@@ -1,22 +1,79 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
-= Rsr Template Repo Roadmap
+= AmbientOps Roadmap
+:toc:
+:toclevels: 3
+:icons: font
 
-== Current Status
+Development roadmap for AmbientOps (umbrella + UX model + packaging glue).
 
-Initial development phase.
+== Phase 0 — Bootstrap (now)
 
-== Milestones
+Deliverables:
 
-=== v0.1.0 - Foundation
-* [ ] Core functionality
-* [ ] Basic documentation
-* [ ] CI/CD pipeline
+* AmbientOps umbrella repo established (docs + manifest layout)
+* Hospital model documented (`docs/HOSPITAL_MODEL.adoc`)
+* Ecosystem manifest created (`ecosystem/repos.json` + `ecosystem/repos.adoc`)
+* Baseline trust principles written (anti-fearware copy policy, privacy defaults)
 
-=== v1.0.0 - Stable Release
-* [ ] Full feature set
-* [ ] Comprehensive tests
-* [ ] Production ready
+== Phase 1 — Contracts and seams
 
-== Future Directions
+Goal: stable seams between Ward / ER / OR / Records.
 
-_To be determined based on community feedback._
+Deliverables:
+
+* `system-tools-contracts` repo (recommended) including:
+  - System Weather payload schema
+  - Evidence envelope + run-bundle layout
+  - Receipt schema (human + machine)
+  - Deep-link / intent format for cross-tool navigation
+* Versioning rules for contracts (semver + compatibility notes)
+* Example bundles checked into `examples/`
+
+== Phase 2 — Ward MVP (daily home)
+
+Goal: ship the “not in your face” experience that prevents panic.
+
+Deliverables:
+
+* Ward tray/menu app (profiles + notification budget + “one next step”)
+* HAT roles (coordinator + information + risk + optimisation/positive)
+* Theme packs:
+  - Professional (default)
+  - Kid-friendly (optional)
+* Local-only mode fully supported
+* Integrations:
+  - consume System Weather payload
+  - deep-link to Emergency Room and Operating Room plans
+
+== Phase 3 — Emergency Room MVP (panic-safe intake)
+
+Goal: one-click safe capture + handoff.
+
+Deliverables:
+
+* Incident bundle creation (cross-platform best-effort)
+* Safety posture toggles (non-destructive, reversible where possible)
+* Handoff flows:
+  - to Personal Sysadmin crisis workflows
+  - to Operating Room scan/plan
+* “Share bundle” intent to feedback-a-tron
+
+== Phase 4 — Operating Room MVP (planned procedures)
+
+Goal: “do real work” safely, with receipts and undo.
+
+Deliverables:
+
+* Scan → Plan → Apply → Undo → Receipt end-to-end
+* At least one “Typical” safe pack for one OS shipped as v0.1
+* UI integration from Ward/ER into procedures
+* Basic packaging and distribution (portable + installer where appropriate)
+
+== Phase 5 — Ecosystem polish
+
+Deliverables:
+
+* Cross-platform packaging (“Minimal / Typical / Full”)
+* Optional technician packs (expert-gated)
+* Optional adapters (external tool integration with clear provenance)
+* Documentation site + onboarding flows
+* Community contribution lanes (themes/packs/adapters) with strong boundaries
