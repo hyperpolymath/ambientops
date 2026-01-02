@@ -1,0 +1,128 @@
+= AmbientOps Hospital Model
+:toc:
+:toclevels: 3
+:icons: font
+
+AmbientOps presents system tooling as a hospital to help everyday users navigate complex situations calmly and safely.
+
+== Why a hospital?
+
+Most “system tools” fail users in two ways:
+
+* They feel scary and technical, so users freeze or panic.
+* They use fearware tactics (fake urgency, inflated counts, vague “errors”).
+
+A hospital metaphor communicates:
+
+* There are different levels of response (observe → triage → procedure).
+* Safety, consent, and records are normal.
+* You don’t need to be an expert to get help.
+
+== Departments
+
+=== Ward (daily home)
+
+*Purpose:* ambient oversight and gentle guidance.
+
+* “System Weather” status (e.g., Calm/Watch/Act)
+* Small role-based helpers (HAT roles) appear when something matters
+* Always offers one safe next step
+* Includes profiles (child/general/dev/tech) and a notification budget
+
+Ward should reduce unnecessary Emergency Room usage by catching issues early and explaining them calmly.
+
+=== Emergency Room (panic-safe intake)
+
+*Purpose:* stabilize, capture evidence, enable safety posture, and hand off.
+
+Emergency Room is for:
+
+* suspected compromise
+* imminent data loss
+* “I don’t know what’s happening and I’m scared”
+
+Emergency Room must be:
+
+* non-destructive by default
+* offline-first by default
+* fully logged into an incident bundle
+* able to hand off to:
+  - Personal Sysadmin crisis workflows
+  - Operating Room scan/plan
+
+=== Operating Room (planned procedures)
+
+*Purpose:* planned, consent-based changes with undo and receipts.
+
+Operating Room is the only place where the system performs “doer” actions.
+
+Operating Room flow:
+
+1. Scan (non-mutating)
+2. Plan (previewed, reversible steps labelled)
+3. Apply (explicit approval required)
+4. Undo (where possible)
+5. Receipt (always)
+
+Technician-level operations live here and are expert-gated.
+
+=== Records
+
+*Purpose:* trust and continuity.
+
+Records contain:
+
+* receipts (human-readable + machine-readable)
+* undo tokens / rollback guidance
+* incident bundles for sharing with helpers
+* “referral letters” via feedback-a-tron (with redaction presets)
+
+== Roles (HAT model)
+
+Ward uses “roles” (themeable as staff, hats, hamsters, etc.). The default mapping:
+
+* Coordinator (Blue) — “what’s happening overall?” / “one next step”
+* Information (White) — facts, measurements, evidence pointers
+* Risk/Caution (Black) — guardrails, safety concerns, escalation triggers
+* Optimisation/Positive (Green/Yellow) — improvements, diagnostics, reassurance
+* (Optional) Comfort (Red) — reassurance language, anxiety reduction
+
+Roles are UI/UX only; they do not add capabilities beyond the underlying tools.
+
+== Profiles
+
+Profiles control:
+
+* intrusiveness (Quiet/Balanced/Proactive)
+* detail level (Minimal/Standard/Detailed)
+* which roles can interrupt
+* which actions are visible (especially expert-gated actions)
+
+Example intent:
+
+* Child: proactive risk + minimal detail + limited controls
+* General: balanced + clear language + safe handoffs
+* Developer: high detail info flows, risk nudges toned down
+* Technician: full detail + expert packs visible, still plan-first
+
+== Safety boundaries (non-negotiables)
+
+* Ward never applies changes.
+* Emergency Room defaults to non-destructive actions.
+* Operating Room requires explicit approval to apply.
+* Every apply produces a receipt.
+* Undo is first-class (and “not reversible” must be clearly labelled).
+* No fearware copy; evidence beats theatrics.
+
+== Deep-links and artifacts (seams)
+
+Ward and ER should navigate into OR and Records using stable intents.
+
+Shared artifacts:
+
+* System Weather payload (Ward input)
+* Evidence envelope (Scan output)
+* Plan (approved steps)
+* Run bundle (folder layout for each run)
+* Receipt (human + machine)
+* Message intent (feedback-a-tron routing + redaction)
