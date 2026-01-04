@@ -1,63 +1,61 @@
-## Machine-Readable Artefacts
-
-The following files in `.machine_readable/` contain structured project metadata:
-
-- `STATE.scm` - Current project state and progress
-- `META.scm` - Architecture decisions and development practices
-- `ECOSYSTEM.scm` - Position in the ecosystem and related projects
-- `AGENTIC.scm` - AI agent interaction patterns
-- `NEUROSYM.scm` - Neurosymbolic integration config
-- `PLAYBOOK.scm` - Operational runbook
-
----
-
 # CLAUDE.md - AI Assistant Instructions
 
-## Language Policy (Hyperpolymath Standard)
+## Language Policy (Hyperpolymath Standard — January 2026)
+
+### The D/V Layer Model
+
+| Layer | Mnemonic | Responsibility | Primary Language |
+|-------|----------|----------------|------------------|
+| **D** | Drivers/Deployment/Delivery | Execution, IO, adapters | D |
+| **V** | Verification/Validation/Veridicality | Policy, proofs, schemas | V |
 
 ### ALLOWED Languages & Tools
 
 | Language/Tool | Use Case | Notes |
 |---------------|----------|-------|
-| **ReScript** | Primary application code | Compiles to JS, type-safe |
+| **D** | Driver/deployment layer | Adapters, execution, IO boundaries |
+| **V** | Verification layer | Policy, plan verification, schema conformance |
+| **ReScript** | Primary application code | Compiles to JS, type-safe; AmbientOps primary |
 | **Deno** | Runtime & package management | Replaces Node/npm/bun |
-| **Rust** | Performance-critical, systems, WASM | Preferred for CLI tools |
-| **Tauri 2.0+** | Mobile apps (iOS/Android) | Rust backend + web UI |
-| **Dioxus** | Mobile apps (native UI) | Pure Rust, React-like |
+| **Rust** | Agent/verify boxes only | Isolated repos (`*-agent-rs/`, `*-verify-rs/`) |
+| **Elixir** | Observability/event hub only | NEVER source of truth |
 | **Gleam** | Backend services | Runs on BEAM or compiles to JS |
 | **Bash/POSIX Shell** | Scripts, automation | Keep minimal |
 | **JavaScript** | Only where ReScript cannot | MCP protocol glue, Deno APIs |
-| **Python** | SaltStack only | No other Python permitted |
 | **Nickel** | Configuration language | For complex configs |
 | **Guile Scheme** | State/meta files | STATE.scm, META.scm, ECOSYSTEM.scm |
 | **Julia** | Batch scripts, data processing | Per RSR |
 | **OCaml** | AffineScript compiler | Language-specific |
 | **Ada** | Safety-critical systems | Where required |
+| **Bebop** | Wire serialization | JS+Rust peers; TS only as generated artifacts |
+| **Protobuf** | Wire serialization | If Elixir must be a peer |
 
 ### BANNED - Do Not Use
 
-| Banned | Replacement |
-|--------|-------------|
-| TypeScript | ReScript |
-| Node.js | Deno |
-| npm | Deno |
-| Bun | Deno |
-| pnpm/yarn | Deno |
-| Go | Rust |
-| Python (general) | ReScript/Rust |
-| Java/Kotlin | Rust/Tauri/Dioxus |
-| Swift | Tauri/Dioxus |
-| React Native | Tauri/Dioxus |
-| Flutter/Dart | Tauri/Dioxus |
+| Banned | Replacement | Reason |
+|--------|-------------|--------|
+| TypeScript | ReScript | Type safety without JS baggage |
+| Node.js | Deno | Security-first runtime |
+| npm/yarn/pnpm/bun | Deno | Deno manages deps |
+| Go | Rust | Memory safety without GC |
+| **Python** | ReScript/Rust/D/V | **Completely banned** (SaltStack abandoned) |
+| Java/Kotlin | Rust/Tauri | No JVM |
+| Swift | Tauri/Dioxus | No Apple lock-in |
 
-### Mobile Development
+### Rust Usage Rules
 
-**No exceptions for Kotlin/Swift** - use Rust-first approach:
+Rust is a **scalpel, not default**. Only allowed in:
+- `*-agent-rs/` repos (hardened local agents)
+- `*-verify-rs/` repos (high-assurance verification)
+- Isolated agent/verify components within larger repos
 
-1. **Tauri 2.0+** - Web UI (ReScript) + Rust backend, MIT/Apache-2.0
-2. **Dioxus** - Pure Rust native UI, MIT/Apache-2.0
+### Elixir Usage Rules
 
-Both are FOSS with independent governance (no Big Tech).
+Elixir is allowed **only for observability/event hubs**:
+- Long-running supervision trees
+- Event ingestion and fanout
+- Live dashboards
+- **MUST NOT** become policy engine, IR authority, or config truth
 
 ### Enforcement Rules
 
@@ -65,7 +63,7 @@ Both are FOSS with independent governance (no Big Tech).
 2. **No package.json for runtime deps** - Use deno.json imports
 3. **No node_modules in production** - Deno caches deps automatically
 4. **No Go code** - Use Rust instead
-5. **Python only for SaltStack** - All other Python must be rewritten
+5. **No Python anywhere** - Completely banned
 6. **No Kotlin/Swift for mobile** - Use Tauri 2.0+ or Dioxus
 
 ### Package Management
@@ -82,3 +80,11 @@ Both are FOSS with independent governance (no Big Tech).
 - SHA-pinned dependencies
 - SPDX license headers on all files
 
+### SCM Checkpoint Files
+
+Every repo should have at root:
+- `STATE.scm` — current project state (update every session)
+- `META.scm` — architecture decisions
+- `ECOSYSTEM.scm` — project relationships
+
+See `docs/SCM-FILES-GUIDE.adoc` for format and maintenance rules.
