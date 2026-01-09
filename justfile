@@ -1,8 +1,5 @@
-# RSR-template-repo - RSR Standard Justfile Template
+# AmbientOps - Justfile
 # https://just.systems/man/en/
-#
-# This is the CANONICAL template for all RSR projects.
-# Copy this file to new projects and customize the {{PLACEHOLDER}} values.
 #
 # Run `just` to see all available recipes
 # Run `just cookbook` to generate docs/just-cookbook.adoc
@@ -12,8 +9,8 @@ set shell := ["bash", "-uc"]
 set dotenv-load := true
 set positional-arguments := true
 
-# Project metadata - CUSTOMIZE THESE
-project := "RSR-template-repo"
+# Project metadata
+project := "ambientops"
 version := "0.1.0"
 tier := "infrastructure"  # 1 | 2 | infrastructure
 
@@ -50,26 +47,38 @@ info:
 # BUILD & COMPILE
 # ═══════════════════════════════════════════════════════════════════════════════
 
-# Build the project (debug mode)
+# Build documentation (AsciiDoc → HTML)
 build *args:
-    @echo "Building {{project}}..."
-    # TODO: Add build command for your language
-    # Rust: cargo build {{args}}
-    # ReScript: npm run build
-    # Elixir: mix compile
+    @echo "Building {{project}} documentation..."
+    @mkdir -p dist/html
+    @command -v asciidoctor >/dev/null && \
+        find . -maxdepth 1 -name "*.adoc" -exec asciidoctor -D dist/html {} \; || \
+        echo "asciidoctor not found - install via: gem install asciidoctor"
+    @[ -d docs ] && command -v asciidoctor >/dev/null && \
+        find docs -name "*.adoc" -exec asciidoctor -D dist/html {} \; || true
+    @echo "Documentation built in dist/html/"
 
-# Build in release mode with optimizations
+# Build documentation with PDF output (release)
 build-release *args:
-    @echo "Building {{project}} (release)..."
-    # TODO: Add release build command
-    # Rust: cargo build --release {{args}}
+    @echo "Building {{project}} (release with PDF)..."
+    @mkdir -p dist/html dist/pdf
+    @command -v asciidoctor >/dev/null && \
+        find . -maxdepth 1 -name "*.adoc" -exec asciidoctor -D dist/html {} \; && \
+        find docs -name "*.adoc" -exec asciidoctor -D dist/html {} \; || \
+        echo "asciidoctor not found - install via: gem install asciidoctor"
+    @command -v asciidoctor-pdf >/dev/null && \
+        asciidoctor-pdf -D dist/pdf README.adoc || \
+        echo "asciidoctor-pdf not found - install via: gem install asciidoctor-pdf"
+    @echo "Release build complete in dist/"
 
-# Build and watch for changes
+# Build and watch for changes (requires watchexec or entr)
 build-watch:
     @echo "Watching for changes..."
-    # TODO: Add watch command
-    # Rust: cargo watch -x build
-    # ReScript: npm run watch
+    @command -v watchexec >/dev/null && \
+        watchexec -e adoc -- just build || \
+        (command -v entr >/dev/null && \
+            find . -name "*.adoc" | entr -c just build || \
+            echo "Install watchexec or entr for file watching")
 
 # Clean build artifacts [reversible: rebuild with `just build`]
 clean:
@@ -84,24 +93,33 @@ clean-all: clean
 # TEST & QUALITY
 # ═══════════════════════════════════════════════════════════════════════════════
 
-# Run all tests
+# Run all validation tests
 test *args:
-    @echo "Running tests..."
-    # TODO: Add test command
-    # Rust: cargo test {{args}}
-    # ReScript: npm test
-    # Elixir: mix test
+    @echo "Running validation tests..."
+    @just validate-rsr
+    @just validate-state
+    @just validate-scm
+    @echo "All validation tests passed!"
 
 # Run tests with verbose output
 test-verbose:
     @echo "Running tests (verbose)..."
-    # TODO: Add verbose test
+    @echo "=== RSR Compliance ===" && just validate-rsr
+    @echo "=== STATE.scm Validation ===" && just validate-state
+    @echo "=== SCM Files Validation ===" && just validate-scm
+    @echo "=== All Tests Complete ==="
 
-# Run tests and generate coverage report
+# Validate documentation coverage (checks all .adoc files exist and are non-empty)
 test-coverage:
-    @echo "Running tests with coverage..."
-    # TODO: Add coverage command
-    # Rust: cargo llvm-cov
+    @echo "Checking documentation coverage..."
+    @for f in README.adoc ROADMAP.adoc CONTRIBUTING.adoc; do \
+        if [ -f "$$f" ]; then \
+            [ -s "$$f" ] && echo "✓ $$f" || echo "✗ $$f (empty)"; \
+        else \
+            echo "✗ $$f (missing)"; \
+        fi; \
+    done
+    @echo "Documentation coverage check complete"
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # LINT & FORMAT
@@ -110,22 +128,36 @@ test-coverage:
 # Format all source files [reversible: git checkout]
 fmt:
     @echo "Formatting..."
-    # TODO: Add format command
-    # Rust: cargo fmt
-    # ReScript: npm run format
-    # Elixir: mix format
+    @# Format markdown files with prettier if available
+    @command -v prettier >/dev/null && \
+        prettier --write "*.md" "docs/**/*.md" 2>/dev/null || true
+    @# Normalize trailing whitespace in .adoc files
+    @find . -name "*.adoc" -type f -exec sed -i 's/[[:space:]]*$$//' {} \; 2>/dev/null || true
+    @echo "Formatting complete"
 
 # Check formatting without changes
 fmt-check:
     @echo "Checking format..."
-    # TODO: Add format check
-    # Rust: cargo fmt --check
+    @# Check for trailing whitespace in .adoc files
+    @! grep -rn '[[:space:]]$$' --include="*.adoc" . 2>/dev/null || \
+        (echo "Warning: trailing whitespace found in .adoc files" && true)
+    @# Check markdown with prettier if available
+    @command -v prettier >/dev/null && \
+        prettier --check "*.md" "docs/**/*.md" 2>/dev/null || true
+    @echo "Format check complete"
 
-# Run linter
+# Run linter (validates SCM files and checks for common issues)
 lint:
     @echo "Linting..."
-    # TODO: Add lint command
-    # Rust: cargo clippy -- -D warnings
+    @# Validate all .scm files parse correctly
+    @for f in *.scm .machine_readable/*.scm; do \
+        [ -f "$$f" ] && (guile -c "(primitive-load \"$$f\")" 2>/dev/null && echo "✓ $$f" || echo "✗ $$f: parse error") || true; \
+    done
+    @# Check for broken internal links in .adoc files
+    @echo "Checking for common documentation issues..."
+    @! grep -rn '{{[A-Z_]*}}' --include="*.md" --include="*.adoc" . 2>/dev/null || \
+        echo "Warning: unreplaced template placeholders found"
+    @echo "Linting complete"
 
 # Run all quality checks
 quality: fmt-check lint test
@@ -139,41 +171,57 @@ fix: fmt
 # RUN & EXECUTE
 # ═══════════════════════════════════════════════════════════════════════════════
 
-# Run the application
+# Serve documentation locally (requires python3 or simple HTTP server)
 run *args:
-    @echo "Running {{project}}..."
-    # TODO: Add run command
-    # Rust: cargo run {{args}}
+    @echo "Serving {{project}} documentation..."
+    @just build
+    @echo "Starting local server at http://localhost:8000"
+    @cd dist/html && python3 -m http.server 8000 2>/dev/null || \
+        (command -v deno >/dev/null && deno run --allow-net --allow-read https://deno.land/std/http/file_server.ts . || \
+        echo "Install python3 or deno for local server")
 
-# Run in development mode with hot reload
+# Run in development mode with live reload (build + watch + serve)
 dev:
     @echo "Starting dev mode..."
-    # TODO: Add dev command
+    @just build
+    @echo "Dev mode: watching for changes and serving at http://localhost:8000"
+    @command -v watchexec >/dev/null && \
+        (cd dist/html && python3 -m http.server 8000 &) && watchexec -e adoc -- just build || \
+        echo "Install watchexec for live reload, or use 'just run' for static serving"
 
-# Run REPL/interactive mode
+# Run Guile REPL for interactive SCM file exploration
 repl:
-    @echo "Starting REPL..."
-    # TODO: Add REPL command
-    # Elixir: iex -S mix
-    # Guile: guix shell guile -- guile
+    @echo "Starting Guile REPL..."
+    @echo "Tip: (primitive-load \"STATE.scm\") to load project state"
+    @command -v guile >/dev/null && guile || \
+        (command -v guix >/dev/null && guix shell guile -- guile || \
+        echo "Install guile or guix for REPL support")
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # DEPENDENCIES
 # ═══════════════════════════════════════════════════════════════════════════════
 
-# Install all dependencies
+# Install all dependencies (documentation tooling)
 deps:
     @echo "Installing dependencies..."
-    # TODO: Add deps command
-    # Rust: (automatic with cargo)
-    # ReScript: npm install
-    # Elixir: mix deps.get
+    @echo "Required tools:"
+    @echo "  - asciidoctor (gem install asciidoctor)"
+    @echo "  - asciidoctor-pdf (gem install asciidoctor-pdf) [optional]"
+    @echo "  - guile (for SCM file validation)"
+    @echo ""
+    @echo "Checking available tools..."
+    @command -v asciidoctor >/dev/null && echo "✓ asciidoctor" || echo "✗ asciidoctor (required)"
+    @command -v asciidoctor-pdf >/dev/null && echo "✓ asciidoctor-pdf" || echo "○ asciidoctor-pdf (optional)"
+    @command -v guile >/dev/null && echo "✓ guile" || echo "✗ guile (required for validation)"
+    @command -v watchexec >/dev/null && echo "✓ watchexec" || echo "○ watchexec (optional, for dev mode)"
 
 # Audit dependencies for vulnerabilities
 deps-audit:
     @echo "Auditing dependencies..."
-    # TODO: Add audit command
-    # Rust: cargo audit
+    @echo "This is a documentation repository with minimal runtime dependencies."
+    @echo "Checking for security issues in toolchain..."
+    @command -v gitleaks >/dev/null && gitleaks detect --source . --verbose 2>/dev/null || true
+    @echo "Audit complete (no runtime dependencies to audit)"
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # DOCUMENTATION
@@ -218,16 +266,18 @@ man:
     #!/usr/bin/env bash
     mkdir -p docs/man
     cat > docs/man/{{project}}.1 << EOF
-.TH RSR-TEMPLATE-REPO 1 "$(date +%Y-%m-%d)" "{{version}}" "RSR Template Manual"
+.TH AMBIENTOPS 1 "$(date +%Y-%m-%d)" "{{version}}" "AmbientOps Manual"
 .SH NAME
-{{project}} \- RSR standard repository template
+{{project}} \- cross-platform system tools for everyday users
 .SH SYNOPSIS
 .B just
 [recipe] [args...]
 .SH DESCRIPTION
-Canonical template for RSR (Rhodium Standard Repository) projects.
+AmbientOps is a cross-platform ecosystem of system tools designed for everyday users
+who need trustworthy help without fearware, nagware, or scammy "optimizers".
+Organized around a hospital mental model: Ward, Emergency Room, Operating Room, and Records.
 .SH AUTHOR
-Hyperpolymath <hyperpolymath@proton.me>
+Jonathan D.A. Jewell <hyperpolymath@proton.me>
 EOF
     echo "Generated: docs/man/{{project}}.1"
 
@@ -322,8 +372,24 @@ validate-state:
         echo "No STATE.scm found"; \
     fi
 
+# Validate all SCM files in repository
+validate-scm:
+    @echo "=== SCM Files Validation ==="
+    @PASS=true; \
+    for f in STATE.scm META.scm ECOSYSTEM.scm PLAYBOOK.scm AGENTIC.scm NEUROSYM.scm .machine_readable/*.scm; do \
+        if [ -f "$$f" ]; then \
+            if guile -c "(primitive-load \"$$f\")" 2>/dev/null; then \
+                echo "✓ $$f"; \
+            else \
+                echo "✗ $$f: parse error"; \
+                PASS=false; \
+            fi; \
+        fi; \
+    done; \
+    $$PASS && echo "SCM validation: PASS" || (echo "SCM validation: FAIL" && exit 1)
+
 # Full validation suite
-validate: validate-rsr validate-state
+validate: validate-rsr validate-state validate-scm
     @echo "All validations passed!"
 
 # ═══════════════════════════════════════════════════════════════════════════════

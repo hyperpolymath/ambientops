@@ -1,0 +1,66 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+= AmbientOps Project State
+:toc: preamble
+:icons: font
+
+This document provides a human-readable summary of the current project state.
+For machine-readable state, see `STATE.scm` and `.machine_readable/STATE.scm`.
+
+== Current Phase
+
+**Bootstrap** (Phase 0)
+
+The project is establishing the umbrella repository with documentation, ecosystem manifest, and packaging structure.
+
+== Progress Summary
+
+[cols="2,1,3",options="header"]
+|===
+| Component | Status | Notes
+
+| Umbrella Repository
+| 90%
+| Documentation structure complete, RSR compliance established
+
+| Hospital Model
+| 80%
+| UX model documented in `docs/HOSPITAL_MODEL.adoc`
+
+| Ecosystem Manifest
+| 50%
+| Format defined, awaiting satellite repos
+
+| Contracts
+| 0%
+| Planned for Phase 1
+|===
+
+== Working Features
+
+* Documentation site structure
+* Hospital model specification (Ward/ER/OR/Records)
+* Ecosystem manifest format
+* RSR compliance structure
+* Machine-readable state files (SCM format)
+
+== Next Actions
+
+=== Immediate
+* Complete umbrella repo documentation
+* Define contracts for satellite repos
+
+=== This Week
+* Create `system-tools-contracts` repo
+* Draft System Weather payload schema
+
+=== This Month
+* Begin Ward MVP implementation
+* Establish satellite repo structure
+
+== Roadmap Reference
+
+See link:ROADMAP.adoc[ROADMAP.adoc] for full phase breakdown.
+
+== Last Updated
+
+2026-01-09

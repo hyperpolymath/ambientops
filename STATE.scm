@@ -6,14 +6,16 @@
     (version "0.1.0")
     (schema-version "1.0")
     (created "2025-01-03")
-    (updated "2025-01-03")
+    (updated "2026-01-09")
     (project "ambientops")
     (repo "hyperpolymath/ambientops"))
   (project-context
-    (name "ambientops")
-    (tagline "image:https://img.shields.io/badge/License-AGPL--3.0--or--later-blue.svg[AGPL-3.0,link="https://www.gnu.org/licenses/agpl-3.0"]"))
+    (name "AmbientOps")
+    (tagline "Cross-platform system tools for everyday users - trustworthy help without fearware"))
   (current-position
-    (phase "alpha")
+    (phase "bootstrap")
     (overall-completion 10))
   (critical-next-actions
-    (immediate ("Initial development"))))
+    (immediate
+      ("Complete umbrella repo documentation")
+      ("Define satellite repo contracts"))))
