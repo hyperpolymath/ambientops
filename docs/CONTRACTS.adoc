@@ -1,0 +1,37 @@
+= AmbientOps Contracts (Draft)
+:toc: left
+:toclevels: 2
+:icons: font
+
+This document defines cross-repo data contracts and encoding choices.
+
+== Canonical Encoding
+
+* *Primary*: JSON for single objects
+* *Streaming/Logs*: NDJSON (one JSON object per line)
+* *Schema*: JSON Schema (draft-07)
+
+JSON-LD is not used as the primary contract at this time.
+
+== Telemetry Channel
+
+* Human-reviewable events remain JSON/NDJSON
+* System Observatory may accept Bebop for high-volume telemetry
+
+== Bebop Bridge (Optional)
+
+If used, Bebop is an *internal observability channel* only. A converter
+translates JSON events into Bebop records for ingestion, while retaining JSON
+as the source of truth.
+
+Converter requirements:
+
+* Input: JSON/NDJSON events conforming to schemas
+* Output: Bebop-encoded frames per event type
+* Backpressure-safe and loss-aware (retry/queue)
+
+== Contract Stability Rules
+
+* Additive changes only (new fields)
+* Never remove or rename fields without a version bump
+* All events must include `event_type`, `timestamp`, and `payload`

@@ -1,0 +1,95 @@
+= AmbientOps Master Roadmap (Standalone Satellites)
+:toc: left
+:toclevels: 2
+:icons: font
+
+This roadmap prioritizes standalone capability while enabling integration.
+
+== Phase 1: Contracts and Safety Core
+
+* Shared schemas: audit events, placement decisions, recovery receipts
+* Privacy gateway spec (feedback-a-tron)
+* Reversibility primitives (snapshots, state vault, auto-revert)
+
+== Phase 2: Linux Coverage (Immediate Utility)
+
+* Full Linux/WSL surface collectors
+* Unmanaged detection + guided upgrade routes
+* Core log scans for missed/failed updates
+* Placement policy profiles (zero-trace, state vault, multi-version)
+
+== Phase 3: Investigation + Observability
+
+* Total Recall incident workflow (timeline, barriers, lessons)
+* System Observatory ingestion of run bundles + audits
+* Risk scoring and early warnings
+
+== Phase 4: Privacy + Feedback Loops
+
+* Privacy gate UI (advanced pane)
+* Optional submission flows to vendors/community
+* Lessons learned archive and reuse
+
+== Phase 5: Cross-Platform Expansion
+
+* BSD/Unix collectors
+* macOS collectors (brew/MacPorts/system updates)
+* Windows collectors (winget/choco/scoop)
+* Mobile scope definition (iOS/Android)
+* Architecture metadata (x86_64/arm64/riscv64)
+
+== Satellite Responsibilities
+
+* DNFinition/TotalUpdate: placement, updates, audit events
+* Total Recall: recovery + investigation
+* Feedback-a-tron: privacy gateway + submission
+* System Observatory: metrics + recommendations
+
+== Repo-Level Milestones
+
+=== DNFinition / TotalUpdate
+
+* v0.1: placement + audit schemas finalized (status: in_progress, target: 2025-Q1)
+* v0.2: Linux surface coverage (system PMs + core language PMs) (status: planned, target: 2025-Q2)
+* v0.3: unmanaged detection + guided upgrade routes (status: planned, target: 2025-Q2)
+* v0.4: log scans for missed/failed updates (status: planned, target: 2025-Q3)
+
+Dependencies:
+
+* v0.2 depends on v0.1 (schemas)
+* v0.3 depends on v0.2 (surface coverage)
+* v0.4 depends on v0.1 (audit schema)
+
+=== Total Recall
+
+* v0.1: spec completion (recovery + investigation) (status: in_progress, target: 2025-Q1)
+* v0.2: snapshot integration + auto-revert guard (status: planned, target: 2025-Q2)
+* v0.3: incident timeline + barrier analysis (status: planned, target: 2025-Q3)
+
+Dependencies:
+
+* v0.2 depends on v0.1 (spec)
+* v0.3 depends on v0.2 (recovery signals)
+
+=== Feedback-a-tron
+
+* v0.1: privacy gate workflow + spec (status: in_progress, target: 2025-Q1)
+* v0.2: outbox review + redaction flows (status: planned, target: 2025-Q2)
+* v0.3: optional submission routing (status: planned, target: 2025-Q3)
+
+Dependencies:
+
+* v0.2 depends on v0.1 (privacy gate)
+* v0.3 depends on v0.2 (approval workflow)
+
+=== System Observatory
+
+* v0.1: ingest audit/run bundles (status: planned, target: 2025-Q2)
+* v0.2: timeline correlation + anomaly scoring (status: planned, target: 2025-Q3)
+* v0.3: recommendations export to Operating Theatre (status: planned, target: 2025-Q4)
+
+Dependencies:
+
+* v0.1 depends on DNFinition v0.1 (schemas)
+* v0.2 depends on v0.1 (ingest)
+* v0.3 depends on v0.2 (correlation)

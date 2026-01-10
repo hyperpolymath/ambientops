@@ -1,0 +1,15 @@
+{
+  "policy_id": "ambientops-default",
+  "max_payload_bytes": 65536,
+  "allowed_event_types": [
+    "placement_decision",
+    "log_scan",
+    "state_vault_capture",
+    "unmanaged_detection",
+    "unmanaged_suggestion",
+    "user_feedback"
+  ],
+  "redact_tokens": ["$HOME", "/home/", "/Users/"],
+  "required_fields": ["event_type", "timestamp", "payload"],
+  "deny_fields": ["secrets", "tokens", "passwords"]
+}

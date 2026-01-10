@@ -1,0 +1,11 @@
+= Idris2 Policy Checker Integration
+:toc: left
+:toclevels: 2
+:icons: font
+
+This repo integrates with the AmbientOps Idris2 egress/ingress checker.
+
+* Source-of-truth policy: `ambientops/docs/AIRGAP_SDP_SECURITY.adoc`
+* Local stubs: `lib/idris/` (JsonParser, SchemaAdapter, EgressChecker)
+
+The checker runs before any outbound payload is submitted via feedback-a-tron.

@@ -1,0 +1,52 @@
+= AmbientOps Ecosystem Map
+:toc: left
+:toclevels: 2
+:icons: font
+
+This document provides a top-level map of AmbientOps satellites, their roles,
+and which responsibilities belong where.
+
+== Core Principle
+
+*AmbientOps is the front door.* It maintains system overview and orchestration
+contracts, while satellites implement specialized behavior.
+
+== Satellites and Ownership
+
+[cols="2,3,3"]
+|===
+|Satellite |Primary Role |Owns
+
+|DNFinition + TotalUpdate
+|Universal updates + reversibility
+|Package surfaces, placement decisions, update audit trails
+
+|Total Recall
+|Recovery + investigation
+|Rollback workflows, incident analysis, recovery playbooks
+
+|Feedback-a-tron
+|Privacy-gated feedback
+|Outbox approval, redaction, submission routing
+
+|System Observatory
+|Observability + recommendations
+|Metrics store, anomaly detection, forecasts (no mutation)
+
+|Personal Sysadmin
+|Clinician workflows
+|Guided advice, user-facing recommendations
+|===
+
+== Data Flow (High Level)
+
+* Updates flow into audit trails (DNFinition/TotalUpdate)
+* Observability consumes run bundles and audits (System Observatory)
+* Recovery actions reference audits and snapshots (Total Recall)
+* Privacy gate mediates all external sharing (Feedback-a-tron)
+
+== Where to Start Work
+
+* *AmbientOps*: central map + policy language
+* *System Observatory*: architecture overview and metrics schema
+* *Satellites*: implement per-domain capabilities

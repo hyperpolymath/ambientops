@@ -1,0 +1,84 @@
+= AmbientOps Airgap + SDP Security Model
+:toc: left
+:toclevels: 2
+:icons: font
+
+This document defines the airgapped-by-default network model for AmbientOps,
+with a single privacy gateway (feedback-a-tron) and a Secure Data Plane (SDP)
+for any required egress.
+
+== Goals
+
+* Default offline operation
+* Minimal, auditable egress
+* User-visible approval for all data leaving the system
+* Strong transport security and identity verification
+
+== Network Model
+
+* Default: no network access unless explicitly allowed
+* Allow-listed egress only:
+** Update mirrors and package repositories
+** feedback-a-tron gateway
+* All other tools operate in local-only mode
+
+== Single Privacy Gateway
+
+* feedback-a-tron is the only outbox for external sharing
+* Users review, redact, and approve every outbound payload
+* Outbound data is serialized in NDJSON for transparent inspection
+
+== SDP Boundary
+
+* SDP is the only network front door
+* Mutual TLS (mTLS) and device identity required
+* Egress traffic restricted to approved endpoints
+* Outbound requests are signed and logged
+
+== Idris2 Egress/Ingress Checker
+
+An Idris2-based policy checker validates:
+
+* All outbound payloads conform to schema
+* No unapproved fields or data classes are present
+* Required user approvals exist before egress
+
+This checker runs before any network send, including updates and feedback.
+
+=== Idris2 Checker Interface (Draft)
+
+Inputs:
+
+* `payload` (NDJSON entry)
+* `schema` (JSON Schema path or ID)
+* `policy` (allowed fields, max sizes, redaction rules)
+* `approval` (user approval token or signature)
+
+Outputs:
+
+* `Allow` with normalized payload
+* `Deny` with reason and offending fields
+
+Error codes:
+
+* `E_SCHEMA_INVALID`
+* `E_APPROVAL_MISSING`
+* `E_FIELD_DISALLOWED`
+* `E_SIZE_EXCEEDED`
+* `E_REDACTION_REQUIRED`
+
+=== Sample Policy + Idris2 Skeleton
+
+* `docs/IDRIS_POLICY.sample.json`
+* `lib/idris/EgressChecker.idr`
+
+== Privacy vs Diagnostics
+
+AmbientOps prioritizes local diagnostics and minimizes external sharing.
+Where overlap exists, the user decides what leaves the system.
+
+== Auditability
+
+* All egress decisions are logged
+* All approvals are recorded
+* Outbound payloads are reproducible from the outbox

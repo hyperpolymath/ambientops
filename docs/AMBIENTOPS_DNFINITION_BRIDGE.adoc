@@ -1,0 +1,74 @@
+= AmbientOps Bridge: DNFinition Placement + Audit
+:toc: left
+:toclevels: 2
+:icons: font
+
+AmbientOps treats DNFinition as a satellite. This bridge document describes
+how AmbientOps calls into DNFinition to produce placement decisions and
+collect audit/telemetry signals.
+
+== Scope
+
+* Placement decisions (where to install)
+* Audit emission (JSONL)
+* Telemetry events for AmbientOps subscribers
+
+== CLI Adapter
+
+The AmbientOps adapter shell script calls DNFinition's mix task:
+
+* `scripts/ambientops-dnfinition-placement.sh`
+* Env: `DNFINITION_ROOT` or `TOTAL_UPGRADE_ROOT`
+
+Example:
+
+[source,bash]
+----
+scripts/ambientops-dnfinition-placement.sh \
+  --package org.example.Tool \
+  --intent gui_app \
+  --kinoite-auto \
+  --validate \
+  --validate-output
+----
+
+== Input/Output Schemas
+
+Schemas live in the TotalUpdate repo:
+
+* Input: `docs/placement_input.schema.json`
+* Output: `docs/placement_decision.schema.json`
+
+AmbientOps can validate inputs before calling the CLI, or rely on
+`--validate` and `--validate-output` flags.
+
+== Audit Logs
+
+Default audit log path (system):
+
+* `/var/lib/dnfinition/audit/audit.jsonl`
+
+Fallback audit log path (user):
+
+* `~/.local/state/dnfinition/audit/audit.jsonl`
+
+== Telemetry Events
+
+Placement decision event:
+
+* `[:dnfinition, :placement, :decision]`
+* Measurements: `%{count: 1}`
+* Metadata: `operation_id`, `package_id`, `intent`, `profile`,
+  `selected_surface`, `dry_run`, `result`
+
+State vault event:
+
+* `[:dnfinition, :placement, :state_vault]`
+* Measurements: `%{count: 1, paths: count}`
+* Metadata: `operation_id`, `package_id`, `vault_path`, `entry_dir`, `dry_run`
+
+== AmbientOps Subscription Guidance
+
+* Subscribe to telemetry to build "Records" receipts.
+* Store audit JSONL as the canonical trace for help bundles.
+* Use placement output to inform Personal-sysadmin recommendations.

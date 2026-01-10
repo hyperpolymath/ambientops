@@ -42,6 +42,7 @@ The umbrella repo coordinates, but does not replace, these satellites:
 * **Personal Sysadmin (clinician workflows):** `hyperpolymath/personal-sysadmin`
 * **Hybrid Automation Router (policy-gated execution):** `hyperpolymath/hybrid-automation-router`
 * **feedback-a-tron (referrals/discharge notes):** `hyperpolymath/feedback-a-tron`
+* **DNFinition + TotalUpdate (updates + reversibility):** `hyperpolymath/total-update`
 * **(Recommended) Contracts:** `hyperpolymath/system-tools-contracts`
 
 This repo keeps an ecosystem manifest in `ecosystem/` to make tooling + packaging reproducible.
@@ -71,6 +72,28 @@ The system should prompt for additional packs only when needed, and always expla
 * `ecosystem/` — machine-readable manifest + compatibility matrix
 * `installers/` — packaging glue per OS
 * `branding/` — icons/themes previews and brand assets
+
+== Ecosystem Map
+
+See link:docs/ECOSYSTEM_MAP.adoc[docs/ECOSYSTEM_MAP.adoc] for satellite roles and data flow.
+
+== Master Roadmap
+
+See link:docs/ROADMAP_MASTER.adoc[docs/ROADMAP_MASTER.adoc] for phased priorities.
+
+== Contracts
+
+See link:docs/CONTRACTS.adoc[docs/CONTRACTS.adoc] for encoding and schema rules.
+
+== Airgap + SDP Security
+
+See link:docs/AIRGAP_SDP_SECURITY.adoc[docs/AIRGAP_SDP_SECURITY.adoc] for the
+default-offline model and privacy gateway design.
+
+== Idris2 Egress Gate
+
+See link:docs/IDRIS2_INTEGRATION.adoc[docs/IDRIS2_INTEGRATION.adoc] for the
+policy-checking interface shared across satellites.
 
 == License
 
