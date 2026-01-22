@@ -74,4 +74,4 @@ The system should prompt for additional packs only when needed, and always expla
 
 == License
 
-AGPL-3.0-or-later (plus Palimpsest where indicated).
+PMPL-1.0-or-later (plus Palimpsest where indicated).
