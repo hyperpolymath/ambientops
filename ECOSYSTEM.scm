@@ -1,4 +1,4 @@
-;; SPDX-License-Identifier: MPL-2.0
+;; SPDX-License-Identifier: PMPL-1.0-or-later
 ;; ECOSYSTEM.scm - Ecosystem positioning
 
 (ecosystem
@@ -11,6 +11,7 @@
      ((ops-glance . "Ward UI - tray/ambient system weather")
       (emergency-button . "Emergency Room - panic-safe intake")
       (operating-room . "Operating Room - planned procedures engine")
+      (network-ambulance . "Network diagnostics and repair (OR procedure pack)")
       (juliadashboard . "Observability dashboard")
       (personal-sysadmin . "Clinician workflows")
       (hybrid-automation-router . "Policy-gated execution")

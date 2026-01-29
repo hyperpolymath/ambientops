@@ -1,4 +1,4 @@
-;; SPDX-License-Identifier: AGPL-3.0-or-later
+;; SPDX-License-Identifier: PMPL-1.0-or-later
 ;; ECOSYSTEM.scm - Ecosystem position for ambientops
 ;; Media-Type: application/vnd.ecosystem+scm
 
@@ -27,7 +27,7 @@
       (status "active")
       (integration "Main automation engine - generates hooks, enforces security"))
 
-    (project "gitvisor"
+    (project "git-hud"
       (relationship "satellite")
       (category "monitoring")
       (description "Git repository supervision and monitoring")

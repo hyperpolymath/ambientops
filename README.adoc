@@ -1,7 +1,7 @@
 = AmbientOps
 
-image:https://img.shields.io/badge/License-MPL_2.0-blue.svg[MPL-2.0,link="https://opensource.org/licenses/MPL-2.0"]
-image:https://img.shields.io/badge/Philosophy-Palimpsest-purple.svg[Palimpsest,link="https://github.com/hyperpolymath/palimpsest-licence"]
+image:https://img.shields.io/badge/License-PMPL--1.0-blue.svg[License: PMPL-1.0,link="https://github.com/hyperpolymath/palimpsest-license"]
+image:https://img.shields.io/badge/Philosophy-Palimpsest-indigo.svg[Palimpsest,link="https://github.com/hyperpolymath/palimpsest-license"]
 
 :toc:
 :toclevels: 3
@@ -35,7 +35,9 @@ See `docs/HOSPITAL_MODEL.adoc` for the full model.
 
 The umbrella repo coordinates, but does not replace, these satellites:
 
-* **Ward UI (tray / ambient):** `hyperpolymath/ops-glance` (name TBD; “Ward” UX)
+=== Core Infrastructure
+
+* **Ward UI (tray / ambient):** `hyperpolymath/ops-glance` (name TBD; "Ward" UX)
 * **Emergency Room:** `hyperpolymath/emergency-button`
 * **Operating Room (procedures engine):** `hyperpolymath/operating-room`
 * **Observability dashboard (Julia):** `hyperpolymath/juliadashboard` (name TBD)
@@ -43,6 +45,22 @@ The umbrella repo coordinates, but does not replace, these satellites:
 * **Hybrid Automation Router (policy-gated execution):** `hyperpolymath/hybrid-automation-router`
 * **feedback-a-tron (referrals/discharge notes):** `hyperpolymath/feedback-a-tron`
 * **(Recommended) Contracts:** `hyperpolymath/system-tools-contracts`
+
+=== Procedure Packs (Operating Room)
+
+These are specialized diagnostic and repair tools that integrate with the Operating Room:
+
+* **link:https://github.com/hyperpolymath/network-ambulance[Network Ambulance]** — Linux network connectivity diagnostics and repair (v1.0 production-ready)
+  - Fix DNS, routing, interfaces, NetworkManager issues
+  - WiFi troubleshooting, VPN diagnostics
+  - Safe, documented, reversible repairs with backups
+  - Captive portal and proxy support (v1.2)
+
+Additional procedure packs coming soon:
+
+* **Disk Ambulance** — Disk health and filesystem repair
+* **Performance Ambulance** — System performance diagnostics
+* **Security Ambulance** — Security posture assessment
 
 This repo keeps an ecosystem manifest in `ecosystem/` to make tooling + packaging reproducible.
 

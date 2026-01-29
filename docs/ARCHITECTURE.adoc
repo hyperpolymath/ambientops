@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-License-Identifier: PMPL-1.0-or-later
 = AmbientOps Architecture
 :toc:
 :toclevels: 3
@@ -22,7 +22,7 @@ AmbientOps is an umbrella platform for ambient computing operations, providing u
 │   CI/CD AUTOMATION  │    │     MONITORING      │    │  SYSTEM RESILIENCE  │
 │                     │    │                     │    │                     │
 │  ┌───────────────┐  │    │  ┌───────────────┐  │    │  ┌───────────────┐  │
-│  │ cicd-hyper-a  │  │    │  │   gitvisor    │  │    │  │ system-flare  │  │
+│  │ cicd-hyper-a  │  │    │  │   git-hud    │  │    │  │ system-flare  │  │
 │  │  (Logtalk)    │  │    │  │  (monitoring) │  │    │  │ (panic halt)  │  │
 │  └───────┬───────┘  │    │  └───────┬───────┘  │    │  └───────────────┘  │
 │          │          │    │          │          │    │                     │
@@ -87,7 +87,7 @@ AmbientOps is an umbrella platform for ambient computing operations, providing u
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
 │  │   TRIAGE     │  │  DIAGNOSIS   │  │  TREATMENT   │  │  PREVENTION  │     │
 │  │              │  │              │  │              │  │              │     │
-│  │ system-      │  │ gitvisor     │  │ cicd-hyper-a │  │ .git-private-│     │
+│  │ system-      │  │ git-hud     │  │ cicd-hyper-a │  │ .git-private-│     │
 │  │ emergency-   │─▶│ (analyze     │─▶│ (apply       │─▶│    farm      │     │
 │  │ room         │  │  failures)   │  │  fixes)      │  │ (deploy      │     │
 │  │ (stabilize)  │  │              │  │              │  │  immunity)   │     │
@@ -111,7 +111,7 @@ AmbientOps is an umbrella platform for ambient computing operations, providing u
 | Satellite | Category | Purpose
 
 | cicd-hyper-a | CI/CD | Logtalk rule engine for automation
-| gitvisor | Monitoring | Repository supervision
+| git-hud | Monitoring | Repository supervision
 | .git-private-farm | Infrastructure | Hook distribution
 | repo-slm-augmentor | Knowledge | Security error catalog
 | echidnabot | Notification | Discord alerts
