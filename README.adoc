@@ -56,11 +56,42 @@ These are specialized diagnostic and repair tools that integrate with the Operat
   - Safe, documented, reversible repairs with backups
   - Captive portal and proxy support (v1.2)
 
-Additional procedure packs coming soon:
+* **link:https://github.com/hyperpolymath/disk-ambulance[Disk Ambulance]** — Disk health and filesystem diagnostics/repair (v0.5 alpha)
+  - SMART monitoring, filesystem integrity checks
+  - Space analysis, mount issue resolution
+  - RAID status, SSD optimization, I/O performance
 
-* **Disk Ambulance** — Disk health and filesystem repair
-* **Performance Ambulance** — System performance diagnostics
-* **Security Ambulance** — Security posture assessment
+* **link:https://github.com/hyperpolymath/performance-ambulance[Performance Ambulance]** — System performance diagnostics and optimization (v0.5 alpha)
+  - CPU/memory/disk I/O bottleneck detection
+  - Process profiling, thermal management
+  - Safe resource adjustments, never kills critical processes
+
+* **link:https://github.com/hyperpolymath/security-ambulance[Security Ambulance]** — Security posture assessment and hardening (v0.5 alpha)
+  - Firewall audit, service scanning, permission checks
+  - Malware detection, log analysis, SSH hardening
+  - Compliance with CIS, NIST, DISA STIG, PCI-DSS
+
+=== Continuous Optimization Tools
+
+* **link:https://github.com/hyperpolymath/traffic-conditioner[Traffic Conditioner]** — Continuous network optimization (v0.1 planning)
+  - Bufferbloat mitigation (CAKE/FQ-CoDel qdiscs)
+  - QoS with priority classes, software line bonding
+  - VPN optimization, real-time monitoring
+  - Runs continuously, adapts to changing conditions
+
+=== Enterprise/Infrastructure Tools (Coming Soon)
+
+* **Network Orchestrator** — Enterprise network management (v0.1 planning)
+  - BGP control, SNMP monitoring, router configuration
+  - DHCP management, PTP (Precision Time Protocol)
+  - Distributed file systems (AFS), database diagnostics
+  - Remote debugging and fixes with authorization
+
+* **AmbientOps Composer** — Visual macro and script builder (v0.1 planning)
+  - Zero-code workflow designer (drag-and-drop nodes)
+  - Macro recorder (record actions, replay as workflows)
+  - Context-sensitive help system
+  - Generates D lang scripts from visual flows
 
 This repo keeps an ecosystem manifest in `ecosystem/` to make tooling + packaging reproducible.
 
