@@ -17,7 +17,11 @@ AmbientOps Hospital
 │   │   ├── Apply     → execute with human confirmation
 │   │   └── Undo      → rollback via receipts
 │   └── NAFA app      — ambient operations mobile app
-└── Records           — receipts and undo tokens
+├── Records           — receipts and undo tokens
+└── Diagnostics Lab (affiliated, remote)
+    └── panic-attack  — software health scanner (top-level repo)
+        ├── https://github.com/hyperpolymath/panic-attacker
+        └── Feeds findings to Records via verisimdb
 ```
 
 ## hardware-crash-team (Added 2026-02-08)
