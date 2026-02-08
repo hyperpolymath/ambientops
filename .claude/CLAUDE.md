@@ -1,4 +1,40 @@
-# CLAUDE.md - AI Assistant Instructions
+# CLAUDE.md - AmbientOps AI Assistant Instructions
+
+## Project Overview
+
+AmbientOps is a hospital-model operations framework. Components are organized by hospital metaphor:
+
+```
+AmbientOps Hospital
+├── Ward              — gentle ambient monitoring (observatory)
+├── Emergency Room    — panic-safe intake (ai-cli-crash-capture)
+├── Operating Room    — planned procedures
+│   ├── Composer      — orchestration engine
+│   ├── hardware-crash-team ← NEW (2026-02-08)
+│   │   ├── Scan      → identify zombie PCI devices
+│   │   ├── Diagnose  → correlate crashes with hardware
+│   │   ├── Plan      → generate remediation options
+│   │   ├── Apply     → execute with human confirmation
+│   │   └── Undo      → rollback via receipts
+│   └── NAFA app      — ambient operations mobile app
+└── Records           — receipts and undo tokens
+```
+
+## hardware-crash-team (Added 2026-02-08)
+
+Rust-based hardware diagnostic tool. See `hardware-crash-team/.claude/CLAUDE.md` for full details.
+
+**Origin**: NVIDIA Quadro M2000M zombie GPU caused 43+ reboots in 3 days. Tool generalizes the fix.
+
+**Key commands**: `scan`, `diagnose`, `plan`, `apply`, `undo`, `status`
+
+**Current state**: Scanner working (detects zombie devices, partial bindings). Analyzer is stub. Remediation generates plans with undo receipts. All destructive operations are DRY RUN by default.
+
+**Next steps for Sonnet**:
+1. Complete scanner (BAR enumeration, lspci enrichment)
+2. Implement crash analyzer (journalctl parsing)
+3. Add multi-device remediation plans
+4. Build ATS2 TUI
 
 ## Language Policy (Hyperpolymath Standard — January 2026)
 
