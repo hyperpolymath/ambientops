@@ -1,0 +1,19 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+@manifest { version: "1.0.0", repo: "hyperpolymath/hardware-crash-team", updated: "2026-02-08" }
+@canonical-locations { scm-files: ".machine_readable/", ci-cd: ".github/workflows/", source: "src/" }
+@critical-invariants {
+  rule: "SCM files in .machine_readable/ ONLY"
+  rule: "All destructive operations require human confirmation"
+  rule: "Receipt files generated for every applied remediation"
+  rule: "DRY RUN by default - never execute system commands without --yes flag"
+  rule: "sysfs-only scanning - no external tool dependencies"
+}
+@lifecycle {
+  on-enter: "Read manifest then SCM files. Run `cargo build` to verify state."
+  on-exit: "Update STATE.scm with progress. Run `cargo test` before committing."
+}
+@ecosystem {
+  parent: "ambientops (hospital model - Operating Room → Crash Team)"
+  siblings: ["panic-attack", "verisimdb", "hypatia"]
+  integration-points: ["verisimdb hexads", "hypatia rules", "SARIF output"]
+}

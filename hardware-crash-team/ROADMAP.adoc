@@ -1,0 +1,101 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+= Hardware Crash Team Roadmap
+
+Part of the AmbientOps ecosystem (hospital model). The crash team diagnoses and remediates hardware-induced system crashes.
+
+== Origin Story (2026-02-08)
+
+Born from a real incident: NVIDIA Quadro M2000M in zombie D0 power state causing 43+ reboots in 3 days on a Fedora 43 Atomic system. The GPU had no driver, yet was crashing the system via:
+
+* PCI bus errors (AER events)
+* Tainted kernel from failed nvidia module verification
+* Partial snd_hda_intel binding to NVIDIA audio codec
+* Unmapped 256MB BAR regions with no management
+* ACPI BIOS bug (HP AE_AML_BUFFER_LIMIT)
+
+Fixed with pci-stub + vfio-pci null driver approach. This tool generalises that fix.
+
+== v0.1.0 - Scanner (CURRENT)
+
+* [x] PCI device enumeration via sysfs
+* [x] Driver binding detection
+* [x] Zombie device detection (powered, no driver)
+* [x] Partial binding detection (e.g., audio codec on GPU)
+* [x] Power state reading
+* [x] IOMMU group detection
+* [x] Risk assessment scoring
+* [x] JSON and text output
+* [ ] Memory region (BAR) enumeration
+* [ ] lspci-based description enrichment
+* [ ] Interrupt assignment checking
+
+== v0.2.0 - Crash Analyzer
+
+* [ ] Parse journalctl -k for hardware-related errors
+* [ ] Boot history analysis (duration, crash indicators)
+* [ ] Kernel taint detection and module failure tracking
+* [ ] ACPI error cataloguing
+* [ ] Crash-to-hardware correlation scoring
+* [ ] Primary suspect identification with confidence score
+* [ ] Timeline reconstruction (when did crashes start)
+
+== v0.3.0 - Remediation Engine
+
+* [x] Dual null-driver strategy (pci-stub + vfio-pci)
+* [x] Plan/Apply/Undo workflow
+* [x] Receipt generation for rollback
+* [ ] rpm-ostree kargs integration (Fedora Atomic)
+* [ ] grubby integration (traditional Fedora/RHEL)
+* [ ] systemd-boot integration
+* [ ] DKMS blacklist management
+* [ ] Power-off via ACPI strategy
+* [ ] Driver unbind strategy
+* [ ] sysfs disable strategy
+* [ ] Multi-device plans (GPU + audio codec together)
+
+== v0.4.0 - TUI
+
+* [ ] ATS2 TUI for interactive diagnostics
+* [ ] Device tree view with status indicators
+* [ ] Real-time power state monitoring
+* [ ] Interactive plan builder
+* [ ] Confirmation dialogs for destructive operations
+* [ ] Post-remediation verification dashboard
+
+== v0.5.0 - Integration
+
+* [ ] verisimdb integration (store findings as hexads)
+* [ ] Hypatia integration (feed patterns to rule engine)
+* [ ] SARIF output for CI/CD
+* [ ] MCP server mode (AI agent integration)
+* [ ] Prometheus metrics endpoint
+* [ ] AmbientOps Operating Room integration (procedure packs)
+
+== v1.0.0 - Production
+
+* [ ] Support for all major bootloaders
+* [ ] Touchscreen/HID device diagnostics
+* [ ] USB device zombie detection
+* [ ] WiFi/Bluetooth driver conflict detection
+* [ ] Comprehensive test suite
+* [ ] Man page and shell completions
+* [ ] Published to crates.io
+
+== Device Types Supported
+
+|===
+| Device Type | Scanner | Analyzer | Remediation
+
+| GPU (NVIDIA, AMD) | v0.1 | v0.2 | v0.3
+| Audio codecs (HDA) | v0.1 | v0.2 | v0.3
+| USB controllers | v0.5 | v0.5 | v1.0
+| Touchscreens/HID | v0.5 | v0.5 | v1.0
+| WiFi/Bluetooth | v0.5 | v0.5 | v1.0
+| NVMe controllers | v0.5 | v0.5 | v1.0
+|===
+
+== Authors
+
+* **Concept & Design:** Jonathan D.A. Jewell
+* **Initial Implementation:** Claude (Anthropic) + Jonathan D.A. Jewell
+* **Date:** 2026-02-08

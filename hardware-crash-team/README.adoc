@@ -1,0 +1,88 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+= Hardware Crash Team
+:author: Jonathan D.A. Jewell <jonathan.jewell@open.ac.uk>
+:toc:
+
+Diagnostic and remediation tool for hardware-induced system crashes. Part of the https://github.com/hyperpolymath/ambientops[AmbientOps] ecosystem (hospital model).
+
+== What It Does
+
+The crash team responds when hardware is crashing your system. It scans PCI devices, detects zombie hardware (powered but unmanaged), analyzes crash logs for hardware correlations, and presents remediation options -- all with human oversight.
+
+=== The Hospital Model
+
+[source]
+----
+AmbientOps Hospital
+├── Ward          — gentle ambient monitoring
+├── Emergency Room — panic-safe intake
+├── Operating Room — planned procedures
+│   └── Hardware Crash Team ← YOU ARE HERE
+│       ├── Scan     → identify zombie devices
+│       ├── Diagnose → correlate crashes with hardware
+│       ├── Plan     → generate remediation options
+│       ├── Apply    → execute with human confirmation
+│       └── Undo     → rollback via receipts
+└── Records       — receipts and undo tokens
+----
+
+== Quick Start
+
+[source,bash]
+----
+# Scan system for hardware issues
+hardware-crash-team scan
+
+# Analyze recent crashes
+hardware-crash-team diagnose --boots 20
+
+# Generate remediation plan
+hardware-crash-team plan 01:00.0 --strategy dual
+
+# Apply plan (with confirmation)
+hardware-crash-team apply plan-01-00-0-1234567890.json
+
+# Undo if needed
+hardware-crash-team undo receipt-2026-02-08T12-00-00.json
+
+# Quick status overview
+hardware-crash-team status
+----
+
+== What It Detects
+
+* **Zombie devices**: Powered on (D0) with no driver managing them
+* **Tainted kernels**: Failed module loads that corrupt kernel state
+* **Partial bindings**: Audio codecs bound to GPU chips
+* **ACPI errors**: BIOS bugs that cause power management failures
+* **Spurious interrupts**: Devices firing interrupts with no handler
+* **Unmanaged memory**: BAR regions mapped with no driver
+
+== Remediation Strategies
+
+|===
+| Strategy | Method | Risk | Reversible
+
+| `dual` (default) | pci-stub + vfio-pci | Low | Yes
+| `pci-stub` | Kernel builtin null driver | Low | Yes
+| `vfio-pci` | IOMMU-backed isolation | Low | Yes
+| `power-off` | ACPI power management | Medium | Yes
+| `disable` | sysfs enable flag | Medium | Yes
+| `unbind` | Remove driver binding | Medium | Yes
+|===
+
+== Building
+
+[source,bash]
+----
+cargo build --release
+cargo install --path .
+----
+
+== Origin
+
+Born from a real NVIDIA Quadro M2000M incident that caused 43+ system reboots in 3 days. The GPU was in zombie D0 power state with no driver, crashing the system via PCI bus errors, kernel taints, and ACPI BIOS bugs. See link:ROADMAP.adoc[ROADMAP] for the full story.
+
+== License
+
+PMPL-1.0-or-later (Palimpsest Meta-Public License)

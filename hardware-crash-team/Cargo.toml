@@ -1,0 +1,38 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+
+[package]
+name = "hardware-crash-team"
+version = "0.1.0"
+edition = "2021"
+authors = ["Jonathan D.A. Jewell <jonathan.jewell@open.ac.uk>"]
+license = "PMPL-1.0-or-later"
+description = "Hardware diagnostic and remediation tool for zombie devices, driver conflicts, and PCI bus issues"
+repository = "https://github.com/hyperpolymath/hardware-crash-team"
+keywords = ["hardware", "diagnostics", "pci", "driver", "crash"]
+categories = ["command-line-utilities", "hardware-support"]
+rust-version = "1.75.0"
+
+[[bin]]
+name = "hardware-crash-team"
+path = "src/main.rs"
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+anyhow = "1"
+thiserror = "2"
+colored = "2"
+walkdir = "2"
+chrono = "0.4"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+reqwest = { version = "0.12", features = ["json"], optional = true }
+tokio = { version = "1", features = ["full"], optional = true }
+
+[features]
+default = []
+verisimdb = ["reqwest", "tokio"]
+
+[dev-dependencies]
+proptest = "1"
