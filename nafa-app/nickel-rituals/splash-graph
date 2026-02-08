@@ -1,0 +1,7 @@
+node "Mood Input" --> "Preferences"
+node "Preferences" --> "Route Planner"
+node "Route Planner" --> "Ambient Overlay"
+node "Ambient Overlay" --> "Journey Outcome"
+node "Journey Outcome" --> "Calm Zone"
+node "Calm Zone" --> "Emergency Fallback"
+node "Emergency Fallback" --> "Splash Trigger"

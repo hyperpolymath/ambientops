@@ -1,0 +1,179 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-FileCopyrightText: 2025 hyperpolymath
+
+= NAFA Developer Cookbook
+:toc: left
+:icons: font
+
+This document explains how to use the `Justfile` to build, test, and run the NAFA project.
+
+== Requirements
+
+* https://deno.land[Deno] 2.1+
+* https://just.systems[just] task runner
+* https://www.rust-lang.org[Rust] 1.83+ (for Tauri mobile builds)
+
+== Quick Reference
+
+[cols="1,3"]
+|===
+|Command |Description
+
+|`just mvp-demo`
+|Run the CLI demo showing all features
+
+|`just mvp-server`
+|Start the API server on port 8080
+
+|`just mvp-dev`
+|Start server with --watch for development
+
+|`just mvp-build`
+|Build ReScript modules via Deno
+
+|`just mvp-check`
+|Type-check server JavaScript files
+|===
+
+== MVP Commands
+
+=== Running the Demo
+
+[source,bash]
+----
+just mvp-demo
+----
+
+This runs the CLI demo that walks through all MVP features:
+
+1. Journey Plan View with sensory-aware segments
+2. Sensory Annotation Flow
+3. Accessibility Settings
+4. Offline Mode
+
+=== Starting the Server
+
+[source,bash]
+----
+just mvp-server
+----
+
+Starts the Deno HTTP server on `http://localhost:8080` with endpoints:
+
+* `GET /` – Welcome page with API documentation
+* `GET /api/journey/:id` – Get journey by ID
+* `GET /api/annotations` – List all annotations
+* `POST /api/annotation` – Create new annotation
+
+=== Development Mode
+
+[source,bash]
+----
+just mvp-dev
+----
+
+Starts the server with `--watch` flag for automatic restart on file changes.
+
+=== Building ReScript
+
+[source,bash]
+----
+just mvp-build
+----
+
+Compiles ReScript modules in `shared/` and `client/` using:
+
+[source,bash]
+----
+deno run -A npm:rescript build
+----
+
+=== Type Checking
+
+[source,bash]
+----
+just mvp-check
+----
+
+Runs Deno's type checker on server files:
+
+[source,bash]
+----
+deno check server/src/main.js server/src/demo.js
+----
+
+== Nickel Configuration
+
+Badge and tier logic is defined in Nickel:
+
+[source,bash]
+----
+# Check badge configuration
+just badge <tier>
+
+# Check contributor tier
+just tier contributor <name>
+----
+
+== Container Build
+
+Build and run with Podman/Docker:
+
+[source,bash]
+----
+# Build the container
+podman build -f Containerfile -t nafa:latest .
+
+# Run on port 8080
+podman run -p 8080:8080 nafa:latest
+----
+
+The container uses `denoland/deno:alpine` for a minimal footprint (~50MB).
+
+== Project Structure
+
+[source]
+----
+nafa-app-ambient/
+├── client/           # ReScript client (TEA pattern)
+│   └── src/Page/     # Page modules
+├── server/           # Deno HTTP server
+│   └── src/          # main.js, demo.js
+├── shared/           # Shared domain types
+│   └── src/          # Domain.res, Route.res
+├── nickel-rituals/   # Badge/tier config
+├── Justfile          # Task runner
+└── Containerfile     # Container build
+----
+
+== Adding New Commands
+
+Edit the `Justfile` to add new tasks:
+
+[source,just]
+----
+# Example: Add a new Deno task
+my-task:
+    cd server && deno run --allow-net src/my-script.js
+----
+
+All commands should use Deno as the runtime, following the project's language policy.
+
+== Future: Tauri Mobile
+
+When Tauri 2.0 mobile support is integrated:
+
+[source,bash]
+----
+# iOS development
+just tauri ios dev
+
+# Android development
+just tauri android dev
+
+# Build for release
+just tauri build --target aarch64-apple-ios
+just tauri build --target aarch64-linux-android
+----
+
+These commands will be added once the Tauri integration is complete.

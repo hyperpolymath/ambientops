@@ -1,0 +1,29 @@
+# --- OIL SCRIPT (Primary) ---
+#!/usr/bin/env oil
+#
+# OIL SCRIPT: Setup asdf plugins
+#
+
+echo "OIL SCRIPT: Setting up asdf..."
+
+# List of tools from .tool-versions
+const tools = readln(".tool-versions")
+if (status() != 0) {
+  echo "Error: .tool-versions file not found." >&2
+  exit 1
+}
+
+# Add plugins and install
+for tool, version in (tools) {
+  echo "Checking plugin: $tool"
+  if (! asdf plugin-list | grep -q $tool) {
+    echo "  -> Adding plugin $tool..."
+    asdf plugin-add $tool
+  } else {
+    echo "  -> Plugin $tool already added."
+  }
+  echo "  -> Installing $tool $version..."
+  asdf install $tool $version
+}
+
+echo "asdf setup complete."
