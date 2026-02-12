@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-License-Identifier: PMPL-1.0-or-later
 
 defmodule SystemObservatory.BundleIngestion do
   @moduledoc """
@@ -110,6 +110,68 @@ defmodule SystemObservatory.BundleIngestion do
     end
   end
 
+  @doc """
+  Ingest an EvidenceEnvelope from hardware-crash-team or other AmbientOps tools.
+
+  Accepts the contract-schema format (evidence-envelope.schema.json) and extracts
+  metrics from artifacts and findings for correlation.
+
+  ## Example
+
+      envelope = %{
+        "version" => "1.0.0",
+        "envelope_id" => "uuid-here",
+        "created_at" => "2026-02-12T10:00:00Z",
+        "source" => %{"tool" => "hardware-crash-team", "host" => %{"hostname" => "myhost"}},
+        "artifacts" => [%{"artifact_id" => "uuid", "type" => "report", "path" => "scan.json"}],
+        "findings" => [%{"finding_id" => "f1", "severity" => "critical", "category" => "performance", "title" => "Zombie GPU"}]
+      }
+
+      SystemObservatory.BundleIngestion.ingest_envelope(envelope)
+  """
+  @spec ingest_envelope(map(), keyword()) :: {:ok, ingest_result()} | {:error, term()}
+  def ingest_envelope(envelope, opts \\ []) do
+    with {:ok, _version} <- validate_envelope_version(envelope),
+         {:ok, envelope_id} <- extract_envelope_id(envelope),
+         {:ok, timestamp} <- extract_timestamp(envelope) do
+      source_tool = get_in(envelope, ["source", "tool"]) || "unknown"
+      source = Keyword.get(opts, :source, source_tool)
+
+      # Record findings as events
+      findings = envelope["findings"] || []
+      findings_count = ingest_envelope_findings(findings, source, timestamp)
+
+      # Record metrics if present
+      metrics_count =
+        case envelope["metrics"] do
+          m when is_map(m) -> ingest_snapshot(m, source, timestamp)
+          _ -> 0
+        end
+
+      # Record artifact count as a metric
+      artifacts = envelope["artifacts"] || []
+      Store.record("envelope_artifacts", length(artifacts), %{"envelope_id" => envelope_id}, source: source)
+
+      {:ok,
+       %{
+         metrics_recorded: metrics_count + 1,
+         events_recorded: findings_count,
+         bundle_id: envelope_id
+       }}
+    end
+  end
+
+  @doc """
+  Ingest an EvidenceEnvelope from a JSON file path.
+  """
+  @spec ingest_envelope_file(Path.t(), keyword()) :: {:ok, ingest_result()} | {:error, term()}
+  def ingest_envelope_file(path, opts \\ []) do
+    with {:ok, content} <- File.read(path),
+         {:ok, envelope} <- Jason.decode(content) do
+      ingest_envelope(envelope, opts)
+    end
+  end
+
   # Private functions
 
   defp extract_bundle_id(%{"id" => id}) when is_binary(id), do: {:ok, id}
@@ -169,6 +231,39 @@ defmodule SystemObservatory.BundleIngestion do
 
     length(applied)
   end
+
+  defp validate_envelope_version(%{"version" => v}) when is_binary(v), do: {:ok, v}
+  defp validate_envelope_version(_), do: {:error, :missing_version}
+
+  defp extract_envelope_id(%{"envelope_id" => id}) when is_binary(id), do: {:ok, id}
+  defp extract_envelope_id(_), do: {:error, :missing_envelope_id}
+
+  defp ingest_envelope_findings(findings, source, _timestamp) when is_list(findings) do
+    Enum.each(findings, fn finding ->
+      severity = finding["severity"] || "info"
+
+      event_type =
+        case severity do
+          s when s in ["critical", "high"] -> :anomaly
+          "medium" -> :metric
+          _ -> :metric
+        end
+
+      event_data = %{
+        "finding_id" => finding["finding_id"],
+        "severity" => severity,
+        "category" => finding["category"],
+        "title" => finding["title"],
+        "auto_fixable" => finding["auto_fixable"] || false
+      }
+
+      Correlator.record_event(event_type, source, event_data)
+    end)
+
+    length(findings)
+  end
+
+  defp ingest_envelope_findings(_, _source, _timestamp), do: 0
 
   defp maybe_load_file(bundle, dir_path, key) do
     file_path = Path.join(dir_path, "#{key}.json")

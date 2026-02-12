@@ -1,0 +1,178 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/hyperpolymath/system-tools-contracts/schemas/message-intent.schema.json",
+  "title": "Message Intent",
+  "description": "How tools request messages via feedback-a-tron: audience, content, attachments, redaction profile, and routing hints.",
+  "type": "object",
+  "required": ["version", "intent_id", "created_at", "audience", "content"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "intent_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source_tool": {
+      "type": "string",
+      "description": "Which tool is requesting the message"
+    },
+    "audience": {
+      "type": "string",
+      "enum": ["user", "helper", "forum", "vendor", "support"],
+      "description": "Who the message is intended for"
+    },
+    "content": {
+      "type": "object",
+      "required": ["subject"],
+      "properties": {
+        "subject": {
+          "type": "string",
+          "description": "Message subject/title"
+        },
+        "body": {
+          "type": "string",
+          "description": "Main message content"
+        },
+        "body_format": {
+          "type": "string",
+          "enum": ["text", "markdown", "html"],
+          "default": "text"
+        },
+        "template": {
+          "type": "string",
+          "description": "Template ID if using predefined templates"
+        },
+        "template_vars": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "attachments": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "type": "object",
+        "properties": {
+          "attachment_id": { "type": "string" },
+          "filename": { "type": "string" },
+          "mime_type": { "type": "string" },
+          "source": {
+            "type": "string",
+            "enum": ["envelope", "receipt", "log", "screenshot", "custom"]
+          },
+          "source_ref": {
+            "type": "string",
+            "description": "Reference to source artifact"
+          },
+          "redaction_profile": {
+            "type": "string",
+            "enum": ["none", "minimal", "standard", "maximum"]
+          },
+          "include_by_default": {
+            "type": "boolean",
+            "default": true
+          }
+        }
+      }
+    },
+    "redaction": {
+      "type": "object",
+      "description": "Redaction settings for this message",
+      "properties": {
+        "profile": {
+          "type": "string",
+          "enum": ["none", "minimal", "standard", "maximum"],
+          "default": "standard"
+        },
+        "redact_hostname": { "type": "boolean", "default": true },
+        "redact_username": { "type": "boolean", "default": true },
+        "redact_paths": { "type": "boolean", "default": true },
+        "redact_ips": { "type": "boolean", "default": true },
+        "custom_patterns": {
+          "type": "array",
+          "maxItems": 50,
+          "items": {
+            "type": "object",
+            "properties": {
+              "pattern": { "type": "string" },
+              "replacement": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "routing": {
+      "type": "object",
+      "description": "How to route/send this message",
+      "properties": {
+        "targets": {
+          "type": "array",
+          "description": "Specific targets if known",
+          "maxItems": 10,
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["email", "forum_post", "ticket", "chat", "clipboard", "file"]
+              },
+              "address": { "type": "string" },
+              "label": { "type": "string" }
+            }
+          }
+        },
+        "tags": {
+          "type": "array",
+          "maxItems": 20,
+          "items": { "type": "string", "maxLength": 64 },
+          "description": "Tags for categorization/filtering"
+        },
+        "severity": {
+          "type": "string",
+          "enum": ["info", "low", "medium", "high", "critical"]
+        },
+        "priority": {
+          "type": "string",
+          "enum": ["low", "normal", "high", "urgent"]
+        },
+        "requires_response": {
+          "type": "boolean",
+          "default": false
+        },
+        "response_deadline": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "context": {
+      "type": "object",
+      "description": "Contextual information for the recipient",
+      "properties": {
+        "envelope_ref": { "type": "string", "format": "uuid" },
+        "receipt_ref": { "type": "string", "format": "uuid" },
+        "related_messages": {
+          "type": "array",
+          "maxItems": 20,
+          "items": { "type": "string", "format": "uuid" }
+        }
+      }
+    },
+    "user_approval": {
+      "type": "object",
+      "description": "User approval requirements",
+      "properties": {
+        "required": { "type": "boolean", "default": true },
+        "preview_required": { "type": "boolean", "default": true },
+        "edit_allowed": { "type": "boolean", "default": true }
+      }
+    }
+  }
+}

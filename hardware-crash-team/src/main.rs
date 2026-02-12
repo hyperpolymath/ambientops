@@ -8,6 +8,7 @@
 
 use clap::{Parser, Subcommand};
 use anyhow::Result;
+use serde_json;
 
 mod scanner;
 mod analyzer;
@@ -39,6 +40,10 @@ enum Commands {
         /// Verbose output with per-device details
         #[arg(short, long)]
         verbose: bool,
+
+        /// Output as contract-conformant EvidenceEnvelope JSON
+        #[arg(long)]
+        envelope: bool,
     },
 
     /// Analyze crash logs and correlate with hardware events
@@ -60,6 +65,10 @@ enum Commands {
         /// Strategy: null-driver, power-off, disable, isolate
         #[arg(short, long)]
         strategy: Option<String>,
+
+        /// Output as contract-conformant ProcedurePlan JSON
+        #[arg(long)]
+        procedure: bool,
     },
 
     /// Apply a remediation plan (requires confirmation)
@@ -93,26 +102,44 @@ fn main() -> Result<()> {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::Scan { format, output, verbose } => {
+        Commands::Scan { format, output, verbose, envelope } => {
             println!("Scanning system hardware...");
             let report = scanner::scan_system(verbose)?;
-            let formatted = scanner::format_report(&report, &format)?;
 
-            if let Some(output_path) = output {
-                std::fs::write(&output_path, &formatted)?;
-                println!("Report saved to: {}", output_path.display());
-            } else {
-                println!("{}", formatted);
-            }
+            if envelope {
+                let report_json = serde_json::to_value(&report)?;
+                let hostname = gethostname();
+                let env = ambientops_contracts::conversions::system_report_to_envelope(
+                    &report_json,
+                    &hostname,
+                );
+                let formatted = serde_json::to_string_pretty(&env)?;
 
-            // Summary
-            let issues = report.devices.iter()
-                .filter(|d| !d.issues.is_empty())
-                .count();
-            if issues > 0 {
-                println!("\n{} device(s) with issues detected. Run `hardware-crash-team diagnose` for analysis.", issues);
+                if let Some(output_path) = output {
+                    std::fs::write(&output_path, &formatted)?;
+                    println!("EvidenceEnvelope saved to: {}", output_path.display());
+                } else {
+                    println!("{}", formatted);
+                }
             } else {
-                println!("\nNo hardware issues detected.");
+                let formatted = scanner::format_report(&report, &format)?;
+
+                if let Some(output_path) = output {
+                    std::fs::write(&output_path, &formatted)?;
+                    println!("Report saved to: {}", output_path.display());
+                } else {
+                    println!("{}", formatted);
+                }
+
+                // Summary
+                let issues = report.devices.iter()
+                    .filter(|d| !d.issues.is_empty())
+                    .count();
+                if issues > 0 {
+                    println!("\n{} device(s) with issues detected. Run `hardware-crash-team diagnose` for analysis.", issues);
+                } else {
+                    println!("\nNo hardware issues detected.");
+                }
             }
         }
 
@@ -122,10 +149,21 @@ fn main() -> Result<()> {
             analyzer::print_diagnosis(&analysis);
         }
 
-        Commands::Plan { device, strategy } => {
+        Commands::Plan { device, strategy, procedure } => {
             println!("Generating remediation plan for device {}...", device);
             let plan = remediation::create_plan(&device, strategy.as_deref())?;
-            remediation::print_plan(&plan);
+
+            if procedure {
+                let plan_json = serde_json::to_value(&plan)?;
+                let envelope_ref = uuid::Uuid::new_v4(); // Would come from a prior scan --envelope
+                let proc_plan = ambientops_contracts::conversions::remediation_plan_to_procedure(
+                    &plan_json,
+                    envelope_ref,
+                );
+                println!("{}", serde_json::to_string_pretty(&proc_plan)?);
+            } else {
+                remediation::print_plan(&plan);
+            }
         }
 
         Commands::Apply { plan, yes } => {
@@ -153,4 +191,11 @@ fn main() -> Result<()> {
     }
 
     Ok(())
+}
+
+fn gethostname() -> String {
+    std::fs::read_to_string("/etc/hostname")
+        .unwrap_or_else(|_| "unknown".to_string())
+        .trim()
+        .to_string()
 }

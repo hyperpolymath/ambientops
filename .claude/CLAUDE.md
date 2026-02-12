@@ -2,26 +2,34 @@
 
 ## Project Overview
 
-AmbientOps is a hospital-model operations framework. Components are organized by hospital metaphor:
+AmbientOps is a hospital-model operations framework (hybrid monorepo). Components are organized by hospital department:
 
 ```
-AmbientOps Hospital
-├── Ward              — gentle ambient monitoring (observatory)
-├── Emergency Room    — panic-safe intake (ai-cli-crash-capture)
-├── Operating Room    — planned procedures
-│   ├── Composer      — orchestration engine
-│   ├── hardware-crash-team ← NEW (2026-02-08)
-│   │   ├── Scan      → identify zombie PCI devices
-│   │   ├── Diagnose  → correlate crashes with hardware
-│   │   ├── Plan      → generate remediation options
-│   │   ├── Apply     → execute with human confirmation
-│   │   └── Undo      → rollback via receipts
-│   └── NAFA app      — ambient operations mobile app
-├── Records           — receipts and undo tokens
-└── Diagnostics Lab (affiliated, remote)
-    └── panic-attack  — software health scanner (top-level repo)
-        ├── https://github.com/hyperpolymath/panic-attacker
-        └── Feeds findings to Records via verisimdb
+ambientops/                      ← Hybrid monorepo
+├── clinician/            (Rust, ~4400 LOC) — Operating Room: AI-assisted sysadmin
+├── emergency-room/       (V, ~1800 LOC)    — Emergency Room: panic-safe intake
+├── hardware-crash-team/  (Rust, ~700 LOC)  — Operating Room: hardware diagnostics
+├── observatory/          (Elixir, ~600 LOC)— Ward: metrics, weather, monitoring
+├── contracts/            (JSON+Deno)       — Data Backbone: 8 JSON schemas
+├── contracts-rust/       (Rust)            — Data Backbone: serde types + conversions
+├── records/referrals/    (Elixir, ~400 LOC)— Records: multi-platform bug reporting
+├── nafa-app/             (ReScript/Deno)   — Ward: mobile UI (shell)
+├── composer/             (stubs)           — Operating Room: orchestration
+└── Cargo.toml            (workspace)       — Rust workspace root
+```
+
+**Data flow:** ER intake → Evidence Envelope → Procedure Plan → Receipt → System Weather
+
+**Satellites (separate repos):** panic-attacker, verisimdb, hypatia, gitbot-fleet, echidna
+
+## Build
+
+```bash
+cargo build --workspace          # All Rust crates
+cargo test --workspace           # All Rust tests
+cd observatory && mix compile    # Elixir observatory
+cd contracts && deno test        # Contract schema tests
+./scripts/demo-flow.sh --build   # End-to-end demo
 ```
 
 ## hardware-crash-team (Added 2026-02-08)
@@ -66,6 +74,7 @@ Rust-based hardware diagnostic tool. See `hardware-crash-team/.claude/CLAUDE.md`
 | **Guile Scheme** | State/meta files | STATE.scm, META.scm, ECOSYSTEM.scm |
 | **Julia** | Batch scripts, data processing | Per RSR |
 | **OCaml** | AffineScript compiler | Language-specific |
+| **V** | Emergency Room, system tools | Vlang.io, fast compilation |
 | **Ada** | Safety-critical systems | Where required |
 | **Bebop** | Wire serialization | JS+Rust peers; TS only as generated artifacts |
 | **Protobuf** | Wire serialization | If Elixir must be a peer |

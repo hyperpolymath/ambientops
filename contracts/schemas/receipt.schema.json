@@ -1,0 +1,219 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/hyperpolymath/system-tools-contracts/schemas/receipt.schema.json",
+  "title": "Receipt",
+  "description": "The trust anchor: what was checked, what changed, what didn't change, undo guidance, and evidence pointers.",
+  "type": "object",
+  "required": ["version", "receipt_id", "created_at", "plan_ref", "envelope_ref", "status", "steps_executed"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "receipt_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "plan_ref": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Reference to the executed Procedure Plan"
+    },
+    "envelope_ref": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Reference to the original Evidence Envelope"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["completed", "partial", "failed", "cancelled", "rolled_back"]
+    },
+    "summary": {
+      "type": "object",
+      "description": "High-level summary for human consumption",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "items_checked": { "type": "integer", "minimum": 0 },
+        "items_changed": { "type": "integer", "minimum": 0 },
+        "items_unchanged": { "type": "integer", "minimum": 0 },
+        "items_failed": { "type": "integer", "minimum": 0 },
+        "space_recovered_bytes": { "type": "integer" },
+        "duration_seconds": { "type": "number" }
+      }
+    },
+    "steps_executed": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "$ref": "#/$defs/step_result"
+      }
+    },
+    "unchanged": {
+      "type": "array",
+      "description": "Items that were checked but NOT changed, with reasons",
+      "maxItems": 500,
+      "items": {
+        "type": "object",
+        "properties": {
+          "item": { "type": "string" },
+          "reason": {
+            "type": "string",
+            "enum": ["already_optimal", "user_skipped", "prerequisite_failed", "not_applicable", "safe_to_keep"]
+          },
+          "explanation": { "type": "string" }
+        }
+      }
+    },
+    "undo_bundle": {
+      "type": "object",
+      "description": "Information needed to reverse changes",
+      "properties": {
+        "available": { "type": "boolean" },
+        "path": {
+          "type": "string",
+          "description": "Path to undo bundle within run bundle",
+          "pattern": "^(?!.*\\.\\.)(?!.*//)[a-zA-Z0-9_./@-]+$",
+          "maxLength": 1024
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When undo data will be cleaned up"
+        },
+        "steps": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": "object",
+            "properties": {
+              "step_ref": { "type": "string", "maxLength": 64 },
+              "reversible": { "type": "boolean" },
+              "undo_command": { "type": "string", "maxLength": 2048 },
+              "backup_path": {
+                "type": "string",
+                "pattern": "^(?!.*\\.\\.)(?!.*//)[a-zA-Z0-9_./@-]+$",
+                "maxLength": 1024
+              }
+            }
+          }
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "description": "References to evidence artifacts",
+      "properties": {
+        "before_snapshot": {
+          "type": "string",
+          "pattern": "^(?!.*\\.\\.)(?!.*//)[a-zA-Z0-9_./@-]+$",
+          "maxLength": 1024
+        },
+        "after_snapshot": {
+          "type": "string",
+          "pattern": "^(?!.*\\.\\.)(?!.*//)[a-zA-Z0-9_./@-]+$",
+          "maxLength": 1024
+        },
+        "logs": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": "string",
+            "pattern": "^(?!.*\\.\\.)(?!.*//)[a-zA-Z0-9_./@-]+$",
+            "maxLength": 1024
+          }
+        },
+        "diffs": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": "string",
+            "pattern": "^(?!.*\\.\\.)(?!.*//)[a-zA-Z0-9_./@-]+$",
+            "maxLength": 1024
+          }
+        }
+      }
+    },
+    "human_readable": {
+      "type": "object",
+      "description": "Pre-rendered human-readable formats",
+      "properties": {
+        "text": { "type": "string" },
+        "html": { "type": "string" },
+        "markdown": { "type": "string" }
+      }
+    },
+    "signatures": {
+      "type": "array",
+      "description": "Cryptographic signatures for integrity",
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "properties": {
+          "signer": { "type": "string" },
+          "algorithm": { "type": "string" },
+          "signature": { "type": "string" },
+          "timestamp": { "type": "string", "format": "date-time" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "step_result": {
+      "type": "object",
+      "required": ["step_id", "status"],
+      "properties": {
+        "step_id": { "type": "string" },
+        "step_ref": {
+          "type": "string",
+          "description": "Reference to step in original plan"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["success", "skipped", "failed", "rolled_back"]
+        },
+        "started_at": { "type": "string", "format": "date-time" },
+        "completed_at": { "type": "string", "format": "date-time" },
+        "what_changed": {
+          "type": "string",
+          "description": "Human-readable description of the change"
+        },
+        "why_changed": {
+          "type": "string",
+          "description": "Reason/justification for the change"
+        },
+        "before": {
+          "type": "object",
+          "description": "State before the change",
+          "additionalProperties": true
+        },
+        "after": {
+          "type": "object",
+          "description": "State after the change",
+          "additionalProperties": true
+        },
+        "error": {
+          "type": "object",
+          "description": "Error details if failed",
+          "properties": {
+            "code": { "type": "string" },
+            "message": { "type": "string" },
+            "recoverable": { "type": "boolean" }
+          }
+        },
+        "skip_reason": {
+          "type": "string",
+          "description": "Why this step was skipped"
+        }
+      }
+    }
+  }
+}

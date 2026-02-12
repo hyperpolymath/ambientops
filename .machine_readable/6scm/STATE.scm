@@ -11,7 +11,7 @@
     (repo "hyperpolymath/ambientops"))
   (project-context
     (name "ambientops")
-    (tagline "image:https://img.shields.io/badge/License-AGPL--3.0--or--later-blue.svg[AGPL-3.0,link="https://www.gnu.org/licenses/agpl-3.0"]"))
+    (tagline "PMPL-1.0-or-later"))
   (current-position
     (phase "alpha")
     (overall-completion 10))

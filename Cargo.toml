@@ -1,0 +1,4 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+[workspace]
+members = ["hardware-crash-team", "clinician", "contracts-rust"]
+resolver = "2"

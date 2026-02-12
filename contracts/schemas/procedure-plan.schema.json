@@ -1,0 +1,169 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/hyperpolymath/system-tools-contracts/schemas/procedure-plan.schema.json",
+  "title": "Procedure Plan",
+  "description": "Operating Theatre plan representation with ordered steps, risk labels, reversibility, and privilege requirements.",
+  "type": "object",
+  "required": ["version", "plan_id", "created_at", "envelope_ref", "steps"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "plan_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "envelope_ref": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Reference to the Evidence Envelope this plan addresses"
+    },
+    "title": {
+      "type": "string",
+      "description": "Human-readable plan title"
+    },
+    "description": {
+      "type": "string",
+      "description": "Summary of what this plan will do"
+    },
+    "overall_risk": {
+      "$ref": "#/$defs/risk_level"
+    },
+    "overall_reversibility": {
+      "$ref": "#/$defs/reversibility"
+    },
+    "estimated_duration_seconds": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "requires_reboot": {
+      "type": "boolean",
+      "default": false
+    },
+    "requires_privileges": {
+      "type": "array",
+      "maxItems": 4,
+      "items": {
+        "type": "string",
+        "enum": ["user", "admin", "root", "system"]
+      }
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 100,
+      "items": {
+        "$ref": "#/$defs/step"
+      }
+    },
+    "prerequisites": {
+      "type": "array",
+      "maxItems": 50,
+      "description": "Conditions that must be true before plan execution",
+      "items": {
+        "type": "object",
+        "properties": {
+          "check": { "type": "string" },
+          "description": { "type": "string" },
+          "blocking": { "type": "boolean", "default": true }
+        }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "maxItems": 20,
+      "items": { "type": "string", "maxLength": 500 },
+      "description": "Important warnings to display to user"
+    },
+    "approval_required": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether user must explicitly approve before execution"
+    }
+  },
+  "$defs": {
+    "risk_level": {
+      "type": "string",
+      "enum": ["safe", "guided", "expert"],
+      "description": "safe=no data loss possible, guided=some risk needs confirmation, expert=significant risk"
+    },
+    "reversibility": {
+      "type": "string",
+      "enum": ["full", "partial", "none"],
+      "description": "full=completely undoable, partial=some changes permanent, none=irreversible"
+    },
+    "step": {
+      "type": "object",
+      "required": ["step_id", "order", "action", "title"],
+      "properties": {
+        "step_id": { "type": "string" },
+        "order": { "type": "integer", "minimum": 1 },
+        "action": {
+          "type": "string",
+          "enum": [
+            "delete_file", "delete_directory", "move_file", "copy_file",
+            "modify_registry", "stop_service", "start_service", "restart_service",
+            "disable_service", "enable_service", "uninstall_program",
+            "run_command", "clear_cache", "clear_temp", "defragment",
+            "update_driver", "repair_permissions", "custom"
+          ]
+        },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "preview": {
+          "type": "string",
+          "description": "Human-readable preview of what will happen"
+        },
+        "risk": { "$ref": "#/$defs/risk_level" },
+        "reversibility": { "$ref": "#/$defs/reversibility" },
+        "undo_instruction": {
+          "type": "string",
+          "description": "How to reverse this step if possible"
+        },
+        "target": {
+          "type": "object",
+          "description": "What this step operates on",
+          "properties": {
+            "path": {
+              "type": "string",
+              "pattern": "^(?!.*\\.\\.)(?!.*//)[a-zA-Z0-9_./@: -]+$",
+              "maxLength": 1024
+            },
+            "service": { "type": "string", "maxLength": 256 },
+            "registry_key": {
+              "type": "string",
+              "pattern": "^(HKEY_LOCAL_MACHINE|HKEY_CURRENT_USER|HKEY_CLASSES_ROOT|HKEY_USERS|HKLM|HKCU|HKCR|HKU)\\\\[A-Za-z0-9\\\\_ -]+$",
+              "maxLength": 512
+            },
+            "program": { "type": "string", "maxLength": 256 }
+          }
+        },
+        "parameters": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Action-specific parameters"
+        },
+        "finding_refs": {
+          "type": "array",
+          "maxItems": 20,
+          "items": { "type": "string", "maxLength": 64 },
+          "description": "Which findings from the envelope this step addresses"
+        },
+        "requires_confirmation": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether to pause and confirm before this step"
+        },
+        "estimated_duration_seconds": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}

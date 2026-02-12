@@ -1,0 +1,17 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+[package]
+name = "ambientops-contracts"
+version = "1.0.0"
+edition = "2021"
+authors = ["Jonathan D.A. Jewell <jonathan.jewell@open.ac.uk>"]
+description = "AmbientOps contract types - Rust structs matching JSON schemas for evidence envelopes, procedure plans, receipts, and system weather"
+license = "PMPL-1.0-or-later"
+repository = "https://github.com/hyperpolymath/ambientops"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+uuid = { version = "1", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+
+[dev-dependencies]

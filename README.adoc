@@ -1,126 +1,112 @@
 = AmbientOps
 
 image:https://img.shields.io/badge/License-PMPL--1.0-blue.svg[License: PMPL-1.0,link="https://github.com/hyperpolymath/palimpsest-license"]
-image:https://img.shields.io/badge/Philosophy-Palimpsest-indigo.svg[Palimpsest,link="https://github.com/hyperpolymath/palimpsest-license"]
 
 :toc:
 :toclevels: 3
 :icons: font
 :source-highlighter: rouge
 
-AmbientOps is a cross-platform ecosystem of system tools designed for **everyday users** (including “know-nothing” and “drowning” users) who need trustworthy help without fearware, nagware, or scammy “optimizers”.
+AmbientOps is a hospital-model operations framework providing **trustworthy system help** without fearware, nagware, or scammy "optimizers". It is organised as a **hybrid monorepo**: core hospital departments live here, external tools stay as satellites.
 
-It is organised around a simple mental model: **a hospital**.
+== Quick Start
 
-[IMPORTANT]
-====
-*Project status:* *Bootstrap / specification in progress*
+[source,bash]
+----
+# Build all Rust components (clinician, hardware-crash-team, contracts-rust)
+cargo build --workspace
 
-This repo is the *front door* (docs, naming, ecosystem manifest, and packaging glue).
-Implementation lives in the satellite repos linked below.
-====
+# Run hardware scan
+cargo run -p hardware-crash-team -- scan
 
-== The hospital model (how users experience it)
+# Run hardware scan with contract-conformant output
+cargo run -p hardware-crash-team -- scan --envelope
 
-AmbientOps presents system tooling as four “departments”:
+# Generate remediation plan
+cargo run -p hardware-crash-team -- plan 01:00.0 --procedure
 
-* **Ward** — System Weather + gentle, ambient guidance (the daily home)
-* **Emergency Room** — panic-safe intake (incident bundle + safety posture + handoff)
-* **Operating Room** — planned procedures (Scan → Plan → Apply → Undo → Receipt)
-* **Records** — receipts, undo tokens, and shareable help bundles
+# Run end-to-end demo
+./scripts/demo-flow.sh --build
+
+# Run contract schema tests (requires Deno)
+cd contracts && deno test
+----
+
+== The Hospital Model
+
+AmbientOps presents system tooling as four "departments":
+
+* **Ward** — System Weather + gentle ambient guidance (`observatory/`)
+* **Emergency Room** — Panic-safe intake with one-click stabilization (`emergency-room/`)
+* **Operating Room** — Planned procedures: Scan → Plan → Apply → Undo → Receipt (`clinician/`, `hardware-crash-team/`, `composer/`)
+* **Records** — Receipts, undo tokens, and referrals (`records/`)
+
+**Data flow:** Evidence Envelope → Procedure Plan → Receipt → System Weather
 
 See `docs/HOSPITAL_MODEL.adoc` for the full model.
 
-== Repositories in the ecosystem
+== Directory Structure
 
-The umbrella repo coordinates, but does not replace, these satellites:
+[source]
+----
+ambientops/
+├── clinician/            (Rust, ~4400 LOC) — AI-assisted sysadmin [from personal-sysadmin]
+├── emergency-room/       (V, ~1800 LOC)    — Panic-safe intake [from emergency-button]
+├── hardware-crash-team/  (Rust, ~700 LOC)  — PCI zombie detection & remediation
+├── observatory/          (Elixir, ~600 LOC)— Metrics, weather, bundle ingestion
+├── contracts/            (JSON+Deno)       — 8 JSON schemas + validators
+├── contracts-rust/       (Rust)            — Serde types matching JSON schemas
+├── records/referrals/    (Elixir, ~400 LOC)— Multi-platform bug reporting MCP
+├── nafa-app/             (ReScript/Deno)   — Mobile journey planner UI (shell)
+├── composer/             (stubs)           — Orchestration engine
+├── scripts/              — Demo and utility scripts
+├── docs/                 — Documentation
+├── Cargo.toml            — Rust workspace root
+└── .machine_readable/    — STATE.scm, ECOSYSTEM.scm, META.scm
+----
 
-=== Core Infrastructure
+== Contract Schemas
 
-* **Ward UI (tray / ambient):** `hyperpolymath/ops-glance` (name TBD; "Ward" UX)
-* **Emergency Room:** `hyperpolymath/emergency-button`
-* **Operating Room (procedures engine):** `hyperpolymath/operating-room`
-* **Observability dashboard (Julia):** `hyperpolymath/juliadashboard` (name TBD)
-* **Personal Sysadmin (clinician workflows):** `hyperpolymath/personal-sysadmin`
-* **Hybrid Automation Router (policy-gated execution):** `hyperpolymath/hybrid-automation-router`
-* **feedback-a-tron (referrals/discharge notes):** `hyperpolymath/feedback-a-tron`
-* **(Recommended) Contracts:** `hyperpolymath/system-tools-contracts`
+The `contracts/` directory contains 8 JSON schemas that define the inter-component data format:
 
-=== Procedure Packs (Operating Room)
+[cols="1,2"]
+|===
+| Schema | Purpose
 
-These are specialized diagnostic and repair tools that integrate with the Operating Room:
+| `evidence-envelope` | A&E intake / scan output with artifacts and findings
+| `procedure-plan` | Operating Theatre steps with risk and reversibility
+| `receipt` | Execution result with undo bundle and evidence
+| `system-weather` | Ward UI payload: calm/watch/act with trends
+| `message-intent` | Command messaging between components
+| `run-bundle` | Execution bundle with completion info
+| `pack-manifest` | Scan pack definition with platform filters
+| `ambient-payload` | Ambient mode indicator data
+|===
 
-* **link:https://github.com/hyperpolymath/network-ambulance[Network Ambulance]** — Linux network connectivity diagnostics and repair (v1.0 production-ready)
-  - Fix DNS, routing, interfaces, NetworkManager issues
-  - WiFi troubleshooting, VPN diagnostics
-  - Safe, documented, reversible repairs with backups
-  - Captive portal and proxy support (v1.2)
+The `contracts-rust/` crate provides Rust structs with `serde` serialization and `From` conversions from hardware-crash-team types.
 
-* **link:https://github.com/hyperpolymath/disk-ambulance[Disk Ambulance]** — Disk health and filesystem diagnostics/repair (v0.5 alpha)
-  - SMART monitoring, filesystem integrity checks
-  - Space analysis, mount issue resolution
-  - RAID status, SSD optimization, I/O performance
+== Satellite Repos
 
-* **link:https://github.com/hyperpolymath/performance-ambulance[Performance Ambulance]** — System performance diagnostics and optimization (v0.5 alpha)
-  - CPU/memory/disk I/O bottleneck detection
-  - Process profiling, thermal management
-  - Safe resource adjustments, never kills critical processes
+External tools that integrate with AmbientOps but live in their own repos:
 
-* **link:https://github.com/hyperpolymath/security-ambulance[Security Ambulance]** — Security posture assessment and hardening (v0.5 alpha)
-  - Firewall audit, service scanning, permission checks
-  - Malware detection, log analysis, SSH hardening
-  - Compliance with CIS, NIST, DISA STIG, PCI-DSS
+* **panic-attacker** — Software health scanner (feeds verisimdb)
+* **verisimdb** / **verisimdb-data** — Multimodal database for scan results
+* **hypatia** — Neurosymbolic CI/CD intelligence
+* **gitbot-fleet** — Bot orchestration (rhodibot, echidnabot, etc.)
+* **echidna** — Neurosymbolic theorem proving (30 prover backends)
+* **network-orchestrator** — Enterprise network management (planned)
+* **traffic-conditioner** — Continuous network optimization (planned)
 
-=== Continuous Optimization Tools
+== Safety and Trust Principles
 
-* **link:https://github.com/hyperpolymath/traffic-conditioner[Traffic Conditioner]** — Continuous network optimization (v0.1 planning)
-  - Bufferbloat mitigation (CAKE/FQ-CoDel qdiscs)
-  - QoS with priority classes, software line bonding
-  - VPN optimization, real-time monitoring
-  - Runs continuously, adapts to changing conditions
-
-=== Enterprise/Infrastructure Tools (Coming Soon)
-
-* **Network Orchestrator** — Enterprise network management (v0.1 planning)
-  - BGP control, SNMP monitoring, router configuration
-  - DHCP management, PTP (Precision Time Protocol)
-  - Distributed file systems (AFS), database diagnostics
-  - Remote debugging and fixes with authorization
-
-* **AmbientOps Composer** — Visual macro and script builder (v0.1 planning)
-  - Zero-code workflow designer (drag-and-drop nodes)
-  - Macro recorder (record actions, replay as workflows)
-  - Context-sensitive help system
-  - Generates D lang scripts from visual flows
-
-This repo keeps an ecosystem manifest in `ecosystem/` to make tooling + packaging reproducible.
-
-== Installation philosophy
-
-AmbientOps aims to avoid “install everything” by default.
-
-* **Minimal**: Ward only (System Weather + calm guidance)
-* **Typical**: Ward + Emergency Room + Operating Room (safe pack for your OS)
-* **Full**: Typical + technician packs + optional adapters
-
-The system should prompt for additional packs only when needed, and always explain why.
-
-== Safety and trust principles
-
-* No fearware claims (“304 errors fixed!”)
+* No fearware claims ("304 errors fixed!")
 * Evidence first: show measurements, not hype
 * Scan is non-mutating by default
 * Apply requires explicit approval
+* DRY RUN by default for all destructive operations
 * Undo and receipts are first-class
 * Privacy controls are visible and simple (local-only by default)
 
-== Repository layout
-
-* `docs/` — umbrella documentation and UX model
-* `ecosystem/` — machine-readable manifest + compatibility matrix
-* `installers/` — packaging glue per OS
-* `branding/` — icons/themes previews and brand assets
-
 == License
 
-PMPL-1.0-or-later (plus Palimpsest where indicated).
+PMPL-1.0-or-later (Palimpsest License).

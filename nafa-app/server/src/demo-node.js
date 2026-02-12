@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// SPDX-License-Identifier: MIT OR AGPL-3.0-or-later
+// SPDX-License-Identifier: MIT OR PMPL-1.0-or-later
 // SPDX-FileCopyrightText: 2025 hyperpolymath
 
 /**

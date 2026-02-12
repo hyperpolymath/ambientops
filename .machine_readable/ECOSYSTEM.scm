@@ -3,108 +3,158 @@
 ;; Media-Type: application/vnd.ecosystem+scm
 
 (ecosystem
-  (version "1.0")
+  (version "2.0")
   (name "ambientops")
-  (type "umbrella-platform")
-  (purpose "Ambient computing operations platform - unified control plane for distributed systems, CI/CD automation, and system resilience")
+  (type "hybrid-monorepo")
+  (purpose "Hospital-model operations framework - trustworthy system help without fearware")
 
   (position-in-ecosystem
     (category "platform-infrastructure")
-    (subcategory "ambient-computing")
+    (subcategory "system-operations")
     (unique-value
-      ("Hospital Model: triage, diagnosis, treatment, prevention")
-      ("Neurosymbolic automation: neural learning + symbolic execution")
-      ("Cross-forge CI/CD orchestration")
-      ("System resilience: freeze-ejector + flare for crash recovery")
-      ("Hook wave propagation for atomic multi-repo updates")))
+      ("Hospital Model: Ward → ER → Operating Room → Records")
+      ("Contract-driven data flow: EvidenceEnvelope → ProcedurePlan → Receipt → SystemWeather")
+      ("Human oversight mandatory: DRY RUN by default, receipts for undo")
+      ("Hybrid monorepo: core departments in-repo, tools as satellites")))
 
+  ;; Internal components (in this monorepo)
+  (internal-components
+    (component "clinician"
+      (department "Operating Room")
+      (language "Rust")
+      (loc 4400)
+      (description "AI-assisted system administration with learning capabilities")
+      (origin "personal-sysadmin")
+      (integration "Consumes EvidenceEnvelopes from ER, applies diagnostic reasoning"))
+
+    (component "emergency-room"
+      (department "Emergency Room")
+      (language "V")
+      (loc 1800)
+      (description "Panic-safe intake with one-click stabilization")
+      (origin "emergency-button")
+      (integration "Captures incidents, hands off to clinician via correlation IDs"))
+
+    (component "hardware-crash-team"
+      (department "Operating Room")
+      (language "Rust")
+      (loc 425)
+      (description "PCI zombie detection, crash correlation, remediation plans")
+      (integration "Produces EvidenceEnvelopes and ProcedurePlans via --envelope/--procedure flags"))
+
+    (component "observatory"
+      (department "Ward")
+      (language "Elixir")
+      (loc 500)
+      (description "System metrics, bundle ingestion, weather generation")
+      (integration "Ingests EvidenceEnvelopes, generates SystemWeather for ambient UI"))
+
+    (component "contracts"
+      (department "Data Backbone")
+      (language "JSON+Deno")
+      (description "8 JSON schemas with cross-validation")
+      (origin "system-tools/contracts")
+      (integration "Schema definitions for all inter-component data"))
+
+    (component "contracts-rust"
+      (department "Data Backbone")
+      (language "Rust")
+      (description "Serde types matching JSON schemas with From conversions")
+      (integration "Shared crate for Rust components to emit schema-conformant output"))
+
+    (component "records/referrals"
+      (department "Records")
+      (language "Elixir")
+      (loc 400)
+      (description "Automated multi-platform bug reporting MCP server")
+      (origin "feedback-o-tron")
+      (integration "Submits findings to GitHub/GitLab/Bugzilla/Codeberg"))
+
+    (component "nafa-app"
+      (department "Ward")
+      (language "ReScript+Deno")
+      (description "Mobile journey planner UI (shell)")
+      (integration "Displays SystemWeather, provides ambient operations interface"))
+
+    (component "composer"
+      (department "Operating Room")
+      (description "Orchestration engine (stubs)")
+      (integration "Planned: visual macro/script builder for procedures")))
+
+  ;; External satellites (separate repos)
   (related-projects
-    ;; Core satellites - CI/CD
-    (project "cicd-hyper-a"
+    (project "panic-attacker"
       (relationship "satellite")
-      (category "ci-cd-automation")
-      (description "Neurosymbolic CI/CD automation with Logtalk rule engine")
+      (category "diagnostics-lab")
+      (description "Software health scanner - security posture assessment")
       (status "active")
-      (integration "Main automation engine - generates hooks, enforces security"))
+      (integration "Feeds scan results to verisimdb via JSON output"))
 
-    (project "git-hud"
+    (project "verisimdb"
       (relationship "satellite")
-      (category "monitoring")
-      (description "Git repository supervision and monitoring")
+      (category "data-pipeline")
+      (description "Multimodal database for scan results and drift detection")
       (status "active")
-      (integration "Monitors repos, feeds data to cicd-hyper-a"))
+      (integration "Stores hexads from panic-attack, queryable via VQL"))
 
-    (project ".git-private-farm"
+    (project "verisimdb-data"
       (relationship "satellite")
-      (category "infrastructure")
-      (description "Private git hook and template distribution")
+      (category "data-pipeline")
+      (description "Git-backed flat-file store for scan snapshots")
       (status "active")
-      (integration "Distributes hooks generated by cicd-hyper-a"))
+      (integration "Ingest pipeline: scan → JSON → git commit → indexed"))
 
-    ;; Core satellites - System Resilience
-    (project "system-freeze-ejector"
-      (relationship "planned-satellite")
-      (category "system-resilience")
-      (description "Off-machine kernel dump for system recovery")
-      (status "planned")
-      (integration "Preserves state during system crashes, enables recovery")
-      (concept "Off-machine kernel dump to networked storage or USB"))
-
-    (project "system-flare"
-      (relationship "planned-satellite")
-      (category "system-resilience")
-      (description "Rapid system halt with state preservation")
-      (status "planned")
-      (integration "Emergency stop that saves work-in-progress before halt")
-      (concept "Quick-access panic button with graceful state dump"))
-
-    ;; Knowledge/Learning satellites
-    (project "repo-slm-augmentor"
+    (project "hypatia"
       (relationship "satellite")
-      (category "knowledge-base")
-      (description "SLM augmentation for security knowledge")
+      (category "ci-cd")
+      (description "Neurosymbolic CI/CD intelligence and pattern detection")
       (status "active")
-      (integration "Provides Logtalk security_errors.lgt knowledge base"))
+      (integration "Reads verisimdb hexads, dispatches to gitbot-fleet"))
 
-    ;; Notification satellites
-    (project "echidnabot"
+    (project "gitbot-fleet"
       (relationship "satellite")
-      (category "notifications")
-      (description "Discord bot for CI/CD notifications")
+      (category "automation")
+      (description "Bot orchestration: rhodibot, echidnabot, sustainabot, glambot, seambot, finishbot")
       (status "active")
-      (integration "Reports issues from cicd-hyper-a"))
+      (integration "Executes automated fixes with confidence thresholds"))
 
-    (project "rhodibot"
+    (project "echidna"
       (relationship "satellite")
-      (category "dashboard")
-      (description "Repository health dashboard bot")
+      (category "verification")
+      (description "Neurosymbolic theorem proving with 30 prover backends")
       (status "active")
-      (integration "Displays metrics from ambientops components"))
+      (integration "Trust-hardening verification pipeline for proofs"))
 
-    ;; Hospital Model components
-    (project "system-emergency-room"
+    (project "network-orchestrator"
       (relationship "satellite")
-      (category "hospital-model")
-      (description "Immediate triage and stabilization")
-      (status "active")
-      (integration "First responder for critical issues"))
+      (category "network")
+      (description "Enterprise network infrastructure management")
+      (status "planning")
+      (integration "BGP, SNMP, DHCP routing and remote diagnostics"))
 
-    (project "system-observatory"
+    (project "traffic-conditioner"
       (relationship "satellite")
-      (category "hospital-model")
-      (description "Long-term monitoring and trend analysis")
+      (category "network")
+      (description "Continuous network optimization and QoS")
+      (status "planning")
+      (integration "Bufferbloat mitigation, VPN and WiFi optimization"))
+
+    (project "system-tools"
+      (relationship "upstream-source")
+      (category "canonical-contracts")
+      (description "Original location of contract schemas (now absorbed)")
       (status "active")
-      (integration "Feeds insights back to prevention layer")))
+      (integration "Canonical copies in ambientops/contracts/, originals preserved")))
 
   (what-this-is
-    ("Umbrella platform for ambient computing operations")
-    ("Hospital Model for system health: triage, diagnosis, treatment, prevention")
-    ("Coordination layer for distributed automation satellites")
-    ("Unified control plane for CI/CD, monitoring, and resilience")
-    ("Neurosymbolic platform: neural learning feeds symbolic automation"))
+    ("Hybrid monorepo for hospital-model system operations")
+    ("Contract-driven data flow between Ward, ER, OR, and Records")
+    ("Human-first operations: DRY RUN default, receipts, undo tokens")
+    ("Rust workspace (clinician + hardware-crash-team + contracts-rust)")
+    ("Elixir OTP apps (observatory + referrals) as separate processes"))
 
   (what-this-is-not
-    ("Not a single monolithic application")
-    ("Not a replacement for GitHub/GitLab - works alongside them")
-    ("Not an observability platform - delegates to dedicated satellites")
-    ("Not a cloud provider - manages existing infrastructure")))
+    ("Not a single monolithic application - hybrid architecture")
+    ("Not an observability platform - observatory is advisory only")
+    ("Not a cloud provider - manages local/on-prem systems")
+    ("Not automated-first - human oversight mandatory for all mutations")))
