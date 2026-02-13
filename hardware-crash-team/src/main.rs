@@ -15,6 +15,7 @@ mod analyzer;
 mod remediation;
 mod types;
 mod tui;
+mod sarif;
 
 /// Hardware Crash Team - diagnose and fix hardware-induced crashes
 #[derive(Parser)]

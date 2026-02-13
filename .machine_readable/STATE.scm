@@ -31,9 +31,9 @@
       ("umbrella-repo" 90 "Docs, manifest, Justfile, unified build, integration tests")
       ("hospital-model" 85 "UX model documented, data flow wired, architecture synced")
       ("ecosystem-manifest" 85 "Structure defined, satellites integrated, all 8 schemas typed")
-      ("clinician" 70 "Core tools + satellite integration + real service connections behind feature gates")
+      ("clinician" 78 "Core tools + satellites + gossipsub mesh + ArangoDB graph traversal behind feature gates")
       ("emergency-room" 75 "1.8k LOC V, PII redaction, EvidenceEnvelope producer, 9 tests")
-      ("hardware-crash-team" 90 "All 6 strategies, BAR/lspci/interrupts, multi-device, TUI, 45+ tests")
+      ("hardware-crash-team" 92 "All 6 strategies, BAR/lspci/interrupts, multi-device, TUI, SARIF output, 60 tests")
       ("observatory" 90 "Metrics, ingestion, weather, forecasting, themes, ambient payload, CLI routes")
       ("contracts" 85 "8 JSON schemas, Deno validators, WIRING.md, 14/14 test steps")
       ("contracts-rust" 90 "Serde types matching all 8 schemas, From conversions, 15+ tests")
@@ -53,7 +53,10 @@
       ("Clinician: incident/envelope intake, 5 sysadmin tool modules, feature-gated deps")
       ("Records/referrals: MCP server, multi-platform bug reporting, envelope consumer")
       ("Nafa-app: GET /api/weather consuming observatory output")
-      ("Rust workspace: 3 crates, unified build, 50 tests")
+      ("Clinician: full gossipsub pub/sub mesh with persistent peer identity")
+      ("Clinician: ArangoDB graph traversal with AQL queries, 2-step find+traverse")
+      ("Hardware-crash-team: SARIF 2.1.0 output with 9 rule IDs (HCT001-HCT009)")
+      ("Rust workspace: 3 crates, unified build, 145+ tests")
       ("Justfile: build-all, test-all, check, clean")
       ("Contract wiring: 4 schemas wired across all departments")))
 
@@ -80,20 +83,21 @@
     (medium
       ("nafa-app needs full UI build (Phase 2: Ward MVP)"))
     (low
-      ("Composer orchestration engine not yet specified beyond PLAN.md")
-      ("Full libp2p gossipsub mesh (only mDNS discovery implemented)")
-      ("ArangoDB/Redis graph traversal (basic CRUD behind feature gates only)")))
+      ("Composer orchestration engine not yet specified beyond PLAN.md")))
+
 
   (critical-next-actions
     (immediate
       ("nafa-app: connect UI to weather + ambient endpoints")
       ("Composer: choose language and begin orchestration skeleton"))
     (this-week
-      ("Full libp2p gossipsub mesh for clinician P2P")
-      ("ArangoDB graph traversal queries in storage module"))
+      ("Integration test script end-to-end (./scripts/integration-test.sh)")
+      ("Wire remaining contract producers/consumers (composer needed for most)"))
     (this-month
       ("Codeberg + Bitbucket mirroring for ambientops")
-      ("SARIF output format for hardware-crash-team")))
+      ("VeriSimDB/Hypatia integration for hardware-crash-team")
+      ("Composer: choose language and begin orchestration engine")))
+
 
   (session-history
     ("2026-01-09" "Resolved all TODOs and stubs in umbrella repo")
@@ -101,4 +105,5 @@
     ("2026-02-12" "Consolidated hospital model: absorbed clinician, ER, contracts, referrals")
     ("2026-02-12" "Wave 1: Justfile, feature-gated clinician, fixed Python/AGPL/stale state")
     ("2026-02-13" "Waves 2-5: 56 new tests, contract wiring (ER→envelope, obs→weather→nafa, referrals→envelope), docs sync, integration test")
-    ("2026-02-13" "Deep build: 62+ new tests, all 6 remediation strategies, BAR/lspci/interrupts, TUI, 4 typed schemas, theme packs, ambient payload, satellite integration, real service connections")))
+    ("2026-02-13" "Deep build: 62+ new tests, all 6 remediation strategies, BAR/lspci/interrupts, TUI, 4 typed schemas, theme packs, ambient payload, satellite integration, real service connections")
+    ("2026-02-13" "SARIF output (9 rules, HCT001-HCT009), gossipsub mesh (persistent identity, pub/sub), ArangoDB graph traversal (AQL queries, 2-step find+traverse)")))

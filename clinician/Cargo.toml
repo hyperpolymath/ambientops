@@ -43,19 +43,21 @@ ring = "0.17.13"
 uuid = { version = "1", features = ["v4"] }
 toml = "0.8"
 
+futures = "0.3"
 ambientops-contracts = { path = "../contracts-rust" }
 
 # === Feature-gated dependencies (roadmap items, not yet used in code) ===
 arangors = { version = "0.6", optional = true }
 redis = { version = "0.27", features = ["tokio-comp", "connection-manager"], optional = true }
 ollama-rs = { version = "0.2", optional = true }
-libp2p = { version = "0.56", features = ["tokio", "mdns", "gossipsub", "kad"], optional = true }
+libp2p = { version = "0.56", features = ["tokio", "mdns", "gossipsub", "kad", "tcp", "noise", "yamux"], optional = true }
 ndarray = { version = "0.16", optional = true }
 scraper = { version = "0.21", optional = true }
 tantivy = { version = "0.22", optional = true }
 
 [dev-dependencies]
 tokio-test = "0.4"
+tempfile = "3"
 
 [[bin]]
 name = "ambientops-clinician"

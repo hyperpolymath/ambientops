@@ -13,6 +13,7 @@ src/
 ├── scanner/mod.rs   # PCI scanner via sysfs + BAR enumeration + lspci enrichment + interrupt checking
 ├── analyzer/mod.rs  # Crash log analyzer (~429 LOC, journalctl parsing)
 ├── remediation/mod.rs # Plan/Apply/Undo workflow with 6 strategies + multi-device support
+├── sarif.rs         # SARIF 2.1.0 output (9 rules HCT001-HCT009, severity mapping)
 └── tui/             # ATS2 TUI (ratatui, behind `tui` feature)
     ├── mod.rs       # Screen enum, feature gate
     ├── app.rs       # App state, event loop
@@ -29,6 +30,7 @@ cargo build --release --features tui
 # Run scan (needs Linux with sysfs):
 cargo run -- scan
 cargo run -- scan --format json --output report.json
+cargo run -- scan --format sarif --output report.sarif
 cargo run -- plan 01:00.0 --strategy dual
 cargo run -- plan 01:00.0 01:00.1 --strategy vfio-pci   # Multi-device
 cargo run -- tui   # Interactive TUI (requires --features tui)

@@ -44,12 +44,13 @@ Rust-based hardware diagnostic tool. See `hardware-crash-team/.claude/CLAUDE.md`
 
 **Key commands**: `scan`, `diagnose`, `plan`, `apply`, `undo`, `status`, `tui`
 
-**Current state**: Full scanner with BAR enumeration, lspci enrichment, interrupt checking. All 6 remediation strategies working (pci-stub, vfio-pci, dual, power-off, disable, unbind). Multi-device plans. ATS2 TUI with 5 screens (behind `tui` feature). 45+ tests covering scanner, analyzer, remediation.
+**Current state**: Full scanner with BAR enumeration, lspci enrichment, interrupt checking. All 6 remediation strategies working (pci-stub, vfio-pci, dual, power-off, disable, unbind). Multi-device plans. ATS2 TUI with 5 screens (behind `tui` feature). SARIF 2.1.0 output (9 rules HCT001-HCT009). 60 tests.
+
+**Output formats**: `--format text` (default), `--format json`, `--format sarif`
 
 **Next steps**:
-1. SARIF output format
-2. VeriSimDB/Hypatia integration
-3. MCP server for external tool access
+1. VeriSimDB/Hypatia integration
+2. MCP server for external tool access
 
 ## clinician feature gates
 
@@ -58,9 +59,14 @@ Heavy dependencies (arangors, redis, ollama-rs, libp2p, ndarray, scraper, tantiv
 ```bash
 cargo build -p ambientops-clinician                    # Fast: default features (none)
 cargo build -p ambientops-clinician --features ai      # Enable ollama-rs
-cargo build -p ambientops-clinician --features storage  # Enable arangors
+cargo build -p ambientops-clinician --features storage  # Enable arangors (ArangoDB graph traversal)
+cargo build -p ambientops-clinician --features p2p     # Enable libp2p (gossipsub mesh)
 cargo build -p ambientops-clinician --all-features     # Everything (slow)
 ```
+
+**p2p (gossipsub)**: Full libp2p mesh with persistent Ed25519 peer identity, gossipsub pub/sub on `ambientops/solutions/v1` and `ambientops/sync/v1` topics, mDNS local discovery, TCP+Noise+Yamux transport.
+
+**storage (ArangoDB)**: Graph traversal via AQL queries — category lookup, text search, 2-step find+traverse for related solutions, outcome recording. Falls back to no-op when ArangoDB unavailable.
 
 ## Language Policy (Hyperpolymath Standard — January 2026)
 

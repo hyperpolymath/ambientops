@@ -197,7 +197,9 @@ fn assess_risk(devices: &[PciDevice], acpi_errors: &[AcpiError]) -> RiskLevel {
 pub fn format_report(report: &SystemReport, format: &str) -> Result<String> {
     match format {
         "json" => Ok(serde_json::to_string_pretty(report)?),
-        "text" | _ => Ok(format_text_report(report)),
+        "sarif" => crate::sarif::format_sarif(report),
+        "text" => Ok(format_text_report(report)),
+        other => anyhow::bail!("Unknown format '{}'. Supported: text, json, sarif", other),
     }
 }
 
