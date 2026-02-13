@@ -88,7 +88,7 @@ defmodule SystemObservatory.Forecasting do
 
       true ->
         sorted = Enum.sort_by(metrics, & &1.timestamp, DateTime)
-        {slope, intercept} = linear_regression(sorted)
+        {slope, _intercept} = linear_regression(sorted)
 
         cond do
           slope <= 0 ->

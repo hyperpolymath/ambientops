@@ -171,10 +171,10 @@ defmodule SystemObservatory.Correlator do
         changes
         |> Enum.filter(fn change ->
           diff = DateTime.diff(anomaly.timestamp, change.timestamp, :second)
-          diff >= 0 and diff <= window_seconds
+          abs(diff) <= window_seconds
         end)
         |> Enum.sort_by(fn change ->
-          DateTime.diff(anomaly.timestamp, change.timestamp, :second)
+          abs(DateTime.diff(anomaly.timestamp, change.timestamp, :second))
         end)
 
       %{
