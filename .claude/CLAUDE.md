@@ -13,7 +13,6 @@ ambientops/                      ← Hybrid monorepo
 ├── contracts/            (JSON+Deno)       — Data Backbone: 8 JSON schemas
 ├── contracts-rust/       (Rust)            — Data Backbone: serde types + conversions
 ├── records/referrals/    (Elixir, ~400 LOC)— Records: multi-platform bug reporting
-├── nafa-app/             (ReScript/Deno)   — Ward: mobile UI (shell)
 ├── composer/             (stubs)           — Operating Room: orchestration
 └── Cargo.toml            (workspace)       — Rust workspace root
 ```
@@ -32,7 +31,6 @@ cargo test --workspace           # Rust tests only
 cd observatory && mix test       # Elixir observatory tests
 cd records/referrals && mix test # Elixir referrals tests
 cd contracts && deno test --allow-read  # Contract schema tests
-cd nafa-app/shared && deno test test/domain_test.js  # Nafa-app domain tests
 cd emergency-room && v test src/ # V emergency-room tests
 ```
 

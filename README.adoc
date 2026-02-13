@@ -51,8 +51,7 @@ cd observatory && mix sysobs weather --output /tmp/ambientops/weather.json
 | records/referrals | Elixir | 8 | 65%
 | hardware-crash-team | Rust | 27 | 75%
 | clinician | Rust | 16 | 55%
-| nafa-app | ReScript/Deno | 7 | 50%
-| composer | (planned) | 0 | 10%
+| composer | Gleam (planned) | 0 | 10%
 |===
 
 == The Hospital Model
@@ -80,8 +79,7 @@ ambientops/
 ├── contracts/            (JSON+Deno)       — 8 JSON schemas + validators
 ├── contracts-rust/       (Rust)            — Serde types matching JSON schemas
 ├── records/referrals/    (Elixir, ~400 LOC)— Multi-platform bug reporting MCP
-├── nafa-app/             (ReScript/Deno)   — Mobile journey planner UI (shell)
-├── composer/             (stubs)           — Orchestration engine
+├── composer/             (Gleam, stubs)    — Orchestration engine
 ├── scripts/              — Demo and utility scripts
 ├── docs/                 — Documentation
 ├── Cargo.toml            — Rust workspace root

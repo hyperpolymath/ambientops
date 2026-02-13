@@ -18,8 +18,7 @@
       ("Rust" "clinician, hardware-crash-team, contracts-rust")
       ("V" "emergency-room")
       ("Elixir" "observatory, records/referrals")
-      ("ReScript" "nafa-app UI")
-      ("Deno" "contract validators, scripts, nafa-app server")
+      ("Deno" "contract validators, scripts")
       ("AsciiDoc" "documentation")
       ("Guile Scheme" "machine-readable state files")
       ("Justfile" "task automation")))
@@ -38,8 +37,7 @@
       ("contracts" 85 "8 JSON schemas, Deno validators, WIRING.md, 14/14 test steps")
       ("contracts-rust" 90 "Serde types matching all 8 schemas, From conversions, 15+ tests")
       ("records-referrals" 65 "MCP server, multi-platform submitter, envelope consumer, 8 tests")
-      ("nafa-app" 50 "TEA shell, weather endpoint, domain tests, 7 tests")
-      ("composer" 10 "RSR template + PLAN.md (orchestration architecture documented)"))
+      ("composer" 10 "RSR template + PLAN.md (orchestration architecture documented, Gleam chosen)"))
     (working-features
       ("Hospital model specification and data flow")
       ("PCI zombie scanning with Evidence Envelope output (--envelope)")
@@ -52,7 +50,6 @@
       ("contracts-rust: serde types + From conversions for all types")
       ("Clinician: incident/envelope intake, 5 sysadmin tool modules, feature-gated deps")
       ("Records/referrals: MCP server, multi-platform bug reporting, envelope consumer")
-      ("Nafa-app: GET /api/weather consuming observatory output")
       ("Clinician: full gossipsub pub/sub mesh with persistent peer identity")
       ("Clinician: ArangoDB graph traversal with AQL queries, 2-step find+traverse")
       ("Hardware-crash-team: SARIF 2.1.0 output with 9 rule IDs (HCT001-HCT009)")
@@ -81,15 +78,14 @@
     (critical)
     (high)
     (medium
-      ("nafa-app needs full UI build (Phase 2: Ward MVP)"))
+)
     (low
       ("Composer orchestration engine not yet specified beyond PLAN.md")))
 
 
   (critical-next-actions
     (immediate
-      ("nafa-app: connect UI to weather + ambient endpoints")
-      ("Composer: choose language and begin orchestration skeleton"))
+      ("Composer: begin Gleam orchestration skeleton"))
     (this-week
       ("Integration test script end-to-end (./scripts/integration-test.sh)")
       ("Wire remaining contract producers/consumers (composer needed for most)"))

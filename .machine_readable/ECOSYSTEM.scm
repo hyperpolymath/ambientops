@@ -53,7 +53,7 @@
       (description "System metrics, bundle ingestion, weather generation")
       (produces ("system-weather"))
       (consumes ("evidence-envelope" "receipt" "run-bundle"))
-      (integration "Ingests EvidenceEnvelopes via CLI, generates SystemWeather for nafa-app"))
+      (integration "Ingests EvidenceEnvelopes via CLI, generates SystemWeather"))
 
     (component "contracts"
       (department "Data Backbone")
@@ -81,14 +81,6 @@
       (consumes ("evidence-envelope"))
       (integration "Submits findings from EvidenceEnvelopes to GitHub/GitLab/Bugzilla/Codeberg"))
 
-    (component "nafa-app"
-      (department "Ward")
-      (language "ReScript+Deno")
-      (description "Mobile journey planner UI (shell)")
-      (produces ())
-      (consumes ("system-weather"))
-      (integration "Displays SystemWeather via GET /api/weather, provides ambient UI"))
-
     (component "composer"
       (department "Operating Room")
       (description "Orchestration engine (stubs)")
@@ -96,6 +88,14 @@
 
   ;; External satellites (separate repos)
   (related-projects
+    (project "nafa-app"
+      (relationship "satellite")
+      (category "ward-ui")
+      (description "Mobile journey planner UI (ReScript/Deno)")
+      (status "active")
+      (consumes ("system-weather" "ambient-payload"))
+      (integration "Displays SystemWeather via GET /api/weather, provides ambient UI"))
+
     (project "panic-attacker"
       (relationship "satellite")
       (category "diagnostics-lab")

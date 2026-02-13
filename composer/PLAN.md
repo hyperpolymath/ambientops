@@ -41,10 +41,8 @@ Composer is the orchestration engine for AmbientOps. It will coordinate multi-st
 
 ## Language
 
-Primary language TBD. Candidates:
-- ReScript (consistent with nafa-app, compiles to JS)
-- Rust (consistent with clinician/HCT, strong typing)
-- Gleam (BEAM runtime, good for orchestration)
+**Gleam** — chosen for BEAM supervision trees (alongside observatory), type safety,
+and native Elixir/Erlang interop. Compiles to BEAM or JS if needed.
 
 ## Dependencies
 
