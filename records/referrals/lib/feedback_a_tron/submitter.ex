@@ -62,6 +62,44 @@ defmodule FeedbackATron.Submitter do
   end
 
   @doc """
+  Submit feedback from an EvidenceEnvelope JSON file.
+
+  Reads the envelope, extracts findings, and formats each as a bug report
+  for submission to configured platforms.
+
+  Returns `{:ok, :no_findings}` if the envelope has no findings,
+  or delegates to `submit_batch/2` with formatted issues.
+  """
+  def submit_from_envelope(envelope_path, opts \\ []) do
+    with {:ok, json} <- File.read(envelope_path),
+         {:ok, envelope} <- Jason.decode(json) do
+      findings = Map.get(envelope, "findings", [])
+
+      if Enum.empty?(findings) do
+        {:ok, :no_findings}
+      else
+        source_tool = get_in(envelope, ["source", "tool"]) || "unknown"
+        envelope_id = Map.get(envelope, "envelope_id", "unknown")
+
+        issues =
+          Enum.map(findings, fn finding ->
+            %{
+              title: "[#{source_tool}] #{finding["title"] || "Finding from #{envelope_id}"}",
+              body: format_envelope_finding(finding, envelope),
+              repo: opts[:repo] || "hyperpolymath/ambientops"
+            }
+          end)
+
+        submit_batch(issues, opts)
+      end
+    else
+      {:error, :enoent} -> {:error, :envelope_not_found}
+      {:error, %Jason.DecodeError{} = err} -> {:error, {:invalid_json, err}}
+      error -> error
+    end
+  end
+
+  @doc """
   Check submission status.
   """
   def status(submission_id) do
@@ -301,5 +339,30 @@ defmodule FeedbackATron.Submitter do
 
   defp generate_id do
     :crypto.strong_rand_bytes(8) |> Base.url_encode64(padding: false)
+  end
+
+  defp format_envelope_finding(finding, envelope) do
+    severity = finding["severity"] || "info"
+    details = finding["details"] || ""
+    category = finding["category"] || ""
+    remediation = finding["remediation"] || ""
+    envelope_id = Map.get(envelope, "envelope_id", "")
+    source_tool = get_in(envelope, ["source", "tool"]) || ""
+
+    body = """
+    ## Finding: #{finding["title"]}
+
+    **Severity:** #{severity}
+    **Category:** #{category}
+    **Source:** #{source_tool} (envelope: #{envelope_id})
+
+    #{details}
+    """
+
+    if remediation != "" do
+      body <> "\n### Suggested Remediation\n\n#{remediation}\n"
+    else
+      body
+    end
   end
 end

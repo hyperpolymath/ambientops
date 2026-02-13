@@ -5,162 +5,131 @@
 
 == Overview
 
-AmbientOps is an umbrella platform for ambient computing operations, providing unified control for CI/CD automation, system monitoring, and resilience.
-
-== System Architecture
-
-....
-┌─────────────────────────────────────────────────────────────────────────────────┐
-│                              AMBIENTOPS PLATFORM                                 │
-│                     Ambient Computing Operations Control Plane                   │
-└─────────────────────────────────────────────────────────────────────────────────┘
-                                        │
-           ┌────────────────────────────┼────────────────────────────┐
-           │                            │                            │
-           ▼                            ▼                            ▼
-┌─────────────────────┐    ┌─────────────────────┐    ┌─────────────────────┐
-│   CI/CD AUTOMATION  │    │     MONITORING      │    │  SYSTEM RESILIENCE  │
-│                     │    │                     │    │                     │
-│  ┌───────────────┐  │    │  ┌───────────────┐  │    │  ┌───────────────┐  │
-│  │ cicd-hyper-a  │  │    │  │   git-hud    │  │    │  │ system-flare  │  │
-│  │  (Logtalk)    │  │    │  │  (monitoring) │  │    │  │ (panic halt)  │  │
-│  └───────┬───────┘  │    │  └───────┬───────┘  │    │  └───────────────┘  │
-│          │          │    │          │          │    │                     │
-│  ┌───────▼───────┐  │    │  ┌───────▼───────┐  │    │  ┌───────────────┐  │
-│  │.git-private-  │  │    │  │system-        │  │    │  │system-freeze- │  │
-│  │    farm       │  │    │  │observatory    │  │    │  │   ejector     │  │
-│  │ (hook distro) │  │    │  │(trend analysis)│  │    │  │(crash dump)   │  │
-│  └───────────────┘  │    │  └───────────────┘  │    │  └───────────────┘  │
-│                     │    │                     │    │                     │
-│  ┌───────────────┐  │    │  ┌───────────────┐  │    │  ┌───────────────┐  │
-│  │repo-slm-      │  │    │  │system-        │  │    │  │               │  │
-│  │  augmentor    │  │    │  │emergency-room │  │    │  │  (recovery    │  │
-│  │(knowledge DB) │  │    │  │(triage)       │  │    │  │   server)     │  │
-│  └───────────────┘  │    │  └───────────────┘  │    │  └───────────────┘  │
-└─────────────────────┘    └─────────────────────┘    └─────────────────────┘
-           │                            │                            │
-           └────────────────────────────┼────────────────────────────┘
-                                        │
-                                        ▼
-                        ┌───────────────────────────────┐
-                        │       NOTIFICATION LAYER      │
-                        │                               │
-                        │  ┌─────────┐    ┌─────────┐   │
-                        │  │echidna- │    │ rhodibot│   │
-                        │  │  bot    │    │(dash-   │   │
-                        │  │(Discord)│    │ board)  │   │
-                        │  └─────────┘    └─────────┘   │
-                        └───────────────────────────────┘
-....
-
-== Data Flow
-
-....
-┌──────────────────────────────────────────────────────────────────────────────┐
-│                           NEUROSYMBOLIC PIPELINE                             │
-│                                                                              │
-│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐   │
-│  │   GitHub    │    │   Neural    │    │ Distillation│    │  Symbolic   │   │
-│  │   Actions   │───▶│   Layer     │───▶│   Layer     │───▶│   Layer     │   │
-│  │   Logs      │    │ (Pattern    │    │(Rule        │    │ (Logtalk    │   │
-│  │             │    │  Detection) │    │ Conversion) │    │  Execution) │   │
-│  └─────────────┘    └─────────────┘    └─────────────┘    └──────┬──────┘   │
-│                                                                   │          │
-│                      ┌────────────────────────────────────────────┘          │
-│                      ▼                                                       │
-│  ┌─────────────────────────────────────────────────────────────────────────┐ │
-│  │                        HOOK WAVE PROPAGATION                            │ │
-│  │                                                                         │ │
-│  │   cicd-hyper-a ──▶ .git-private-farm ──▶ [200+ repos receive hooks]    │ │
-│  │                                                                         │ │
-│  └─────────────────────────────────────────────────────────────────────────┘ │
-└──────────────────────────────────────────────────────────────────────────────┘
-....
+AmbientOps is a hospital-model operations framework providing trustworthy system help without fearware. It is organised as a hybrid monorepo: core hospital departments live here, external tools integrate as satellites.
 
 == Hospital Model
 
 ....
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│                            HOSPITAL MODEL                                     │
-│         (Triage → Diagnosis → Treatment → Prevention → Monitoring)           │
+│                            HOSPITAL MODEL                                    │
 │                                                                              │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
-│  │   TRIAGE     │  │  DIAGNOSIS   │  │  TREATMENT   │  │  PREVENTION  │     │
-│  │              │  │              │  │              │  │              │     │
-│  │ system-      │  │ git-hud     │  │ cicd-hyper-a │  │ .git-private-│     │
-│  │ emergency-   │─▶│ (analyze     │─▶│ (apply       │─▶│    farm      │     │
-│  │ room         │  │  failures)   │  │  fixes)      │  │ (deploy      │     │
-│  │ (stabilize)  │  │              │  │              │  │  immunity)   │     │
-│  └──────────────┘  └──────────────┘  └──────────────┘  └──────────────┘     │
-│         ▲                                                     │              │
-│         │                                                     │              │
-│         └─────────────────────────────────────────────────────┘              │
-│                              Feedback Loop                                   │
+│  ┌──────────────────┐                                                        │
+│  │      WARD        │  observatory (Elixir) — Metrics, weather, trends       │
+│  │  Ambient Guidance │  nafa-app (ReScript/Deno) — Mobile UI, weather display │
+│  └────────┬─────────┘                                                        │
+│           │ SystemWeather                                                     │
+│           │                                                                  │
+│  ┌────────▼─────────┐                                                        │
+│  │  EMERGENCY ROOM  │  emergency-room (V) — Panic-safe intake                │
+│  │  Incident Capture │  One-click stabilization, PII redaction               │
+│  └────────┬─────────┘                                                        │
+│           │ EvidenceEnvelope                                                  │
+│           │                                                                  │
+│  ┌────────▼─────────┐                                                        │
+│  │  OPERATING ROOM  │  clinician (Rust) — AI-assisted sysadmin               │
+│  │  Diagnosis+Apply  │  hardware-crash-team (Rust) — HW diagnostics          │
+│  │                   │  composer (planned) — Orchestration engine             │
+│  └────────┬─────────┘                                                        │
+│           │ ProcedurePlan → Receipt                                           │
+│           │                                                                  │
+│  ┌────────▼─────────┐                                                        │
+│  │     RECORDS      │  records/referrals (Elixir) — Multi-platform reporting  │
+│  │  Audit + Referral │  Deduplication, audit log, MCP server                 │
+│  └──────────────────┘                                                        │
 │                                                                              │
-│  ┌──────────────────────────────────────────────────────────────────────┐   │
-│  │                      MONITORING (system-observatory)                 │   │
-│  │                       Long-term trend analysis                        │   │
-│  └──────────────────────────────────────────────────────────────────────┘   │
+│  ┌──────────────────┐                                                        │
+│  │  DATA BACKBONE   │  contracts/ (JSON+Deno) — 8 JSON schemas              │
+│  │  Contract Schemas │  contracts-rust/ (Rust) — Serde types + conversions   │
+│  └──────────────────┘                                                        │
 └──────────────────────────────────────────────────────────────────────────────┘
 ....
 
-== Satellite Relationships
-
-[cols="1,1,2"]
-|===
-| Satellite | Category | Purpose
-
-| cicd-hyper-a | CI/CD | Logtalk rule engine for automation
-| git-hud | Monitoring | Repository supervision
-| .git-private-farm | Infrastructure | Hook distribution
-| repo-slm-augmentor | Knowledge | Security error catalog
-| echidnabot | Notification | Discord alerts
-| rhodibot | Dashboard | Health metrics display
-| system-emergency-room | Hospital | Immediate triage
-| system-observatory | Hospital | Trend analysis
-| system-flare | Resilience | Panic button halt
-| system-freeze-ejector | Resilience | Crash state dump
-|===
-
-== Cross-Forge Support
+== Data Flow
 
 ....
-┌───────────────────────────────────────────────────────────────────┐
-│                     MULTI-FORGE ARCHITECTURE                      │
-│                                                                   │
-│   ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐      │
-│   │  GitHub  │   │  GitLab  │   │Bitbucket │   │ Codeberg │      │
-│   └────┬─────┘   └────┬─────┘   └────┬─────┘   └────┬─────┘      │
-│        │              │              │              │             │
-│        └──────────────┴──────────────┴──────────────┘             │
-│                              │                                    │
-│                              ▼                                    │
-│                    ┌──────────────────┐                           │
-│                    │  forge_adapters  │                           │
-│                    │     .lgt         │                           │
-│                    │  (Logtalk)       │                           │
-│                    └────────┬─────────┘                           │
-│                             │                                     │
-│                             ▼                                     │
-│                    ┌──────────────────┐                           │
-│                    │   cicd_rules     │                           │
-│                    │      .lgt        │                           │
-│                    │  (Unified)       │                           │
-│                    └──────────────────┘                           │
-└───────────────────────────────────────────────────────────────────┘
+┌─────────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐
+│ Emergency   │    │  Operating   │    │  Observatory │    │    Ward      │
+│   Room      │    │    Room      │    │  (Ingest)    │    │  (Display)   │
+│             │    │              │    │              │    │              │
+│  trigger    │──▶│  scan/plan   │──▶│  ingest      │──▶│  weather     │
+│  --envelope │    │  --procedure │    │  --envelope  │    │  /api/weather│
+│             │    │  apply       │    │  weather     │    │              │
+└─────────────┘    └──────┬───────┘    └──────────────┘    └──────────────┘
+                          │
+                          ▼
+                   ┌──────────────┐
+                   │   Records    │
+                   │  submit from │
+                   │   envelope   │
+                   └──────────────┘
+
+Contract chain: EvidenceEnvelope → ProcedurePlan → Receipt → SystemWeather
 ....
+
+== Components
+
+[cols="1,1,1,1,2"]
+|===
+| Component | Department | Language | LOC | Purpose
+
+| clinician | Operating Room | Rust | ~4400 | AI-assisted sysadmin with diagnostic reasoning
+| emergency-room | Emergency Room | V | ~1800 | Panic-safe intake, PII redaction, incident bundles
+| hardware-crash-team | Operating Room | Rust | ~700 | PCI zombie detection, crash analysis, remediation plans
+| observatory | Ward | Elixir | ~600 | Metrics store, bundle ingestion, weather generation
+| contracts | Data Backbone | JSON+Deno | ~250 | 8 JSON schemas with cross-validation
+| contracts-rust | Data Backbone | Rust | ~500 | Serde types matching JSON schemas
+| records/referrals | Records | Elixir | ~400 | Multi-platform bug reporting MCP server
+| nafa-app | Ward | ReScript/Deno | ~500 | Mobile journey planner + weather display
+| composer | Operating Room | (planned) | 0 | Orchestration engine
+|===
+
+== Schema Wiring
+
+See `contracts/WIRING.md` for the full wiring table.
+
+**Wired (data flows today):**
+
+* `evidence-envelope` — ER and HCT produce; observatory and records consume
+* `procedure-plan` — HCT produces; clinician and composer consume
+* `receipt` — ER and HCT produce; observatory ingests
+* `system-weather` — observatory produces; nafa-app displays
+
+**Future (schema defined, not yet wired):**
+
+* `message-intent`, `pack-manifest`, `ambient-payload`, `run-bundle`
 
 == Technology Stack
 
 [cols="1,1"]
 |===
-| Component | Technology
+| Layer | Technology
 
-| Rule Engine | Logtalk (on SWI-Prolog)
-| Knowledge Storage | Virtuoso Open Source (planned)
-| Batch Scripts | Julia
+| Systems / CLI | Rust (nightly, cargo workspace)
+| Emergency intake | V (vlang.io)
+| Observability | Elixir (OTP supervision trees)
+| Application UI | ReScript (compiles to JS)
+| Runtime / Package Mgmt | Deno
 | Configuration | Nickel
-| State Files | Guile Scheme (.scm)
-| API Adapters | ReScript/Deno
-| Resilience Tools | Rust (kernel-level)
+| State / Meta files | Guile Scheme (.scm)
+| Build orchestration | just (Justfile)
+| Contract schemas | JSON Schema + Deno validators
 |===
+
+== Satellite Repos
+
+External tools that integrate via contract types:
+
+[cols="1,1,2"]
+|===
+| Satellite | Category | Integration
+
+| panic-attacker | Diagnostics | Software health scanner → verisimdb
+| verisimdb / verisimdb-data | Data Pipeline | Multimodal scan result database
+| hypatia | CI/CD | Neurosymbolic pattern detection → gitbot-fleet
+| gitbot-fleet | Automation | Bot orchestration (rhodibot, echidnabot, etc.)
+| echidna | Verification | Neurosymbolic theorem proving (30 backends)
+|===
+
+== Cross-Forge Support
+
+AmbientOps is mirrored to GitHub, GitLab, Bitbucket, and Codeberg. The `records/referrals` MCP server supports submitting issues to all four forges plus Bugzilla and email.

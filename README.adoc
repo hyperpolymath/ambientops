@@ -13,11 +13,14 @@ AmbientOps is a hospital-model operations framework providing **trustworthy syst
 
 [source,bash]
 ----
-# Build all Rust components (clinician, hardware-crash-team, contracts-rust)
-cargo build --workspace
+# Build everything (requires just, cargo, mix, deno)
+just build-all
 
-# Run hardware scan
-cargo run -p hardware-crash-team -- scan
+# Run all tests
+just test-all
+
+# Build Rust components only
+cargo build --workspace
 
 # Run hardware scan with contract-conformant output
 cargo run -p hardware-crash-team -- scan --envelope
@@ -25,12 +28,32 @@ cargo run -p hardware-crash-team -- scan --envelope
 # Generate remediation plan
 cargo run -p hardware-crash-team -- plan 01:00.0 --procedure
 
+# Emergency room with envelope output
+cd emergency-room && v run src/ trigger --envelope
+
+# Generate system weather
+cd observatory && mix sysobs weather --output /tmp/ambientops/weather.json
+
 # Run end-to-end demo
 ./scripts/demo-flow.sh --build
-
-# Run contract schema tests (requires Deno)
-cd contracts && deno test
 ----
+
+== Component Status
+
+[cols="1,1,1,1"]
+|===
+| Component | Language | Tests | Maturity
+
+| contracts | JSON+Deno | 13 steps | 80%
+| contracts-rust | Rust | 7 | 80%
+| observatory | Elixir | 87 | 85%
+| emergency-room | V | 9 (3 files) | 75%
+| records/referrals | Elixir | 8 | 65%
+| hardware-crash-team | Rust | 27 | 75%
+| clinician | Rust | 16 | 55%
+| nafa-app | ReScript/Deno | 7 | 50%
+| composer | (planned) | 0 | 10%
+|===
 
 == The Hospital Model
 

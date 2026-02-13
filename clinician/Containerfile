@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-License-Identifier: PMPL-1.0-or-later
 # Personal Sysadmin - Containerized with Wolfi for security
 #
 # Uses Wolfi base for minimal attack surface:
@@ -38,7 +38,7 @@ FROM cgr.dev/chainguard/wolfi-base:latest AS runtime
 LABEL org.opencontainers.image.title="Personal Sysadmin"
 LABEL org.opencontainers.image.description="AI-assisted Linux system administration toolkit"
 LABEL org.opencontainers.image.source="https://github.com/hyperpolymath/personal-sysadmin"
-LABEL org.opencontainers.image.licenses="AGPL-3.0-or-later"
+LABEL org.opencontainers.image.licenses="PMPL-1.0-or-later"
 LABEL org.opencontainers.image.vendor="hyperpolymath"
 
 # Install minimal runtime dependencies

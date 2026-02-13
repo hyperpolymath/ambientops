@@ -63,6 +63,11 @@ defmodule FeedbackATron.MCP.Tools.SubmitFeedback do
         skip_dedupe: %{
           type: "boolean",
           description: "If true, skip duplicate checking"
+        },
+        envelope_path: %{
+          type: "string",
+          description:
+            "Path to an EvidenceEnvelope JSON file. If provided, findings from the envelope are submitted and title/body fields are ignored."
         }
       },
       required: ["title", "body", "repo"]
@@ -71,27 +76,43 @@ defmodule FeedbackATron.MCP.Tools.SubmitFeedback do
 
   @impl true
   def execute(params, _context) do
-    issue = %{
-      title: params["title"],
-      body: params["body"],
-      repo: params["repo"]
-    }
-
     opts = [
       platforms: parse_platforms(params["platforms"]),
       labels: params["labels"] || [],
       dry_run: params["dry_run"] || false,
-      dedupe: not (params["skip_dedupe"] || false)
+      dedupe: not (params["skip_dedupe"] || false),
+      repo: params["repo"]
     ]
 
-    case Submitter.submit(issue, opts) do
-      {:ok, submission_id, results} ->
-        formatted = format_results(submission_id, results)
-        text = format_text(formatted)
-        {:ok, [%{type: "text", text: text}]}
-      {:error, reason} ->
-        Logger.error("MCP submit_feedback failed: #{inspect(reason)}")
-        {:error, reason}
+    if envelope_path = params["envelope_path"] do
+      case Submitter.submit_from_envelope(envelope_path, opts) do
+        {:ok, :no_findings} ->
+          {:ok, [%{type: "text", text: "No findings in envelope — nothing to submit."}]}
+
+        {:ok, results} ->
+          {:ok, [%{type: "text", text: "Envelope findings submitted: #{inspect(results)}"}]}
+
+        {:error, reason} ->
+          Logger.error("MCP submit_feedback envelope failed: #{inspect(reason)}")
+          {:error, reason}
+      end
+    else
+      issue = %{
+        title: params["title"],
+        body: params["body"],
+        repo: params["repo"]
+      }
+
+      case Submitter.submit(issue, opts) do
+        {:ok, submission_id, results} ->
+          formatted = format_results(submission_id, results)
+          text = format_text(formatted)
+          {:ok, [%{type: "text", text: text}]}
+
+        {:error, reason} ->
+          Logger.error("MCP submit_feedback failed: #{inspect(reason)}")
+          {:error, reason}
+      end
     end
   rescue
     exception ->

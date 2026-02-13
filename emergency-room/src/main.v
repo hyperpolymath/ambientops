@@ -15,6 +15,7 @@ mut:
 	quick_backup_dest string
 	dry_run           bool
 	verbose           bool
+	envelope          bool
 }
 
 fn main() {
@@ -61,6 +62,7 @@ fn run_trigger(args []string) {
 	quick_backup := fp.string('quick-backup', `b`, '', 'Destination path for quick backup (opt-in)')
 	dry_run := fp.bool('dry-run', `n`, false, 'Preview actions without executing')
 	verbose := fp.bool('verbose', `V`, false, 'Verbose output')
+	envelope := fp.bool('envelope', `e`, false, 'Generate EvidenceEnvelope JSON in incident directory')
 
 	_ := fp.finalize() or {
 		eprintln(fp.usage())
@@ -71,6 +73,7 @@ fn run_trigger(args []string) {
 		quick_backup_dest: quick_backup
 		dry_run: dry_run
 		verbose: verbose
+		envelope: envelope
 	}
 
 	println('')
@@ -106,6 +109,14 @@ fn run_trigger(args []string) {
 		log_warn(incident.logs_path, 'main', 'Could not write receipt: ${err}')
 	}
 
+	// Generate EvidenceEnvelope if requested
+	if config.envelope {
+		write_evidence_envelope(incident, config) or {
+			eprintln('${c_yellow}[WARN]${c_reset} Could not write envelope: ${err}')
+			log_warn(incident.logs_path, 'main', 'Could not write envelope: ${err}')
+		}
+	}
+
 	// Quick backup if requested
 	if config.quick_backup_dest.len > 0 {
 		println('')
@@ -138,6 +149,7 @@ fn show_help() {
 	println('    -b, --quick-backup <path>   Run quick backup to destination (opt-in)')
 	println('    -n, --dry-run               Preview actions without executing')
 	println('    -V, --verbose               Verbose output')
+	println('    -e, --envelope              Generate EvidenceEnvelope JSON')
 	println('')
 	println('${c_bold}EXAMPLES:${c_reset}')
 	println('    ${app_name} trigger')

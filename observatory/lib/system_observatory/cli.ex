@@ -35,12 +35,14 @@ defmodule SystemObservatory.CLI do
           since: :string,
           format: :string,
           priority: :string,
+          output: :string,
           help: :boolean
         ],
         aliases: [
           s: :since,
           f: :format,
           p: :priority,
+          o: :output,
           h: :help
         ]
       )
@@ -49,6 +51,9 @@ defmodule SystemObservatory.CLI do
       ["status" | _] -> status(opts)
       ["ingest", path] -> ingest(path, opts)
       ["ingest"] -> error("Usage: sysobs ingest <path>")
+      ["ingest-envelope", path] -> ingest_envelope(path, opts)
+      ["ingest-envelope"] -> error("Usage: sysobs ingest-envelope <path>")
+      ["weather" | _] -> weather(opts)
       ["recommend" | _] -> recommend(opts)
       ["query", metric | _] -> query(metric, opts)
       ["query"] -> error("Usage: sysobs query <metric> [--since <duration>]")
@@ -118,6 +123,54 @@ defmodule SystemObservatory.CLI do
 
       {:error, reason} ->
         error("Failed to ingest bundle: #{inspect(reason)}")
+    end
+  end
+
+  @doc """
+  Ingest an EvidenceEnvelope JSON file.
+  """
+  def ingest_envelope(path, _opts \\ []) do
+    case BundleIngestion.ingest_envelope_file(path) do
+      {:ok, info} ->
+        output("""
+        Evidence Envelope ingested successfully
+        ----------------------------------------
+        Envelope ID:      #{info.envelope_id}
+        Metrics recorded: #{info.metrics_recorded}
+        Events recorded:  #{info.events_recorded}
+        """)
+
+      {:error, :enoent} ->
+        error("File not found: #{path}")
+
+      {:error, reason} ->
+        error("Failed to ingest envelope: #{inspect(reason)}")
+    end
+  end
+
+  @doc """
+  Generate and output system weather report.
+  """
+  def weather(opts \\ []) do
+    alias SystemObservatory.Weather
+
+    report = Weather.generate()
+
+    case Jason.encode(report, pretty: true) do
+      {:ok, json} ->
+        case opts[:output] do
+          nil ->
+            output(json)
+
+          path ->
+            dir = Path.dirname(path)
+            File.mkdir_p!(dir)
+            File.write!(path, json)
+            output("Weather report written to #{path}")
+        end
+
+      {:error, reason} ->
+        error("Failed to encode weather: #{inspect(reason)}")
     end
   end
 
@@ -207,6 +260,8 @@ defmodule SystemObservatory.CLI do
     COMMANDS:
         status              Show current system status
         ingest <path>       Ingest a run bundle from Operating Theatre
+        ingest-envelope <p> Ingest an EvidenceEnvelope JSON file
+        weather             Generate system weather report
         recommend           Get recommendations based on current state
         query <metric>      Query metrics by name
         version             Show version information
@@ -215,12 +270,15 @@ defmodule SystemObservatory.CLI do
     OPTIONS:
         --since, -s <dur>   Filter by duration (e.g., 1h, 7d, 30m)
         --format, -f <fmt>  Output format (text, json)
+        --output, -o <path> Write output to file instead of stdout
         --priority, -p <p>  Filter by minimum priority (critical, high, medium, low)
         --help, -h          Show help for a command
 
     EXAMPLES:
         sysobs status
         sysobs ingest /path/to/run-bundle/
+        sysobs ingest-envelope /path/to/envelope.json
+        sysobs weather --output /tmp/ambientops/weather.json
         sysobs recommend --format json
         sysobs query cpu_usage --since 24h
 

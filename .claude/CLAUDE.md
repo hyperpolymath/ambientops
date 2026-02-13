@@ -25,11 +25,15 @@ ambientops/                      ← Hybrid monorepo
 ## Build
 
 ```bash
-cargo build --workspace          # All Rust crates
-cargo test --workspace           # All Rust tests
-cd observatory && mix compile    # Elixir observatory
-cd contracts && deno test        # Contract schema tests
-./scripts/demo-flow.sh --build   # End-to-end demo
+just build-all                   # Build everything (Rust + Elixir + contracts)
+just test-all                    # Run all tests
+cargo build --workspace          # Rust crates only
+cargo test --workspace           # Rust tests only
+cd observatory && mix test       # Elixir observatory tests
+cd records/referrals && mix test # Elixir referrals tests
+cd contracts && deno test --allow-read  # Contract schema tests
+cd nafa-app/shared && deno test test/domain_test.js  # Nafa-app domain tests
+cd emergency-room && v test src/ # V emergency-room tests
 ```
 
 ## hardware-crash-team (Added 2026-02-08)
@@ -40,13 +44,24 @@ Rust-based hardware diagnostic tool. See `hardware-crash-team/.claude/CLAUDE.md`
 
 **Key commands**: `scan`, `diagnose`, `plan`, `apply`, `undo`, `status`
 
-**Current state**: Scanner working (detects zombie devices, partial bindings). Analyzer is stub. Remediation generates plans with undo receipts. All destructive operations are DRY RUN by default.
+**Current state**: Scanner working (detects zombie devices, partial bindings). Analyzer implemented (~429 LOC, parses journalctl for PCI/ACPI/taint/crash patterns). Remediation generates plans with undo receipts. All destructive operations are DRY RUN by default. 27 tests covering scanner and analyzer.
 
-**Next steps for Sonnet**:
-1. Complete scanner (BAR enumeration, lspci enrichment)
-2. Implement crash analyzer (journalctl parsing)
-3. Add multi-device remediation plans
-4. Build ATS2 TUI
+**Next steps**:
+1. Complete remaining 5 remediation strategies (v0.3.0)
+2. BAR enumeration and lspci enrichment for scanner
+3. Multi-device remediation plans
+4. Build ATS2 TUI (v0.4.0)
+
+## clinician feature gates
+
+Heavy dependencies (arangors, redis, ollama-rs, libp2p, ndarray, scraper, tantivy) are behind optional cargo features. Default build compiles fast with no features enabled.
+
+```bash
+cargo build -p ambientops-clinician                    # Fast: default features (none)
+cargo build -p ambientops-clinician --features ai      # Enable ollama-rs
+cargo build -p ambientops-clinician --features storage  # Enable arangors
+cargo build -p ambientops-clinician --all-features     # Everything (slow)
+```
 
 ## Language Policy (Hyperpolymath Standard — January 2026)
 

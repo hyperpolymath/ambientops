@@ -52,6 +52,93 @@ struct TriggerInfo {
 	args       string
 }
 
+// Evidence Envelope output (AmbientOps contract: evidence-envelope.schema.json)
+struct EvidenceEnvelopeOut {
+	version           string               @[json: 'version']
+	envelope_id       string               @[json: 'envelope_id']
+	source            EnvelopeSourceOut
+	artifacts         []EnvelopeArtifactOut
+	findings          []EnvelopeFindingOut
+	redaction_profile string               @[json: 'redaction_profile']
+}
+
+struct EnvelopeSourceOut {
+	tool    string
+	host    string
+	profile string
+}
+
+struct EnvelopeArtifactOut {
+	artifact_type string @[json: 'type']
+	path          string
+	description   string
+	size_bytes    i64    @[json: 'size_bytes']
+}
+
+struct EnvelopeFindingOut {
+	finding_id string @[json: 'finding_id']
+	severity   string
+	title      string
+	details    string
+}
+
+fn write_evidence_envelope(incident Incident, config Config) ! {
+	// Generate UUID-like envelope ID
+	eid := '${rand.hex(4)}-${rand.hex(2)}-${rand.hex(2)}-${rand.hex(2)}-${rand.hex(6)}'
+
+	// Collect artifacts from incident directory
+	mut artifacts := []EnvelopeArtifactOut{}
+
+	// incident.json manifest
+	incident_json_path := os.join_path(incident.path, 'incident.json')
+	if os.exists(incident_json_path) {
+		fsize := os.file_size(incident_json_path)
+		artifacts << EnvelopeArtifactOut{
+			artifact_type: 'report'
+			path: 'incident.json'
+			description: 'Incident manifest with platform and command info'
+			size_bytes: i64(fsize)
+		}
+	}
+
+	// Captured log files
+	log_files := os.ls(incident.logs_path) or { [] }
+	for f in log_files {
+		full_path := os.join_path(incident.logs_path, f)
+		fsize := os.file_size(full_path)
+		artifacts << EnvelopeArtifactOut{
+			artifact_type: 'log'
+			path: 'logs/${f}'
+			description: 'Captured diagnostic log'
+			size_bytes: i64(fsize)
+		}
+	}
+
+	envelope := EvidenceEnvelopeOut{
+		version: schema_version
+		envelope_id: eid
+		source: EnvelopeSourceOut{
+			tool: app_name
+			host: os.hostname() or { 'unknown' }
+			profile: 'default'
+		}
+		artifacts: artifacts
+		findings: []EnvelopeFindingOut{} // ER captures, does not diagnose
+		redaction_profile: 'standard'
+	}
+
+	json_content := json.encode_pretty(envelope)
+	ev_path := os.join_path(incident.path, 'envelope.json')
+
+	if config.dry_run {
+		println('${c_cyan}[DRY-RUN]${c_reset} Would write evidence envelope: envelope.json')
+		return
+	}
+
+	atomic_write_file(ev_path, json_content)!
+	println('${c_green}[OK]${c_reset} Written evidence envelope: envelope.json')
+}
+
 fn create_incident_bundle(config Config) !Incident {
 	now := time.now()
 	// HIGH-005 fix: Use nanoseconds + random suffix to prevent ID collisions

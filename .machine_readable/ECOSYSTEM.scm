@@ -33,28 +33,37 @@
       (loc 1800)
       (description "Panic-safe intake with one-click stabilization")
       (origin "emergency-button")
-      (integration "Captures incidents, hands off to clinician via correlation IDs"))
+      (produces ("evidence-envelope" "receipt"))
+      (consumes ())
+      (integration "Captures incidents, produces EvidenceEnvelope via --envelope flag"))
 
     (component "hardware-crash-team"
       (department "Operating Room")
       (language "Rust")
-      (loc 425)
-      (description "PCI zombie detection, crash correlation, remediation plans")
+      (loc 700)
+      (description "PCI zombie detection, crash analysis, remediation plans")
+      (produces ("evidence-envelope" "procedure-plan" "receipt"))
+      (consumes ())
       (integration "Produces EvidenceEnvelopes and ProcedurePlans via --envelope/--procedure flags"))
 
     (component "observatory"
       (department "Ward")
       (language "Elixir")
-      (loc 500)
+      (loc 600)
       (description "System metrics, bundle ingestion, weather generation")
-      (integration "Ingests EvidenceEnvelopes, generates SystemWeather for ambient UI"))
+      (produces ("system-weather"))
+      (consumes ("evidence-envelope" "receipt" "run-bundle"))
+      (integration "Ingests EvidenceEnvelopes via CLI, generates SystemWeather for nafa-app"))
 
     (component "contracts"
       (department "Data Backbone")
       (language "JSON+Deno")
-      (description "8 JSON schemas with cross-validation")
+      (description "8 JSON schemas with cross-validation (4 wired, 4 future)")
       (origin "system-tools/contracts")
-      (integration "Schema definitions for all inter-component data"))
+      (schemas
+        (wired "evidence-envelope" "procedure-plan" "receipt" "system-weather")
+        (future "message-intent" "pack-manifest" "ambient-payload" "run-bundle"))
+      (integration "Schema definitions for all inter-component data; see contracts/WIRING.md"))
 
     (component "contracts-rust"
       (department "Data Backbone")
@@ -68,13 +77,17 @@
       (loc 400)
       (description "Automated multi-platform bug reporting MCP server")
       (origin "feedback-o-tron")
-      (integration "Submits findings to GitHub/GitLab/Bugzilla/Codeberg"))
+      (produces ())
+      (consumes ("evidence-envelope"))
+      (integration "Submits findings from EvidenceEnvelopes to GitHub/GitLab/Bugzilla/Codeberg"))
 
     (component "nafa-app"
       (department "Ward")
       (language "ReScript+Deno")
       (description "Mobile journey planner UI (shell)")
-      (integration "Displays SystemWeather, provides ambient operations interface"))
+      (produces ())
+      (consumes ("system-weather"))
+      (integration "Displays SystemWeather via GET /api/weather, provides ambient UI"))
 
     (component "composer"
       (department "Operating Room")

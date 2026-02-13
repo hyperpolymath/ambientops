@@ -116,6 +116,25 @@ async function handler(request) {
       }
     }
 
+    // GET /api/weather — read SystemWeather JSON from observatory output
+    if (path === "/api/weather" && request.method === "GET") {
+      const weatherPath = Deno.env.get("AMBIENTOPS_WEATHER_PATH") ||
+        "/tmp/ambientops/weather.json";
+      try {
+        const data = await Deno.readTextFile(weatherPath);
+        JSON.parse(data); // validate JSON
+        return new Response(data, { headers });
+      } catch {
+        return new Response(
+          JSON.stringify({
+            error: "Weather data not available",
+            hint: "Run: mix sysobs weather --output " + weatherPath,
+          }),
+          { status: 503, headers },
+        );
+      }
+    }
+
     // GET /api/annotations
     if (path === "/api/annotations" && request.method === "GET") {
       return new Response(JSON.stringify(Array.from(annotations.values())), {
@@ -170,6 +189,9 @@ async function handler(request) {
   <h2>API Endpoints</h2>
   <div class="endpoint">
     <span class="method">GET</span> /api/journey/journey-001 - Get sample journey
+  </div>
+  <div class="endpoint">
+    <span class="method">GET</span> /api/weather - System weather from observatory
   </div>
   <div class="endpoint">
     <span class="method">GET</span> /api/annotations - List all annotations
