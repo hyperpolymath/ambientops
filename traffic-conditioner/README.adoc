@@ -1,0 +1,1073 @@
+= Traffic Conditioner
+:toc:
+:toclevels: 3
+:icons: font
+:source-highlighter: rouge
+
+image:https://img.shields.io/badge/License-PMPL--1.0-blue.svg[License: PMPL-1.0]
+image:https://img.shields.io/badge/Philosophy-Palimpsest-indigo.svg[Palimpsest]
+image:https://img.shields.io/badge/Status-Planning-yellow.svg[Status]
+
+*Continuous network optimization for Linux: reduce latency, eliminate jitter, maximize bandwidth.*
+
+Traffic Conditioner is a **continuously-running network optimizer** that monitors and improves network performance in real-time. Unlike diagnostic tools that tell you what's wrong, Traffic Conditioner actively maintains optimal network conditions.
+
+[quote]
+____
+"Your network is never 'done'. Traffic Conditioner keeps it smooth, fast, and responsive—automatically."
+____
+
+== The Problem
+
+Modern networks are complex and dynamic:
+
+* Latency spikes during video calls
+* Bufferbloat makes your 1Gbps connection feel slow
+* Downloads starve uploads (or vice versa)
+* Multiple connections compete unfairly
+* VPN adds overhead and instability
+* WiFi channels get congested
+* QoS misconfigurations waste bandwidth
+
+**Manual tuning** is tedious and brittle. **Traffic Conditioner** manages this automatically.
+
+== What It Does
+
+Traffic Conditioner provides **continuous, intelligent network optimization**:
+
+=== 🔄 Continuous Operation Modes
+
+[cols="1,3,2"]
+|===
+|Mode |Description |Use Case
+
+|**Continuous (Daemon)**
+|Always running, adapts to changing conditions
+|Default for laptops/desktops
+
+|**On-Demand**
+|Run when needed, then exit
+|Troubleshooting, testing
+
+|**Scheduled**
+|Run at specific times or intervals
+|Peak hours optimization
+
+|**Event-Triggered**
+|Activate on network events (VPN connect, WiFi roam)
+|Automated response to changes
+|===
+
+=== 🎯 Optimization Targets
+
+[cols="1,2,2"]
+|===
+|Metric |What It Improves |Techniques
+
+|**Latency (Ping)**
+|Reduce round-trip time
+|Queue management, bufferbloat mitigation, fast path routing
+
+|**Jitter**
+|Stabilize latency variance
+|Traffic smoothing, prioritization, packet pacing
+
+|**Packet Loss**
+|Eliminate dropped packets
+|Queue sizing, ECN, congestion avoidance
+
+|**Bandwidth**
+|Maximize throughput
+|TCP tuning, MTU optimization, parallel streams
+
+|**Speed (Perceived)**
+|Faster application responsiveness
+|Low-latency mode, burst handling, background throttling
+|===
+
+=== ⚡ Optimization Techniques
+
+==== Reactive (Respond to Problems)
+
+Applied when conditions degrade:
+
+* **Bufferbloat mitigation** — Detect and eliminate buffer bloat (CoDel, FQ_CoDel, CAKE)
+* **Congestion recovery** — Back off when network is saturated
+* **Error correction** — Retransmit lost packets intelligently
+* **Path switching** — Fail over to better route when available
+* **Emergency throttling** — Prevent complete saturation
+
+==== Proactive (Prevent Problems)
+
+Applied continuously to maintain optimal state:
+
+* **Queue discipline** — Use smart queueing (fq_codel, cake) instead of default (pfifo_fast)
+* **TCP tuning** — Optimize TCP window scaling, congestion control algorithms
+* **MTU optimization** — Set optimal MTU for path (avoid fragmentation)
+* **ECN (Explicit Congestion Notification)** — Enable modern congestion signaling
+* **Fair queueing** — Prevent any single flow from dominating
+
+==== Scheduled (Periodic Maintenance)
+
+Run at intervals or specific times:
+
+* **Channel optimization** (WiFi) — Switch to less congested channels
+* **Route optimization** — Test and prefer faster paths
+* **Cache management** — Flush stale ARP/routing caches
+* **DNS optimization** — Switch to fastest resolvers
+* **Bandwidth testing** — Measure available capacity
+
+==== Continuous (Always Active)
+
+Running in real-time:
+
+* **Traffic shaping** — Enforce upload/download limits, prevent saturation
+* **QoS enforcement** — Prioritize interactive traffic over bulk
+* **Connection tracking** — Monitor active flows, detect anomalies
+* **Latency monitoring** — Detect spikes, measure jitter
+* **Automatic tuning** — Adjust parameters based on measurements
+
+== Key Features
+
+=== 1. Bufferbloat Mitigation ⭐
+
+Bufferbloat is the #1 cause of "fast but laggy" internet.
+
+**Problem:** Your router/modem has huge buffers that fill up, causing 1000ms+ latency spikes.
+
+**Solution:** Traffic Conditioner applies modern queue disciplines:
+
+* **CAKE (Common Applications Kept Enhanced)** — Best for home/office
+* **FQ-CoDel (Fair Queue Controlled Delay)** — Fallback for older kernels
+* **HTB (Hierarchical Token Bucket)** — Fine-grained control
+
+**Result:** Latency stays <20ms even during saturating downloads/uploads.
+
+[source,bash]
+----
+# Before Traffic Conditioner
+$ ping google.com
+PING google.com: 15ms, 18ms, 850ms, 920ms, 1200ms  # BUFFERBLOAT!
+
+# After Traffic Conditioner
+$ ping google.com
+PING google.com: 12ms, 14ms, 11ms, 13ms, 12ms  # Smooth!
+----
+
+=== 2. QoS (Quality of Service) ⭐
+
+Automatic traffic prioritization ensures interactive applications stay responsive:
+
+[cols="1,2,2"]
+|===
+|Priority Class |Traffic Types |Bandwidth Allocation
+
+|**Realtime**
+|VoIP, gaming, SSH, DNS
+|Minimum latency, 10-20% bandwidth
+
+|**Interactive**
+|Web browsing, video streaming
+|Low latency, 50-70% bandwidth
+
+|**Bulk**
+|Downloads, backups, torrents
+|Best effort, remaining bandwidth
+|===
+
+**Smart detection:** Automatically classifies traffic by port, packet size, and behavior.
+
+=== 3. Software Line Bonding ⭐
+
+Combine multiple internet connections for **increased bandwidth and reliability**:
+
+[cols="1,3"]
+|===
+|Bonding Mode |Use Case
+
+|**Round-Robin**
+|Distribute packets across all connections (max bandwidth)
+
+|**Active-Backup**
+|Use primary connection, failover to backup if it fails
+
+|**Balance-RR**
+|Load balance based on packet count
+
+|**Balance-XOR**
+|Load balance based on source/destination MAC
+
+|**Broadcast**
+|Send all traffic on all connections (redundancy)
+
+|**Adaptive Load Balancing**
+|Distribute based on current link utilization
+
+|**Weighted Round-Robin**
+|Distribute proportionally to connection speed
+|===
+
+**Example:** Combine Ethernet + WiFi + USB tethering for 3x bandwidth and redundancy.
+
+[source,bash]
+----
+traffic-conditioner bond create \
+  --name multi-wan \
+  --mode active-backup \
+  --interfaces eth0,wlan0,usb0 \
+  --primary eth0
+----
+
+=== 4. VPN Optimization
+
+Diagnose and fix VPN performance issues:
+
+* **Split-tunnel optimization** — Route only necessary traffic through VPN
+* **MTU fixing** — Adjust for VPN encapsulation overhead
+* **Protocol optimization** — WireGuard over UDP, better ports
+* **DNS leak prevention** — Force DNS through VPN
+* **Kill-switch enforcement** — Block traffic if VPN drops
+
+=== 5. Real-Time Monitoring
+
+Dashboard shows live metrics:
+
+[source,text]
+----
+┌─ Traffic Conditioner ────────────────────────┐
+│                                               │
+│ Status: OPTIMIZED                             │
+│                                               │
+│ Latency:    12ms (▼ -85ms from baseline)     │
+│ Jitter:     2ms  (excellent)                  │
+│ Loss:       0.0% (no packets lost)            │
+│ Download:   95 Mbps (95% of max)              │
+│ Upload:     18 Mbps (90% of max)              │
+│                                               │
+│ Active Optimizations:                         │
+│  ✓ CAKE qdisc (bufferbloat eliminated)       │
+│  ✓ QoS active (3 priority classes)           │
+│  ✓ ECN enabled                                │
+│  ✓ TCP BBR congestion control                │
+│                                               │
+│ Connections: 47 active flows                  │
+│  - Realtime: 2 (SSH, DNS)                    │
+│  - Interactive: 12 (HTTPS, streaming)        │
+│  - Bulk: 33 (downloads)                      │
+│                                               │
+└───────────────────────────────────────────────┘
+----
+
+== How It Works
+
+=== Architecture
+
+[source,text]
+----
+┌─────────────────────────────────────────┐
+│     Traffic Conditioner Daemon          │
+├─────────────────────────────────────────┤
+│                                         │
+│  ┌──────────┐  ┌──────────┐  ┌───────┐ │
+│  │ Monitor  │  │ Analyzer │  │ Tuner │ │
+│  └────┬─────┘  └────┬─────┘  └───┬───┘ │
+│       │             │             │     │
+│       ├─────────────┼─────────────┤     │
+│       │    Decision Engine        │     │
+│       └───────────────────────────┘     │
+│                                         │
+└────────────┬─────────────────┬──────────┘
+             │                 │
+    ┌────────▼────────┐  ┌────▼─────────┐
+    │  Kernel (tc,    │  │  User-Space  │
+    │  iptables, etc) │  │  Optimization│
+    └─────────────────┘  └──────────────┘
+----
+
+**Components:**
+
+1. **Monitor** — Collects metrics (latency, bandwidth, loss, jitter)
+2. **Analyzer** — Detects problems (bufferbloat, congestion, imbalance)
+3. **Decision Engine** — Chooses optimizations to apply
+4. **Tuner** — Applies fixes (qdisc, tcp params, routing)
+
+=== Optimization Loop
+
+[source,text]
+----
+1. MEASURE
+   └─> Latency, bandwidth, loss, jitter
+       Flow statistics, queue depths
+
+2. ANALYZE
+   └─> Detect issues: bufferbloat, congestion,
+       unfair queueing, suboptimal routes
+
+3. DECIDE
+   └─> Choose optimizations based on:
+       - Current conditions
+       - User preferences
+       - Safety constraints
+
+4. APPLY
+   └─> Execute changes:
+       - Queue disciplines
+       - TCP parameters
+       - Routing policies
+       - Firewall rules
+
+5. VERIFY
+   └─> Measure impact
+       - Improvement? Keep it
+       - No change? Try next
+       - Worse? Rollback
+
+6. REPEAT (every 1-10 seconds)
+----
+
+=== Safety
+
+Traffic Conditioner follows AmbientOps safety principles:
+
+* **Non-destructive** — Never breaks working connections
+* **Automatic rollback** — Reverts if optimization makes things worse
+* **Evidence-based** — Only applies proven optimizations
+* **Graceful degradation** — Falls back if advanced features unavailable
+* **User control** — All optimizations can be disabled
+
+== Quick Start
+
+=== Installation
+
+[source,bash]
+----
+git clone https://github.com/hyperpolymath/traffic-conditioner.git
+cd traffic-conditioner
+sudo ./install.sh
+----
+
+=== Basic Usage
+
+==== Start Continuous Optimization
+
+[source,bash]
+----
+sudo traffic-conditioner start
+----
+
+This starts the daemon with default settings:
+* CAKE qdisc for bufferbloat mitigation
+* Basic QoS (3 priority classes)
+* ECN enabled
+* TCP BBR congestion control
+* Automatic MTU optimization
+
+==== Check Status
+
+[source,bash]
+----
+traffic-conditioner status
+----
+
+Shows current optimizations, metrics, and improvements.
+
+==== Run One-Time Optimization
+
+[source,bash]
+----
+sudo traffic-conditioner optimize --once
+----
+
+Analyzes current conditions, applies optimizations, then exits.
+
+==== Stop Daemon
+
+[source,bash]
+----
+sudo traffic-conditioner stop
+----
+
+Removes all optimizations, restores defaults.
+
+=== Configuration
+
+Edit `/etc/traffic-conditioner/config.toml`:
+
+[source,toml]
+----
+[general]
+mode = "continuous"  # continuous | on-demand | scheduled
+log_level = "info"   # debug | info | warn | error
+
+[targets]
+optimize_latency = true
+optimize_jitter = true
+optimize_bandwidth = true
+mitigate_bufferbloat = true
+enable_qos = true
+
+[limits]
+max_download_mbps = 100  # Set to 95% of your ISP speed
+max_upload_mbps = 20     # Set to 95% of your ISP speed
+
+[qos]
+realtime_min_percent = 10
+interactive_min_percent = 50
+bulk_min_percent = 10
+
+[bonding]
+enabled = false
+interfaces = []
+mode = "active-backup"
+
+[vpn]
+optimize = true
+detect_leaks = true
+enforce_killswitch = false
+
+[scheduling]
+# Run optimizations at specific times
+[[scheduling.jobs]]
+time = "09:00"
+action = "optimize"
+
+[[scheduling.jobs]]
+time = "*/30 * * * *"  # Every 30 minutes
+action = "test_bandwidth"
+----
+
+== Advanced Features
+
+=== Line Bonding Setup
+
+Combine multiple connections:
+
+[source,bash]
+----
+# Create bond interface
+sudo traffic-conditioner bond create \
+  --name bond0 \
+  --mode balance-rr \
+  --interfaces eth0,wlan0
+
+# Verify bonding
+traffic-conditioner bond status bond0
+
+# Test combined bandwidth
+traffic-conditioner test --interface bond0
+----
+
+**Modes explained:**
+
+* `active-backup` — Reliability (failover)
+* `balance-rr` — Maximum bandwidth
+* `balance-xor` — Balanced load
+* `weighted-rr` — Proportional to link speed
+
+=== Custom QoS Rules
+
+Define application-specific priorities:
+
+[source,bash]
+----
+# Prioritize Zoom
+sudo traffic-conditioner qos add \
+  --name zoom \
+  --class realtime \
+  --port 8801-8810 \
+  --protocol udp
+
+# Deprioritize torrents
+sudo traffic-conditioner qos add \
+  --name torrent \
+  --class bulk \
+  --port 6881-6889 \
+  --protocol tcp
+----
+
+=== VPN Optimization
+
+[source,bash]
+----
+# Optimize active VPN
+sudo traffic-conditioner vpn optimize
+
+# Test for DNS leaks
+traffic-conditioner vpn test-leak
+
+# Show VPN metrics
+traffic-conditioner vpn status
+----
+
+=== Bufferbloat Testing
+
+[source,bash]
+----
+# Test for bufferbloat (uses Flent or DSLReports)
+traffic-conditioner test bufferbloat
+
+# Before optimization:
+# Idle latency: 12ms
+# Loaded latency: 850ms  # BLOAT!
+# Bufferbloat: SEVERE (Grade: D)
+
+# After optimization:
+# Idle latency: 12ms
+# Loaded latency: 18ms
+# Bufferbloat: NONE (Grade: A+)
+----
+
+=== Scheduling
+
+Run optimizations at specific times:
+
+[source,bash]
+----
+# Optimize during work hours
+sudo traffic-conditioner schedule add \
+  --name "work-hours" \
+  --time "09:00" \
+  --action "optimize --profile work"
+
+# Test bandwidth nightly
+sudo traffic-conditioner schedule add \
+  --name "nightly-test" \
+  --time "03:00" \
+  --action "test bandwidth"
+----
+
+== Use Cases
+
+=== 1. Work From Home Setup
+
+**Problem:** Video calls lag during uploads/downloads.
+
+**Solution:**
+[source,bash]
+----
+sudo traffic-conditioner start --profile wfh
+
+# Applies:
+# - Realtime priority for Zoom/Teams/Meet
+# - Upload throttling to prevent saturation
+# - Bufferbloat mitigation (CAKE qdisc)
+# - Jitter reduction (traffic smoothing)
+----
+
+**Result:** Smooth video calls even during large file uploads.
+
+=== 2. Gaming + Streaming
+
+**Problem:** High ping in games when streaming/downloading.
+
+**Solution:**
+[source,bash]
+----
+sudo traffic-conditioner start --profile gaming
+
+# Applies:
+# - Lowest latency mode for game traffic
+# - Throttle background downloads to 80% capacity
+# - Prioritize small packets (game updates)
+# - Jitter elimination (packet pacing)
+----
+
+**Result:** <20ms ping, no jitter, smooth gameplay.
+
+=== 3. Multi-WAN Failover
+
+**Problem:** ISP goes down frequently.
+
+**Solution:**
+[source,bash]
+----
+sudo traffic-conditioner bond create \
+  --name failover \
+  --mode active-backup \
+  --interfaces eth0,lte0 \
+  --primary eth0 \
+  --failover-threshold 5000ms
+
+# Primary: Fiber (fast but unreliable)
+# Backup: LTE (slower but reliable)
+----
+
+**Result:** Automatic failover to LTE within 5 seconds when fiber drops.
+
+=== 4. Bandwidth-Limited Connection
+
+**Problem:** 10 Mbps DSL shared by family, constant congestion.
+
+**Solution:**
+[source,bash]
+----
+sudo traffic-conditioner start \
+  --max-download 9.5 \
+  --max-upload 0.8 \
+  --enable-qos
+
+# Sets hard limits (prevent ISP bufferbloat)
+# QoS ensures fair sharing among users/apps
+----
+
+**Result:** No bufferbloat, fair bandwidth distribution.
+
+=== 5. VPN Performance
+
+**Problem:** VPN cuts bandwidth in half, adds 100ms latency.
+
+**Solution:**
+[source,bash]
+----
+sudo traffic-conditioner vpn optimize
+
+# Applies:
+# - MTU adjustment for VPN encapsulation
+# - Split-tunnel for local traffic
+# - WireGuard protocol optimization
+# - ECN for VPN tunnel
+----
+
+**Result:** VPN bandwidth increased 30%, latency reduced 50%.
+
+== Complete Optimization List
+
+=== Network Layer
+
+[cols="1,2,1,1"]
+|===
+|Optimization |Description |Mode |Target
+
+|**CAKE qdisc**
+|Eliminate bufferbloat, fair queueing
+|Continuous
+|Latency, Jitter
+
+|**FQ-CoDel**
+|Fallback queue discipline (older kernels)
+|Continuous
+|Latency
+
+|**ECN**
+|Explicit Congestion Notification
+|Proactive
+|Loss, Latency
+
+|**TCP BBR**
+|Modern congestion control algorithm
+|Proactive
+|Bandwidth, Latency
+
+|**TCP Window Scaling**
+|Optimize receive windows for BDP
+|Proactive
+|Bandwidth
+
+|**MTU Optimization**
+|Path MTU discovery, avoid fragmentation
+|Reactive/Scheduled
+|Bandwidth, Loss
+
+|**Jumbo Frames**
+|9000 byte MTU for Gigabit LANs
+|Proactive (LAN only)
+|Bandwidth
+
+|**IP TOS/DSCP**
+|Mark packets for QoS handling
+|Continuous
+|Latency, Jitter
+|===
+
+=== Queue Disciplines
+
+[cols="1,3,1"]
+|===
+|Qdisc |Description |Best For
+
+|**CAKE**
+|Common Applications Kept Enhanced (modern, comprehensive)
+|Home/Office
+
+|**FQ-CoDel**
+|Fair Queue + Controlled Delay (older but reliable)
+|General purpose
+
+|**HTB**
+|Hierarchical Token Bucket (complex, powerful)
+|Fine-grained control
+
+|**TBF**
+|Token Bucket Filter (simple rate limiting)
+|Hard bandwidth caps
+
+|**SFQ**
+|Stochastic Fair Queueing (legacy)
+|Fallback only
+|===
+
+=== QoS Techniques
+
+[cols="1,2,1,1"]
+|===
+|Technique |Description |Mode |Benefit
+
+|**nftables marks**
+|Mark packets for priority classification
+|Continuous
+|QoS
+
+|**Connection tracking**
+|Track flows, classify by behavior
+|Continuous
+|QoS
+
+|**DPI (lite)**
+|Detect application types (non-invasive)
+|Continuous
+|QoS
+
+|**Bandwidth reservation**
+|Guarantee minimum bandwidth per class
+|Continuous
+|Fairness
+
+|**Burst handling**
+|Allow short bursts above limit
+|Continuous
+|Responsiveness
+
+|**Deficit round-robin**
+|Fair scheduling algorithm
+|Continuous
+|Fairness
+|===
+
+=== TCP Tuning
+
+[cols="1,2,1,1"]
+|===
+|Parameter |Optimization |Mode |Target
+
+|**tcp_congestion_control**
+|BBR > CUBIC > Reno
+|Proactive
+|Bandwidth
+
+|**tcp_window_scaling**
+|Enable for high BDP networks
+|Proactive
+|Bandwidth
+
+|**tcp_timestamps**
+|Enable for accurate RTT measurement
+|Proactive
+|Latency
+
+|**tcp_sack**
+|Selective ACK for loss recovery
+|Proactive
+|Loss
+
+|**tcp_fack**
+|Forward ACK for faster recovery
+|Proactive
+|Loss
+
+|**tcp_fastopen**
+|Reduce connection setup latency
+|Proactive
+|Latency
+
+|**tcp_low_latency**
+|Optimize for latency over throughput
+|On-demand (gaming)
+|Latency
+
+|**tcp_slow_start_after_idle**
+|Disable to maintain cwnd
+|Proactive
+|Bandwidth
+|===
+
+=== Bufferbloat Mitigation
+
+[cols="1,2,1"]
+|===
+|Technique |How It Works |Effectiveness
+
+|**CAKE qdisc**
+|Active queue management, drop/mark early
+|Excellent
+
+|**Rate limiting**
+|Cap bandwidth at 95% of link speed
+|Good
+
+|**Fair queueing**
+|Separate queues per flow
+|Good
+
+|**Packet pacing**
+|Spread packet transmission over time
+|Moderate
+
+|**Burst absorption**
+|Handle short bursts without dropping
+|Moderate
+|===
+
+=== Software Line Bonding
+
+[cols="1,3"]
+|===
+|Mode |Description
+
+|**Round-Robin**
+|Send packets alternating across all links (max bandwidth, may cause reordering)
+
+|**Active-Backup**
+|One active link, others standby (reliability over bandwidth)
+
+|**Balance-RR**
+|Load balance packets round-robin
+
+|**Balance-XOR**
+|Load balance based on MAC address hash
+
+|**Broadcast**
+|Send all packets on all links (redundancy, wastes bandwidth)
+
+|**ALB (Adaptive Load Balance)**
+|Dynamically distribute based on link utilization
+
+|**Weighted Round-Robin**
+|Distribute packets proportionally to link speed (e.g., 80% on fiber, 20% on LTE)
+
+|**Per-Flow Balance**
+|Keep flows on same link (prevent reordering), balance across flows
+|===
+
+=== VPN Optimizations
+
+[cols="1,2,1"]
+|===
+|Optimization |Description |Impact
+
+|**MTU adjustment**
+|Reduce MTU to avoid fragmentation (usually 1420 for WireGuard)
+|Bandwidth +10-20%
+
+|**Split-tunnel**
+|Route only necessary traffic through VPN
+|Latency -50%
+
+|**Protocol tuning**
+|WireGuard > OpenVPN (UDP) > OpenVPN (TCP)
+|Latency -30-70%
+
+|**ECN over VPN**
+|Enable ECN for VPN tunnel
+|Loss -20%
+
+|**DNS optimization**
+|Use VPN's DNS or fast public DNS
+|Resolution speed +50%
+
+|**Compression**
+|Compress traffic (CPU vs bandwidth tradeoff)
+|Bandwidth +10-30%
+
+|**Kill-switch**
+|Block non-VPN traffic (prevents leaks)
+|Security
+|===
+
+=== Wireless Optimizations
+
+[cols="1,2,1,1"]
+|===
+|Optimization |Description |Mode |Target
+
+|**Channel selection**
+|Switch to less congested channel
+|Scheduled
+|Bandwidth, Latency
+
+|**Band steering**
+|Prefer 5GHz over 2.4GHz
+|Continuous
+|Bandwidth, Latency
+
+|**TX power**
+|Adjust transmission power
+|Reactive
+|Stability
+
+|**RTS/CTS threshold**
+|Tune for environment
+|Proactive
+|Loss, Fairness
+
+|**Frame aggregation**
+|Enable A-MPDU/A-MSDU
+|Proactive
+|Bandwidth
+
+|**Roaming optimization**
+|Fast BSS transition
+|Continuous
+|Latency
+
+|**Power save disable**
+|Disable sleep for latency-sensitive
+|On-demand
+|Latency
+|===
+
+=== Monitoring & Testing
+
+[cols="1,2,1"]
+|===
+|Tool/Metric |Purpose |Frequency
+
+|**RTT measurement**
+|Track latency to gateway/DNS/internet
+|Every 1s (continuous)
+
+|**Jitter calculation**
+|Measure latency variance
+|Every 10s
+
+|**Packet loss**
+|Count dropped packets
+|Continuous
+
+|**Bandwidth test**
+|Measure actual throughput
+|Scheduled (hourly)
+
+|**Bufferbloat test**
+|Loaded vs idle latency
+|Scheduled (daily)
+
+|**DNS resolution time**
+|Measure query latency
+|Every request
+
+|**Connection count**
+|Track active flows
+|Continuous
+
+|**Queue depth**
+|Monitor qdisc statistics
+|Continuous
+|===
+
+=== Scheduled Maintenance
+
+[cols="1,2,1"]
+|===
+|Task |Description |Frequency
+
+|**Route optimization**
+|Test alternate routes, prefer faster
+|Hourly
+
+|**DNS rotation**
+|Switch to fastest resolver
+|Hourly
+
+|**Cache flush**
+|Clear ARP/routing/DNS caches
+|Daily
+
+|**Bandwidth test**
+|Measure available capacity
+|Daily
+
+|**Bufferbloat test**
+|Verify mitigation is working
+|Daily
+
+|**Channel scan**
+|Find best WiFi channel
+|Weekly
+
+|**Performance report**
+|Generate metrics summary
+|Weekly
+|===
+
+== Part of AmbientOps
+
+Traffic Conditioner integrates with the link:https://github.com/hyperpolymath/ambientops[AmbientOps] ecosystem:
+
+* **Ward** — Shows network performance in System Weather
+* **Operating Room** — On-demand optimization as a procedure
+* **Network Ambulance** — Diagnostics and repair integration
+
+See `docs/AMBIENTOPS_INTEGRATION.adoc` for details.
+
+== Roadmap
+
+=== v0.1 (Q2 2026) - MVP
+
+* Basic bufferbloat mitigation (CAKE/FQ-CoDel)
+* Simple QoS (3 priority classes)
+* Continuous daemon mode
+* TCP BBR enablement
+* Real-time monitoring
+
+=== v0.5 (Q3 2026) - Enhanced
+
+* Software line bonding (2+ connections)
+* VPN optimization
+* Advanced QoS rules
+* Scheduled optimizations
+* WiFi channel optimization
+
+=== v1.0 (Q4 2026) - Production
+
+* Full feature set
+* Web UI dashboard
+* ML-based optimization
+* Multi-platform support
+* Integration with AmbientOps
+
+== Implementation
+
+**Language:** Rust (performance-critical) + D (orchestration)
+
+**Requirements:**
+* Linux kernel 4.9+ (for CAKE)
+* Root access (for tc, iptables)
+* iproute2, iptables/nftables
+
+**Architecture:**
+* Core daemon in Rust (low overhead, safe)
+* CLI in D (robust, cross-distro)
+* Web UI in ReScript (type-safe, fast)
+
+== License
+
+PMPL-1.0-or-later (Palimpsest Meta-Permissive License)
+
+== Philosophy
+
+Traffic Conditioner follows Palimpsest principles:
+
+* **Automatic is better than manual** — Set it and forget it
+* **Continuous beats one-shot** — Always optimizing, not just fixing
+* **Evidence-based** — Measure, apply, verify
+* **Safety-first** — Never break working connections
+* **Transparent** — Show what's happening and why
+
+[quote]
+____
+"The best network optimization is the one you never notice—until you turn it off and everything feels slow."
+____
+
+---
+
+Made with care by the link:https://github.com/hyperpolymath[Hyperpolymath Project].

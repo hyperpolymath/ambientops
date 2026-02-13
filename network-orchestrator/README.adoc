@@ -1,0 +1,1489 @@
+= Network Orchestrator
+:toc:
+:toclevels: 3
+:icons: font
+:source-highlighter: rouge
+
+image:https://img.shields.io/badge/License-PMPL--1.0-blue.svg[License: PMPL-1.0,link="https://github.com/hyperpolymath/palimpsest-license"]
+image:https://img.shields.io/badge/Philosophy-Palimpsest-indigo.svg[Palimpsest,link="https://github.com/hyperpolymath/palimpsest-license"]
+image:https://img.shields.io/badge/Version-0.1.0-yellow.svg[Version]
+image:https://img.shields.io/badge/Status-Planning-orange.svg[Status]
+
+*Enterprise network infrastructure management that doesn't require a PhD in networking.*
+
+Network Orchestrator is a comprehensive tool for managing enterprise network infrastructure—routers, switches, DHCP, BGP, distributed filesystems, and remote diagnostics. Unlike vendor-specific management platforms or error-prone manual CLI work, it provides *safe, auditable, multi-vendor* network operations with *full rollback capabilities*.
+
+[quote]
+____
+"It's 3am, your data center BGP session is flapping, DHCP is misconfigured, and your on-call engineer is unreachable. You don't need a CCIE—you need Network Orchestrator."
+____
+
+== The Problem
+
+Enterprise network operations are broken:
+
+* **Vendor lock-in**: Cisco Prime, Juniper Space, Arista CVP—each requires separate training and licensing
+* **Manual CLI hell**: SSH into 50 routers to check BGP status or update ACLs
+* **No safety nets**: One typo in router config can take down production
+* **Audit nightmare**: Who changed what, when, and why? Nobody knows.
+* **Fragmented tools**: SNMP monitoring here, DHCP management there, routing management somewhere else
+* **Zero rollback**: Broke something? Good luck remembering the old config.
+
+You're managing critical infrastructure with:
+
+* Vendor GUIs that crash on Firefox
+* Spreadsheets tracking DHCP reservations
+* Manual scripts with no error handling
+* "Trust me, I tested it in dev" deployments
+* No approval workflows for production changes
+
+**Network Orchestrator solves this.**
+
+== What It Does
+
+Network Orchestrator provides *unified, safe, auditable management* of enterprise network infrastructure—across all major vendors and protocols.
+
+=== 🌐 BGP Control & Monitoring
+
+Manage Border Gateway Protocol without memorizing vendor syntax:
+
+[cols="1,3"]
+|===
+|Feature |What It Does
+
+|**Session Monitoring**
+|Real-time status of all BGP peers, session uptime, state changes, flapping detection
+
+|**Route Advertisement Control**
+|Safely advertise/withdraw routes, prefix filtering, route-map validation
+
+|**Peer Management**
+|Add/remove peers, update policies, configure authentication, MD5 password rotation
+
+|**Prefix Analysis**
+|See received/advertised prefixes per peer, detect route leaks, validate AS-PATH
+
+|**Multi-Vendor Support**
+|Cisco IOS/IOS-XE, JunOS, Arista EOS, VyOS, FRRouting—unified syntax
+|===
+
+=== 📊 SNMP Monitoring & Management
+
+Enterprise-grade SNMP without the complexity:
+
+[cols="1,3"]
+|===
+|Feature |What It Does
+
+|**Device Polling**
+|Automated polling of CPU, memory, interface stats, temperature, fan status
+
+|**Trap Management**
+|Configure SNMP traps, centralized trap collection, intelligent alert routing
+
+|**MIB Browser**
+|Browse device MIBs, query OIDs, translate OID to human-readable names
+
+|**Performance Metrics**
+|Historical trending, threshold alerts, SLA monitoring, capacity planning data
+
+|**Bulk Operations**
+|Update SNMP community strings, configure v3 users, set trap destinations across all devices
+|===
+
+=== 🔧 Multi-Vendor Router/Switch Configuration
+
+Unified config management for heterogeneous networks:
+
+[cols="1,3"]
+|===
+|Vendor Support |Details
+
+|**Cisco IOS/IOS-XE**
+|Routers, switches, ASR/ISR series, Catalyst switches
+
+|**Juniper JunOS**
+|MX/EX/QFX series, automated commit-confirm for safety
+
+|**Arista EOS**
+|Data center switches, MLAG, VXLAN configuration
+
+|**OpenWrt**
+|Embedded routers, home/branch office devices
+
+|**VyOS**
+|Open-source routing platform, VM/container deployments
+|===
+
+**Features:**
+- Automated config backups before every change
+- Syntax validation before deployment
+- Dry-run mode (preview changes without applying)
+- Config diff visualization
+- Rollback on failure (automatic or manual)
+
+=== 🖧 DHCP Management
+
+Enterprise DHCP without spreadsheet chaos:
+
+[cols="1,3"]
+|===
+|Feature |What It Does
+
+|**Pool Management**
+|Create/modify/delete DHCP pools, subnet management, scope configuration
+
+|**Lease Tracking**
+|Active leases, lease history, detect rogue DHCP servers, MAC-to-IP mapping
+
+|**Reservations**
+|Static IP reservations, MAC address management, hostname tracking
+
+|**DHCP Options**
+|Configure options 66 (TFTP server), 67 (boot file), custom vendor options
+
+|**Failover Config**
+|DHCP failover pairs, split-scope, load balancing configuration
+
+|**Multi-Server Support**
+|ISC DHCPd, Windows DHCP, dnsmasq, Kea DHCP
+|===
+
+=== ⏱️ PTP (Precision Time Protocol)
+
+Microsecond-level time synchronization for distributed systems:
+
+[cols="1,3"]
+|===
+|Feature |What It Does
+
+|**Clock Synchronization**
+|Monitor PTP domains, grandmaster status, sync accuracy, offset measurements
+
+|**Grandmaster Selection**
+|Best Master Clock Algorithm (BMCA) monitoring, priority configuration, failover testing
+
+|**Drift Monitoring**
+|Track clock drift over time, alert on excessive drift, historical analysis
+
+|**PTP Profiles**
+|IEEE 1588 default, ITU-T Telecom, SMPTE, custom profiles
+
+|**Multicast/Unicast**
+|Both multicast (PTP v2) and unicast (scaled deployments) support
+|===
+
+=== 💾 Distributed Filesystem Diagnostics
+
+Enterprise filesystem connectivity and performance:
+
+[cols="1,3"]
+|===
+|Filesystem |Capabilities
+
+|**AFS (Andrew File System)**
+|Volume info, quota checks, ACL diagnostics, server reachability, token validity
+
+|**NFS (Network File System)**
+|Mount health, v3/v4 status, lock states, performance metrics, stale handle detection
+
+|**CIFS/SMB**
+|Windows share connectivity, Active Directory integration, permission mapping, performance tuning
+|===
+
+=== 🗄️ Database Connectivity Diagnostics
+
+Verify database connections from network infrastructure:
+
+- PostgreSQL, MySQL, MariaDB (SQL databases)
+- MongoDB (document store)
+- Redis (cache/message broker)
+
+**What it checks:**
+- Connection success/failure
+- Authentication validity
+- Network latency
+- Firewall rule verification
+- SSL/TLS certificate validation
+- Query performance baselines
+
+=== 🛠️ Remote Management & Debugging
+
+SSH-based remote troubleshooting with strong authorization:
+
+[cols="1,3"]
+|===
+|Capability |What It Does
+
+|**Remote Diagnostics**
+|Run diagnostic commands on remote devices, collect logs, check processes
+
+|**Configuration Fixes**
+|Apply config changes remotely, verify syntax first, rollback on error
+
+|**Authorization Controls**
+|Multi-level approval for production changes, emergency break-glass procedures
+
+|**Audit Trail**
+|Who ran what command on which device, full session recording, tamper-proof logs
+
+|**Session Management**
+|Concurrent session limits, timeout enforcement, shared screen for pair troubleshooting
+|===
+
+== Enterprise Use Cases
+
+=== Data Center Network Administration
+
+**Scenario:** You manage a 500-server data center with top-of-rack switches, spine switches, and edge routers.
+
+**What Network Orchestrator does:**
+- Unified view of BGP sessions (external peers, iBGP fabric)
+- SNMP monitoring of switch port utilization
+- DHCP management for server provisioning
+- Config management for Arista spine-leaf fabric
+- PTP synchronization for distributed systems (trading platforms, HPC)
+
+=== Campus Network Management
+
+**Scenario:** University campus with 200+ switches, VLANs per building, wireless controllers, RADIUS.
+
+**What Network Orchestrator does:**
+- Centralized VLAN management across all switches
+- DHCP pools per building/department
+- SNMP alerts for switch failures or port saturation
+- Automated config backups every night
+- Wireless controller integration for AP management
+
+=== Service Provider Operations (ISP/Carrier)
+
+**Scenario:** Regional ISP with customer edge routers, aggregation, core BGP routing, MPLS backbone.
+
+**What Network Orchestrator does:**
+- BGP session monitoring (hundreds of peers)
+- Customer DHCP pool management
+- Multi-vendor router config (Cisco core, Juniper edge, VyOS customer CPE)
+- SNMP-based SLA monitoring (latency, packet loss)
+- Automated route advertisement for new customers
+
+=== Multi-Site WAN Management
+
+**Scenario:** Global enterprise with 50 branch offices, MPLS WAN, VPN failover, centralized internet breakout.
+
+**What Network Orchestrator does:**
+- VPN tunnel monitoring (IPsec, WireGuard)
+- Branch router config management (OpenWrt, VyOS)
+- DHCP for branch office devices
+- Routing changes for traffic steering (MPLS primary, internet backup)
+- Distributed filesystem monitoring (branch NAS connectivity)
+
+=== Cloud Network Orchestration
+
+**Scenario:** Hybrid cloud with AWS/Azure/GCP VPCs, Direct Connect/ExpressRoute, transit gateways.
+
+**What Network Orchestrator does:**
+- BGP monitoring for cloud peering (AWS Direct Connect, Azure ExpressRoute)
+- Cloud router config (AWS Transit Gateway, Azure VPN Gateway)
+- IPAM integration (track cloud subnet allocations)
+- DHCP coordination for hybrid workloads
+- Database connectivity checks (RDS, Cloud SQL from on-prem)
+
+== Safety & Authorization
+
+Network Orchestrator follows *AmbientOps safety principles* for infrastructure operations:
+
+=== ✓ Dry-Run Mode for All Changes
+
+Every configuration change, routing update, or DHCP modification can be previewed:
+
+[source,bash]
+----
+network-orchestrator config deploy --device core-rt1 --dry-run
+
+[Preview] Changes to core-rt1:
++ router bgp 65001
++   neighbor 10.0.1.2 remote-as 65002
++   neighbor 10.0.1.2 route-map FILTER-IN in
+
+[✓] Syntax valid
+[✓] Config diff: 3 lines added, 0 removed
+[!] Production change - requires approval
+
+Approve? [y/N]:
+----
+
+=== ✓ Automatic Config Backups
+
+Before *every* change, Network Orchestrator:
+
+1. Takes timestamped backup of current config
+2. Stores in version control (Git)
+3. Saves rollback token
+4. Documents who requested the change
+
+[source,text]
+----
+Backups stored in:
+/var/lib/network-orchestrator/backups/
+├── core-rt1/
+│   ├── 2026-01-29_14-30-22.cfg    # Backup before BGP change
+│   ├── 2026-01-29_09-15-10.cfg    # Backup before ACL update
+│   └── rollback-tokens.json       # Rollback metadata
+----
+
+=== ✓ Role-Based Access Control (RBAC)
+
+Not everyone should be able to change production routing:
+
+[cols="1,2,2"]
+|===
+|Role |Read Operations |Write Operations
+
+|**Viewer**
+|View configs, BGP status, SNMP data
+|None
+
+|**Operator**
+|All read operations
+|DHCP changes, interface shutdowns, SNMP config
+
+|**Engineer**
+|All read operations
+|Routing changes, BGP peer config, switch config (non-production)
+
+|**Admin**
+|All read operations
+|All write operations (with audit trail)
+
+|**Emergency**
+|All operations
+|Break-glass access (requires justification, 2-person approval)
+|===
+
+=== ✓ Change Approval Workflow
+
+Production changes require approval:
+
+[source,bash]
+----
+network-orchestrator config deploy --device prod-core --config bgp-peer.cfg
+
+[!] This is a PRODUCTION device
+[!] Change requires approval from: Network Lead, Change Manager
+
+Creating change request CR-2026-0129-001...
+Notifying approvers...
+
+[Pending approval - status: https://orchestrator/cr/2026-0129-001]
+----
+
+Approvers can:
+- Review config diff
+- See risk assessment
+- Approve/reject/request-changes
+- Schedule change window
+
+=== ✓ Rollback Capability
+
+If a change breaks something, rollback instantly:
+
+[source,bash]
+----
+network-orchestrator config rollback --device core-rt1 --to 2026-01-29_14-30-22
+
+Rolling back core-rt1 to 2026-01-29_14-30-22...
+[✓] Previous config restored
+[✓] BGP sessions re-established
+[✓] Rollback complete (took 12 seconds)
+
+[Note] Rollback recorded in audit log (who, when, why)
+----
+
+Or automatic rollback if health checks fail:
+
+[source,bash]
+----
+network-orchestrator config deploy --device edge-rt1 --config new-acl.cfg --auto-rollback
+
+Deploying config to edge-rt1...
+Running health checks...
+[✗] Health check FAILED: BGP session to 10.0.1.1 down
+
+[!] Auto-rollback triggered
+[✓] Previous config restored
+[✓] BGP session recovered
+
+[Error] Deployment aborted - config NOT applied
+----
+
+=== ✓ Audit Logging
+
+**Every** operation is logged:
+
+[source,text]
+----
+{
+  "timestamp": "2026-01-29T14:30:22Z",
+  "user": "jdoe@example.com",
+  "role": "engineer",
+  "action": "config_deploy",
+  "device": "core-rt1",
+  "change_id": "CR-2026-0129-001",
+  "config_hash": "a3f8e9c...",
+  "backup_id": "2026-01-29_14-30-22",
+  "approval": {
+    "required": true,
+    "approved_by": ["network-lead@example.com"],
+    "approved_at": "2026-01-29T14:25:10Z"
+  },
+  "result": "success",
+  "duration_ms": 3421
+}
+----
+
+Audit logs are:
+- Immutable (append-only)
+- Cryptographically signed
+- Stored off-device (syslog, S3, compliance archive)
+- Retained per compliance policy (SOC2, HIPAA, PCI-DSS)
+
+=== ✓ Never Opens Security Holes
+
+Network Orchestrator will **NEVER**:
+
+* Disable firewall rules without explicit approval
+* Weaken authentication (downgrade SNMPv3 to v2c, disable SSH key auth)
+* Allow unauthenticated access
+* Save credentials in plaintext
+* Skip config validation
+* Apply untested configs to production
+
+== Quick Start
+
+=== Installation
+
+[source,bash]
+----
+git clone https://github.com/hyperpolymath/network-orchestrator.git
+cd network-orchestrator
+sudo ./install.sh
+----
+
+Or install from package:
+
+[source,bash]
+----
+# Fedora/RHEL
+sudo dnf install network-orchestrator
+
+# Ubuntu/Debian
+sudo apt install network-orchestrator
+
+# Arch Linux
+paru -S network-orchestrator
+----
+
+=== Initial Configuration
+
+Create config directory and credential vault:
+
+[source,bash]
+----
+network-orchestrator init
+
+[✓] Created /etc/network-orchestrator/
+[✓] Created credential vault (encrypted)
+[✓] Created audit log directory
+[✓] Initialized Git repo for config backups
+
+Next steps:
+1. Add device credentials: network-orchestrator creds add
+2. Add devices to inventory: network-orchestrator device add
+3. Test connectivity: network-orchestrator device list
+----
+
+=== Add Network Devices
+
+[source,bash]
+----
+network-orchestrator device add \
+  --name core-rt1 \
+  --ip 10.0.1.1 \
+  --vendor cisco \
+  --model ISR4451 \
+  --role core-router \
+  --credential-group production
+
+Device added: core-rt1 (10.0.1.1)
+----
+
+Or import from CSV:
+
+[source,bash]
+----
+network-orchestrator device import --csv devices.csv
+
+Imported 47 devices:
+  - 12 Cisco routers
+  - 18 Arista switches
+  - 10 Juniper switches
+  - 7 VyOS routers
+----
+
+=== Basic Usage
+
+==== Check BGP Status Across All Devices
+
+[source,bash]
+----
+network-orchestrator bgp status
+
+Device: core-rt1 (10.0.1.1)
+  BGP Router ID: 10.0.1.1, AS: 65001
+  Peers:
+    - 10.0.2.1 (AS 65002) - Established (uptime: 45d 3h)
+    - 10.0.3.1 (AS 65003) - Established (uptime: 12d 8h)
+
+Device: edge-rt1 (10.0.5.1)
+  BGP Router ID: 10.0.5.1, AS: 65001
+  Peers:
+    - 203.0.113.1 (AS 64512) - Established (uptime: 2d 14h)
+    - 198.51.100.1 (AS 64513) - Idle (last error: Connection refused)
+      [!] ALERT: Peer down for 3 hours
+
+[Summary] 5 peers total, 4 Established, 1 Down
+----
+
+==== Monitor SNMP Metrics
+
+[source,bash]
+----
+network-orchestrator snmp poll --device core-sw1
+
+Device: core-sw1 (10.0.10.1)
+  System:
+    - Uptime: 45 days, 3 hours, 12 minutes
+    - CPU: 12% (1min avg)
+    - Memory: 3.2 GB / 8 GB (40% used)
+  Interfaces:
+    - GigabitEthernet1/0/1: UP, 850 Mbps in, 320 Mbps out
+    - GigabitEthernet1/0/2: UP, 120 Mbps in, 95 Mbps out
+    - TenGigabitEthernet1/0/1: UP, 7.2 Gbps in, 6.8 Gbps out
+  Temperature:
+    - Chassis: 42°C (normal)
+    - Power Supply 1: 38°C (normal)
+----
+
+==== Manage DHCP Pools
+
+[source,bash]
+----
+network-orchestrator dhcp pool list --server dhcp1.example.com
+
+DHCP Pools on dhcp1.example.com:
+  - vlan10-pool: 10.10.0.100 - 10.10.0.200 (VLAN 10 - Engineering)
+    Active leases: 47 / 100
+    Available: 53
+  - vlan20-pool: 10.20.0.100 - 10.20.0.200 (VLAN 20 - Marketing)
+    Active leases: 89 / 100 [!] 89% utilization
+    Available: 11
+
+[!] WARNING: vlan20-pool is 89% full - consider expanding range
+----
+
+Add a new DHCP pool:
+
+[source,bash]
+----
+network-orchestrator dhcp pool add \
+  --server dhcp1.example.com \
+  --name vlan30-pool \
+  --range 10.30.0.100-10.30.0.200 \
+  --gateway 10.30.0.1 \
+  --dns 10.0.1.10,10.0.1.11 \
+  --domain example.com \
+  --lease-time 86400
+
+[Preview] Creating DHCP pool:
+  subnet 10.30.0.0 netmask 255.255.255.0 {
+    range 10.30.0.100 10.30.0.200;
+    option routers 10.30.0.1;
+    option domain-name-servers 10.0.1.10, 10.0.1.11;
+    option domain-name "example.com";
+    default-lease-time 86400;
+    max-lease-time 172800;
+  }
+
+Apply? [y/N]: y
+
+[✓] Pool added: vlan30-pool
+[✓] DHCP server reloaded
+----
+
+==== Deploy Router Configuration
+
+[source,bash]
+----
+network-orchestrator config deploy \
+  --device edge-rt2 \
+  --config edge-rt2-bgp.cfg \
+  --dry-run
+
+[Preview] Config changes for edge-rt2:
+  + router bgp 65001
+  +   neighbor 203.0.113.10 remote-as 64520
+  +   neighbor 203.0.113.10 description "ISP-Provider-A"
+  +   neighbor 203.0.113.10 route-map CUSTOMER-IN in
+  +   neighbor 203.0.113.10 route-map CUSTOMER-OUT out
+
+[✓] Syntax validation: PASSED
+[✓] No syntax errors detected
+
+[!] This will add 1 BGP peer to production router
+[Note] Run without --dry-run to apply
+----
+
+Apply for real:
+
+[source,bash]
+----
+sudo network-orchestrator config deploy \
+  --device edge-rt2 \
+  --config edge-rt2-bgp.cfg
+
+[!] Production change requires approval
+Creating change request...
+Change request ID: CR-2026-0129-003
+
+[Waiting for approval from: network-ops@example.com]
+...
+[✓] Approved by: alice@example.com at 2026-01-29 15:42:10
+
+Creating backup of current config...
+Deploying config to edge-rt2...
+Validating BGP session...
+[✓] BGP peer 203.0.113.10 established
+
+[✓] Config deployed successfully
+[✓] Health checks passed
+----
+
+== Real-World Scenarios
+
+=== Scenario 1: BGP Peer Down, Find and Fix
+
+**Problem:** Customer reports intermittent connectivity. Your BGP monitoring shows a peer flapping.
+
+[source,bash]
+----
+$ network-orchestrator bgp status --peer 203.0.113.20
+
+Device: edge-rt1
+  Peer: 203.0.113.20 (AS 64530)
+  State: Idle
+  Last state change: 5 minutes ago
+  Flap count: 12 in last hour
+  Last error: "BGP Notification sent: Hold Timer Expired"
+
+$ network-orchestrator bgp diagnose --peer 203.0.113.20
+
+[Diagnostics] BGP Peer 203.0.113.20
+  [✓] IP reachable (ping: 12ms)
+  [✓] TCP port 179 open
+  [✗] BGP hold timer too low (configured: 30s, recommended: 180s)
+  [✗] Route-map CUSTOMER-IN has invalid prefix-list reference
+
+[Suggested Fix]
+  1. Increase hold timer to 180s
+  2. Fix route-map prefix-list reference (PREFIX-CUSTOMER-20 does not exist)
+
+Apply fix? [y/N]: y
+
+Backing up config...
+Applying fixes...
+  [✓] Set hold timer to 180s
+  [✓] Created missing prefix-list PREFIX-CUSTOMER-20
+  [✓] Reapplied route-map
+
+Waiting for BGP session...
+[✓] Peer 203.0.113.20 established
+
+[✓] BGP peer repaired (flapping stopped)
+----
+
+=== Scenario 2: DHCP Pool Exhaustion
+
+**Problem:** Users report "No IP address" errors. DHCP pool is exhausted.
+
+[source,bash]
+----
+$ network-orchestrator dhcp pool status --pool vlan40-sales
+
+Pool: vlan40-sales (10.40.0.100 - 10.40.0.150)
+  Range size: 50 addresses
+  Active leases: 50 / 50 [!] 100% FULL
+  Pending requests: 7 (denied due to exhaustion)
+
+[!] CRITICAL: DHCP pool exhausted
+
+$ network-orchestrator dhcp leases list --pool vlan40-sales --sort-by age
+
+Active leases (showing oldest):
+  - 10.40.0.100: 00:11:22:33:44:55 (hostname: printer-1) - 45 days old
+  - 10.40.0.101: 00:11:22:33:44:66 (hostname: unknown) - 30 days old (no traffic)
+  - 10.40.0.102: 00:11:22:33:44:77 (hostname: old-laptop) - 28 days old (offline)
+
+[Suggestion] Release stale leases (offline >7 days) or expand pool range
+
+$ sudo network-orchestrator dhcp pool expand \
+  --pool vlan40-sales \
+  --new-range 10.40.0.100-10.40.0.200
+
+[Preview] Expanding vlan40-sales:
+  Old range: 10.40.0.100 - 10.40.0.150 (50 addresses)
+  New range: 10.40.0.100 - 10.40.0.200 (100 addresses)
+  [+] 50 additional addresses
+
+Apply? [y/N]: y
+
+[✓] Pool expanded
+[✓] DHCP server reloaded
+[✓] 50 addresses now available
+----
+
+=== Scenario 3: Multi-Vendor Config Rollout
+
+**Problem:** You need to update NTP servers on 30 routers (Cisco, Juniper, Arista mix).
+
+[source,bash]
+----
+$ network-orchestrator config template apply \
+  --template ntp-update.j2 \
+  --devices "role:router" \
+  --dry-run
+
+[Template] ntp-update.j2
+  Variables:
+    - ntp_servers: [10.0.1.5, 10.0.1.6]
+
+[Preview] Changes to 30 devices:
+
+Cisco devices (12):
+  + ntp server 10.0.1.5 prefer
+  + ntp server 10.0.1.6
+
+Juniper devices (10):
+  + set system ntp server 10.0.1.5 prefer
+  + set system ntp server 10.0.1.6
+
+Arista devices (8):
+  + ntp server 10.0.1.5 prefer
+  + ntp server 10.0.1.6
+
+[Note] Run without --dry-run to apply to all 30 devices
+
+$ sudo network-orchestrator config template apply \
+  --template ntp-update.j2 \
+  --devices "role:router" \
+  --batch-size 5 \
+  --delay 30s
+
+[Batch Deploy] 30 devices in batches of 5, 30s delay between batches
+
+Batch 1/6: core-rt1, core-rt2, edge-rt1, edge-rt2, dist-rt1
+  [✓] core-rt1: deployed (12s)
+  [✓] core-rt2: deployed (9s)
+  [✓] edge-rt1: deployed (11s)
+  [✓] edge-rt2: deployed (10s)
+  [✓] dist-rt1: deployed (13s)
+
+Waiting 30 seconds before next batch...
+
+Batch 2/6: dist-rt2, ...
+  ...
+
+[✓] All 30 devices updated successfully
+[✓] NTP sync verified on all devices
+----
+
+=== Scenario 4: PTP Clock Drift Alert
+
+**Problem:** Distributed system reports time sync issues. PTP grandmaster failing.
+
+[source,bash]
+----
+$ network-orchestrator ptp status
+
+PTP Domain 0:
+  Grandmaster: switch-core-1 (10.0.1.10)
+    Clock Class: 6
+    Clock Accuracy: 25ns
+    Offset from UTC: +12ns
+
+  Slaves:
+    - switch-dist-1: offset +340ns (normal)
+    - switch-dist-2: offset +8200ns [!] HIGH DRIFT
+    - switch-dist-3: offset +290ns (normal)
+
+[!] ALERT: switch-dist-2 drift exceeds threshold (>5000ns)
+
+$ network-orchestrator ptp diagnose --device switch-dist-2
+
+[Diagnostics] PTP on switch-dist-2
+  [✓] PTP daemon running
+  [✗] Network latency to grandmaster: 45ms (expected <10ms)
+  [✗] PTP packets dropping (5% loss)
+  [!] Interface GigabitEthernet1/0/24 has errors (CRC errors: 1204)
+
+[Suggested Fix]
+  1. Check cable on GigabitEthernet1/0/24
+  2. Consider switching to backup grandmaster (switch-core-2)
+
+$ sudo network-orchestrator ptp switch-grandmaster --to switch-core-2
+
+Switching PTP grandmaster to switch-core-2...
+  [✓] Announced new grandmaster
+  [✓] All slaves converged to switch-core-2
+  [✓] Max offset now: 420ns (acceptable)
+
+[✓] PTP grandmaster switched (incident resolved)
+----
+
+== Part of AmbientOps
+
+Network Orchestrator is part of the link:https://github.com/hyperpolymath/ambientops[AmbientOps ecosystem], designed for *infrastructure operations*:
+
+[cols="1,2"]
+|===
+|Tool |Purpose
+
+|**Network Ambulance**
+|End-user network problems (WiFi, DNS, home/office connectivity)
+
+|**Network Orchestrator**
+|Enterprise infrastructure (routers, BGP, DHCP, multi-vendor management)
+
+|**AmbientOps Ward**
+|Daily infrastructure health monitoring
+
+|**AmbientOps Operating Theatre**
+|Procedure orchestration and workflow automation
+
+|**AmbientOps Records**
+|Audit logs, compliance reports, change history
+|===
+
+**Relationship to Network Ambulance:**
+
+- Network Ambulance fixes *end-user* internet problems (laptop WiFi, DNS, etc.)
+- Network Orchestrator manages *infrastructure* that provides the network (routers, switches, DHCP servers)
+
+**Example Integration:**
+
+User reports "No internet" → Network Ambulance diagnoses "No DHCP lease" → Escalates to Network Orchestrator → Orchestrator finds "DHCP pool exhausted" → Expands pool → User gets IP address.
+
+See `docs/AMBIENTOPS_INTEGRATION.adoc` for integration details.
+
+== Safety Guarantees
+
+Network Orchestrator follows *AmbientOps safety principles* for infrastructure operations:
+
+=== ✓ Evidence-First, Not Guesswork
+
+No "I think the BGP peer is down". Network Orchestrator shows you:
+
+* Exact peer state (Established, Idle, Active, Connect, etc.)
+* Last state change timestamp
+* Error messages from the device
+* Reachability tests (ping, TCP port checks)
+* Historical flapping data
+
+=== ✓ Non-Destructive by Default
+
+All operations are read-only unless you explicitly request changes:
+
+* `network-orchestrator bgp status` — read-only, no device changes
+* `network-orchestrator config deploy` — prompts for approval, creates backups
+* `--dry-run` flag — preview changes without applying
+
+=== ✓ Rollback-First Design
+
+Every config change includes:
+
+* Automatic pre-change backup
+* Rollback token (one command to undo)
+* Health checks after change (auto-rollback on failure)
+* Manual rollback to any previous state
+
+=== ✓ Multi-Level Approval
+
+Production changes can require:
+
+* Approval from network lead
+* Change request (CR) number
+* Scheduled maintenance window
+* 2-person approval for emergency changes
+
+Configurable per device group (dev/staging/production).
+
+=== ✓ Never Surprises Production
+
+Network Orchestrator will **NEVER**:
+
+* Apply changes without showing you what will happen
+* Skip backups "to save time"
+* Ignore syntax errors
+* Deploy to production without approval workflow
+* Allow unauthenticated access to devices
+* Store credentials in plaintext
+
+== Command Reference
+
+[cols="2,3"]
+|===
+|Command |Description
+
+|**Device Management**
+|
+
+|`network-orchestrator device add`
+|Add device to inventory
+
+|`network-orchestrator device list`
+|List all managed devices
+
+|`network-orchestrator device test`
+|Test connectivity to device
+
+|**BGP Operations**
+|
+
+|`network-orchestrator bgp status`
+|Show BGP peer status
+
+|`network-orchestrator bgp peers`
+|List all BGP peers
+
+|`network-orchestrator bgp advertise`
+|Advertise prefix to peer
+
+|`network-orchestrator bgp withdraw`
+|Withdraw prefix from peer
+
+|`network-orchestrator bgp diagnose`
+|Diagnose BGP peer issues
+
+|**SNMP Operations**
+|
+
+|`network-orchestrator snmp poll`
+|Poll SNMP metrics from device
+
+|`network-orchestrator snmp trap`
+|Configure SNMP trap destination
+
+|`network-orchestrator snmp walk`
+|Walk SNMP MIB tree
+
+|`network-orchestrator snmp set`
+|Set SNMP OID value
+
+|**DHCP Operations**
+|
+
+|`network-orchestrator dhcp pool list`
+|List DHCP pools
+
+|`network-orchestrator dhcp pool add`
+|Create DHCP pool
+
+|`network-orchestrator dhcp leases`
+|Show active DHCP leases
+
+|`network-orchestrator dhcp reservation`
+|Add static DHCP reservation
+
+|`network-orchestrator dhcp pool expand`
+|Expand DHCP pool range
+
+|**Configuration Management**
+|
+
+|`network-orchestrator config backup`
+|Backup device config
+
+|`network-orchestrator config deploy`
+|Deploy config to device
+
+|`network-orchestrator config diff`
+|Show config differences
+
+|`network-orchestrator config rollback`
+|Rollback to previous config
+
+|`network-orchestrator config template`
+|Apply Jinja2 template to devices
+
+|**PTP Operations**
+|
+
+|`network-orchestrator ptp status`
+|Show PTP synchronization status
+
+|`network-orchestrator ptp diagnose`
+|Diagnose PTP clock drift
+
+|`network-orchestrator ptp switch-grandmaster`
+|Switch to backup grandmaster
+
+|**Filesystem Diagnostics**
+|
+
+|`network-orchestrator fs afs status`
+|Check AFS volume health
+
+|`network-orchestrator fs nfs check`
+|Verify NFS mount health
+
+|`network-orchestrator fs cifs test`
+|Test CIFS/SMB connectivity
+
+|**Database Diagnostics**
+|
+
+|`network-orchestrator db check`
+|Test database connectivity (PostgreSQL, MySQL, MongoDB, Redis)
+
+|**Remote Management**
+|
+
+|`network-orchestrator remote exec`
+|Execute command on remote device
+
+|`network-orchestrator remote debug`
+|Start remote debugging session
+
+|`network-orchestrator remote logs`
+|Collect logs from device
+
+|**Audit & Compliance**
+|
+
+|`network-orchestrator audit log`
+|Show audit trail
+
+|`network-orchestrator audit report`
+|Generate compliance report
+
+|`network-orchestrator audit export`
+|Export audit logs (SIEM integration)
+|===
+
+=== Options
+
+[cols="1,3"]
+|===
+|Option |Description
+
+|`-v, --verbose`
+|Show detailed output
+
+|`-q, --quiet`
+|Minimal output
+
+|`--dry-run`
+|Preview changes only (no actual changes)
+
+|`--yes`
+|Auto-approve (dangerous! requires --force for production)
+
+|`--format json`
+|JSON output (for automation)
+
+|`--log <file>`
+|Write log to file
+
+|`--device <name>`
+|Target specific device
+
+|`--devices <query>`
+|Target multiple devices (query: "role:router", "vendor:cisco", etc.)
+
+|`--auto-rollback`
+|Automatically rollback if health checks fail
+|===
+
+== Advanced Features
+
+=== Template-Based Config Generation
+
+Use Jinja2 templates for repetitive configs:
+
+[source,jinja]
+----
+{# templates/bgp-peer.j2 #}
+router bgp {{ local_as }}
+  neighbor {{ peer_ip }} remote-as {{ peer_as }}
+  neighbor {{ peer_ip }} description "{{ peer_description }}"
+  {% if peer_auth %}
+  neighbor {{ peer_ip }} password {{ peer_auth }}
+  {% endif %}
+  neighbor {{ peer_ip }} route-map {{ peer_route_map_in }} in
+  neighbor {{ peer_ip }} route-map {{ peer_route_map_out }} out
+----
+
+Apply to multiple devices:
+
+[source,bash]
+----
+network-orchestrator config template apply \
+  --template bgp-peer.j2 \
+  --vars peer.yml \
+  --devices "role:edge-router"
+----
+
+=== Compliance Reporting
+
+Generate compliance reports for audits:
+
+[source,bash]
+----
+network-orchestrator audit report \
+  --type soc2 \
+  --start 2026-01-01 \
+  --end 2026-01-31 \
+  --output report.pdf
+
+Generating SOC2 compliance report...
+  [✓] Access control audit (RBAC)
+  [✓] Change management audit (approvals)
+  [✓] Configuration backups (retention policy)
+  [✓] Audit log integrity (cryptographic signatures)
+
+Report saved: report.pdf (42 pages)
+----
+
+=== Multi-Vendor Abstraction
+
+Network Orchestrator abstracts vendor differences:
+
+[source,bash]
+----
+# Same command works on Cisco, Juniper, Arista
+network-orchestrator interface shutdown \
+  --device ANY-DEVICE \
+  --interface GigabitEthernet1/0/1
+
+# Automatically translated to:
+# Cisco: shutdown
+# Juniper: set interfaces ge-1/0/1 disable
+# Arista: shutdown
+----
+
+=== Integration with NMS/Monitoring
+
+Export metrics to monitoring systems:
+
+[source,bash]
+----
+# Prometheus exporter
+network-orchestrator export prometheus --listen :9100
+
+# Grafana dashboard
+network-orchestrator export grafana --output dashboard.json
+
+# SNMP trap forwarding to syslog
+network-orchestrator snmp trap-forward --to syslog://10.0.1.100:514
+----
+
+=== API Access
+
+RESTful API for automation:
+
+[source,bash]
+----
+# Start API server
+network-orchestrator api --listen :8080
+
+# Example API calls
+curl -X GET http://localhost:8080/api/v1/devices
+curl -X GET http://localhost:8080/api/v1/bgp/peers
+curl -X POST http://localhost:8080/api/v1/config/deploy \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{"device": "core-rt1", "config": "..."}'
+----
+
+== Distribution Support
+
+Network Orchestrator works on:
+
+* ✓ Fedora / RHEL / CentOS (fully supported)
+* ✓ Ubuntu / Debian (fully supported)
+* ✓ Arch Linux (supported)
+* ✓ openSUSE (supported)
+* ✓ Any systemd-based distro (best-effort)
+
+Network device support:
+
+* ✓ Cisco IOS, IOS-XE (routers, switches)
+* ✓ Juniper JunOS (MX, EX, QFX series)
+* ✓ Arista EOS (data center switches)
+* ✓ VyOS (open-source routing)
+* ✓ OpenWrt (embedded routers)
+* ⚠ FRRouting (Linux routing daemon)
+* ⚠ Mikrotik RouterOS (limited support)
+
+DHCP server support:
+
+* ✓ ISC DHCPd (Linux/Unix standard)
+* ✓ Kea DHCP (modern ISC replacement)
+* ✓ dnsmasq (embedded/small deployments)
+* ⚠ Windows DHCP Server (limited support via PowerShell remoting)
+
+== Technical Details
+
+=== Architecture
+
+Network Orchestrator is designed with *safety-first architecture*:
+
+[source,text]
+----
+network-orchestrator/
+├── src/
+│   ├── core/                  # Core orchestration (D language)
+│   │   ├── device_manager.d   # Device inventory, SSH connections
+│   │   ├── config_engine.d    # Config templating, deployment
+│   │   ├── audit_logger.d     # Tamper-proof audit logging
+│   │   └── rbac.d             # Role-based access control
+│   ├── protocols/             # Protocol handlers (D language)
+│   │   ├── bgp.d              # BGP monitoring/control
+│   │   ├── snmp.d             # SNMP polling/traps
+│   │   ├── dhcp.d             # DHCP management
+│   │   └── ptp.d              # PTP clock synchronization
+│   ├── lowlevel/              # Ultra-low-level ops (Zig)
+│   │   ├── bpf_filter.zig     # eBPF packet filtering
+│   │   ├── kernel_bypass.zig  # DPDK/kernel bypass for high-speed polling
+│   │   └── crypto.zig         # Cryptographic signing (audit logs)
+│   ├── ui/                    # User interfaces
+│   │   ├── cli/               # CLI (Ada/SPARK for safety-critical)
+│   │   └── gui/               # GUI (future: ReScript + Tauri)
+│   └── vendors/               # Vendor-specific adapters
+│       ├── cisco.d
+│       ├── juniper.d
+│       ├── arista.d
+│       └── vyos.d
+├── templates/                 # Jinja2 config templates
+├── tests/                     # Test suite
+└── docs/                      # Documentation
+----
+
+=== Implementation Languages
+
+Network Orchestrator uses:
+
+* **D** — Core orchestration, protocol handling, config management
+  - Robust error handling (no crashes from bad device responses)
+  - Cross-platform (Linux, BSD, macOS)
+  - Compiles to native code (no runtime dependency)
+
+* **Zig** — Ultra-low-level operations
+  - eBPF integration for packet inspection
+  - Kernel bypass (DPDK) for high-speed SNMP polling
+  - Cryptographic operations for audit log signing
+
+* **Ada/SPARK** — Safety-critical TUI (terminal user interface)
+  - Formally verified (no memory corruption)
+  - Prevents accidental destructive commands
+  - Compliant with safety standards (e.g., railway, aerospace)
+
+* **ReScript + Tauri** — Future GUI (cross-platform desktop app)
+
+Per link:https://github.com/hyperpolymath/rhodium-standard-repositories[Rhodium Standard Repository (RSR)] guidelines.
+
+=== Requirements
+
+**Minimum:**
+- Linux kernel 5.10+ (for eBPF features)
+- 2 GB RAM
+- Network connectivity to managed devices
+
+**Recommended:**
+- Linux kernel 6.0+
+- 4 GB RAM (for large inventories >100 devices)
+- Git (for config version control)
+- systemd (for service management)
+
+**Optional:**
+- Docker/Podman (for containerized deployment)
+- PostgreSQL (for centralized audit log storage)
+- Redis (for caching device state)
+
+== Why Network Orchestrator?
+
+=== vs. Vendor-Specific Management
+
+|===
+|Vendor Platforms |Network Orchestrator
+
+|Cisco Prime, Juniper Space, Arista CVP
+|Unified interface for all vendors
+
+|Separate license per vendor
+|Open source, no licensing costs
+
+|Vendor lock-in
+|Multi-vendor by design
+
+|Proprietary protocols
+|Standard SSH, SNMP, NETCONF
+
+|Windows-only GUIs (often)
+|Cross-platform CLI + GUI
+
+|No audit trail
+|Immutable audit logs
+|===
+
+=== vs. Manual SSH/CLI
+
+|===
+|Manual CLI |Network Orchestrator
+
+|SSH into each device individually
+|Parallel operations on 100+ devices
+
+|Remember vendor syntax differences
+|Abstracted commands (same syntax everywhere)
+
+|No config version control
+|Automatic Git-based versioning
+
+|Typos can break production
+|Syntax validation before deployment
+
+|No rollback capability
+|One-command rollback to any previous state
+
+|No approval workflow
+|RBAC + change approval built-in
+|===
+
+=== vs. Ansible/SaltStack
+
+Network Orchestrator is *complementary* to config management tools:
+
+|===
+|Ansible/SaltStack |Network Orchestrator
+
+|General-purpose automation
+|Network-specific domain expertise
+
+|Playbook-based (stateless)
+|Stateful (tracks device inventory, config history)
+
+|Limited network protocol support
+|Native BGP, SNMP, DHCP, PTP support
+
+|No audit trail by default
+|Built-in audit logging + compliance reports
+
+|Config management focus
+|Operations focus (diagnostics, monitoring, troubleshooting)
+
+|Best for: Provisioning new devices
+|Best for: Day-2 operations (monitoring, changes, incident response)
+|===
+
+**Recommendation:** Use Ansible for initial device provisioning, Network Orchestrator for ongoing operations.
+
+== Roadmap
+
+=== v0.1 (Current - Planning Phase)
+
+* ✓ Architecture design complete
+* ✓ Language selection (D, Zig, Ada/SPARK)
+* 🔄 Core device manager implementation
+* 🔄 BGP status monitoring (read-only)
+* 🔄 SNMP polling engine
+* 🔄 Basic CLI interface
+
+=== v0.2 (Q2 2026) 🎯 **Target: Minimal Viable Product**
+
+* DHCP pool management (read + write)
+* Config deployment (single device, Cisco IOS only)
+* Automatic backups + rollback
+* RBAC implementation (3 roles: viewer, operator, admin)
+* Audit logging to local files
+* Support: Cisco IOS, VyOS
+
+=== v0.3 (Q3 2026)
+
+* Multi-vendor support (Juniper JunOS, Arista EOS)
+* BGP peer management (add/remove peers)
+* PTP monitoring (basic)
+* Template-based config generation (Jinja2)
+* Health checks + auto-rollback
+* Support: Cisco IOS-XE, OpenWrt
+
+=== v0.4 (Q4 2026)
+
+* Distributed filesystem diagnostics (AFS, NFS, CIFS)
+* Database connectivity checks
+* Batch operations (deploy to 50+ devices)
+* Change approval workflow
+* API server (RESTful)
+* SNMP trap management
+
+=== v1.0 (Q1 2027) 🎯 **Production-Ready**
+
+* Remote debugging/management
+* Compliance reporting (SOC2, PCI-DSS)
+* Prometheus/Grafana integration
+* Advanced RBAC (custom roles)
+* High-availability deployment (clustered)
+* Web GUI (ReScript + Tauri)
+
+See link:ROADMAP.adoc[ROADMAP.adoc] for detailed milestones.
+
+== Contributing
+
+We welcome contributions! See link:CONTRIBUTING.adoc[CONTRIBUTING.adoc].
+
+Priority areas for v0.2:
+
+* Device manager implementation (SSH connection pooling)
+* BGP protocol parser (show bgp summary output)
+* SNMP library integration (D bindings for Net-SNMP)
+* DHCP server adapter (ISC DHCPd)
+* Test coverage (unit tests for protocol parsers)
+
+== Support
+
+* Issues: https://github.com/hyperpolymath/network-orchestrator/issues
+* Discussions: https://github.com/hyperpolymath/network-orchestrator/discussions
+* Security issues: See link:SECURITY.md[SECURITY.md]
+
+== License
+
+Network Orchestrator is licensed under PMPL-1.0-or-later (Palimpsest Meta-Permissive License).
+
+See link:LICENSE[LICENSE] for details.
+
+== Philosophy
+
+Network Orchestrator follows the link:https://github.com/hyperpolymath/palimpsest-license[Palimpsest philosophy]:
+
+* **Boring is good** — Reliable, predictable network operations
+* **Evidence over hype** — Show real device state, not guesses
+* **Safety-first** — Never break production, always have rollback
+* **Respect operators** — No dark patterns, no "trust me" configs
+* **Open by default** — Audit anything, inspect everything
+
+[quote]
+____
+"The best network management tool is invisible—until BGP goes down at 3am, and it saves your weekend."
+____
+
+---
+
+Made with care by the link:https://github.com/hyperpolymath[Hyperpolymath Project].

@@ -1,0 +1,7 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: flatracoon-dashboard
+  labels:
+    app.kubernetes.io/part-of: flatracoon

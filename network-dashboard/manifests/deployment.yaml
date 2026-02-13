@@ -1,0 +1,61 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: network-dashboard
+  namespace: flatracoon-dashboard
+  labels:
+    app.kubernetes.io/name: network-dashboard
+    app.kubernetes.io/component: web-ui
+    app.kubernetes.io/part-of: flatracoon
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: network-dashboard
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: network-dashboard
+    spec:
+      containers:
+        - name: phoenix
+          image: ghcr.io/hyperpolymath/network-dashboard:latest
+          ports:
+            - containerPort: 4000
+              name: http
+              protocol: TCP
+          env:
+            - name: PHX_HOST
+              value: "network-dashboard.flatracoon-dashboard.svc.cluster.local"
+            - name: PORT
+              value: "4000"
+            - name: SECRET_KEY_BASE
+              valueFrom:
+                secretKeyRef:
+                  name: dashboard-secrets
+                  key: secret-key-base
+            - name: ORCHESTRATOR_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: dashboard-config
+                  key: orchestrator-url
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi

@@ -1,0 +1,274 @@
+image:https://img.shields.io/badge/License-PMPL--1.0-blue.svg[License: PMPL-1.0,link="https://github.com/hyperpolymath/palimpsest-license"]
+image:https://img.shields.io/badge/Philosophy-Palimpsest-indigo.svg[Palimpsest,link="https://github.com/hyperpolymath/palimpsest-license"]
+
+
+// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-FileCopyrightText: 2025 Hyperpolymath <hyperpolymath@proton.me>
+= network-dashboard
+
+:icons: font
+:toc: left
+:toclevels: 3
+
+== Purpose
+
+Monitoring suite for Twingate, ZeroTier, IPFS, IPv6 ingress, BGP, and general network health across the FlatRacoon Network Stack.
+
+Built with Phoenix LiveView for real-time updates and poly-observability-mcp for metrics collection.
+
+Part of the link:https://github.com/hyperpolymath/flatracoon-netstack[FlatRacoon Network Stack].
+
+== Architecture
+
+[source]
+----
+┌─────────────────────────────────────────────────────────────┐
+│                   Network Dashboard                          │
+│                   (Phoenix LiveView)                         │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐   │    │
+│  │  │Twingate │ │ZeroTier │ │  IPFS   │ │  IPv6   │   │    │
+│  │  │ Panel   │ │  Panel  │ │  Panel  │ │  Panel  │   │    │
+│  │  └────┬────┘ └────┬────┘ └────┬────┘ └────┬────┘   │    │
+│  │       │           │           │           │         │    │
+│  │  ┌────▼───────────▼───────────▼───────────▼────┐   │    │
+│  │  │           Real-Time Metrics Engine           │   │    │
+│  │  │              (GenServer + ETS)               │   │    │
+│  │  └────────────────────┬─────────────────────────┘   │    │
+│  └───────────────────────┼─────────────────────────────┘    │
+└──────────────────────────┼──────────────────────────────────┘
+                           │
+              ┌────────────┼────────────┐
+              │            │            │
+     ┌────────▼────────┐   │   ┌────────▼────────┐
+     │   Prometheus    │   │   │      Loki       │
+     │   (metrics)     │   │   │     (logs)      │
+     └────────┬────────┘   │   └────────┬────────┘
+              │            │            │
+              └────────────┼────────────┘
+                           │
+       ┌───────────────────┼───────────────────┐
+       │                   │                   │
+┌──────▼──────┐     ┌──────▼──────┐     ┌──────▼──────┐
+│  Twingate   │     │  ZeroTier   │     │    IPFS     │
+│  Connector  │     │   Agents    │     │   Nodes     │
+└─────────────┘     └─────────────┘     └─────────────┘
+----
+
+== Components
+
+* **Phoenix LiveView dashboard** - Real-time web interface
+* **Prometheus integration** - Metrics collection and alerting
+* **Loki integration** - Log aggregation and search
+* **Grafana dashboards** - Pre-built visualization templates
+* **Alert manager** - Notification routing
+
+== Directory Structure
+
+[source]
+----
+network-dashboard/
+├── lib/
+│   ├── network_dashboard/
+│   │   ├── application.ex
+│   │   ├── metrics/
+│   │   │   ├── twingate.ex
+│   │   │   ├── zerotier.ex
+│   │   │   ├── ipfs.ex
+│   │   │   ├── ipv6.ex
+│   │   │   └── bgp.ex
+│   │   └── alerts/
+│   └── network_dashboard_web/
+│       ├── live/
+│       │   ├── dashboard_live.ex
+│       │   ├── twingate_live.ex
+│       │   ├── zerotier_live.ex
+│       │   ├── ipfs_live.ex
+│       │   └── network_live.ex
+│       └── components/
+├── assets/
+│   └── js/                    # ReScript compiled JS
+├── grafana/
+│   ├── dashboards/
+│   │   ├── overview.json
+│   │   ├── twingate.json
+│   │   ├── zerotier.json
+│   │   └── ipfs.json
+│   └── provisioning/
+├── prometheus/
+│   ├── rules/
+│   └── alerts/
+├── configs/
+│   ├── dashboard.ncl
+│   ├── alerts.ncl
+│   └── retention.ncl
+├── mix.exs
+├── Justfile
+├── README.adoc
+├── STATE.scm
+├── META.scm
+└── ECOSYSTEM.scm
+----
+
+== Dashboard Panels
+
+=== Overview
+* Total connected nodes
+* Active Twingate sessions
+* ZeroTier mesh health
+* IPFS cluster status
+* IPv6 traffic volume
+* BGP session states
+
+=== Twingate Panel
+* Active connections
+* Authentication events
+* Bandwidth usage
+* Access policy violations
+* Connector health
+
+=== ZeroTier Panel
+* Peer count and status
+* Network latency matrix
+* NAT traversal success rate
+* Bandwidth per node
+* Route convergence time
+
+=== IPFS Panel
+* Swarm peer count
+* Pinned content size
+* Gateway request rate
+* Bandwidth in/out
+* Block store metrics
+
+=== Network Panel
+* IPv6 traffic volume
+* IPv4 rejection count
+* DNS query rate (Hesiod)
+* BGP route count
+* Packet loss metrics
+
+== Inputs
+
+[cols="1,2,1"]
+|===
+| Input | Description | Source
+
+| Prometheus endpoint
+| Metrics scrape target
+| poly-observability-mcp
+
+| Loki endpoint
+| Log aggregation target
+| poly-observability-mcp
+
+| Module health endpoints
+| Per-module health checks
+| Each FlatRacoon module
+
+| Alert rules
+| Alerting configuration
+| configs/alerts.ncl
+|===
+
+== Outputs
+
+[cols="1,2"]
+|===
+| Output | Description
+
+| Web dashboard
+| Real-time Phoenix LiveView UI
+
+| Grafana dashboards
+| Pre-configured visualizations
+
+| Prometheus alerts
+| Configured alerting rules
+
+| API endpoints
+| Programmatic access to metrics
+|===
+
+== Integration Points
+
+=== With FlatRacoon Stack
+
+* **All modules** - Metrics collection endpoints
+* **poly-observability-mcp** - Prometheus/Loki integration
+* **flatracoon-netstack orchestrator** - Health status feed
+
+=== Machine-Readable Manifest
+
+[source,json]
+----
+{
+  "module": "network-dashboard",
+  "version": "0.1.0",
+  "layer": "observability",
+  "requires": ["prometheus", "loki", "elixir"],
+  "provides": ["dashboard", "alerting", "visualization"],
+  "config_schema": "configs/schema.ncl",
+  "health_endpoint": "/health",
+  "metrics_endpoint": "/metrics"
+}
+----
+
+== Quick Start
+
+[source,bash]
+----
+# 1. Install dependencies
+just deps
+
+# 2. Configure endpoints
+cp configs/dashboard.ncl.example configs/dashboard.ncl
+# Edit configs/dashboard.ncl
+
+# 3. Start dashboard
+just server
+
+# 4. Access at http://localhost:4000
+
+# 5. Import Grafana dashboards
+just grafana-import
+----
+
+== Technology Stack
+
+[cols="1,2"]
+|===
+| Component | Technology
+
+| Backend
+| Elixir / Phoenix 1.7+
+
+| Frontend
+| Phoenix LiveView + ReScript
+
+| Real-time
+| Phoenix Channels / WebSocket
+
+| Metrics
+| Prometheus / VictoriaMetrics
+
+| Logs
+| Loki / Grafana
+
+| Visualization
+| Grafana dashboards
+
+| Configuration
+| Nickel
+|===
+
+== Status
+
+[horizontal]
+Phase:: Scaffolding
+Completion:: 5%
+Next:: Phoenix project initialization and LiveView skeleton
+
+== License
+
+PMPL-1.0-or-later

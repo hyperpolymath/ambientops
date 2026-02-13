@@ -1,0 +1,18 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+apiVersion: v1
+kind: Service
+metadata:
+  name: network-dashboard
+  namespace: flatracoon-dashboard
+  labels:
+    app.kubernetes.io/name: network-dashboard
+    app.kubernetes.io/part-of: flatracoon
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: network-dashboard
+  ports:
+    - name: http
+      port: 4000
+      targetPort: http
+      protocol: TCP

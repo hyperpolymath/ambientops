@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dashboard-config
+  namespace: flatracoon-dashboard
+  labels:
+    app.kubernetes.io/name: network-dashboard
+    app.kubernetes.io/part-of: flatracoon
+data:
+  orchestrator-url: "http://flatracoon-orchestrator.flatracoon.svc.cluster.local:4000"
+  module-list: "twingate-helm-deploy,zerotier-k8s-link,ipfs-overlay,bgp-backbone-lab,ipv6-site-enforcer,hesiod-dns-map,poly-k8s-mcp,poly-secret-mcp,poly-observability-mcp,flatracoon-os"
