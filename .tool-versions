@@ -3,7 +3,17 @@
 # Run 'asdf install' to install all tools
 
 # Primary runtime
-deno 2.1.4
+deno 2.6.6
 
 # Build tools
-just 1.36.0
+just 1.30.0
+
+# Rust (managed via asdf-rust, nightly channel)
+rust nightly
+
+# V (emergency-room)
+v 0.5
+
+# BEAM (Elixir + Erlang for observatory and records/referrals)
+erlang 28.3.1
+elixir 1.19.4-otp-28

@@ -55,9 +55,9 @@ info "Running: hardware-crash-team scan --envelope --output $DEMO_DIR/envelope.j
 "$HCT" scan --envelope --output "$DEMO_DIR/envelope.json" 2>&1 || true
 if [[ -f "$DEMO_DIR/envelope.json" ]]; then
     ok "Evidence Envelope generated"
-    ENVELOPE_ID=$(python3 -c "import json; print(json.load(open('$DEMO_DIR/envelope.json'))['envelope_id'])" 2>/dev/null || echo "unknown")
-    FINDINGS=$(python3 -c "import json; print(len(json.load(open('$DEMO_DIR/envelope.json')).get('findings', [])))" 2>/dev/null || echo "?")
-    ARTIFACTS=$(python3 -c "import json; print(len(json.load(open('$DEMO_DIR/envelope.json'))['artifacts']))" 2>/dev/null || echo "?")
+    ENVELOPE_ID=$(deno eval "const d=JSON.parse(Deno.readTextFileSync('$DEMO_DIR/envelope.json')); console.log(d.envelope_id)" 2>/dev/null || echo "unknown")
+    FINDINGS=$(deno eval "const d=JSON.parse(Deno.readTextFileSync('$DEMO_DIR/envelope.json')); console.log((d.findings||[]).length)" 2>/dev/null || echo "?")
+    ARTIFACTS=$(deno eval "const d=JSON.parse(Deno.readTextFileSync('$DEMO_DIR/envelope.json')); console.log(d.artifacts.length)" 2>/dev/null || echo "?")
     info "  Envelope ID: $ENVELOPE_ID"
     info "  Artifacts:   $ARTIFACTS"
     info "  Findings:    $FINDINGS"
@@ -95,7 +95,7 @@ if [[ -f "$DEMO_DIR/envelope.json" ]]; then
     "$HCT" plan "$DEVICE" --procedure > "$DEMO_DIR/procedure.json" 2>&1 || true
     if [[ -s "$DEMO_DIR/procedure.json" ]]; then
         ok "Procedure Plan generated"
-        STEPS=$(python3 -c "import json; print(len(json.load(open('$DEMO_DIR/procedure.json'))['steps']))" 2>/dev/null || echo "?")
+        STEPS=$(deno eval "const d=JSON.parse(Deno.readTextFileSync('$DEMO_DIR/procedure.json')); console.log(d.steps.length)" 2>/dev/null || echo "?")
         info "  Steps: $STEPS"
     fi
 fi

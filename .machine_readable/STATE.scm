@@ -4,7 +4,7 @@
 
 (state
   (metadata
-    (version "0.2.0")
+    (version "0.3.0")
     (schema-version "1.0")
     (created "2026-01-03")
     (updated "2026-02-12")
@@ -25,37 +25,43 @@
       ("Justfile" "task automation")))
 
   (current-position
-    (phase "consolidation")
-    (overall-completion 35)
+    (phase "leveling")
+    (overall-completion 55)
     (components
-      ("umbrella-repo" 90 "Docs, manifest, packaging glue")
-      ("hospital-model" 80 "UX model documented")
-      ("ecosystem-manifest" 70 "Structure defined, satellites identified")
-      ("clinician" 40 "Absorbed from personal-sysadmin, 4.4k LOC Rust")
-      ("emergency-room" 35 "Absorbed from emergency-button, 1.8k LOC V")
-      ("hardware-crash-team" 25 "Scanner working, analyzer stub, remediation plans")
-      ("observatory" 30 "Elixir metrics, bundle ingestion, forecasting stubs")
-      ("contracts" 80 "8 JSON schemas, Deno validators, Rust types")
-      ("contracts-rust" 30 "Rust serde types matching JSON schemas")
-      ("records-referrals" 25 "Absorbed from feedback-o-tron, bug reporting MCP")
-      ("nafa-app" 10 "Shell structure only")
-      ("composer" 5 "Stubs only"))
+      ("umbrella-repo" 90 "Docs, manifest, Justfile, unified build")
+      ("hospital-model" 80 "UX model documented, data flow wired")
+      ("ecosystem-manifest" 75 "Structure defined, satellites identified, schema wiring")
+      ("clinician" 30 "Core tools work (process/network/disk/service/security/crisis), heavy deps feature-gated")
+      ("emergency-room" 70 "1.8k LOC V, PII redaction, handoff to clinician, tests")
+      ("hardware-crash-team" 60 "Scanner + real crash analyzer + remediation, contract output")
+      ("observatory" 80 "Metrics, bundle ingestion, weather generation, forecasting, correlator")
+      ("contracts" 80 "8 JSON schemas, Deno validators, cross-validation")
+      ("contracts-rust" 80 "Serde types matching all 8 schemas, From conversions, 7 tests")
+      ("records-referrals" 55 "MCP server works, multi-platform submitter")
+      ("nafa-app" 25 "TEA shell, no backend connectivity")
+      ("composer" 0 "RSR template only"))
     (working-features
-      ("Hospital model specification")
-      ("PCI zombie device scanning (hardware-crash-team)")
-      ("Remediation plan generation with undo receipts")
-      ("Observatory metrics collection and bundle ingestion")
-      ("Emergency button one-click stabilization")
-      ("8 contract schemas with cross-validation")
-      ("Clinician incident envelope intake")
-      ("RSR compliance structure")))
+      ("Hospital model specification and data flow")
+      ("PCI zombie scanning with Evidence Envelope output (--envelope)")
+      ("Crash analyzer: journalctl parsing, PCI/ACPI correlation")
+      ("Remediation plans with Procedure Plan output (--procedure)")
+      ("Observatory: metrics, weather generation, forecasting, correlator")
+      ("Emergency room: one-click stabilization with PII redaction")
+      ("8 contract schemas with Deno cross-validation")
+      ("contracts-rust: serde types + From conversions for all types")
+      ("Clinician: incident/envelope intake, 5 sysadmin tool modules")
+      ("Records/referrals: MCP server, multi-platform bug reporting")
+      ("Rust workspace: 3 crates, unified build")
+      ("Justfile: build-all, test-all, check, clean")))
 
   (route-to-mvp
     (milestones
-      ("Phase 0 - Bootstrap" "mostly-complete"
+      ("Phase 0 - Bootstrap" "complete"
         "Umbrella repo, hospital model docs, ecosystem manifest, trust principles")
-      ("Phase 1 - Consolidation" "in-progress"
-        "Absorb satellite repos, wire contract schemas, establish workspace")
+      ("Phase 1 - Consolidation" "complete"
+        "Absorbed satellite repos, wired contract schemas, established workspace")
+      ("Phase 1.5 - Leveling" "in-progress"
+        "Balanced component development: tests, contract connectivity, build health")
       ("Phase 2 - Ward MVP" "planned"
         "System weather generation, ambient monitoring, theme packs")
       ("Phase 3 - Emergency Room MVP" "planned"
@@ -68,28 +74,30 @@
   (blockers-and-issues
     (critical)
     (high
-      ("Wire end-to-end flow: ER → OR → Records with contract schemas"))
+      ("Add test suites to hardware-crash-team and records/referrals (both at 0 tests)")
+      ("Wire remaining contract consumers: ER→envelope, referrals→envelope, nafa→weather"))
     (medium
-      ("Crash analyzer not yet implemented in hardware-crash-team")
-      ("System weather generation not yet in observatory"))
+      ("nafa-app needs weather endpoint and basic tests")
+      ("ARCHITECTURE.adoc completely stale (describes wrong system)"))
     (low
-      ("nafa-app UI not started")
-      ("Composer orchestration engine is stubs only")))
+      ("Composer orchestration engine not yet specified")
+      ("4 of 8 schemas unwired (message-intent, pack-manifest, ambient-payload, run-bundle)")))
 
   (critical-next-actions
     (immediate
-      ("Wire hardware-crash-team output to contract schemas")
-      ("Create contracts-rust shared crate")
-      ("Implement crash analyzer"))
+      ("Add tests to all untested components (Wave 2)")
+      ("Wire contract connectivity across all departments (Wave 3)")
+      ("Rewrite stale ARCHITECTURE.adoc (Wave 4)"))
     (this-week
-      ("System weather generation in observatory")
-      ("Demo flow script: scan → envelope → plan → receipt")
-      ("Update ECOSYSTEM.scm with absorbed components"))
+      ("Integration test script for end-to-end validation")
+      ("Composer plan documentation")
+      ("Update ECOSYSTEM.scm with schema wiring info"))
     (this-month
-      ("Ward MVP - ambient monitoring UI")
-      ("Emergency Room handoff integration")))
+      ("Remaining remediation strategies in hardware-crash-team")
+      ("Ward MVP - nafa-app consuming SystemWeather")))
 
   (session-history
     ("2026-01-09" "Resolved all TODOs and stubs in umbrella repo")
     ("2026-02-08" "Added hardware-crash-team with PCI scanning and remediation")
-    ("2026-02-12" "Consolidated hospital model: absorbed clinician, emergency-room, contracts, referrals")))
+    ("2026-02-12" "Consolidated hospital model: absorbed clinician, ER, contracts, referrals")
+    ("2026-02-12" "Balanced leveling: Justfile, feature-gated clinician, fixed Python/AGPL/stale state")))

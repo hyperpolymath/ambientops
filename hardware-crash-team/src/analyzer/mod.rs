@@ -426,3 +426,112 @@ impl Clone for BootEntry {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_extract_pci_device_full_address() {
+        let line = "pci 0000:01:00.0: [10de:13b0] type 00 class 0x030000";
+        assert_eq!(extract_pci_device(line), Some("01:00.0".to_string()));
+    }
+
+    #[test]
+    fn test_extract_pci_device_short_address() {
+        let line = "AER: 02:00.0 Uncorrected Error detected";
+        assert_eq!(extract_pci_device(line), Some("02:00.0".to_string()));
+    }
+
+    #[test]
+    fn test_extract_pci_device_multifunction() {
+        let line = "BAR 0 of 0000:01:00.1: cannot claim resource";
+        assert_eq!(extract_pci_device(line), Some("01:00.1".to_string()));
+    }
+
+    #[test]
+    fn test_extract_pci_device_no_match() {
+        let line = "normal log line without pci address";
+        assert_eq!(extract_pci_device(line), None);
+    }
+
+    #[test]
+    fn test_extract_acpi_device_sb_path() {
+        let line = "ACPI BIOS Error: _SB._OSC method failed (AE_AML_BUFFER_LIMIT)";
+        let result = extract_acpi_device(line);
+        assert!(result.is_some());
+        assert!(result.unwrap().starts_with("_SB"));
+    }
+
+    #[test]
+    fn test_extract_acpi_device_pci0() {
+        let line = "ACPI Error: _SB.PCI0._OSC evaluation failed";
+        let result = extract_acpi_device(line);
+        assert!(result.is_some());
+        assert!(result.unwrap().contains("PCI0"));
+    }
+
+    #[test]
+    fn test_extract_acpi_device_no_match() {
+        let line = "normal kernel log without ACPI path";
+        assert_eq!(extract_acpi_device(line), None);
+    }
+
+    #[test]
+    fn test_extract_module_name_failed() {
+        let line = "module nvidia failed verification";
+        assert_eq!(extract_module_name(line), Some("nvidia".to_string()));
+    }
+
+    #[test]
+    fn test_extract_module_name_tainting() {
+        let line = "module nouveau tainting kernel";
+        assert_eq!(extract_module_name(line), Some("nouveau".to_string()));
+    }
+
+    #[test]
+    fn test_extract_module_name_verification_skip() {
+        // "verification" is filtered out as a common false positive
+        let line = "module verification failed: signature";
+        assert_eq!(extract_module_name(line), None);
+    }
+
+    #[test]
+    fn test_extract_module_name_no_match() {
+        let line = "some random kernel log line";
+        assert_eq!(extract_module_name(line), None);
+    }
+
+    #[test]
+    fn test_truncate_within_limit() {
+        assert_eq!(truncate("hello", 10), "hello");
+    }
+
+    #[test]
+    fn test_truncate_at_limit() {
+        assert_eq!(truncate("hello", 5), "hello");
+    }
+
+    #[test]
+    fn test_truncate_beyond_limit() {
+        assert_eq!(truncate("hello world", 5), "hello");
+    }
+
+    #[test]
+    fn test_parse_epoch_rough_valid() {
+        let result = parse_epoch_rough("2026-02-08 10:30:45 UTC");
+        assert_eq!(result, Some(10 * 3600 + 30 * 60 + 45));
+    }
+
+    #[test]
+    fn test_parse_epoch_rough_midnight() {
+        let result = parse_epoch_rough("2026-02-08 00:00:00 UTC");
+        assert_eq!(result, Some(0));
+    }
+
+    #[test]
+    fn test_parse_epoch_rough_no_time() {
+        let result = parse_epoch_rough("no time here");
+        assert_eq!(result, None);
+    }
+}

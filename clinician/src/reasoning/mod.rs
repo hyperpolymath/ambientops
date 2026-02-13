@@ -264,4 +264,87 @@ mod tests {
         assert_eq!(results.len(), 2);
         assert!(results[0].1 >= results[1].1); // Sorted by confidence
     }
+
+    #[test]
+    fn test_compound_unification() {
+        let engine = ReasoningEngine::new();
+        let t1 = compound("fix", vec![atom("nvidia"), var("Method")]);
+        let t2 = compound("fix", vec![atom("nvidia"), atom("modprobe")]);
+        let result = engine.unify(&t1, &t2, &HashMap::new());
+        assert!(result.is_some());
+        assert_eq!(result.unwrap().get("Method"), Some(&atom("modprobe")));
+    }
+
+    #[test]
+    fn test_compound_unification_name_mismatch() {
+        let engine = ReasoningEngine::new();
+        let t1 = compound("fix", vec![atom("nvidia")]);
+        let t2 = compound("diagnose", vec![atom("nvidia")]);
+        assert!(engine.unify(&t1, &t2, &HashMap::new()).is_none());
+    }
+
+    #[test]
+    fn test_compound_unification_arity_mismatch() {
+        let engine = ReasoningEngine::new();
+        let t1 = compound("fix", vec![atom("nvidia"), atom("modprobe")]);
+        let t2 = compound("fix", vec![atom("nvidia")]);
+        assert!(engine.unify(&t1, &t2, &HashMap::new()).is_none());
+    }
+
+    #[test]
+    fn test_list_unification() {
+        let engine = ReasoningEngine::new();
+        let t1 = Term::List(vec![atom("a"), var("X"), atom("c")]);
+        let t2 = Term::List(vec![atom("a"), atom("b"), atom("c")]);
+        let result = engine.unify(&t1, &t2, &HashMap::new());
+        assert!(result.is_some());
+        assert_eq!(result.unwrap().get("X"), Some(&atom("b")));
+    }
+
+    #[test]
+    fn test_list_unification_length_mismatch() {
+        let engine = ReasoningEngine::new();
+        let t1 = Term::List(vec![atom("a"), atom("b")]);
+        let t2 = Term::List(vec![atom("a"), atom("b"), atom("c")]);
+        assert!(engine.unify(&t1, &t2, &HashMap::new()).is_none());
+    }
+
+    #[test]
+    fn test_rule_query() {
+        let mut engine = ReasoningEngine::new();
+        // Fact: is_gpu(nvidia) with confidence 1.0
+        engine.add_fact(compound("is_gpu", vec![atom("nvidia")]), 1.0);
+        // Rule: needs_fix(X) :- is_gpu(X) with confidence 0.8
+        engine.add_rule(
+            compound("needs_fix", vec![var("X")]),
+            vec![compound("is_gpu", vec![var("X")])],
+            0.8,
+        );
+        let results = engine.query(&compound("needs_fix", vec![var("Y")]));
+        assert!(!results.is_empty());
+        // Combined confidence: 0.8 * 1.0 = 0.8
+        assert!((results[0].1 - 0.8).abs() < 0.01);
+    }
+
+    #[test]
+    fn test_confidence_ordering() {
+        let mut engine = ReasoningEngine::new();
+        engine.add_fact(compound("fix", vec![atom("a")]), 0.5);
+        engine.add_fact(compound("fix", vec![atom("b")]), 0.9);
+        engine.add_fact(compound("fix", vec![atom("c")]), 0.3);
+        let results = engine.query(&compound("fix", vec![var("X")]));
+        assert_eq!(results.len(), 3);
+        assert!(results[0].1 >= results[1].1);
+        assert!(results[1].1 >= results[2].1);
+    }
+
+    #[test]
+    fn test_walk_resolves_chain() {
+        let engine = ReasoningEngine::new();
+        let mut subst = HashMap::new();
+        subst.insert("X".to_string(), var("Y"));
+        subst.insert("Y".to_string(), atom("resolved"));
+        let result = engine.walk(&var("X"), &subst);
+        assert_eq!(result, atom("resolved"));
+    }
 }

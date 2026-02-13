@@ -270,3 +270,145 @@ fn read_kernel_version() -> String {
         .unwrap_or("unknown")
         .to_string()
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::types::*;
+
+    fn make_device(slot: &str, driver: Option<&str>, power: PowerState, issues: Vec<DeviceIssue>) -> PciDevice {
+        PciDevice {
+            slot: slot.to_string(),
+            pci_id: "10de:13b0".to_string(),
+            description: String::new(),
+            vendor: "10de".to_string(),
+            class: "0300".to_string(),
+            driver: driver.map(|s| s.to_string()),
+            kernel_modules: Vec::new(),
+            power_state: power,
+            enabled: true,
+            iommu_group: None,
+            memory_regions: Vec::new(),
+            issues,
+        }
+    }
+
+    #[test]
+    fn test_pci_device_json_roundtrip() {
+        let device = make_device("01:00.0", None, PowerState::D0, vec![]);
+        let json = serde_json::to_string(&device).unwrap();
+        let parsed: PciDevice = serde_json::from_str(&json).unwrap();
+        assert_eq!(parsed.slot, "01:00.0");
+        assert_eq!(parsed.pci_id, "10de:13b0");
+        assert!(parsed.driver.is_none());
+    }
+
+    #[test]
+    fn test_system_report_json_roundtrip() {
+        let report = SystemReport {
+            timestamp: "2026-02-12T00:00:00Z".to_string(),
+            kernel_version: "6.18.8".to_string(),
+            devices: vec![make_device("01:00.0", Some("i915"), PowerState::D0, vec![])],
+            iommu: IommuStatus {
+                enabled: true,
+                iommu_type: Some("Intel VT-d".to_string()),
+                group_count: 14,
+                interrupt_remapping: true,
+            },
+            acpi_errors: vec![],
+            risk_level: RiskLevel::Clean,
+        };
+        let json = serde_json::to_string_pretty(&report).unwrap();
+        let parsed: SystemReport = serde_json::from_str(&json).unwrap();
+        assert_eq!(parsed.devices.len(), 1);
+        assert_eq!(parsed.kernel_version, "6.18.8");
+    }
+
+    #[test]
+    fn test_zombie_device_issue() {
+        let issue = DeviceIssue {
+            severity: IssueSeverity::High,
+            issue_type: IssueType::ZombieDevice,
+            description: "Device in D0 with no driver".to_string(),
+            remediation: "Claim with pci-stub".to_string(),
+        };
+        assert_eq!(issue.severity, IssueSeverity::High);
+    }
+
+    #[test]
+    fn test_partial_binding_issue() {
+        let issue = DeviceIssue {
+            severity: IssueSeverity::Warning,
+            issue_type: IssueType::PartialBinding,
+            description: "NVIDIA audio codec bound to snd_hda_intel".to_string(),
+            remediation: "Claim with pci-stub".to_string(),
+        };
+        assert_eq!(issue.severity, IssueSeverity::Warning);
+    }
+
+    #[test]
+    fn test_assess_risk_clean() {
+        let devices = vec![make_device("01:00.0", Some("i915"), PowerState::D0, vec![])];
+        let risk = assess_risk(&devices, &[]);
+        assert!(matches!(risk, RiskLevel::Clean));
+    }
+
+    #[test]
+    fn test_assess_risk_medium() {
+        let issues = vec![DeviceIssue {
+            severity: IssueSeverity::Warning,
+            issue_type: IssueType::PartialBinding,
+            description: "partial binding".to_string(),
+            remediation: "fix".to_string(),
+        }];
+        let devices = vec![make_device("01:00.0", Some("snd_hda_intel"), PowerState::D0, issues)];
+        let risk = assess_risk(&devices, &[]);
+        assert!(matches!(risk, RiskLevel::Medium));
+    }
+
+    #[test]
+    fn test_assess_risk_high() {
+        let issues = vec![DeviceIssue {
+            severity: IssueSeverity::High,
+            issue_type: IssueType::ZombieDevice,
+            description: "zombie".to_string(),
+            remediation: "fix".to_string(),
+        }];
+        let devices = vec![make_device("01:00.0", None, PowerState::D0, issues)];
+        let risk = assess_risk(&devices, &[]);
+        assert!(matches!(risk, RiskLevel::High));
+    }
+
+    #[test]
+    fn test_assess_risk_high_with_acpi() {
+        let devices = vec![make_device("01:00.0", Some("i915"), PowerState::D0, vec![])];
+        let acpi_errors = vec![AcpiError {
+            method: "_SB._OSC".to_string(),
+            error_code: "AE_AML_BUFFER_LIMIT".to_string(),
+            description: "BIOS bug".to_string(),
+            related_device: None,
+        }];
+        let risk = assess_risk(&devices, &acpi_errors);
+        assert!(matches!(risk, RiskLevel::High));
+    }
+
+    #[test]
+    fn test_assess_risk_critical() {
+        let issues = vec![DeviceIssue {
+            severity: IssueSeverity::Critical,
+            issue_type: IssueType::SpuriousInterrupts,
+            description: "critical interrupt storm".to_string(),
+            remediation: "disable device".to_string(),
+        }];
+        let devices = vec![make_device("01:00.0", None, PowerState::D0, issues)];
+        let risk = assess_risk(&devices, &[]);
+        assert!(matches!(risk, RiskLevel::Critical));
+    }
+
+    #[test]
+    fn test_issue_severity_ordering() {
+        assert!(IssueSeverity::Info < IssueSeverity::Warning);
+        assert!(IssueSeverity::Warning < IssueSeverity::High);
+        assert!(IssueSeverity::High < IssueSeverity::Critical);
+    }
+}

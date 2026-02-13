@@ -93,3 +93,46 @@ fn test_capture_module_list_coverage() {
 		assert name.len > 0
 	}
 }
+
+// PII Redaction Tests
+
+fn test_redact_pii_password() {
+	input := 'password=s3cretValue123'
+	result := redact_pii(input)
+	assert !result.contains('s3cretValue123')
+	assert result.contains('[REDACTED]')
+}
+
+fn test_redact_pii_email() {
+	input := 'Contact user@example.com for details'
+	result := redact_pii(input)
+	assert !result.contains('user@example.com')
+	assert result.contains('[REDACTED-EMAIL]')
+}
+
+fn test_redact_pii_ssn() {
+	input := 'SSN: 123-45-6789'
+	result := redact_pii(input)
+	assert !result.contains('123-45-6789')
+	assert result.contains('[REDACTED-SSN]')
+}
+
+fn test_redact_pii_aws_key() {
+	input := 'AWS key: AKIAIOSFODNN7EXAMPLE'
+	result := redact_pii(input)
+	assert !result.contains('AKIAIOSFODNN7EXAMPLE')
+	assert result.contains('[REDACTED]')
+}
+
+fn test_redact_pii_github_token() {
+	input := 'token=ghp_ABCDEFabcdef1234567890'
+	result := redact_pii(input)
+	assert !result.contains('ghp_ABCDEFabcdef1234567890')
+	assert result.contains('[REDACTED]')
+}
+
+fn test_redact_pii_clean_input() {
+	input := 'Just a normal log line with no sensitive data'
+	result := redact_pii(input)
+	assert result == input
+}
