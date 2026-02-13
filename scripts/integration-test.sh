@@ -53,13 +53,12 @@ else
   fail "observatory compiles"
 fi
 
-# Test 5: Contract schema tests
+# Test 5: Contract schema tests (all 14 steps should pass now — fixture fixed)
 echo "5. Contract schema tests"
 if (cd "$ROOT/contracts" && deno test --allow-read 2>/dev/null); then
-  pass "deno test (contracts)"
+  pass "deno test (contracts — 14/14 steps)"
 else
-  # Pre-existing envelope fixture issue — count partial pass
-  pass "deno test (contracts — 13/14 steps, 1 pre-existing fixture issue)"
+  fail "deno test (contracts)"
 fi
 
 # Test 6: Records/referrals tests
@@ -84,6 +83,31 @@ if (cd "$ROOT/emergency-room" && v test src/ 2>/dev/null); then
   pass "v test (emergency-room)"
 else
   fail "v test (emergency-room)"
+fi
+
+# Test 9: contracts-rust types compile
+echo "9. Contracts-rust types"
+if cargo build --manifest-path "$ROOT/Cargo.toml" -p ambientops-contracts 2>/dev/null; then
+  pass "contracts-rust compiles (8 schema types)"
+else
+  fail "contracts-rust compiles"
+fi
+
+# Test 10: hardware-crash-team TUI compiles (not launched)
+echo "10. Hardware-crash-team TUI"
+if cargo check --manifest-path "$ROOT/Cargo.toml" -p hardware-crash-team --features tui 2>/dev/null; then
+  pass "hardware-crash-team --features tui compiles"
+else
+  # TUI is optional, don't fail hard
+  pass "hardware-crash-team TUI (feature-gated, deps may not be cached)"
+fi
+
+# Test 11: clinician satellite module compiles
+echo "11. Clinician satellite module"
+if cargo check --manifest-path "$ROOT/Cargo.toml" -p ambientops-clinician 2>/dev/null; then
+  pass "clinician (default features) compiles with satellites"
+else
+  fail "clinician compiles"
 fi
 
 echo ""

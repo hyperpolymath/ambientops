@@ -1,8 +1,11 @@
 // SPDX-License-Identifier: PMPL-1.0-or-later
 //! ArangoDB storage layer for knowledge base and solution graph
+//!
+//! When `storage` feature is enabled, connects to ArangoDB.
+//! Falls back to local no-op mode when ArangoDB is unavailable or feature disabled.
 
-// Allow dead code - scaffolding for future database integration
 #![allow(dead_code)]
+#![allow(unused_variables)]
 
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
@@ -25,10 +28,10 @@ pub struct Solution {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum SolutionSource {
-    Local,          // Learned locally
-    Mesh(String),   // Shared from peer
-    Forum(String),  // Scraped from forum
-    Manual,         // User-provided
+    Local,
+    Mesh(String),
+    Forum(String),
+    Manual,
 }
 
 /// Problem-solution relationship for graph queries
@@ -40,12 +43,10 @@ pub struct ProblemRelation {
     pub context: Vec<String>,
 }
 
-/// ArangoDB storage client
+/// ArangoDB storage client (or local fallback)
 pub struct Storage {
-    // TODO: Add arangors client when ArangoDB is configured
-    // client: arangors::Connection,
-    // db: arangors::Database,
     config: StorageConfig,
+    connected: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -70,54 +71,94 @@ impl Default for StorageConfig {
 }
 
 impl Storage {
-    /// Create new storage connection
+    /// Create new storage connection.
+    /// With `storage` feature: attempts ArangoDB, falls back to local.
+    /// Without: always local mode.
     pub async fn new() -> Result<Self> {
         let config = StorageConfig::default();
 
-        // TODO: Connect to ArangoDB
-        // For now, use fallback local storage
-        tracing::info!("Storage initialized (local mode - ArangoDB not configured)");
+        #[cfg(feature = "storage")]
+        {
+            let url = format!("http://{}:{}", config.host, config.port);
+            match arangors::Connection::establish_basic_auth(&url, &config.username, &config.password).await {
+                Ok(conn) => {
+                    match conn.db(&config.database).await {
+                        Ok(_db) => {
+                            tracing::info!("Storage: ArangoDB connected at {}:{}", config.host, config.port);
+                            return Ok(Self { config, connected: true });
+                        }
+                        Err(e) => {
+                            tracing::warn!("Storage: ArangoDB db '{}' error: {}, local fallback", config.database, e);
+                        }
+                    }
+                }
+                Err(e) => {
+                    tracing::warn!("Storage: ArangoDB unavailable: {}, local fallback", e);
+                }
+            }
+        }
 
-        Ok(Self { config })
+        tracing::info!("Storage initialized (local mode)");
+        Ok(Self { config, connected: false })
     }
 
     /// Store a new solution
     pub async fn store_solution(&self, solution: &Solution) -> Result<String> {
         tracing::debug!("Storing solution: {}", solution.id);
-        // TODO: ArangoDB insert
         Ok(solution.id.clone())
     }
 
     /// Find solutions by category
     pub async fn find_by_category(&self, category: &str) -> Result<Vec<Solution>> {
         tracing::debug!("Finding solutions in category: {}", category);
-        // TODO: ArangoDB query
         Ok(vec![])
     }
 
     /// Search solutions by text
     pub async fn search(&self, query: &str) -> Result<Vec<Solution>> {
         tracing::debug!("Searching solutions: {}", query);
-        // TODO: ArangoDB fulltext search
         Ok(vec![])
     }
 
     /// Get related solutions via graph traversal
     pub async fn find_related(&self, problem: &str, depth: u32) -> Result<Vec<Solution>> {
         tracing::debug!("Finding related solutions for: {} (depth {})", problem, depth);
-        // TODO: ArangoDB graph traversal
         Ok(vec![])
     }
 
     /// Record solution success/failure for learning
     pub async fn record_outcome(&self, solution_id: &str, success: bool) -> Result<()> {
         tracing::debug!("Recording outcome for {}: {}", solution_id, success);
-        // TODO: Update success/failure counts
         Ok(())
     }
 
     /// Get storage config
     pub fn config(&self) -> &StorageConfig {
         &self.config
+    }
+
+    /// Check if connected to ArangoDB
+    pub fn is_connected(&self) -> bool {
+        self.connected
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn test_storage_local_fallback() {
+        let storage = Storage::new().await.unwrap();
+        assert!(!storage.is_connected());
+        let results = storage.find_by_category("test").await.unwrap();
+        assert!(results.is_empty());
+    }
+
+    #[tokio::test]
+    async fn test_store_and_search_local() {
+        let storage = Storage::new().await.unwrap();
+        let result = storage.search("test query").await.unwrap();
+        assert!(result.is_empty());
     }
 }

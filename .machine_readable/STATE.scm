@@ -25,18 +25,18 @@
       ("Justfile" "task automation")))
 
   (current-position
-    (phase "leveling-complete")
-    (overall-completion 65)
+    (phase "deep-build")
+    (overall-completion 78)
     (components
       ("umbrella-repo" 90 "Docs, manifest, Justfile, unified build, integration tests")
       ("hospital-model" 85 "UX model documented, data flow wired, architecture synced")
-      ("ecosystem-manifest" 80 "Structure defined, satellites identified, schema wiring documented")
-      ("clinician" 55 "Core tools work, heavy deps feature-gated, 16 tests, reasoning engine")
+      ("ecosystem-manifest" 85 "Structure defined, satellites integrated, all 8 schemas typed")
+      ("clinician" 70 "Core tools + satellite integration + real service connections behind feature gates")
       ("emergency-room" 75 "1.8k LOC V, PII redaction, EvidenceEnvelope producer, 9 tests")
-      ("hardware-crash-team" 75 "Scanner + crash analyzer (~429 LOC) + remediation, 27 tests")
-      ("observatory" 85 "Metrics, ingestion, weather, forecasting, CLI routes for envelope+weather")
-      ("contracts" 80 "8 JSON schemas, Deno validators, WIRING.md, 13 test steps")
-      ("contracts-rust" 80 "Serde types matching all 8 schemas, From conversions, 7 tests")
+      ("hardware-crash-team" 90 "All 6 strategies, BAR/lspci/interrupts, multi-device, TUI, 45+ tests")
+      ("observatory" 90 "Metrics, ingestion, weather, forecasting, themes, ambient payload, CLI routes")
+      ("contracts" 85 "8 JSON schemas, Deno validators, WIRING.md, 14/14 test steps")
+      ("contracts-rust" 90 "Serde types matching all 8 schemas, From conversions, 15+ tests")
       ("records-referrals" 65 "MCP server, multi-platform submitter, envelope consumer, 8 tests")
       ("nafa-app" 50 "TEA shell, weather endpoint, domain tests, 7 tests")
       ("composer" 10 "RSR template + PLAN.md (orchestration architecture documented)"))
@@ -78,28 +78,27 @@
     (critical)
     (high)
     (medium
-      ("Remaining 5 remediation strategies in hardware-crash-team (v0.3.0)")
-      ("nafa-app needs full UI build (Phase 2: Ward MVP)")
-      ("Observatory pre-existing test failures in forecasting module (8 tests)"))
+      ("nafa-app needs full UI build (Phase 2: Ward MVP)"))
     (low
       ("Composer orchestration engine not yet specified beyond PLAN.md")
-      ("4 of 8 schemas unwired (message-intent, pack-manifest, ambient-payload, run-bundle)")
-      ("Contract test fixture: envelope test needs non-empty artifacts array")))
+      ("Full libp2p gossipsub mesh (only mDNS discovery implemented)")
+      ("ArangoDB/Redis graph traversal (basic CRUD behind feature gates only)")))
 
   (critical-next-actions
     (immediate
-      ("Fix observatory forecasting test failures (8 tests)")
-      ("Fix contract envelope test fixture (empty artifacts)"))
+      ("nafa-app: connect UI to weather + ambient endpoints")
+      ("Composer: choose language and begin orchestration skeleton"))
     (this-week
-      ("Remaining remediation strategies in hardware-crash-team")
-      ("nafa-app: connect UI to weather endpoint"))
+      ("Full libp2p gossipsub mesh for clinician P2P")
+      ("ArangoDB graph traversal queries in storage module"))
     (this-month
-      ("Ward MVP: ambient monitoring with theme packs")
-      ("Composer: choose language, implement orchestration skeleton")))
+      ("Codeberg + Bitbucket mirroring for ambientops")
+      ("SARIF output format for hardware-crash-team")))
 
   (session-history
     ("2026-01-09" "Resolved all TODOs and stubs in umbrella repo")
     ("2026-02-08" "Added hardware-crash-team with PCI scanning and remediation")
     ("2026-02-12" "Consolidated hospital model: absorbed clinician, ER, contracts, referrals")
     ("2026-02-12" "Wave 1: Justfile, feature-gated clinician, fixed Python/AGPL/stale state")
-    ("2026-02-13" "Waves 2-5: 56 new tests, contract wiring (ER→envelope, obs→weather→nafa, referrals→envelope), docs sync, integration test")))
+    ("2026-02-13" "Waves 2-5: 56 new tests, contract wiring (ER→envelope, obs→weather→nafa, referrals→envelope), docs sync, integration test")
+    ("2026-02-13" "Deep build: 62+ new tests, all 6 remediation strategies, BAR/lspci/interrupts, TUI, 4 typed schemas, theme packs, ambient payload, satellite integration, real service connections")))

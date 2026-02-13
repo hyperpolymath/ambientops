@@ -45,7 +45,11 @@ describe("Evidence Envelope Validation", () => {
           hostname: "test-machine",
         },
       },
-      artifacts: [],
+      artifacts: [{
+        artifact_id: "550e8400-e29b-41d4-a716-446655440099",
+        type: "snapshot",
+        path: "snapshots/system-state.json",
+      }],
     };
 
     const result = validator.validateEnvelope(validEnvelope);
@@ -76,7 +80,11 @@ describe("Evidence Envelope Validation", () => {
         tool: "invalid-tool",
         host: { hostname: "test" },
       },
-      artifacts: [],
+      artifacts: [{
+        artifact_id: "550e8400-e29b-41d4-a716-446655440099",
+        type: "snapshot",
+        path: "snapshots/system-state.json",
+      }],
     };
 
     const result = validator.validateEnvelope(invalidEnvelope);

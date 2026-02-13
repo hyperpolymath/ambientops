@@ -242,6 +242,36 @@ pub enum RemediationStrategy {
     DriverUnbind,
 }
 
+impl RemediationStrategy {
+    /// Whether this strategy requires a reboot to take effect
+    pub fn requires_reboot(&self) -> bool {
+        matches!(self, Self::PciStub | Self::VfioPci | Self::DualNullDriver)
+    }
+
+    /// Risk level for this strategy
+    pub fn risk_level(&self) -> RiskLevel {
+        match self {
+            Self::AcpiPowerOff => RiskLevel::Medium,
+            _ => RiskLevel::Low,
+        }
+    }
+}
+
+/// A multi-device remediation plan wrapping per-device plans
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MultiDevicePlan {
+    /// Plan ID
+    pub id: String,
+    /// All target devices
+    pub devices: Vec<String>,
+    /// Per-device (or combined) plans
+    pub plans: Vec<RemediationPlan>,
+    /// Whether the overall plan requires reboot
+    pub requires_reboot: bool,
+    /// Overall risk level
+    pub risk: RiskLevel,
+}
+
 /// A single remediation step
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RemediationStep {

@@ -14,6 +14,7 @@ mod scanner;
 mod analyzer;
 mod remediation;
 mod types;
+mod tui;
 
 /// Hardware Crash Team - diagnose and fix hardware-induced crashes
 #[derive(Parser)]
@@ -59,10 +60,11 @@ enum Commands {
 
     /// Present remediation options for identified issues
     Plan {
-        /// Device to remediate (PCI slot, e.g., "01:00.0")
-        device: String,
+        /// Device(s) to remediate (PCI slot, e.g., "01:00.0"). Multiple devices supported.
+        #[arg(required = true)]
+        devices: Vec<String>,
 
-        /// Strategy: null-driver, power-off, disable, isolate
+        /// Strategy: pci-stub, vfio-pci, dual, power-off, disable, unbind
         #[arg(short, long)]
         strategy: Option<String>,
 
@@ -89,6 +91,9 @@ enum Commands {
 
     /// Show system hardware overview
     Status,
+
+    /// Launch interactive TUI (requires --features tui)
+    Tui,
 }
 
 fn main() -> Result<()> {
@@ -149,20 +154,32 @@ fn main() -> Result<()> {
             analyzer::print_diagnosis(&analysis);
         }
 
-        Commands::Plan { device, strategy, procedure } => {
-            println!("Generating remediation plan for device {}...", device);
-            let plan = remediation::create_plan(&device, strategy.as_deref())?;
+        Commands::Plan { devices, strategy, procedure } => {
+            if devices.len() == 1 {
+                let device = &devices[0];
+                println!("Generating remediation plan for device {}...", device);
+                let plan = remediation::create_plan(device, strategy.as_deref())?;
 
-            if procedure {
-                let plan_json = serde_json::to_value(&plan)?;
-                let envelope_ref = uuid::Uuid::new_v4(); // Would come from a prior scan --envelope
-                let proc_plan = ambientops_contracts::conversions::remediation_plan_to_procedure(
-                    &plan_json,
-                    envelope_ref,
-                );
-                println!("{}", serde_json::to_string_pretty(&proc_plan)?);
+                if procedure {
+                    let plan_json = serde_json::to_value(&plan)?;
+                    let envelope_ref = uuid::Uuid::new_v4();
+                    let proc_plan = ambientops_contracts::conversions::remediation_plan_to_procedure(
+                        &plan_json,
+                        envelope_ref,
+                    );
+                    println!("{}", serde_json::to_string_pretty(&proc_plan)?);
+                } else {
+                    remediation::print_plan(&plan);
+                }
             } else {
-                remediation::print_plan(&plan);
+                println!("Generating multi-device remediation plan for {} devices...", devices.len());
+                let multi = remediation::create_multi_plan(&devices, strategy.as_deref())?;
+
+                if procedure {
+                    println!("{}", serde_json::to_string_pretty(&multi)?);
+                } else {
+                    remediation::print_multi_plan(&multi);
+                }
             }
         }
 
@@ -187,6 +204,10 @@ fn main() -> Result<()> {
             println!("=====================");
             let report = scanner::scan_system(false)?;
             scanner::print_status(&report);
+        }
+
+        Commands::Tui => {
+            tui::run()?;
         }
     }
 

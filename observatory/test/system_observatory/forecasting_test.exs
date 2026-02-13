@@ -11,6 +11,23 @@ defmodule SystemObservatory.ForecastingTest do
     :ok
   end
 
+  # Helper: create a base timestamp far enough in the future to avoid TTL staleness
+  defp base_time do
+    DateTime.utc_now()
+  end
+
+  # Helper: record values spaced 1 hour apart
+  defp record_hourly(name, values) do
+    base = base_time()
+
+    values
+    |> Enum.with_index()
+    |> Enum.each(fn {value, i} ->
+      ts = DateTime.add(base, i * 3600, :second)
+      :ok = Store.record_at(name, value, ts)
+    end)
+  end
+
   describe "generate/0" do
     test "returns empty list when no data" do
       forecasts = Forecasting.generate()
@@ -18,19 +35,14 @@ defmodule SystemObservatory.ForecastingTest do
     end
 
     test "returns empty list with insufficient data points" do
-      :ok = Store.record("cpu_usage", 50)
-      :ok = Store.record("cpu_usage", 55)
+      record_hourly("cpu_usage", [50, 55])
 
       forecasts = Forecasting.generate()
       assert forecasts == []
     end
 
     test "generates forecasts with sufficient data" do
-      :ok = Store.record("cpu_usage", 50)
-      Process.sleep(10)
-      :ok = Store.record("cpu_usage", 55)
-      Process.sleep(10)
-      :ok = Store.record("cpu_usage", 60)
+      record_hourly("cpu_usage", [50, 55, 60])
 
       forecasts = Forecasting.generate()
       # Should have at least one trend forecast
@@ -38,11 +50,7 @@ defmodule SystemObservatory.ForecastingTest do
     end
 
     test "sorts forecasts by confidence" do
-      # Record increasing trend
-      Enum.each(1..5, fn i ->
-        :ok = Store.record("disk_usage", 50 + i * 5)
-        Process.sleep(5)
-      end)
+      record_hourly("disk_usage", [55, 60, 65, 70, 75])
 
       forecasts = Forecasting.generate()
       confidences = Enum.map(forecasts, & &1.confidence)
@@ -54,29 +62,21 @@ defmodule SystemObservatory.ForecastingTest do
 
   describe "predict_exhaustion/2" do
     test "returns error with insufficient data" do
-      :ok = Store.record("disk_usage", 50)
+      record_hourly("disk_usage", [50])
 
       result = Forecasting.predict_exhaustion("disk_usage", 100)
       assert result == {:error, :insufficient_data}
     end
 
     test "returns error when not trending up" do
-      :ok = Store.record("disk_usage", 50)
-      Process.sleep(5)
-      :ok = Store.record("disk_usage", 45)
-      Process.sleep(5)
-      :ok = Store.record("disk_usage", 40)
+      record_hourly("disk_usage", [50, 45, 40])
 
       result = Forecasting.predict_exhaustion("disk_usage", 100)
       assert result == {:error, :not_trending}
     end
 
     test "predicts exhaustion for increasing trend" do
-      :ok = Store.record("disk_usage", 50)
-      Process.sleep(5)
-      :ok = Store.record("disk_usage", 60)
-      Process.sleep(5)
-      :ok = Store.record("disk_usage", 70)
+      record_hourly("disk_usage", [50, 60, 70])
 
       {:ok, forecast} = Forecasting.predict_exhaustion("disk_usage", 100)
 
@@ -89,10 +89,7 @@ defmodule SystemObservatory.ForecastingTest do
     end
 
     test "includes human-readable message" do
-      Enum.each(1..5, fn i ->
-        :ok = Store.record("disk_usage", 50 + i * 5)
-        Process.sleep(5)
-      end)
+      record_hourly("disk_usage", [55, 60, 65, 70, 75])
 
       {:ok, forecast} = Forecasting.predict_exhaustion("disk_usage", 100)
 
@@ -103,22 +100,14 @@ defmodule SystemObservatory.ForecastingTest do
 
   describe "predict_threshold_breach/2" do
     test "returns error when already breached" do
-      :ok = Store.record("cpu_usage", 90)
-      Process.sleep(5)
-      :ok = Store.record("cpu_usage", 92)
-      Process.sleep(5)
-      :ok = Store.record("cpu_usage", 95)
+      record_hourly("cpu_usage", [90, 92, 95])
 
       result = Forecasting.predict_threshold_breach("cpu_usage", 85)
       assert result == {:error, :already_breached}
     end
 
     test "predicts threshold breach" do
-      :ok = Store.record("cpu_usage", 50)
-      Process.sleep(5)
-      :ok = Store.record("cpu_usage", 60)
-      Process.sleep(5)
-      :ok = Store.record("cpu_usage", 70)
+      record_hourly("cpu_usage", [50, 60, 70])
 
       {:ok, forecast} = Forecasting.predict_threshold_breach("cpu_usage", 85)
 
@@ -130,18 +119,14 @@ defmodule SystemObservatory.ForecastingTest do
 
   describe "analyze_trend/1" do
     test "returns error with insufficient data" do
-      :ok = Store.record("test", 50)
+      record_hourly("test", [50])
 
       result = Forecasting.analyze_trend("test")
       assert result == {:error, :insufficient_data}
     end
 
     test "detects increasing trend" do
-      :ok = Store.record("test", 10)
-      Process.sleep(5)
-      :ok = Store.record("test", 20)
-      Process.sleep(5)
-      :ok = Store.record("test", 30)
+      record_hourly("test", [10, 20, 30])
 
       {:ok, analysis} = Forecasting.analyze_trend("test")
 
@@ -150,11 +135,7 @@ defmodule SystemObservatory.ForecastingTest do
     end
 
     test "detects decreasing trend" do
-      :ok = Store.record("test", 30)
-      Process.sleep(5)
-      :ok = Store.record("test", 20)
-      Process.sleep(5)
-      :ok = Store.record("test", 10)
+      record_hourly("test", [30, 20, 10])
 
       {:ok, analysis} = Forecasting.analyze_trend("test")
 
@@ -163,11 +144,7 @@ defmodule SystemObservatory.ForecastingTest do
     end
 
     test "detects stable trend" do
-      :ok = Store.record("test", 50)
-      Process.sleep(5)
-      :ok = Store.record("test", 50)
-      Process.sleep(5)
-      :ok = Store.record("test", 50)
+      record_hourly("test", [50, 50, 50])
 
       {:ok, analysis} = Forecasting.analyze_trend("test")
 
@@ -175,11 +152,7 @@ defmodule SystemObservatory.ForecastingTest do
     end
 
     test "includes current value and data points" do
-      :ok = Store.record("test", 10)
-      Process.sleep(5)
-      :ok = Store.record("test", 20)
-      Process.sleep(5)
-      :ok = Store.record("test", 30)
+      record_hourly("test", [10, 20, 30])
 
       {:ok, analysis} = Forecasting.analyze_trend("test")
 
@@ -190,10 +163,7 @@ defmodule SystemObservatory.ForecastingTest do
 
   describe "forecast structure" do
     test "includes all required fields" do
-      Enum.each(1..5, fn i ->
-        :ok = Store.record("memory_usage", 40 + i * 5)
-        Process.sleep(5)
-      end)
+      record_hourly("memory_usage", [45, 50, 55, 60, 65])
 
       [forecast | _] = Forecasting.generate()
 
@@ -209,10 +179,7 @@ defmodule SystemObservatory.ForecastingTest do
     end
 
     test "confidence is bounded between 0 and 1" do
-      Enum.each(1..10, fn i ->
-        :ok = Store.record("test_usage", 40 + i * 3)
-        Process.sleep(5)
-      end)
+      record_hourly("test_usage", [43, 46, 49, 52, 55, 58, 61, 64, 67, 70])
 
       forecasts = Forecasting.generate()
 

@@ -13,14 +13,14 @@ How AmbientOps contract schemas connect producers to consumers.
 | `receipt` | emergency-room (`write_receipt`), hardware-crash-team (`apply --receipt`) | observatory (`ingest`) | **Wired** |
 | `system-weather` | observatory (`weather`) | nafa-app (`GET /api/weather`) | **Wired** |
 
-## Future Schemas
+## Typed Schemas (Rust types, producers/consumers pending)
 
-| Schema | Planned Producer | Planned Consumer | Notes |
-|--------|------------------|------------------|-------|
-| `message-intent` | nafa-app (user actions) | composer (orchestration) | Phase 3: Ward→OR messaging |
-| `pack-manifest` | composer (pack builder) | clinician (apply), observatory (ingest) | Phase 4: Deployment bundles |
-| `ambient-payload` | composer (ambient compute) | clinician (execute) | Phase 5: Ambient compute payloads |
-| `run-bundle` | composer (run orchestrator) | observatory (ingest) | Phase 5: Full run output bundles |
+| Schema | Planned Producer | Planned Consumer | Status |
+|--------|------------------|------------------|--------|
+| `message-intent` | nafa-app (user actions) | composer (orchestration) | **Typed** — Rust serde types in `contracts-rust/src/message_intent.rs` |
+| `pack-manifest` | composer (pack builder) | clinician (apply), observatory (ingest) | **Typed** — Rust serde types in `contracts-rust/src/pack_manifest.rs` |
+| `ambient-payload` | observatory (ambient) | nafa-app (Ward UI) | **Typed** — Rust serde types in `contracts-rust/src/ambient_payload.rs` |
+| `run-bundle` | composer (run orchestrator) | observatory (ingest) | **Typed** — Rust serde types in `contracts-rust/src/run_bundle.rs` |
 
 ## Data Flow
 

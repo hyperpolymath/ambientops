@@ -18,6 +18,7 @@ mod tools;
 mod ai;
 mod forum;
 mod p2p;
+mod satellites;
 mod validation;
 mod correlation;
 
@@ -122,6 +123,13 @@ enum Commands {
 
     /// Show system health summary
     Health,
+
+    /// Satellite tool integration (panic-attacker, verisimdb, hypatia, echidna)
+    #[command(alias = "sat")]
+    Satellite {
+        #[command(subcommand)]
+        action: SatelliteActionCli,
+    },
 
     /// Crisis mode - analyze incident bundle from emergency-room
     Crisis {
@@ -241,6 +249,59 @@ enum MeshActionCli {
     Sync,
     /// Show mesh status
     Status,
+}
+
+#[derive(Subcommand, Clone)]
+enum SatelliteActionCli {
+    /// Scan target with panic-attacker
+    Scan {
+        /// Target path to scan
+        target: String,
+        /// Output JSON path
+        #[arg(short, long)]
+        output: Option<String>,
+    },
+    /// Ingest scan results into verisimdb
+    Ingest {
+        /// Repository name
+        repo: String,
+        /// Path to scan JSON
+        scan_path: String,
+    },
+    /// Query verisimdb with VQL
+    Query {
+        /// VQL query string
+        vql: String,
+    },
+    /// Verify procedure reversibility with echidna
+    Verify {
+        /// Path to procedure plan JSON
+        procedure_path: String,
+    },
+    /// Check gitbot-fleet status
+    FleetStatus,
+}
+
+impl From<SatelliteActionCli> for satellites::SatelliteAction {
+    fn from(cli: SatelliteActionCli) -> Self {
+        match cli {
+            SatelliteActionCli::Scan { target, output } => {
+                satellites::SatelliteAction::Scan { target, output }
+            }
+            SatelliteActionCli::Ingest { repo, scan_path } => {
+                satellites::SatelliteAction::Ingest { repo, scan_path }
+            }
+            SatelliteActionCli::Query { vql } => {
+                satellites::SatelliteAction::Query { vql }
+            }
+            SatelliteActionCli::Verify { procedure_path } => {
+                satellites::SatelliteAction::Verify { procedure_path }
+            }
+            SatelliteActionCli::FleetStatus => {
+                satellites::SatelliteAction::FleetStatus
+            }
+        }
+    }
 }
 
 // Conversion helpers
@@ -370,6 +431,9 @@ async fn main() -> anyhow::Result<()> {
         }
         Commands::Mesh { action } => {
             p2p::handle(action.into(), &storage, &cache).await?;
+        }
+        Commands::Satellite { action } => {
+            satellites::handle(action.into()).await?;
         }
         Commands::Monitor => {
             tools::monitor::run(&storage, &cache).await?;

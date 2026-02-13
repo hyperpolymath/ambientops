@@ -319,30 +319,33 @@ defmodule SystemObservatory.Forecasting do
   end
 
   defp format_exhaustion_message(name, days, current, threshold) do
+    current_f = current / 1
+    rounded = Float.round(current_f * 1.0, 1)
+
     cond do
       days == 0 ->
-        "#{name} at #{Float.round(current, 1)}% - will reach #{threshold}% within 24 hours"
+        "#{name} at #{rounded}% - will reach #{threshold}% within 24 hours"
 
       days == 1 ->
-        "#{name} at #{Float.round(current, 1)}% - will reach #{threshold}% in approximately 1 day"
+        "#{name} at #{rounded}% - will reach #{threshold}% in approximately 1 day"
 
       days < 7 ->
-        "#{name} at #{Float.round(current, 1)}% - will reach #{threshold}% in approximately #{days} days"
+        "#{name} at #{rounded}% - will reach #{threshold}% in approximately #{days} days"
 
       days < 30 ->
         weeks = div(days, 7)
-        "#{name} at #{Float.round(current, 1)}% - will reach #{threshold}% in approximately #{weeks} week(s)"
+        "#{name} at #{rounded}% - will reach #{threshold}% in approximately #{weeks} week(s)"
 
       true ->
-        "#{name} at #{Float.round(current, 1)}% - will reach #{threshold}% in approximately #{div(days, 30)} month(s)"
+        "#{name} at #{rounded}% - will reach #{threshold}% in approximately #{div(days, 30)} month(s)"
     end
   end
 
   defp format_trend_message(name, slope, current, predicted) do
     direction = if slope > 0, do: "increasing", else: "decreasing"
-    rate = abs(slope)
+    rate = abs(slope) * 1.0
 
     "#{name} is #{direction} at #{Float.round(rate, 2)}/hour. " <>
-      "Current: #{Float.round(current, 1)}, predicted in 24h: #{Float.round(predicted, 1)}"
+      "Current: #{Float.round(current * 1.0, 1)}, predicted in 24h: #{Float.round(predicted * 1.0, 1)}"
   end
 end

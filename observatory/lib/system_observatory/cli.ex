@@ -36,6 +36,7 @@ defmodule SystemObservatory.CLI do
           format: :string,
           priority: :string,
           output: :string,
+          theme: :string,
           help: :boolean
         ],
         aliases: [
@@ -43,6 +44,7 @@ defmodule SystemObservatory.CLI do
           f: :format,
           p: :priority,
           o: :output,
+          t: :theme,
           h: :help
         ]
       )
@@ -54,6 +56,7 @@ defmodule SystemObservatory.CLI do
       ["ingest-envelope", path] -> ingest_envelope(path, opts)
       ["ingest-envelope"] -> error("Usage: sysobs ingest-envelope <path>")
       ["weather" | _] -> weather(opts)
+      ["ambient" | _] -> ambient(opts)
       ["recommend" | _] -> recommend(opts)
       ["query", metric | _] -> query(metric, opts)
       ["query"] -> error("Usage: sysobs query <metric> [--since <duration>]")
@@ -175,6 +178,33 @@ defmodule SystemObservatory.CLI do
   end
 
   @doc """
+  Generate and output ambient payload with optional theme.
+  """
+  def ambient(opts \\ []) do
+    alias SystemObservatory.Ambient
+
+    theme_id = opts[:theme] || "default"
+    payload = Ambient.generate_with_theme(theme_id)
+
+    case Jason.encode(payload, pretty: true) do
+      {:ok, json} ->
+        case opts[:output] do
+          nil ->
+            output(json)
+
+          path ->
+            dir = Path.dirname(path)
+            File.mkdir_p!(dir)
+            File.write!(path, json)
+            output("Ambient payload written to #{path} (theme: #{theme_id})")
+        end
+
+      {:error, reason} ->
+        error("Failed to encode ambient payload: #{inspect(reason)}")
+    end
+  end
+
+  @doc """
   Show recommendations based on current state.
   """
   def recommend(opts \\ []) do
@@ -262,6 +292,7 @@ defmodule SystemObservatory.CLI do
         ingest <path>       Ingest a run bundle from Operating Theatre
         ingest-envelope <p> Ingest an EvidenceEnvelope JSON file
         weather             Generate system weather report
+        ambient             Generate ambient payload for Ward UI
         recommend           Get recommendations based on current state
         query <metric>      Query metrics by name
         version             Show version information
@@ -272,6 +303,7 @@ defmodule SystemObservatory.CLI do
         --format, -f <fmt>  Output format (text, json)
         --output, -o <path> Write output to file instead of stdout
         --priority, -p <p>  Filter by minimum priority (critical, high, medium, low)
+        --theme, -t <name>  Theme for ambient payload (default, minimal, tech)
         --help, -h          Show help for a command
 
     EXAMPLES:
@@ -279,6 +311,7 @@ defmodule SystemObservatory.CLI do
         sysobs ingest /path/to/run-bundle/
         sysobs ingest-envelope /path/to/envelope.json
         sysobs weather --output /tmp/ambientops/weather.json
+        sysobs ambient --theme tech --output /tmp/ambientops/ambient.json
         sysobs recommend --format json
         sysobs query cpu_usage --since 24h
 

@@ -70,6 +70,16 @@ defmodule SystemObservatory.Metrics.Store do
   end
 
   @doc """
+  Record a metric at a specific timestamp.
+
+  Used for backfilling data or testing with controlled time spacing.
+  """
+  @spec record_at(String.t(), number(), DateTime.t(), map()) :: :ok
+  def record_at(name, value, timestamp, tags \\ %{}) do
+    GenServer.cast(__MODULE__, {:record_at, name, value, timestamp, tags})
+  end
+
+  @doc """
   Get all metrics (includes stale metrics marked as such).
   """
   @spec all() :: [metric()]
@@ -141,6 +151,23 @@ defmodule SystemObservatory.Metrics.Store do
       source: source,
       ttl_seconds: ttl,
       # Always advisory - JuSys is never authoritative
+      advisory: true
+    }
+
+    metrics = [metric | state.metrics] |> Enum.take(state.max_size)
+    {:noreply, %{state | metrics: metrics}}
+  end
+
+  @impl true
+  def handle_cast({:record_at, name, value, timestamp, tags}, state) do
+    metric = %{
+      name: name,
+      value: value,
+      timestamp: timestamp,
+      tags: tags,
+      derived_at: timestamp,
+      source: "backfill",
+      ttl_seconds: state.default_ttl,
       advisory: true
     }
 

@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: PMPL-1.0-or-later
 //! AI/SLM integration - local model with Claude fallback
+//!
+//! When `ai` feature is enabled, uses ollama-rs library.
+//! Without: falls back to curl invocation or suggests Claude CLI.
 
 use anyhow::Result;
 use crate::storage::Storage;
@@ -17,14 +20,12 @@ pub async fn diagnose(
 
     // Step 1: Check rules first
     println!("\n[1/3] Checking rules...");
-    // Would check rules engine here
 
     // Step 2: Search knowledge base
     println!("[2/3] Searching knowledge base...");
     let cached = cache.get_solution_lookup(&hash_problem(problem)).await?;
     if let Some(solution_id) = cached {
         println!("  Found cached solution: {}", solution_id);
-        // Would retrieve and display solution
         return Ok(());
     }
 
@@ -34,7 +35,6 @@ pub async fn diagnose(
     if local_only {
         query_local_slm(problem).await?;
     } else {
-        // Try local first, fall back to Claude
         match query_local_slm(problem).await {
             Ok(response) if !response.is_empty() => {
                 println!("\nLocal SLM response:\n{}", response);
@@ -59,43 +59,101 @@ fn hash_problem(problem: &str) -> String {
 }
 
 async fn query_local_slm(problem: &str) -> Result<String> {
-    // Would use ollama-rs to query local model
-    // For now, check if Ollama is running
-    let check = tokio::process::Command::new("curl")
-        .args(["-s", "http://localhost:11434/api/tags"])
-        .output()
-        .await;
+    #[cfg(feature = "ai")]
+    {
+        // Use ollama-rs library
+        let ollama = ollama_rs::Ollama::default();
 
-    match check {
-        Ok(output) if output.status.success() => {
-            // Ollama is running, query it
-            let response = tokio::process::Command::new("curl")
-                .args([
-                    "-s",
-                    "-X", "POST",
-                    "http://localhost:11434/api/generate",
-                    "-d", &format!(
-                        r#"{{"model": "llama3.2", "prompt": "You are a Linux system administrator assistant. Help with this problem: {}", "stream": false}}"#,
-                        problem.replace('"', "\\\"")
-                    ),
-                ])
-                .output()
-                .await?;
+        // Health check
+        match ollama.list_local_models().await {
+            Ok(models) => {
+                if models.is_empty() {
+                    println!("  Ollama running but no models found. Run: ollama pull llama3.2");
+                    return Ok(String::new());
+                }
 
-            Ok(String::from_utf8_lossy(&response.stdout).to_string())
+                let model = models.first()
+                    .map(|m| m.name.clone())
+                    .unwrap_or_else(|| "llama3.2".to_string());
+
+                let prompt = format!(
+                    "You are a Linux system administrator assistant. Help with this problem: {}",
+                    problem
+                );
+
+                match ollama.generate(ollama_rs::generation::completion::request::GenerationRequest::new(
+                    model, prompt
+                )).await {
+                    Ok(response) => {
+                        return Ok(response.response);
+                    }
+                    Err(e) => {
+                        tracing::warn!("Ollama generate failed: {}", e);
+                    }
+                }
+            }
+            Err(e) => {
+                tracing::warn!("Ollama not available: {}", e);
+                println!("  Ollama not running. Install with: curl -fsSL https://ollama.com/install.sh | sh");
+            }
         }
-        _ => {
-            println!("  Ollama not running. Install with: curl -fsSL https://ollama.com/install.sh | sh");
-            Ok(String::new())
+        return Ok(String::new());
+    }
+
+    #[cfg(not(feature = "ai"))]
+    {
+        // Fallback: use curl to talk to Ollama
+        let check = tokio::process::Command::new("curl")
+            .args(["-s", "http://localhost:11434/api/tags"])
+            .output()
+            .await;
+
+        match check {
+            Ok(output) if output.status.success() => {
+                let response = tokio::process::Command::new("curl")
+                    .args([
+                        "-s",
+                        "-X", "POST",
+                        "http://localhost:11434/api/generate",
+                        "-d", &format!(
+                            r#"{{"model": "llama3.2", "prompt": "You are a Linux system administrator assistant. Help with this problem: {}", "stream": false}}"#,
+                            problem.replace('"', "\\\"")
+                        ),
+                    ])
+                    .output()
+                    .await?;
+
+                Ok(String::from_utf8_lossy(&response.stdout).to_string())
+            }
+            _ => {
+                println!("  Ollama not running. Install with: curl -fsSL https://ollama.com/install.sh | sh");
+                Ok(String::new())
+            }
         }
     }
 }
 
 async fn query_claude(problem: &str) -> Result<()> {
-    // Would use Claude API
-    // For now, suggest using claude CLI
     println!("\n  To query Claude directly:");
     println!("    claude \"{}\"", problem);
-
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_hash_problem_deterministic() {
+        let h1 = hash_problem("disk full");
+        let h2 = hash_problem("disk full");
+        assert_eq!(h1, h2);
+    }
+
+    #[test]
+    fn test_hash_problem_case_insensitive() {
+        let h1 = hash_problem("Disk Full");
+        let h2 = hash_problem("disk full");
+        assert_eq!(h1, h2);
+    }
 }
