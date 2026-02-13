@@ -1,0 +1,75 @@
+--  SPDX-License-Identifier: AGPL-3.0-or-later
+--  SPDX-FileCopyrightText: 2025 Jonathan D.A. Jewell <jonathan@hyperpolymath.io>
+
+--  DNFinition - Universal Package Manager TUI with Reversibility
+--  GNAT Project File
+
+with "ncurses";  -- ncurses bindings
+
+project DNFinition is
+
+   for Source_Dirs use ("src/**");
+   for Object_Dir use "obj";
+   for Exec_Dir use "bin";
+   for Main use ("dnfinition.adb");
+
+   type Build_Mode is ("debug", "release", "spark");
+   Mode : Build_Mode := external ("BUILD_MODE", "debug");
+
+   package Compiler is
+      Common_Switches := ("-gnat2022",       --  Ada 2022 standard
+                          "-gnatwa",          --  All warnings
+                          "-gnatVa",          --  All validity checks
+                          "-gnatyM120",       --  Max line length 120
+                          "-gnatyx",          --  No extra parens
+                          "-gnato13",         --  Overflow checking
+                          "-gnatU",           --  Tag all error messages
+                          "-gnatf");          --  Full errors
+
+      case Mode is
+         when "debug" =>
+            for Switches ("Ada") use Common_Switches &
+               ("-g",            --  Debug info
+                "-O0",           --  No optimization
+                "-gnata");       --  Assertions enabled
+         when "release" =>
+            for Switches ("Ada") use Common_Switches &
+               ("-O3",           --  Full optimization
+                "-gnatn",        --  Inlining enabled
+                "-fdata-sections",
+                "-ffunction-sections");
+         when "spark" =>
+            for Switches ("Ada") use Common_Switches &
+               ("-g",
+                "-gnata",
+                "-gnatw.o");     --  Warn on overlays
+      end case;
+   end Compiler;
+
+   package Binder is
+      for Switches ("Ada") use ("-Es");  --  Symbolic tracebacks
+   end Binder;
+
+   package Linker is
+      case Mode is
+         when "debug" =>
+            for Switches ("Ada") use ("-g");
+         when "release" =>
+            for Switches ("Ada") use ("-s",           --  Strip symbols
+                                       "-Wl,--gc-sections");
+         when "spark" =>
+            for Switches ("Ada") use ("-g");
+      end case;
+   end Linker;
+
+   --  SPARK verification configuration
+   package Prove is
+      for Proof_Switches ("Ada") use
+         ("--level=2",           --  Medium proof level
+          "--timeout=30",        --  30 second timeout per VC
+          "--steps=10000",       --  Step limit
+          "--memlimit=4000",     --  4GB memory limit
+          "--counterexamples=on");
+   end Prove;
+
+end DNFinition;

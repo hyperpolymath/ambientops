@@ -1,0 +1,64 @@
+--  SPDX-License-Identifier: AGPL-3.0-or-later
+--  SPDX-FileCopyrightText: 2025 Jonathan D.A. Jewell <jonathan@hyperpolymath.io>
+
+--  TotalUpdate - Universal Package Update Daemon
+--  GNAT Project File
+
+with "ncurses";   --  ncurses bindings
+with "aws";       --  Ada Web Server for HTTP APIs
+
+project TotalUpdate is
+
+   for Source_Dirs use ("src/**");
+   for Object_Dir use "obj";
+   for Exec_Dir use "bin";
+   for Main use ("totalupdate_main.adb");
+
+   type Build_Mode is ("debug", "release", "spark");
+   Mode : Build_Mode := external ("BUILD_MODE", "debug");
+
+   package Compiler is
+      Common_Switches := ("-gnat2022",
+                          "-gnatwa",
+                          "-gnatVa",
+                          "-gnatyM120",
+                          "-gnatyx",
+                          "-gnato13",
+                          "-gnatU",
+                          "-gnatf");
+
+      case Mode is
+         when "debug" =>
+            for Switches ("Ada") use Common_Switches &
+               ("-g", "-O0", "-gnata");
+         when "release" =>
+            for Switches ("Ada") use Common_Switches &
+               ("-O3", "-gnatn", "-fdata-sections", "-ffunction-sections");
+         when "spark" =>
+            for Switches ("Ada") use Common_Switches &
+               ("-g", "-gnata", "-gnatw.o");
+      end case;
+   end Compiler;
+
+   package Binder is
+      for Switches ("Ada") use ("-Es");
+   end Binder;
+
+   package Linker is
+      case Mode is
+         when "debug" =>
+            for Switches ("Ada") use ("-g");
+         when "release" =>
+            for Switches ("Ada") use ("-s", "-Wl,--gc-sections");
+         when "spark" =>
+            for Switches ("Ada") use ("-g");
+      end case;
+   end Linker;
+
+   package Prove is
+      for Proof_Switches ("Ada") use
+         ("--level=2", "--timeout=30", "--steps=10000",
+          "--memlimit=4000", "--counterexamples=on");
+   end Prove;
+
+end TotalUpdate;

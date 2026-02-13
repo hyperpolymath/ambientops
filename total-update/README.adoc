@@ -1,0 +1,322 @@
+= TotalUpdate & DNFinition
+
+image:https://img.shields.io/badge/License-MPL_2.0-blue.svg[MPL-2.0-or-later,link="https://opensource.org/licenses/MPL-2.0"]
+
+== License & Philosophy
+
+This project must declare **MPL-2.0-or-later** for platform/tooling compatibility.
+
+Philosophy: **Palimpsest**. The Palimpsest-MPL (PMPL) text is provided in `license/PMPL-1.0.txt`, and the canonical source is the palimpsest-license repository.
+:toc: left
+:toclevels: 3
+:icons: font
+:source-highlighter: rouge
+
+Universal package management with formal verification and built-in reversibility.
+
+== Overview
+
+This repository contains two complementary tools:
+
+*TotalUpdate*:: Automated background daemon for keeping everything up-to-date across all package managers
+*DNFinition*:: Interactive TUI package manager with reversibility (like nala/aptitude for all package managers)
+
+Both are written in *Ada 2022* (TUI, formal verification) + *Elixir/OTP* (daemon, orchestration), designed for safety-critical package management.
+
+== Project Status
+
+[cols="1,3"]
+|===
+|Phase |Foundation Development
+|Version |0.1.0
+|License |PMPL-1.0-or-later
+|===
+
+== Key Features
+
+=== DNFinition Features
+
+* *Unified Interface* - Single TUI for 50+ package managers
+* *Reversibility Layer* - Every operation can be rolled back
+** Native rollback for rpm-ostree, Nix, Guix, zypper
+** Filesystem snapshots (btrfs, ZFS, LVM)
+** Transaction logging fallback
+* *Formal Verification* - SPARK proofs for safety-critical operations
+* *Pretty Output* - Modern terminal interface like nala
+* *Browse Mode* - Package exploration like aptitude
+
+=== TotalUpdate Features
+
+* *Universal Updates* - System packages, language packages, userscripts, browser extensions
+* *Background Daemon* - Low-memory footprint (<5MB resident)
+* *Strategy Engine* - Whitelist, blacklist, version pinning
+* *Parallel Downloads* - aria2 integration
+* *IPFS Distribution* - Decentralized package hosting
+
+== Architecture
+
+----
+┌─────────────────────────────────────────────────────────────────┐
+│                      TotalUpdate Daemon                         │
+│                     (Elixir/OTP Supervisor)                     │
+├─────────────────────────────────────────────────────────────────┤
+│  Scheduler  │  Watcher  │  DownloadMgr  │  StrategyEngine      │
+└──────────────────────────┬──────────────────────────────────────┘
+                           │
+                           ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    DNFinition Core (Ada)                        │
+├─────────────────────────────────────────────────────────────────┤
+│  Platform Detection  │  Backend Interface  │  Snapshot Manager │
+├──────────────────────┴──────────────────────┴───────────────────┤
+│                     TUI (ncurses)                               │
+└─────────────────────────────────────────────────────────────────┘
+                           │
+                           ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                   Package Manager Backends                       │
+├─────────────┬─────────────┬─────────────┬───────────────────────┤
+│ rpm-ostree  │     dnf     │     apt     │     pacman    │  ...  │
+│   zypper    │     nix     │    guix     │    flatpak    │  ...  │
+└─────────────┴─────────────┴─────────────┴───────────────────────┘
+----
+
+== Supported Package Managers
+
+=== System Package Managers
+
+[cols="3"]
+|===
+|*RPM-based*
+|*DEB-based*
+|*Other Linux*
+
+|rpm-ostree, dnf, yum, zypper
+|apt, nala, aptitude
+|pacman, xbps, apk, portage
+
+|*BSD*
+|*macOS*
+|*Windows*
+
+|pkg (FreeBSD), pkg_add, pkgin
+|Homebrew, MacPorts
+|winget, Chocolatey, Scoop
+
+|*Universal*
+|*Immutable*
+|
+
+|Flatpak, Snap, AppImage
+|Nix, Guix, rpm-ostree
+|
+|===
+
+=== Language Package Managers
+
+[cols="4"]
+|===
+|Deno |pip/pipx/poetry |cargo/rustup |hex/mix
+|cabal |gem |composer |go modules
+|===
+
+== Quick Start
+
+=== Prerequisites
+
+[source,bash]
+----
+# Fedora/RHEL
+sudo dnf install gcc-gnat gprbuild elixir aria2 ncurses-devel
+
+# Debian/Ubuntu
+sudo apt install gnat gprbuild elixir aria2 libncurses-dev
+
+# Arch
+sudo pacman -S gcc-ada gprbuild elixir aria2 ncurses
+----
+
+=== Build
+
+[source,bash]
+----
+# Clone repository
+git clone https://gitlab.com/hyperpolymath/totalupdate
+cd totalupdate
+
+# Check prerequisites
+just prereqs
+
+# Build everything
+just build
+
+# Run DNFinition
+just run-dnfinition
+----
+
+=== Commands
+
+[source,bash]
+----
+# Show available recipes
+just
+
+# Build in release mode
+just build-release
+
+# Run SPARK proofs
+just prove
+
+# Run tests
+just test
+
+# Install to ~/.local/bin
+just install
+----
+
+== Usage
+
+=== DNFinition CLI
+
+[source,bash]
+----
+# Start interactive TUI
+dnfinition
+
+# Search for packages
+dnfinition search firefox
+
+# Install packages (creates snapshot first)
+dnfinition install vim htop
+
+# Upgrade all packages
+dnfinition upgrade
+
+# List snapshots
+dnfinition snapshots
+
+# Rollback to last snapshot
+dnfinition rollback
+
+# Rollback to specific snapshot
+dnfinition rollback 5
+----
+
+=== TotalUpdate Configuration
+
+[source,toml]
+----
+# ~/.config/totalupdate/config.toml
+
+[global]
+mode = "conservative"  # aggressive, conservative, manual
+check_interval = "4h"
+auto_apply = false
+
+[whitelist]
+always_update = ["firefox", "rust", "podman"]
+
+[blacklist]
+never_update = ["nvidia-drivers", "kernel"]
+
+[version_pinning]
+"node" = "20.x"
+"python" = "3.11.*"
+----
+
+== Formal Verification
+
+DNFinition uses SPARK for formal verification of safety-critical operations:
+
+[source,ada]
+----
+procedure Rollback_To_Snapshot (ID : Snapshot_ID)
+  with Pre  => Snapshot_ID_Valid (ID) and then
+               Snapshot_Exists (ID),
+       Post => System_State_Matches_Snapshot (ID);
+----
+
+Run proofs with:
+
+[source,bash]
+----
+just prove
+----
+
+== Development
+
+=== Directory Structure
+
+----
+totalupdate/
+├── ada/
+│   ├── dnfinition/           # DNFinition Ada sources
+│   │   ├── dnfinition.gpr    # GNAT project
+│   │   └── src/
+│   │       ├── platform/     # Platform detection
+│   │       ├── tui/          # ncurses interface
+│   │       ├── backends/     # Package manager backends
+│   │       ├── reversibility/# Snapshot management
+│   │       └── formal/       # SPARK proofs
+│   └── totalupdate/          # TotalUpdate Ada components
+├── elixir/
+│   ├── dnfinition/           # DNFinition OTP app
+│   │   └── lib/
+│   │       ├── application.ex
+│   │       ├── ada_wrapper.ex
+│   │       ├── snapshot_manager.ex
+│   │       ├── transaction_log.ex
+│   │       └── recovery.ex
+│   └── totalupdate/          # TotalUpdate daemon
+│       └── lib/
+│           ├── application.ex
+│           ├── daemon.ex
+│           └── scheduler.ex
+├── docs/
+├── justfile
+└── README.adoc
+----
+
+=== Contributing
+
+See link:CONTRIBUTING.md[CONTRIBUTING.md] for guidelines.
+
+== Roadmap
+
+=== Phase 1: Foundation (Current)
+* [x] Platform detection
+* [x] Backend interface abstraction
+* [x] Reversibility types and SPARK contracts
+* [x] Elixir OTP skeleton
+* [ ] ncurses TUI implementation
+* [ ] First backend (rpm-ostree)
+
+=== Phase 2: Core Features
+* [ ] Snapshot manager (btrfs/ZFS/LVM)
+* [ ] Transaction logging
+* [ ] Rollback engine
+* [ ] dnf/apt backends
+
+=== Phase 3: TotalUpdate
+* [ ] aria2 integration
+* [ ] Background daemon
+* [ ] Strategy engine
+* [ ] IPFS support
+
+=== Phase 4: Polish
+* [ ] Cross-platform testing
+* [ ] Full SPARK verification
+* [ ] Documentation
+* [ ] Container images
+
+== License
+
+link:LICENSE.txt[PMPL-1.0-or-later]
+
+== Author
+
+Jonathan D.A. Jewell <jonathan@hyperpolymath.io>
+
+---
+
+_TotalUpdate & DNFinition are maintained by https://github.com/hyperpolymath[Hyperpolymath]._

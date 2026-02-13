@@ -1,0 +1,368 @@
+= Snapshot/Backout Strategy Matrix
+:toc: left
+:toclevels: 3
+:icons: font
+
+== Overview
+
+This document describes the strategy matrix that determines the optimal recovery strategy
+for package management operations based on:
+
+* Package manager capabilities (native transactions, rollback)
+* Available filesystem features (btrfs, ZFS, LVM)
+* Operation type and risk level
+* System configuration (immutable, container, etc.)
+
+== Critical Safety Invariant
+
+[IMPORTANT]
+====
+*Every modifying package operation MUST be preceded by a valid recovery point.
+Operations without recovery points are REJECTED.*
+====
+
+This invariant is:
+
+* Formally verified using SPARK Ada contracts
+* Enforced at runtime via the `Safety_Boundary` module
+* Tracked via the `Recovery_Point_Token` type (cannot be forged)
+
+== Strategy Priority Order
+
+[cols="1,3,2,2",options="header"]
+|===
+| Priority | Strategy | Backout Speed | Confidence
+
+| 1 (Best)
+| Native PM Recovery (Guix/Nix generations)
+| Instant (< 1 sec)
+| Proven (SPARK verified)
+
+| 2
+| rpm-ostree Deployments
+| Reboot required
+| Proven
+
+| 3
+| Btrfs Snapshots
+| Fast (< 1 min)
+| High
+
+| 4
+| ZFS Snapshots
+| Fast (< 1 min)
+| High
+
+| 5
+| Snapper (openSUSE)
+| Fast
+| High
+
+| 6
+| LVM Thin Snapshots
+| Slow (minutes)
+| Medium
+
+| 7
+| APFS Snapshots (macOS)
+| Fast
+| Medium
+
+| 8
+| VSS (Windows)
+| Slow
+| Medium
+
+| 9 (Fallback)
+| Transaction Log Only
+| Manual
+| High (logging only)
+|===
+
+== Strategy Matrix
+
+=== By Package Manager
+
+[cols="2,2,2,2,2",options="header"]
+|===
+| Package Manager | Native Recovery | Snapshot Strategy | Backout | Requires Reboot
+
+| *GNU Guix*
+| ✓ Generations
+| Native
+| Instant
+| No
+
+| *Nix*
+| ✓ Generations
+| Native
+| Instant
+| No
+
+| *rpm-ostree*
+| ✓ Deployments
+| OSTree
+| Reboot
+| Yes
+
+| *apt* (Debian/Ubuntu)
+| ✗
+| Btrfs/ZFS/LVM
+| Depends on FS
+| Maybe
+
+| *dnf* (Fedora/RHEL)
+| ✗
+| Btrfs/ZFS/LVM
+| Depends on FS
+| Maybe
+
+| *pacman* (Arch)
+| ✗
+| Btrfs/ZFS/LVM
+| Depends on FS
+| Maybe
+
+| *zypper* (openSUSE)
+| ✓ (with snapper)
+| Snapper/Btrfs
+| Fast
+| No
+
+| *Flatpak*
+| ✗
+| N/A (sandboxed)
+| N/A
+| No
+
+| *Homebrew* (macOS)
+| ✗
+| APFS
+| Fast
+| No
+|===
+
+=== By Filesystem
+
+[cols="2,3,2,2",options="header"]
+|===
+| Filesystem | Snapshot Support | Recovery Speed | Notes
+
+| *Btrfs*
+| ✓ CoW subvolumes
+| Fast (< 1 min)
+| Preferred for Linux
+
+| *ZFS*
+| ✓ Snapshots
+| Fast (< 1 min)
+| Enterprise-grade
+
+| *LVM*
+| ✓ Thin snapshots
+| Slow (minutes)
+| Wide compatibility
+
+| *APFS*
+| ✓ Time Machine
+| Medium
+| macOS only
+
+| *ext4/XFS*
+| ✗
+| N/A
+| Use LVM or transaction log
+
+| *NTFS*
+| ✓ VSS
+| Slow
+| Windows only
+|===
+
+=== By Risk Level
+
+[cols="2,3,3",options="header"]
+|===
+| Risk Level | Examples | Required Strategy
+
+| *None*
+| Search, query packages
+| No recovery point needed
+
+| *Low*
+| Install user packages (Flatpak, pip)
+| Transaction log sufficient
+
+| *Medium*
+| Install system packages, remove packages
+| Btrfs/ZFS/Native
+
+| *High*
+| System upgrade, kernel updates
+| Native (Guix/Nix) or Btrfs/ZFS with reboot
+
+| *Critical*
+| Bootloader, system files
+| Native only (Guix/Nix), with verification
+|===
+
+== Decision Flowchart
+
+[source]
+----
+                      ┌─────────────────────────────┐
+                      │  Package Operation Request  │
+                      └─────────────────────────────┘
+                                    │
+                                    ▼
+                      ┌─────────────────────────────┐
+                      │ Is this a read-only op?     │
+                      └─────────────────────────────┘
+                              │ Yes         │ No
+                              ▼             ▼
+                         ┌────────┐   ┌────────────────────┐
+                         │Proceed │   │ PM has native      │
+                         │ safely │   │ recovery?          │
+                         └────────┘   │ (Guix/Nix/ostree)  │
+                                      └────────────────────┘
+                                          │ Yes      │ No
+                                          ▼          ▼
+                            ┌───────────────┐  ┌─────────────────┐
+                            │ Use native    │  │ Btrfs/ZFS/LVM   │
+                            │ generations   │  │ available?      │
+                            │ (INSTANT)     │  └─────────────────┘
+                            └───────────────┘     │ Yes    │ No
+                                                  ▼        ▼
+                                      ┌────────────┐  ┌──────────────┐
+                                      │ Create FS  │  │ Transaction  │
+                                      │ snapshot   │  │ log only     │
+                                      └────────────┘  │ (warn user)  │
+                                                      └──────────────┘
+                                                            │
+                                                            ▼
+                              ┌──────────────────────────────────────────┐
+                              │ Create recovery point before proceeding  │
+                              │ (MANDATORY - safety invariant enforced)  │
+                              └──────────────────────────────────────────┘
+                                                  │
+                                                  ▼
+                                      ┌────────────────────┐
+                                      │ Execute operation  │
+                                      └────────────────────┘
+                                         │ Success  │ Fail
+                                         ▼          ▼
+                               ┌──────────────┐  ┌─────────────┐
+                               │ Log complete │  │ Rollback to │
+                               └──────────────┘  │ recovery pt │
+                                                 └─────────────┘
+----
+
+== Plugin Architecture
+
+=== Plugin Registration
+
+Plugins are registered with the `PluginRegistry` and must implement the `Plugin` behaviour:
+
+[source,elixir]
+----
+defmodule MyCustomPlugin do
+  @behaviour DNFinition.Plugins.Plugin
+
+  def metadata do
+    %{
+      id: "my-pm",
+      name: "My Package Manager",
+      pm_type: :my_pm,
+      priority: 70,
+      capabilities: [:install, :remove, :upgrade],
+      has_native_recovery: false,
+      preferred_snapshot: :btrfs
+    }
+  end
+
+  def available?, do: System.find_executable("my-pm") != nil
+  def backend_module, do: MyPMBackend
+  def initialize, do: :ok
+  def shutdown, do: :ok
+end
+----
+
+=== Plugin Discovery
+
+Plugins are discovered from:
+
+1. Built-in plugins (Guix, Nix, apt, dnf, pacman, etc.)
+2. `~/.config/dnfinition/plugins/` (user plugins)
+3. `/usr/share/dnfinition/plugins/` (system plugins)
+4. `/usr/local/share/dnfinition/plugins/` (local plugins)
+
+=== Capability-Based Selection
+
+The registry selects the best plugin based on required capabilities:
+
+[source,elixir]
+----
+# Find plugin with install, upgrade, and native rollback
+{:ok, plugin} = PluginRegistry.best_for([:install, :upgrade, :native_rollback])
+# Returns: Guix or Nix (priority 90)
+
+# Find any plugin that can install
+{:ok, plugin} = PluginRegistry.best_for([:install])
+# Returns: highest priority available
+----
+
+== API Reference
+
+=== Ada (SPARK)
+
+[source,ada]
+----
+--  Get strategy for platform and risk
+function Get_Strategy
+  (Platform : Platform_Info;
+   PM       : Package_Manager_Type;
+   Risk     : Risk_Level) return Strategy_Recommendation;
+
+--  Execute pre-operation snapshot
+procedure Execute_Pre_Operation_Strategy
+  (Strat   : Strategy_Recommendation;
+   Desc    : String;
+   Success : out Boolean;
+   Point   : out Snapshot_ID);
+
+--  Execute rollback
+procedure Execute_Backout
+  (Strat  : Strategy_Recommendation;
+   Point  : Snapshot_ID;
+   Result : out Rollback_Status);
+----
+
+=== Elixir
+
+[source,elixir]
+----
+# Get strategy
+strategy = StrategyMatrix.get_strategy(:guix, :medium)
+
+# Validate strategy
+true = StrategyMatrix.validate_strategy(strategy)
+
+# Check if strategy meets risk requirements
+true = StrategyMatrix.strategy_meets_risk?(strategy, :high)
+
+# Execute pre-operation
+{:ok, recovery_point} = StrategyMatrix.execute_pre_operation(strategy, "Pre-install")
+
+# Execute backout
+:ok = StrategyMatrix.execute_backout(strategy, recovery_point)
+----
+
+== Testing
+
+Run strategy matrix tests:
+
+[source,bash]
+----
+just test-skeleton    # Integration tests
+just prove            # SPARK proofs (Ada)
+----

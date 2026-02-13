@@ -1,0 +1,387 @@
+= TotalUpdate & DNFinition Roadmap
+:toc: left
+:toclevels: 2
+:icons: font
+
+== Current State
+
+*Version:* 0.1.0 +
+*Phase:* Walking Skeleton Complete +
+*Status:* Guix/Nix backends working, safety boundary verified, plugin architecture implemented
+
+=== Completed
+
+==== Foundation (Phase 1)
+
+* [x] Platform detection module (Ada)
+** OS family detection (Linux, macOS, BSD, Windows)
+** Linux distribution detection (30+ distros)
+** Package manager auto-detection
+** Container/WSL/immutable system detection
+
+* [x] Backend interface abstraction (Ada)
+** Abstract interface for all package managers
+** Package info types
+** Transaction types
+** Operation result types
+** Backend registry implementation
+
+* [x] Reversibility types (Ada/SPARK)
+** Snapshot ID and management types
+** Transaction logging types
+** SPARK contracts for rollback safety
+** Rollback result types
+** Snapshot manager implementation
+
+* [x] Elixir OTP application skeleton
+** DNFinition Application and Supervisor
+** Ada wrapper (Port integration)
+** Snapshot manager GenServer
+** Transaction log GenServer
+** Recovery manager
+
+* [x] TotalUpdate daemon skeleton
+** Application and Supervisor
+** Main daemon process
+** Scheduler GenServer
+** Watcher GenServer
+** Download manager GenServer (aria2 integration)
+** Plugin manager GenServer
+** Strategy engine GenServer
+
+* [x] TUI framework (Ada)
+** Color scheme definitions
+** Box drawing characters
+** Status indicators
+** Main window specification
+
+* [x] Build system
+** GNAT project files (.gpr)
+** Elixir mix.exs
+** Justfile with 40+ recipes
+** Man page generation
+
+==== Walking Skeleton (Phase 1.5) ✓ NEW
+
+* [x] Guix backend (Ada + Elixir)
+** Generation-based install/upgrade/rollback
+** Native recovery point support
+** Profile management
+
+* [x] Nix backend (Ada + Elixir)
+** Generation-based install/upgrade/rollback
+** Native recovery point support
+** Profile management
+
+* [x] Safety boundary module (Ada/SPARK)
+** Recovery_Point_Token type
+** Critical invariant enforcement
+** Formal verification of safety properties
+
+* [x] Plugin architecture
+** Plugin behaviour/interface
+** Plugin registry with capability-based selection
+** Priority-ordered plugin discovery
+** Built-in Guix and Nix plugins
+
+* [x] Strategy matrix
+** Snapshot backend detection (btrfs, ZFS, LVM, native)
+** Risk level assessment
+** Strategy selection based on PM + filesystem + risk
+** Strategy documentation
+
+* [x] DNFinition CLI commands
+** search, install, remove, upgrade, list
+** snapshots, rollback
+** Automatic recovery point creation
+** Backend integration
+
+---
+
+== Roadmap
+
+=== Phase 1: Foundation Completion
+
+==== Remaining Items
+
+* [ ] ncurses bindings (Ada)
+* [ ] TUI main window implementation
+* [ ] Package browser view
+* [ ] First backend: rpm-ostree
+* [ ] Ada/Elixir port communication protocol
+
+---
+
+=== Phase 2: Core Reversibility
+
+==== Snapshot Manager Implementation
+
+* [ ] btrfs snapshot backend
+* [ ] ZFS snapshot backend
+* [ ] LVM snapshot backend
+* [ ] Snapper integration (openSUSE)
+* [ ] rpm-ostree deployment tracking
+
+==== Transaction Logging
+
+* [ ] Log file format specification
+* [ ] Log parsing and replay
+* [ ] Log compression and rotation
+* [ ] Atomic log writes
+
+==== Rollback Engine
+
+* [ ] SPARK proofs for rollback safety
+* [ ] Partial rollback support
+* [ ] Boot-time recovery check
+* [ ] Emergency rollback (grub integration)
+
+---
+
+=== Phase 3: Package Manager Backends
+
+==== Priority 0 (Immutable Systems)
+
+* [ ] rpm-ostree (Silverblue, Kinoite, CoreOS)
+* [x] Nix (NixOS and standalone) ✓
+* [x] Guix (Guix System and standalone) ✓
+
+==== Priority 1 (Major Distributions)
+
+* [ ] dnf (Fedora, RHEL 8+)
+* [ ] apt (Debian, Ubuntu)
+* [ ] zypper (openSUSE, SLE)
+* [ ] pacman (Arch)
+
+==== Priority 2 (BSD and macOS)
+
+* [ ] pkg (FreeBSD)
+* [ ] pkg_add (OpenBSD)
+* [ ] Homebrew (macOS)
+
+==== Priority 3 (Other)
+
+* [ ] xbps (Void)
+* [ ] apk (Alpine)
+* [ ] Flatpak
+* [ ] Snap
+
+---
+
+=== Phase 4: TotalUpdate Features
+
+==== Download Management
+
+* [ ] aria2 integration
+* [ ] Parallel download manager
+* [ ] Bandwidth throttling
+* [ ] Resume support
+* [ ] Mirror selection
+
+==== IPFS Integration
+
+* [ ] Kubo client integration
+* [ ] Content-addressed packages
+* [ ] Pinning strategy
+* [ ] Fallback to HTTP mirrors
+
+==== Strategy Engine
+
+* [ ] Configuration file parsing (TOML)
+* [ ] Whitelist/blacklist enforcement
+* [ ] Version pinning
+* [ ] Schedule management
+* [ ] Conservative/aggressive/manual modes
+
+==== Daemon Features
+
+* [ ] systemd service file
+* [ ] D-Bus interface
+* [ ] Idle detection
+* [ ] Low-memory mode (<5MB)
+
+---
+
+=== Phase 5: Language Package Managers
+
+==== JavaScript/TypeScript
+
+* [ ] Deno (primary)
+* [ ] npm/yarn/pnpm (for compatibility)
+
+==== Python
+
+* [ ] pip
+* [ ] pipx
+* [ ] poetry
+* [ ] conda/mamba
+
+==== Rust
+
+* [ ] rustup (toolchain)
+* [ ] cargo (crates)
+
+==== Other
+
+* [ ] cabal (Haskell)
+* [ ] hex (Elixir/Erlang)
+* [ ] gem (Ruby)
+* [ ] composer (PHP)
+* [ ] go modules (with restrictions)
+
+---
+
+=== Phase 6: App Internal Updaters
+
+==== Discovery Methods
+
+* [ ] D-Bus signal monitoring
+* [ ] HTTP API detection
+* [ ] CLI trigger discovery
+* [ ] Config file update methods
+
+==== Supported Applications
+
+* [ ] Firefox
+* [ ] VS Code
+* [ ] Steam
+* [ ] Discord
+* [ ] Electron apps (general)
+
+---
+
+=== Phase 7: Advanced Features
+
+==== Userscript Management
+
+* [ ] Greasemonkey support
+* [ ] Tampermonkey support
+* [ ] Violentmonkey support
+* [ ] Auto-update from Greasy Fork
+
+==== OS Upgrades
+
+* [ ] Fedora system-upgrade
+* [ ] Ubuntu do-release-upgrade
+* [ ] FreeBSD freebsd-update upgrade
+* [ ] macOS softwareupdate
+
+==== Web Dashboard (Optional)
+
+* [ ] Status overview
+* [ ] Manual update triggers
+* [ ] Configuration UI
+* [ ] Log viewer
+
+---
+
+=== Phase 8: Polish & Release
+
+==== Quality
+
+* [ ] Full SPARK verification
+* [ ] Cross-platform testing matrix
+* [ ] Performance optimization
+* [ ] Memory profiling
+
+==== Documentation
+
+* [ ] User manual
+* [ ] Administrator guide
+* [ ] Plugin development guide
+* [ ] API documentation
+
+==== Distribution
+
+* [ ] Fedora COPR package
+* [ ] Debian/Ubuntu PPA
+* [ ] Arch AUR package
+* [ ] Container images
+* [ ] GitLab release pipeline
+
+---
+
+== Version Milestones
+
+[cols="1,2,3"]
+|===
+|Version |Milestone |Key Deliverables
+
+|*0.2.0*
+|Core TUI
+|Working ncurses interface, rpm-ostree backend
+
+|*0.3.0*
+|Reversibility
+|Snapshot manager, rollback working
+
+|*0.4.0*
+|Major Backends
+|dnf, apt, pacman backends
+
+|*0.5.0*
+|TotalUpdate Alpha
+|Background daemon, aria2 integration
+
+|*0.6.0*
+|Language Packages
+|Deno, pip, rustup support
+
+|*0.7.0*
+|IPFS
+|Decentralized package distribution
+
+|*0.8.0*
+|Full Platform Support
+|BSD, macOS, Windows backends
+
+|*0.9.0*
+|App Updaters
+|Internal updater detection
+
+|*1.0.0*
+|Stable Release
+|Full documentation, SPARK verified
+|===
+
+---
+
+== Business Model
+
+=== FOSS Plugins (Free)
+
+* All open-source software plugins
+* Community contributions
+* Maintained by project
+
+=== Proprietary Plugins (Paid)
+
+[cols="1,2"]
+|===
+|Tier |Description
+
+|*Simple ($50-100)*
+|Basic CLI wrapper, simple API
+
+|*Medium ($100-250)*
+|Complex API, custom protocol
+
+|*Complex ($250-500+)*
+|Reverse engineering, custom development
+|===
+
+---
+
+== Contributing
+
+Suggestions welcome via:
+
+* GitLab Issues
+* Pull requests
+* Email: jonathan@hyperpolymath.io
+
+See link:CONTRIBUTING.md[CONTRIBUTING.md] for guidelines.
+
+---
+
+_Last updated: 2025-12-27_
