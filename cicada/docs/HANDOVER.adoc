@@ -1,0 +1,374 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <jonathan.jewell@open.ac.uk>
+= CIcaDA - Crypto Identity Project Handover Document
+Jonathan D.A. Jewell <jonathan.jewell@open.ac.uk>
+:toc: macro
+:toclevels: 3
+:toc-title: Table of Contents
+:sectnums:
+:icons: font
+:source-highlighter: rouge
+
+toc::[]
+
+== Project Overview
+
+CIcaDA (Palimpsest Crypto Identity) is a comprehensive cryptographic identity management tool designed to generate quantum-resistant SSH keys with advanced security features for ethical technology development.
+
+[cols="1,3"]
+|===
+| *Full Name* | Palimpsest Crypto Identity (CIcaDA)
+| *UUID* | `449d71e4-0569-4032-8a3c-f519b3386ebb`
+| *Language* | Julia 1.9+
+| *License* | PMPL-1.0-or-later (Palimpsest License)
+| *Parent Repo* | `ambientops` (hybrid monorepo, `cicada/` subdirectory)
+| *Total Implementation* | ~3,500+ lines of Julia code + tests + documentation
+| *Motto* | "Securing Digital Identities with Quantum-Resistant Precision"
+|===
+
+== Core Features
+
+* *Quantum-resistant key generation* -- Classical (Ed25519, RSA, ECDSA) and post-quantum (Dilithium, Kyber) with hybrid mode
+* *Multi-factor authentication* -- TOTP-based MFA (planned Phase 2)
+* *Secure key storage* -- 0600/0700 permissions, JSON metadata, UUID tracking
+* *GitHub integration* -- Upload, list, delete SSH keys via GitHub API
+* *Cross-platform support* -- Linux, macOS, Windows (CI tested)
+* *Automated key rotation* -- Schedule-based, auto-expiry, and emergency rotation
+* *Security auditing* -- Comprehensive key analysis, strength assessment, and audit trail
+* *Backup and recovery* -- Individual/bulk backups with retention management
+
+== Repository Structure
+
+[source]
+----
+ambientops/cicada/
++-- src/                          # Core implementation
+|   +-- main.jl                   # CLI entry point (PalimpsestCryptoIdentity module)
+|   +-- config.jl                 # TOML configuration management
+|   +-- keygen/                   # Key generation modules
+|   |   +-- types.jl              # Key types and metadata
+|   |   +-- classical.jl          # Ed25519, RSA, ECDSA generation
+|   |   +-- postquantum.jl        # PQC stub (Dilithium, Kyber)
+|   +-- storage/                  # Storage modules
+|   |   +-- keystore.jl           # Key storage and retrieval
+|   |   +-- backup.jl             # Backup and recovery
+|   |   +-- rotation.jl           # Automated key rotation
+|   +-- validation/               # Validation modules
+|   |   +-- verify.jl             # Key validation and auditing
+|   +-- integrations/             # External integrations
+|   |   +-- github.jl             # GitHub API integration
+|   +-- utils/                    # Utilities
+|       +-- errors.jl             # Custom error types (CIcaDAError)
+|       +-- logging.jl            # Logging utilities
++-- test/                         # Comprehensive test suites
+|   +-- runtests.jl               # Test suite entry point
+|   +-- test_types.jl             # Type system tests (17 tests)
+|   +-- test_config.jl            # Configuration tests
+|   +-- test_keygen.jl            # Key generation tests (all algorithms)
+|   +-- test_storage.jl           # Storage and backup tests
+|   +-- test_validation.jl        # Validation tests
++-- docs/                         # Documentation
+|   +-- INDEX.adoc                # Wiki-style documentation index
+|   +-- HANDOVER.adoc             # This document
+|   +-- QUICKSTART.md             # Quick start guide (5 minutes)
+|   +-- USER_GUIDE.md             # Comprehensive user guide
+|   +-- CITATIONS.adoc            # Academic citations
+|   +-- examples/                 # Workflow examples
+|       +-- daily_workflow.sh     # Daily development workflow
+|       +-- security_incident.sh  # Security incident response
+|       +-- hybrid_setup.sh       # Hybrid QR key setup
++-- .machine_readable/            # Structured project metadata
+|   +-- STATE.scm                 # Current project state and progress
+|   +-- META.scm                  # Architecture decisions (8 ADRs)
+|   +-- ECOSYSTEM.scm             # Ecosystem position and relationships
+|   +-- AGENTIC.scm               # AI agent interaction patterns
+|   +-- NEUROSYM.scm              # Neurosymbolic integration config
+|   +-- PLAYBOOK.scm              # Operational runbook
++-- .github/workflows/            # CI/CD
+|   +-- ci.yml                    # GitHub Actions workflow
++-- malware-scanner/              # Git submodule (not yet integrated)
++-- contractiles/                 # RSR contractiles (k9, dust, lust, must, trust)
++-- ffi/                          # FFI bridge (Zig, when implemented)
++-- AI.a2ml                       # AI manifest
++-- CLAUDE.md                     # Development notes for AI assistants
++-- TOPOLOGY.md                   # Architecture diagram and completion dashboard
++-- Project.toml                  # Julia dependencies
++-- install.sh                    # Installation script
++-- justfile                      # Build recipes
++-- README.adoc                   # User-facing documentation
++-- LICENSE                       # Palimpsest License v0.4
+----
+
+== Technical Architecture
+
+=== Primary Language
+
+*Julia 1.9+* -- chosen for strong numerical computing, native C interop for cryptographic libraries, multiple dispatch for clean API design, and cross-platform support.
+
+=== Cryptographic Foundations
+
+[cols="1,2,2"]
+|===
+| *Component* | *Technology* | *Purpose*
+
+| Key Generation (Classical)
+| Ed25519, RSA-2048/4096, ECDSA-P256/P384
+| SSH key pair generation using OpenSSH_jll bindings
+
+| Key Generation (PQC)
+| Dilithium2/3/5, Kyber512/768/1024
+| Post-quantum signatures and key encapsulation (NIST FIPS 204/203). Currently stub implementation.
+
+| Hybrid Mode
+| Ed25519 + Dilithium3
+| Defense-in-depth: if either algorithm is broken, the other provides fallback
+
+| Key Derivation (Planned)
+| Argon2id
+| Passphrase-based key derivation for backup encryption, resistant to GPU/ASIC attacks
+
+| Encryption at Rest (Planned)
+| AES-256-GCM
+| Authenticated encryption for private key backups
+
+| Hashing
+| Nettle.jl (SHA-256+)
+| Fingerprint computation and integrity verification
+|===
+
+=== Authentication
+
+* *TOTP-based multi-factor authentication* -- Planned for Phase 2, will use TOTP.jl for enrollment and verification
+* *Hardware security keys* -- Planned for Phase 2 (YubiKey support)
+* *Secure key storage* -- OS-level permissions (0600/0700), JSON metadata with UUIDs
+
+== Key Technical Components
+
+=== 1. Secure Key Generation Module
+
+Generates Ed25519/RSA/ECDSA key pairs using OpenSSH_jll (cryptographically secure RNG). PQC stubs establish the architecture for Dilithium/Kyber integration via NistyPQC.jl. Hybrid mode combines classical + PQC for maximum security.
+
+*Source*: `src/keygen/classical.jl`, `src/keygen/postquantum.jl`, `src/keygen/types.jl`
+
+=== 2. Multi-Factor Authentication System
+
+Planned Phase 2 feature. Will implement TOTP authentication using TOTP.jl with user enrollment and verification workflows. Hardware security key support (YubiKey) also planned.
+
+=== 3. GitHub SSH Key Integration
+
+Automates uploading, listing, and deleting SSH keys on GitHub via the GitHub API. Supports both CLI-provided and configuration-file tokens. Includes token validation.
+
+*Source*: `src/integrations/github.jl`
+
+=== 4. Cross-Platform Installer Generator
+
+Installation script (`install.sh`) handles dependency checking and setup. Platform-specific packaging (Windows/macOS/Linux) planned for Phase 2.
+
+*Source*: `install.sh`
+
+=== 5. Advanced Logging and Audit Mechanisms
+
+Logs all key generation, authentication, and GitHub integration events. Security audit command provides strength assessment, expiration checking, and algorithm analysis for all stored keys.
+
+*Source*: `src/utils/logging.jl`, `src/validation/verify.jl`
+
+== Project Goals
+
+[cols="1,3"]
+|===
+| *Goal* | *Measurable Target*
+
+| Quantum-resistant cryptographic identity
+| Support all NIST PQC standards (Dilithium, Kyber) with production-ready implementations
+
+| Simplify secure key management
+| Reduce steps to generate and deploy a secure SSH key to under 5 minutes (see QUICKSTART.md)
+
+| Enhance GitHub integration security
+| Automate key deployment and enforce key rotation policies
+
+| Support ethical technology development
+| Provide auditable identity management under the Palimpsest License
+|===
+
+== Security Principles
+
+* *Quantum-resistant cryptography* -- All algorithms chosen with post-quantum transition in mind
+* *Comprehensive entropy collection* -- OpenSSH_jll uses system CSPRNG
+* *Secure key derivation* -- Argon2id for passphrase-based operations (planned)
+* *Multi-factor authentication* -- TOTP and hardware keys (planned)
+* *Detailed audit logging* -- All operations logged with timestamps and key IDs
+* *Defense in depth* -- Hybrid keys, restrictive permissions, backup encryption
+
+== Development Roadmap
+
+=== Phase 1: MVP (COMPLETE)
+
+[%header,cols="1,1,3"]
+|===
+| Status | Priority | Deliverable
+| DONE | -- | Classical SSH key generation (Ed25519, RSA, ECDSA)
+| DONE | -- | Post-quantum stubs (Dilithium, Kyber)
+| DONE | -- | Hybrid quantum-resistant keys
+| DONE | -- | Key management (list, info, validate, audit)
+| DONE | -- | Storage, backup, and recovery
+| DONE | -- | Automated key rotation
+| DONE | -- | GitHub API integration
+| DONE | -- | CLI interface (11 commands)
+| DONE | -- | Comprehensive test suite
+| DONE | -- | Documentation and examples
+| DONE | -- | CI/CD pipeline (GitHub Actions)
+|===
+
+=== Phase 2: Enhanced Security (PLANNED -- 2026 Q2)
+
+[%header,cols="1,1,3"]
+|===
+| Status | Priority | Deliverable
+| TODO | *Critical* | Full PQC implementation (integrate NistyPQC.jl)
+| TODO | *High* | Multi-factor authentication (TOTP, hardware keys)
+| TODO | *High* | Backup encryption with passphrase (Argon2id + AES-256-GCM)
+| TODO | Medium | Platform-specific installers (Windows, macOS, Linux)
+| TODO | Medium | Key sharing and delegation
+| TODO | Medium | Email notifications for expiration
+| TODO | Low | Malware scanner integration (use existing submodule)
+|===
+
+=== Phase 3: Enterprise Features (PLANNED -- 2026 Q3)
+
+[%header,cols="1,1,3"]
+|===
+| Status | Priority | Deliverable
+| TODO | High | Team management and collaboration
+| TODO | High | Role-based access control (RBAC)
+| TODO | Medium | Centralized key management server
+| TODO | Medium | Compliance reporting (SOC2, ISO 27001)
+| TODO | Medium | Vault integrations (HashiCorp Vault, AWS Secrets Manager)
+| TODO | Low | Web GUI interface
+| TODO | Low | SIEM export (audit log integration)
+| TODO | Low | API server mode
+|===
+
+== Key Technical Challenges
+
+[%header,cols="1,1,3"]
+|===
+| Challenge | Priority | Notes
+
+| Cross-platform key generation
+| *Critical*
+| Ensuring consistent and secure key generation across Linux, macOS, Windows. OpenSSH_jll provides cross-platform bindings.
+
+| Secure key storage
+| *Critical*
+| Protecting private keys from unauthorized access. Currently uses filesystem permissions; Phase 2 adds encryption at rest.
+
+| GitHub API integration
+| Medium
+| Handling rate limits and authentication securely. Token management via config or CLI.
+
+| PQC implementation maturity
+| *Critical*
+| NistyPQC.jl must reach production quality before CIcaDA can offer real PQC. Current stubs establish architecture only.
+
+| Cross-platform installers
+| Medium
+| Need Inno Setup (Windows), pkgbuild (macOS), and distribution packages (Linux).
+|===
+
+== Research and Innovation Areas
+
+* *Hardware RNG integration* -- Investigating hardware random number generators (HRNGs) and environmental noise sampling for enhanced entropy
+* *Post-quantum standards tracking* -- Monitoring NIST PQC standardization (FIPS 203/204) and Julia ecosystem readiness
+* *Secure enclaves* -- Exploring HSM and secure enclave integration for key protection
+* *Privacy-preserving identity verification* -- Researching zero-knowledge proofs for identity attestation without key exposure
+
+== Potential Use Cases
+
+* Secure developer identity management across GitHub/GitLab/Bitbucket
+* Ethical AI research key generation with audit trails
+* Quantum-resistant authentication systems for long-lived keys
+* Secure collaboration tools for open-source projects
+* Automated key lifecycle management in CI/CD pipelines
+
+== Dependencies
+
+[cols="1,1,2"]
+|===
+| Package | Version | Purpose
+
+| ArgParse | v1.1+ | Command-line argument parsing
+| HTTP | v1 | GitHub API integration
+| JSON3 | v1 | JSON serialization for metadata and GitHub responses
+| Nettle | v0.2 | Cryptographic hashing (SHA-256+)
+| OpenSSH_jll | -- | SSH key generation binaries
+| TOML | stdlib | Configuration file parsing
+| UUIDs | stdlib | Unique key identifiers
+| Dates | stdlib | Expiration date handling
+| Logging | stdlib | Audit trail and debug logging
+|===
+
+== Build and Test Instructions
+
+[source,bash]
+----
+# Clone and setup
+cd ~/Documents/hyperpolymath-repos/ambientops/cicada
+git submodule update --init --recursive
+
+# Install Julia dependencies
+julia --project=. -e 'using Pkg; Pkg.instantiate()'
+
+# Run tests
+julia --project=. test/runtests.jl
+
+# Run the application
+julia --project=. src/main.jl --help
+
+# Generate a key
+julia --project=. src/main.jl generate -e your@email.com
+
+# Using justfile
+just build
+just test
+----
+
+== Known Issues and Limitations
+
+1. *PQC is stub only* -- Post-quantum algorithms produce simulated key material, not cryptographically secure PQC keys
+2. *No MFA yet* -- Single-factor key access; TOTP planned for Phase 2
+3. *Backups unencrypted* -- Backup files are readable without passphrase; encryption planned for Phase 2
+4. *malware-scanner not integrated* -- Submodule exists but not wired into key operations
+5. *Julia startup latency* -- CLI has noticeable startup time due to Julia's JIT compilation
+6. *Ed448 not implemented* -- Original handover mentions Ed448; CIcaDA uses Ed25519 (more widely supported, adequate security)
+
+== Technical References
+
+[cols="1,2"]
+|===
+| Reference | Location
+
+| Main Implementation | `src/main.jl` (PalimpsestCryptoIdentity module, 680 lines)
+| Cryptographic Utilities | `src/keygen/classical.jl`, `src/keygen/postquantum.jl`
+| GitHub Integration | `src/integrations/github.jl`
+| Configuration | `src/config.jl`
+| Error Handling | `src/utils/errors.jl`
+| Key Types | `src/keygen/types.jl`
+| Test Suite | `test/runtests.jl` (entry point)
+| Quick Start | `docs/QUICKSTART.md`
+| User Guide | `docs/USER_GUIDE.md`
+| Architecture Decisions | `.machine_readable/META.scm` (8 ADRs)
+| Project State | `.machine_readable/STATE.scm`
+| Ecosystem Position | `.machine_readable/ECOSYSTEM.scm`
+|===
+
+== Contribution Guidelines
+
+1. Maintain the highest security standards -- all crypto operations use established libraries
+2. Prioritize quantum-resistant design -- every algorithm choice considers PQC transition
+3. Comprehensive testing for all features -- target 90% code coverage
+4. Clear, detailed documentation -- update docs with every feature change
+5. Ethical use of cryptographic technologies -- Palimpsest License enforces ethical use
+6. Adhere to the link:../CODE_OF_CONDUCT.md[Code of Conduct]
+7. Follow Julia style guide conventions and use multiple dispatch
+8. Add docstrings to all public functions

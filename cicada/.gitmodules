@@ -1,0 +1,3 @@
+[submodule "malware-scanner"]
+	path = malware-scanner
+	url = https://github.com/hyperpolymath/malware-scanner.git

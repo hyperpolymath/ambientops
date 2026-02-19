@@ -1,0 +1,36 @@
+= CIcaDA - Citation Guide
+:toc:
+
+== BibTeX
+
+[source,bibtex]
+----
+@software{cicada_2025,
+  author = {Polymath, Hyper},
+  title = {CIcaDA},
+  year = {2025},
+  url = {https://github.com/hyperpolymath/CIcaDA},
+  license = {AGPL-3.0-or-later}
+}
+----
+
+== Harvard Style
+
+Polymath, H. (2025) _CIcaDA_ [Computer software]. Available at: https://github.com/hyperpolymath/CIcaDA
+
+== OSCOLA
+
+Hyper Polymath, 'CIcaDA' (2025) <https://github.com/hyperpolymath/CIcaDA>
+
+== MLA
+
+Polymath, Hyper. "CIcaDA." 2025, github.com/hyperpolymath/CIcaDA.
+
+== APA 7
+
+Polymath, H. (2025). _CIcaDA_ [Computer software]. GitHub. https://github.com/hyperpolymath/CIcaDA
+
+== See Also
+
+* link:../CITATION.cff[CITATION.cff]
+* link:../codemeta.json[codemeta.json]

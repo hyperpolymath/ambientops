@@ -1,0 +1,119 @@
+= CIcaDA - Crypto Identity
+
+image:https://img.shields.io/badge/License-PMPL--1.0-blue.svg[License: PMPL-1.0,link="https://github.com/hyperpolymath/palimpsest-license"]
+image:https://img.shields.io/badge/Philosophy-Palimpsest-indigo.svg[Palimpsest,link="https://github.com/hyperpolymath/palimpsest-license"]
+
+
+*Quantum-Resistant Cryptographic Identity Management*
+
+CIcaDA is a comprehensive cryptographic identity management system built in Julia, designed for the post-quantum era. It provides classical SSH key generation, post-quantum cryptography support, automated key rotation, and seamless GitHub integration.
+
+== Features
+
+- 🔐 *Classical Key Generation*: Ed25519, RSA-2048/4096, ECDSA-P256/P384
+- 🛡️ *Post-Quantum Cryptography*: Dilithium (signatures), Kyber (encryption)
+- 🔄 *Hybrid Keys*: Combine classical + PQC for maximum security
+- ⚡ *Automated Key Rotation*: Schedule-based and manual rotation
+- 🔍 *Security Auditing*: Comprehensive key analysis and validation
+- 💾 *Backup & Recovery*: Encrypted backups with retention management
+- 🐙 *GitHub Integration*: Upload/manage keys via GitHub API
+- 📊 *Detailed Logging*: Audit trail for all operations
+- 🎯 *CLI Interface*: Powerful command-line tool
+
+== Quick Start
+
+=== Installation
+
+```bash
+git clone https://github.com/Hyperpolymath/CIcaDA.git
+cd CIcaDA
+git submodule update --init --recursive
+./install.sh
+```
+
+=== Generate Your First Key
+
+```bash
+= Initialize configuration
+
+julia --project=. src/main.jl init
+
+= Generate Ed25519 key
+
+julia --project=. src/main.jl generate -e your@email.com
+
+= List keys
+
+julia --project=. src/main.jl list
+```
+
+== Documentation
+
+- [Quick Start Guide](docs/QUICKSTART.md) - Get started in 5 minutes
+- [User Guide](docs/USER_GUIDE.md) - Complete documentation
+- [Examples](docs/examples/) - Common workflows
+- [CLAUDE.md](CLAUDE.md) - Development notes
+
+== Commands
+
+```bash
+= Key generation
+
+julia --project=. src/main.jl generate -e user@email.com [-a algorithm]
+
+= Key management
+
+julia --project=. src/main.jl list [--verbose]
+julia --project=. src/main.jl info --id KEY_ID
+julia --project=. src/main.jl validate --id KEY_ID
+julia --project=. src/main.jl audit [--id KEY_ID]
+
+= Backup & rotation
+
+julia --project=. src/main.jl backup [--id KEY_ID]
+julia --project=. src/main.jl rotate [--auto | --all]
+
+= GitHub integration
+
+julia --project=. src/main.jl github --action upload --id KEY_ID --token TOKEN
+```
+
+== Supported Algorithms
+
+*Classical*: Ed25519 (recommended), RSA-2048/4096, ECDSA-P256/P384
+*Post-Quantum*: Dilithium2/3/5, Kyber512/768/1024, Hybrid
+
+*Note*: PQC is currently stub implementation. For production, install NistyPQC.jl
+
+== Architecture
+
+```
+CIcaDA/
+├── src/
+│   ├── main.jl              # CLI entry point
+│   ├── config.jl            # Configuration
+│   ├── keygen/              # Key generation
+│   ├── storage/             # Storage, backup, rotation
+│   ├── validation/          # Validation and auditing
+│   ├── integrations/        # GitHub integration
+│   └── utils/               # Utilities
+├── test/                    # Test suite
+├── docs/                    # Documentation
+└── malware-scanner/         # Submodule
+```
+
+== Development
+
+```bash
+git clone https://github.com/Hyperpolymath/CIcaDA.git
+cd CIcaDA
+git submodule update --init --recursive
+julia --project=. -e 'using Pkg; Pkg.instantiate()'
+julia --project=. test/runtests.jl
+```
+
+== License
+
+Palimpsest License v0.4 - see [LICENSE](LICENSE)
+
+*Built with Julia | Securing the post-quantum future*

@@ -1,0 +1,87 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    name: Julia ${{ matrix.version }} - ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        version:
+          - '1.9'
+          - '1.10'
+          - 'nightly'
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
+
+    steps:
+      - uses: actions/checkout@v6.0.1
+        with:
+          submodules: recursive
+
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: ${{ matrix.version }}
+
+      - uses: julia-actions/cache@v2
+
+      - uses: julia-actions/julia-buildpkg@v1
+
+      - name: Run tests
+        run: |
+          julia --project=. -e 'using Pkg; Pkg.test()'
+
+      - uses: julia-actions/julia-processcoverage@v1
+        if: matrix.os == 'ubuntu-latest' && matrix.version == '1.9'
+
+      - uses: codecov/codecov-action@v5
+        if: matrix.os == 'ubuntu-latest' && matrix.version == '1.9'
+        with:
+          file: lcov.info
+
+  lint:
+    name: Code Quality
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6.0.1
+
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: '1.9'
+
+      - name: Check formatting
+        run: |
+          julia -e 'using Pkg; Pkg.add("JuliaFormatter"); using JuliaFormatter; format(".", verbose=true) || error("Formatting check failed")'
+
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6.0.1
+
+      - name: Run security checks
+        run: |
+          # Check for common security issues
+          echo "Scanning for hardcoded secrets..."
+          ! grep -r "password\s*=" src/ test/
+          ! grep -r "secret\s*=" src/ test/
+          ! grep -r "token\s*=" src/ test/ | grep -v "github_token" | grep -v "# GitHub"
+
+      - name: Dependency audit
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: '1.9'
+
+      - run: |
+          julia --project=. -e 'using Pkg; Pkg.audit()'

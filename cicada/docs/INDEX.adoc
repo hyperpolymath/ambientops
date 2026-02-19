@@ -1,0 +1,254 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <jonathan.jewell@open.ac.uk>
+= CIcaDA Documentation Index
+:toc: macro
+:toclevels: 2
+:toc-title: Navigation
+:icons: font
+
+toc::[]
+
+== About This Index
+
+This is the central documentation hub for *CIcaDA* (Palimpsest Crypto Identity), a quantum-resistant SSH key management tool. Use the links below to navigate to any document in the project.
+
+---
+
+== I. Getting Started
+
+[cols="1,2,1"]
+|===
+| Document | Description | Location
+
+| link:QUICKSTART.md[Quick Start Guide]
+| Get CIcaDA running in 5 minutes: install, init, generate first key
+| `docs/QUICKSTART.md`
+
+| link:../install.sh[Installation Script]
+| Automated installation with dependency checking
+| `install.sh`
+
+| link:../README.adoc[README]
+| Project overview, features, commands, architecture
+| `README.adoc`
+|===
+
+== II. User Documentation
+
+[cols="1,2,1"]
+|===
+| Document | Description | Location
+
+| link:USER_GUIDE.md[User Guide]
+| Comprehensive guide: configuration, key generation, management, GitHub integration, best practices
+| `docs/USER_GUIDE.md`
+
+| link:QUICKSTART.md[Quick Start]
+| Abbreviated setup and first-use guide
+| `docs/QUICKSTART.md`
+
+| link:examples/daily_workflow.sh[Daily Workflow Example]
+| Shell script demonstrating daily development key workflow
+| `docs/examples/daily_workflow.sh`
+
+| link:examples/security_incident.sh[Security Incident Response]
+| Emergency key rotation and audit procedures
+| `docs/examples/security_incident.sh`
+
+| link:examples/hybrid_setup.sh[Hybrid QR Key Setup]
+| Setting up hybrid quantum-resistant keys (Ed25519 + Dilithium3)
+| `docs/examples/hybrid_setup.sh`
+|===
+
+== III. Project Handover and Status
+
+[cols="1,2,1"]
+|===
+| Document | Description | Location
+
+| link:HANDOVER.adoc[Handover Document]
+| Complete project handover: overview, architecture, roadmap, challenges, research areas, contribution guidelines
+| `docs/HANDOVER.adoc`
+
+| link:../.machine_readable/STATE.scm[STATE.scm]
+| Machine-readable project state: phase completion, blockers, next actions, session history
+| `.machine_readable/STATE.scm`
+
+| link:../TOPOLOGY.md[TOPOLOGY.md]
+| Architecture diagram and completion dashboard with progress bars
+| `TOPOLOGY.md`
+
+| link:../ROADMAP.adoc[Roadmap]
+| Development roadmap overview
+| `ROADMAP.adoc`
+
+| link:../CHANGELOG.adoc[Changelog]
+| Version history and release notes
+| `CHANGELOG.adoc`
+|===
+
+== IV. Architecture and Design
+
+[cols="1,2,1"]
+|===
+| Document | Description | Location
+
+| link:../.machine_readable/META.scm[META.scm]
+| Architecture Decision Records (8 ADRs): Julia choice, Ed25519 default, Dilithium/Kyber PQC, TOML config, UUID keys, Argon2id KDF, AES-256-GCM encryption, ambientops integration
+| `.machine_readable/META.scm`
+
+| link:../.machine_readable/ECOSYSTEM.scm[ECOSYSTEM.scm]
+| Ecosystem position: relationships to ambientops, panic-attacker, verisimdb, hypatia, echidna, gitbot-fleet, explicit-trust-plane
+| `.machine_readable/ECOSYSTEM.scm`
+
+| link:../ABI-FFI-README.md[ABI/FFI Architecture]
+| Idris2 ABI + Zig FFI standard (when implemented)
+| `ABI-FFI-README.md`
+
+| link:../CLAUDE.md[CLAUDE.md]
+| Development notes, project structure, implementation status, and AI assistant guidelines
+| `CLAUDE.md`
+|===
+
+== V. Security
+
+[cols="1,2,1"]
+|===
+| Document | Description | Location
+
+| link:../SECURITY.md[Security Policy]
+| Vulnerability reporting, supported versions, security contacts
+| `SECURITY.md`
+
+| link:CITATIONS.adoc[Citations]
+| Academic and standards references for cryptographic choices
+| `docs/CITATIONS.adoc`
+|===
+
+== VI. Contributing and Governance
+
+[cols="1,2,1"]
+|===
+| Document | Description | Location
+
+| link:../CONTRIBUTING.md[Contributing Guide]
+| How to contribute: code style, PR process, testing requirements
+| `CONTRIBUTING.md`
+
+| link:../CODE_OF_CONDUCT.md[Code of Conduct]
+| Community standards and expectations
+| `CODE_OF_CONDUCT.md`
+
+| link:../MAINTAINERS.md[Maintainers]
+| Project maintainer contacts and responsibilities
+| `MAINTAINERS.md`
+
+| link:../LICENSE[License]
+| Palimpsest License v0.4 (PMPL-1.0-or-later)
+| `LICENSE`
+
+| link:../PALIMPSEST.adoc[Palimpsest Philosophy]
+| Philosophy behind the Palimpsest License
+| `PALIMPSEST.adoc`
+|===
+
+== VII. Machine-Readable Metadata
+
+[cols="1,2,1"]
+|===
+| Document | Description | Location
+
+| link:../.machine_readable/STATE.scm[STATE.scm]
+| Current project state, completion percentages, blockers, next actions
+| `.machine_readable/STATE.scm`
+
+| link:../.machine_readable/META.scm[META.scm]
+| Architecture decisions, development practices, design rationale
+| `.machine_readable/META.scm`
+
+| link:../.machine_readable/ECOSYSTEM.scm[ECOSYSTEM.scm]
+| Ecosystem position, related projects, integration points
+| `.machine_readable/ECOSYSTEM.scm`
+
+| link:../.machine_readable/AGENTIC.scm[AGENTIC.scm]
+| AI agent interaction patterns and constraints
+| `.machine_readable/AGENTIC.scm`
+
+| link:../.machine_readable/NEUROSYM.scm[NEUROSYM.scm]
+| Neurosymbolic integration configuration
+| `.machine_readable/NEUROSYM.scm`
+
+| link:../.machine_readable/PLAYBOOK.scm[PLAYBOOK.scm]
+| Operational runbook: build, test, deploy, rollback
+| `.machine_readable/PLAYBOOK.scm`
+
+| link:../AI.a2ml[AI Manifest]
+| Universal AI agent entry point: canonical locations, invariants, startup sequence
+| `AI.a2ml`
+|===
+
+== VIII. Development and CI/CD
+
+[cols="1,2,1"]
+|===
+| Document | Description | Location
+
+| link:../Project.toml[Project.toml]
+| Julia dependency manifest (ArgParse, HTTP, JSON3, Nettle, OpenSSH_jll)
+| `Project.toml`
+
+| link:../justfile[Justfile]
+| Build recipes: `just build`, `just test`, `just release`
+| `justfile`
+
+| link:../.github/workflows/ci.yml[CI Workflow]
+| GitHub Actions: multi-Julia version (1.9, 1.10, nightly), cross-platform (Ubuntu, macOS, Windows)
+| `.github/workflows/ci.yml`
+
+| link:../DEVELOPMENT_SUMMARY.md[Development Summary]
+| Detailed implementation summary
+| `DEVELOPMENT_SUMMARY.md`
+
+| link:../RSR_COMPLIANCE.md[RSR Compliance]
+| Rhodium Standard Repository compliance checklist
+| `RSR_COMPLIANCE.md`
+
+| link:../RSR_IMPLEMENTATION_SUMMARY.md[RSR Implementation]
+| RSR implementation details
+| `RSR_IMPLEMENTATION_SUMMARY.md`
+|===
+
+---
+
+== Quick Reference: CLI Commands
+
+[source,bash]
+----
+julia --project=. src/main.jl init                    # Initialize configuration
+julia --project=. src/main.jl generate -e EMAIL        # Generate SSH key (default: Ed25519)
+julia --project=. src/main.jl list [--verbose]         # List stored keys
+julia --project=. src/main.jl info --id KEY_ID         # Show key details
+julia --project=. src/main.jl validate --id KEY_ID     # Validate key pair
+julia --project=. src/main.jl audit [--id KEY_ID]      # Security audit
+julia --project=. src/main.jl backup [--id KEY_ID]     # Backup keys
+julia --project=. src/main.jl restore --backup-path P  # Restore from backup
+julia --project=. src/main.jl rotate [--auto|--all]    # Rotate keys
+julia --project=. src/main.jl github --action ACTION   # GitHub integration
+julia --project=. src/main.jl pqc-info                 # PQC support info
+----
+
+== Quick Reference: Supported Algorithms
+
+[cols="1,1,1"]
+|===
+| Algorithm | Type | Status
+
+| Ed25519 | Classical (default) | Production
+| RSA-2048 | Classical | Production
+| RSA-4096 | Classical | Production
+| ECDSA-P256 | Classical | Production
+| ECDSA-P384 | Classical | Production
+| Dilithium2/3/5 | Post-Quantum | Stub
+| Kyber512/768/1024 | Post-Quantum | Stub
+| Ed25519+Dilithium3 | Hybrid | Stub (PQC part)
+|===

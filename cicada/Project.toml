@@ -1,0 +1,22 @@
+name = "PalimpsestCryptoIdentity"
+uuid = "449d71e4-0569-4032-8a3c-f519b3386ebb"
+authors = ["Your Name <your.email@example.com>"]
+version = "0.1.0"
+
+[deps]
+ArgParse = "c3e4b0f8-55cb-11ea-2d4f-a9dad03fdaef"
+Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
+HTTP = "cd3eb016-35fb-5094-929b-558a96fad6f3"
+JSON3 = "0f8b85d8-7281-11e9-16c2-39a750bddbf1"
+Logging = "56ddb016-1d5c-4c9e-9873-a7c1b4f1b7a0"
+Nettle = "49dea1ee-f6fa-5aa6-9a11-8816cee7d4b9"
+OpenSSH_jll = "9bd350c2-7e96-507f-8002-3f2e0b4f7f87"
+TOML = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
+UUIDs = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
+
+[compat]
+ArgParse = "1.1"
+HTTP = "1"
+JSON3 = "1"
+Nettle = "0.2"
+julia = "1.9"
