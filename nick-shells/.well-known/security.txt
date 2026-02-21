@@ -1,0 +1,11 @@
+# Security Policy for nick-shells
+# RFC 9116 compliant security.txt
+# https://securitytxt.org/
+
+Contact: https://github.com/hyperpolymath/nick-shells/security/advisories/new
+Contact: mailto:security@hyperpolymath.org
+Expires: 2026-12-31T23:59:59.000Z
+Preferred-Languages: en
+Canonical: https://github.com/hyperpolymath/nick-shells/.well-known/security.txt
+Policy: https://github.com/hyperpolymath/nick-shells/blob/main/SECURITY.md
+Acknowledgments: https://github.com/hyperpolymath/nick-shells/blob/main/SECURITY-ACKNOWLEDGMENTS.md

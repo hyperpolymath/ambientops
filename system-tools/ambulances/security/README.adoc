@@ -1,0 +1,894 @@
+= Security Ambulance
+:toc:
+:toclevels: 3
+:icons: font
+:source-highlighter: rouge
+
+image:https://img.shields.io/badge/License-PMPL--1.0-blue.svg[License: PMPL-1.0,link="https://github.com/hyperpolymath/palimpsest-license"]
+image:https://img.shields.io/badge/Philosophy-Palimpsest-indigo.svg[Palimpsest,link="https://github.com/hyperpolymath/palimpsest-license"]
+image:https://img.shields.io/badge/Version-1.0.0-success.svg[Version]
+image:https://img.shields.io/badge/Status-Production_Ready-brightgreen.svg[Status]
+
+*Your Linux system security is compromised. Security Ambulance hardens your defenses.*
+
+Security Ambulance is a comprehensive security posture assessment and hardening tool for Linux systems. Unlike commercial security scanners that overwhelm you with false positives or sketchy "PC optimizer" malware, it provides *safe, evidence-based, auditable* security improvements with *full compliance tracking*.
+
+[quote]
+____
+"You just discovered suspicious activity on your server. You don't need a CISSP certification—you need Security Ambulance."
+____
+
+== The Problem
+
+You've been there:
+
+* Account compromised, don't know what was accessed
+* Firewall wide open, no idea which ports are safe to close
+* Services running as root that don't need to be
+* World-writable files everywhere
+* Haven't checked for updates in months
+* SSH configured with password authentication (bad practice)
+* SELinux/AppArmor disabled "because it was easier"
+* Failed login attempts in logs, no idea if it's serious
+* SSL certificates expired, breaking services
+
+You search for security guides. You find 200-page CIS benchmarks. You don't know which settings matter. Some advice is outdated. You're afraid of locking yourself out.
+
+**Security Ambulance solves this.**
+
+== What It Does
+
+Security Ambulance provides *systematic, expert-level security assessment and hardening* for Linux systems—without requiring you to be a security expert.
+
+=== 🔍 Comprehensive Security Audit
+
+Security Ambulance checks *everything* that affects your security posture:
+
+[cols="1,3"]
+|===
+|Area |What It Checks
+
+|**Firewall**
+|Open ports, unsafe rules, default deny policy, port exposure, failed connection attempts
+
+|**Services**
+|Unnecessary services running, services running as root, unpatched daemons, listening ports
+
+|**File Permissions**
+|World-writable files, SUID/SGID binaries, sensitive config permissions, SSH key permissions, /tmp safety
+
+|**Users & Groups**
+|Password policy strength, sudo access, inactive accounts, UID 0 accounts, password aging
+
+|**Updates**
+|Missing security patches, kernel version, outdated packages, auto-update configuration
+
+|**Access Control**
+|SELinux/AppArmor status, mandatory access control policies, enforcement mode
+
+|**Malware Detection**
+|Rootkit signatures, suspicious processes, unauthorized SUID binaries, hidden files, modified system binaries
+
+|**Logs**
+|Failed login attempts, privilege escalation attempts, suspicious network activity, log tampering
+
+|**Certificates**
+|Expired TLS/SSL certificates, weak cipher suites, certificate validation, self-signed certs
+
+|**SSH Hardening**
+|Password authentication, root login, key-only auth, port configuration, protocol version
+|===
+
+=== 🔧 Safe, Auditable Hardening
+
+When Security Ambulance finds vulnerabilities, it can fix them—*safely*:
+
+* **Firewall hardening**: Close unnecessary ports, add rate limiting, enable default deny, block known bad IPs
+* **Service hardening**: Disable unnecessary services, enforce principle of least privilege, restrict service capabilities
+* **Permission fixes**: Fix world-writable files, secure SUID binaries, harden SSH keys, protect config files
+* **Access control**: Enable SELinux/AppArmor, configure policies, enforce mandatory access control
+* **SSH hardening**: Disable password auth, enforce key-based authentication, disable root login, change default port
+* **Update management**: Install security patches, configure auto-updates, verify package signatures
+
+Every hardening action:
+
+* ✓ Shows you what it will do *before* doing it (dry-run mode)
+* ✓ Creates automatic backups of modified configs
+* ✓ Generates compliance receipts (CIS, NIST, DISA STIG)
+* ✓ Can be undone if something breaks
+* ✓ Never weakens security without explicit approval
+
+== Quick Start
+
+=== Installation
+
+[source,bash]
+----
+git clone https://github.com/hyperpolymath/security-ambulance.git
+cd security-ambulance
+sudo ./install.sh
+----
+
+Or download and install in one command:
+
+[source,bash]
+----
+curl -fsSL https://raw.githubusercontent.com/hyperpolymath/security-ambulance/main/install.sh | sudo bash
+----
+
+=== Basic Usage
+
+==== Run Full Security Audit
+
+[source,bash]
+----
+sudo security-audit scan
+----
+
+This shows you *everything* about your security posture: firewall rules, running services, file permissions, user accounts, updates, SELinux status, malware indicators, logs, certificates.
+
+Sample output:
+
+[source,text]
+----
+[✓] Firewall: active (ufw), default deny incoming
+[✗] Port 22 (SSH) exposed to 0.0.0.0 (RISK)
+[✗] Port 3306 (MySQL) exposed to 0.0.0.0 (CRITICAL)
+[✓] Services: 23 running, 4 unnecessary services detected
+[✗] Service 'cups' running as root (unnecessary)
+[✗] 47 world-writable files detected (RISK)
+[✗] 12 SUID binaries detected (review recommended)
+[!] SELinux: disabled (SECURITY RISK)
+[✗] 127 failed SSH login attempts from 34.56.78.90
+[✓] All SSL certificates valid
+[!] WARNING: SSH password authentication enabled (RISK)
+----
+
+==== Auto-Harden Everything
+
+If you trust Security Ambulance to fix everything it found:
+
+[source,bash]
+----
+sudo security-audit auto-harden
+----
+
+==== Guided Hardening (Recommended)
+
+For more control, use interactive mode:
+
+[source,bash]
+----
+sudo security-audit harden --interactive
+----
+
+This walks you through each issue and asks what you want to do:
+
+[source,text]
+----
+Issue: SSH password authentication enabled (allows brute-force attacks)
+
+Suggested hardening: Disable password authentication in /etc/ssh/sshd_config
+Requires: SSH keys configured for all users
+
+[Y] Apply this fix
+[S] Skip
+[D] Show details
+[Q] Quit
+
+Your choice:
+----
+
+==== Target Specific Security Areas
+
+Fix just firewall issues:
+
+[source,bash]
+----
+sudo security-audit harden firewall
+----
+
+Fix just file permissions:
+
+[source,bash]
+----
+sudo security-audit harden permissions
+----
+
+Other targets: `services`, `users`, `updates`, `selinux`, `ssh`, `malware`, `certificates`
+
+==== Dry-Run Mode
+
+See what *would* be changed without actually changing it:
+
+[source,bash]
+----
+sudo security-audit harden --dry-run
+----
+
+Perfect for understanding risks or verifying before production changes.
+
+==== Compliance Reporting
+
+Generate CIS Benchmark compliance report:
+
+[source,bash]
+----
+sudo security-audit compliance --benchmark cis
+----
+
+Other benchmarks: `nist`, `disa-stig`, `pci-dss`
+
+== Real-World Scenarios
+
+=== Scenario 1: "I Think My Account Was Compromised"
+
+Suspicious activity detected, need to assess damage and lock down.
+
+[source,bash]
+----
+$ sudo security-audit scan malware
+
+[✗] Rootkit detected: possible linux-rootkit-4 signatures
+[✗] Suspicious process: /tmp/.hidden/miner (high CPU)
+[✗] Unauthorized SUID binary: /usr/local/bin/.backdoor
+[✗] Modified system binary: /bin/ps (checksum mismatch)
+[!] 847 failed login attempts from 12 unique IPs
+
+$ sudo security-audit harden malware
+
+Quarantining suspicious process /tmp/.hidden/miner...
+Removing unauthorized SUID binary /usr/local/bin/.backdoor...
+Restoring /bin/ps from package...
+Blocking IP addresses with failed attempts...
+Enabling auditd for process monitoring...
+
+[✓] Malware remediation complete. System hardened.
+Recommendation: Review /var/log/security-audit/incident-2026-01-29.log
+----
+
+=== Scenario 2: "Firewall Wide Open, Don't Know What to Close"
+
+Default firewall config allows everything, need to lock down safely.
+
+[source,bash]
+----
+$ sudo security-audit scan firewall
+
+[✗] 17 ports exposed to 0.0.0.0 (public internet)
+[!] Port 3306 (MySQL): No authentication required (CRITICAL)
+[!] Port 6379 (Redis): No password set (CRITICAL)
+[!] Port 8080 (HTTP): Unencrypted (RISK)
+
+$ sudo security-audit harden firewall --interactive
+
+Port 3306 (MySQL) exposed to 0.0.0.0
+Recommendation: Restrict to localhost or specific IPs
+
+[1] Restrict to localhost only
+[2] Allow specific IP range (enter manually)
+[3] Keep public (not recommended)
+[4] Disable MySQL service entirely
+
+Your choice: 1
+
+Updating firewall rules...
+Restricting MySQL to 127.0.0.1 only...
+Testing connectivity... SUCCESS (local only)
+
+[✓] Firewall hardened. 14 ports closed, 3 restricted.
+----
+
+=== Scenario 3: "Need to Pass Security Compliance Audit"
+
+Company requires CIS Benchmark compliance, don't know where to start.
+
+[source,bash]
+----
+$ sudo security-audit compliance --benchmark cis
+
+CIS Benchmark Compliance Report
+Generated: 2026-01-29 14:32:17
+
+Overall Score: 67/100 (NEEDS IMPROVEMENT)
+
+Critical Failures:
+[✗] 1.1.1.1 - Ensure mounting of cramfs filesystems is disabled
+[✗] 1.3.1 - Ensure sudo is installed
+[✗] 5.2.2 - Ensure SSH Protocol is set to 2
+[✗] 5.3.1 - Ensure password creation requirements are configured
+
+Recommendations:
+[!] 23 critical items need remediation
+[!] 45 high-priority items detected
+[!] 12 medium-priority items detected
+
+$ sudo security-audit harden --compliance cis
+
+Applying CIS Benchmark remediations...
+Disabling cramfs filesystem...
+Configuring password complexity requirements...
+Hardening SSH configuration...
+Enabling auditd...
+Configuring file integrity monitoring...
+
+[✓] CIS compliance improved: 67/100 → 94/100
+Remaining issues require manual review (see report)
+----
+
+=== Scenario 4: "Server Acting Strange, High CPU Usage"
+
+Unknown processes consuming resources, possible crypto-mining malware.
+
+[source,bash]
+----
+$ sudo security-audit scan malware
+
+[✗] Suspicious process: /tmp/.x11/kworker (CPU 95%)
+[✗] Outbound connections to known mining pool: pool.minexmr.com
+[✗] Cron job added by unknown user: /etc/cron.d/.system
+[✗] Modified /etc/ld.so.preload (rootkit indicator)
+
+$ sudo security-audit harden malware
+
+Killing suspicious process /tmp/.x11/kworker...
+Removing malicious cron job...
+Cleaning /etc/ld.so.preload...
+Blocking mining pool domains...
+Scanning for additional persistence mechanisms...
+Found: systemd service /etc/systemd/system/.update.service
+Removing malicious systemd service...
+
+[✓] Malware removed. Enabling enhanced monitoring.
+Recommendation: Change all passwords, review user accounts
+----
+
+=== Scenario 5: "SSH Brute-Force Attacks in Logs"
+
+Thousands of failed login attempts, need to secure SSH immediately.
+
+[source,bash]
+----
+$ sudo security-audit scan ssh
+
+[✗] SSH password authentication enabled (RISK)
+[✗] SSH root login permitted (CRITICAL)
+[✗] SSH on default port 22 (predictable)
+[!] 4,372 failed login attempts in last 24 hours
+[!] Brute-force attack detected from 89.234.156.78
+
+$ sudo security-audit harden ssh
+
+Creating backup of /etc/ssh/sshd_config...
+Disabling password authentication...
+Disabling root login...
+Changing SSH port to 22022...
+Installing fail2ban...
+Configuring fail2ban for SSH protection...
+Banning IP 89.234.156.78 (4,372 failed attempts)...
+Restarting SSH service...
+
+[✓] SSH hardened. Password auth disabled, fail2ban active.
+WARNING: Ensure you have working SSH key before logout!
+----
+
+== Part of AmbientOps
+
+Security Ambulance is a *procedure pack* in the link:https://github.com/hyperpolymath/ambientops[AmbientOps ecosystem], which uses a "hospital model" for system tools:
+
+* **Ward** — Daily ambient system health ("System Weather")
+* **Emergency Room** — Panic-safe emergency diagnostics
+* **Operating Room** — Planned procedures (Security Ambulance lives here)
+* **Records** — Receipts, undo tokens, compliance reports
+
+Security Ambulance integrates with:
+
+* **Operating Theatre** for security procedure orchestration
+* **Ward** for surfacing security health signals (exposed ports, failed logins)
+* **Emergency Room** for security incidents (quick compromise assessment)
+* **Records** for generating compliance reports and incident bundles
+
+See `docs/AMBIENTOPS_INTEGRATION.adoc` for details.
+
+== Safety Guarantees
+
+Security Ambulance follows *AmbientOps safety principles*:
+
+=== ✓ Evidence-First, Not Fearware
+
+No "9,847 CRITICAL THREATS DETECTED" scareware. Security Ambulance shows you *actual risks*, not hype.
+
+Instead of: "Your system is 99% vulnerable! Buy premium now!"
+
+You get: "Port 3306 (MySQL) exposed to 0.0.0.0 with no password. CIS Benchmark 3.5.2 violation. Recommendation: restrict to localhost."
+
+=== ✓ Non-Destructive by Default
+
+Security audits are *completely read-only*. No changes without your approval.
+
+Hardening actions:
+
+* Create automatic timestamped backups of all modified files
+* Prefer additive security (add rules, don't delete config)
+* Never lock you out (verify SSH keys before disabling passwords)
+* Provide undo receipts for all changes
+
+=== ✓ Explicit Approval Required
+
+No silent changes. Every hardening action shows:
+
+* What it will do
+* Why it's a security risk
+* What compliance standards it violates
+* How to undo it
+* What could break
+
+You approve each change (or use `--yes` if you're confident).
+
+=== ✓ Never Opens Security Holes
+
+Security Ambulance will **NEVER**:
+
+* Weaken existing security controls
+* Disable firewalls or access controls
+* Create new attack surfaces
+* Expose services to public internet without explicit consent
+* Disable SELinux/AppArmor without strong justification
+* Store passwords or credentials
+* Reduce password complexity requirements
+* Open backdoors or "remote assistance" ports
+
+=== ✓ Compliance-Aware
+
+Security Ambulance understands industry standards:
+
+* CIS Benchmarks (Center for Internet Security)
+* NIST Cybersecurity Framework
+* DISA STIG (Security Technical Implementation Guides)
+* PCI-DSS (Payment Card Industry)
+* HIPAA Security Rule
+
+All recommendations cite specific compliance requirements.
+
+=== ✓ Works Offline
+
+Security Ambulance doesn't require internet to audit or harden systems.
+
+All security checks and most hardening actions work *completely offline*.
+
+== Command Reference
+
+[cols="2,3"]
+|===
+|Command |Description
+
+|`sudo security-audit scan`
+|Run full security audit
+
+|`sudo security-audit scan <target>`
+|Scan specific area (firewall\|services\|permissions\|users\|updates\|selinux\|malware\|logs\|certificates\|ssh)
+
+|`sudo security-audit harden`
+|Interactive guided hardening
+
+|`sudo security-audit harden <target>`
+|Harden specific area
+
+|`sudo security-audit auto-harden`
+|Automatically fix all detected issues
+
+|`sudo security-audit harden --dry-run`
+|Show what would be changed (no actual changes)
+
+|`sudo security-audit compliance --benchmark <name>`
+|Generate compliance report (cis\|nist\|disa-stig\|pci-dss)
+
+|`sudo security-audit status`
+|Quick security posture summary
+
+|`security-audit list-issues`
+|List all detected security issues
+
+|`security-audit baseline`
+|Create security baseline for comparison
+
+|`security-audit compare-baseline`
+|Compare current state to baseline
+
+|`security-audit version`
+|Show version info
+
+|`security-audit help`
+|Show help message
+|===
+
+=== Options
+
+[cols="1,3"]
+|===
+|Option |Description
+
+|`-v, --verbose`
+|Show detailed output
+
+|`-q, --quiet`
+|Minimal output
+
+|`-y, --yes`
+|Auto-approve all changes (dangerous!)
+
+|`--dry-run`
+|Preview changes only
+
+|`--no-color`
+|Disable colored output
+
+|`--log <file>`
+|Write log to file
+
+|`--backup-dir <dir>`
+|Custom backup directory
+
+|`--interactive`
+|Guided mode (ask before each change)
+
+|`--severity <level>`
+|Filter by severity (critical\|high\|medium\|low)
+
+|`--format <type>`
+|Output format (text\|json\|html\|pdf)
+|===
+
+== Advanced Features
+
+=== Export Incident Bundles
+
+Generate a shareable security incident bundle for forensics/support:
+
+[source,bash]
+----
+sudo security-audit export --incident /tmp/security-incident
+----
+
+Creates:
+
+[source,text]
+----
+/tmp/security-incident/
+├── audit-report.txt         # Full audit output
+├── system-info.txt          # OS, kernel, hardware
+├── security-configs/        # Config files (sanitized)
+│   ├── sshd_config
+│   ├── firewall-rules
+│   ├── pam.d/
+│   └── selinux/
+├── logs/                    # Security logs
+│   ├── auth.log
+│   ├── audit.log
+│   ├── fail2ban.log
+│   └── syslog-security.log
+├── malware-indicators/      # IOCs (Indicators of Compromise)
+│   ├── suspicious-processes.txt
+│   ├── unauthorized-files.txt
+│   └── network-connections.txt
+└── metadata.json            # Machine-readable summary
+----
+
+The bundle *automatically sanitizes* sensitive info (passwords, SSH keys, IPs if requested).
+
+=== Baseline Management
+
+Create a security baseline when system is known-good:
+
+[source,bash]
+----
+sudo security-audit baseline --save /var/lib/security-audit/baseline.json
+----
+
+Later, detect drift from baseline:
+
+[source,bash]
+----
+sudo security-audit compare-baseline /var/lib/security-audit/baseline.json
+----
+
+Shows:
+
+[source,text]
+----
+[!] 3 new world-writable files since baseline
+[!] Service 'telnetd' enabled (was disabled)
+[!] SELinux changed from enforcing to permissive
+[!] 2 new SUID binaries detected
+----
+
+=== Backup Management
+
+List all backups:
+
+[source,bash]
+----
+security-audit list-backups
+----
+
+Restore from backup:
+
+[source,bash]
+----
+sudo security-audit restore --backup 2026-01-29_14-30-22
+----
+
+=== JSON Output
+
+For scripting/automation:
+
+[source,bash]
+----
+sudo security-audit scan --format json
+----
+
+Returns structured JSON with all audit results.
+
+=== Continuous Monitoring
+
+Enable systemd timer for daily security scans:
+
+[source,bash]
+----
+sudo security-audit enable-monitoring
+----
+
+Sends notifications when security posture degrades.
+
+=== Logging
+
+Enable file logging:
+
+[source,bash]
+----
+sudo security-audit scan --log /var/log/security-audit.log
+----
+
+Or set default log location:
+
+[source,bash]
+----
+export SECURITY_AUDIT_LOG=/var/log/security-audit.log
+----
+
+== Distribution Support
+
+Security Ambulance works on:
+
+* ✓ Ubuntu / Debian (fully supported)
+* ✓ Fedora / RHEL / CentOS (fully supported)
+* ✓ Arch Linux (fully supported)
+* ✓ openSUSE (supported)
+* ⚠ Other systemd-based distros (best-effort)
+
+Access control systems:
+
+* ✓ SELinux (primary, fully supported)
+* ✓ AppArmor (fully supported)
+* ⚠ TOMOYO Linux (experimental)
+
+Firewall support:
+
+* ✓ ufw (primary, fully supported)
+* ✓ firewalld (fully supported)
+* ✓ iptables/nftables (supported)
+
+== Technical Details
+
+=== Architecture
+
+[source,text]
+----
+security-audit
+├── src/
+│   ├── main.d                # D orchestration entry point
+│   ├── scanner/              # Security scanning modules
+│   │   ├── firewall.d
+│   │   ├── services.d
+│   │   ├── permissions.d
+│   │   ├── users.d
+│   │   ├── updates.d
+│   │   ├── selinux.d
+│   │   ├── malware.d
+│   │   ├── logs.d
+│   │   ├── certificates.d
+│   │   └── ssh.d
+│   ├── hardening/            # Hardening modules
+│   │   ├── firewall.d
+│   │   ├── permissions.d
+│   │   ├── selinux.d
+│   │   └── ssh.d
+│   ├── compliance/           # Compliance checking
+│   │   ├── cis.d
+│   │   ├── nist.d
+│   │   ├── disa_stig.d
+│   │   └── pci_dss.d
+│   ├── crypto/               # Rust cryptographic operations
+│   │   ├── hash_verify.rs
+│   │   ├── cert_validate.rs
+│   │   └── signature_check.rs
+│   ├── policy/               # V security policy verification
+│   │   ├── firewall_policy.v
+│   │   ├── permission_policy.v
+│   │   └── service_policy.v
+│   └── utils/                # Core utilities
+│       ├── backup.d          # Backup/restore
+│       ├── logging.d         # Logging framework
+│       ├── privileges.d      # Root/sudo handling
+│       └── system.d          # OS detection
+└── tests/                    # Test suite
+----
+
+=== Requirements
+
+* D compiler (ldc2 or dmd) for orchestration
+* V compiler for policy verification
+* Rust toolchain for cryptographic operations
+* Standard Linux utilities: `iptables`, `systemctl`, `auditctl`
+* Root/sudo for scanning and hardening
+
+=== Implementation Languages
+
+Security Ambulance uses a multi-language architecture per Rhodium Standard Repository (RSR) guidelines:
+
+* **D** — Core orchestration, system interaction (robust, cross-distro)
+* **V** — Security policy verification (fast, memory-safe)
+* **Rust** — Cryptographic operations (safety-critical, no undefined behavior)
+
+This ensures:
+
+* Type safety (no memory corruption vulnerabilities)
+* Performance (native compiled, no runtime overhead)
+* Correctness (formal verification of security policies)
+* Auditability (clear separation of concerns)
+
+== Why Security Ambulance?
+
+=== vs. Manual Security Guides
+
+|===
+|Manual Hardening |Security Ambulance
+
+|Read 200-page CIS Benchmark
+|One command
+
+|Manually check 147 settings
+|Automated comprehensive scan
+
+|Hope you didn't miss anything
+|Evidence-based audit
+
+|No undo if you break something
+|Automatic backups + undo
+
+|"Last updated: 2019"
+|Current compliance standards
+
+|Might lock yourself out
+|Verifies access before changes
+|===
+
+=== vs. Commercial Security Scanners
+
+Those expensive enterprise tools?
+
+* They generate 10,000-line reports with 90% false positives
+* They require annual licenses and "professional services"
+* They have opaque algorithms (you can't audit them)
+* They want to "phone home" and upload your data
+* They cost $10,000+ per year
+
+Security Ambulance:
+
+* ✓ Open source (audit the code yourself)
+* ✓ No telemetry, no tracking, no data upload
+* ✓ No "enterprise licenses" or vendor lock-in
+* ✓ Evidence-based, no fake threats
+* ✓ Compliance-aware (CIS, NIST, DISA STIG)
+* ✓ Free forever
+
+=== vs. "PC Optimizer" Malware
+
+Those sketchy "Scan your PC for threats!" tools?
+
+* They ARE the malware
+* They lie about problems to scare you
+* They open security holes
+* They install adware/ransomware
+* They steal credentials
+
+Security Ambulance:
+
+* ✓ Open source (review the code)
+* ✓ Never weakens security
+* ✓ Never installs anything suspicious
+* ✓ Evidence-based, no fake errors
+* ✓ Safety-first design
+
+=== vs. Learning Everything Yourself
+
+Learning security is great, but when your server is compromised at 2am and you have customers affected, you don't have time for a security certification course.
+
+Security Ambulance is *teaching-friendly*:
+
+* Explains security risks in plain English
+* Shows the exact commands it runs
+* Documents why each hardening action works
+* Cites compliance standards (CIS, NIST)
+* References are included (learn at your own pace)
+
+You can learn while fixing, not instead of fixing.
+
+== Roadmap
+
+=== v1.1 (Q2 2026)
+
+* Container security scanning (Docker, Podman)
+* Kernel hardening (sysctl parameters)
+* Enhanced malware detection (YARA rules)
+* Intrusion detection integration (AIDE, Tripwire)
+
+=== v1.2 (Q3 2026)
+
+* Cloud provider security (AWS, Azure, GCP)
+* Kubernetes security posture
+* Automated incident response playbooks
+* Threat intelligence integration
+* Plugin architecture (beta)
+
+=== v2.0 (Q4 2026)
+
+* Distributed security monitoring
+* Real-time threat detection
+* Security orchestration automation
+* Compliance as code
+
+See link:ROADMAP.adoc[ROADMAP.adoc] for the complete roadmap.
+
+== Contributing
+
+We welcome contributions! See link:CONTRIBUTING.adoc[CONTRIBUTING.adoc].
+
+Priority areas for v1.1:
+
+* Container security scanning
+* Kernel hardening checks
+* Additional compliance benchmarks
+* Malware signature database
+* Documentation for additional distros
+
+== Support
+
+* Issues: https://github.com/hyperpolymath/security-ambulance/issues
+* Discussions: https://github.com/hyperpolymath/security-ambulance/discussions
+* Security issues: See link:SECURITY.md[SECURITY.md]
+
+== License
+
+Security Ambulance is licensed under PMPL-1.0-or-later (Palimpsest Meta-Permissive License).
+
+See link:LICENSE[LICENSE] for details.
+
+== Philosophy
+
+Security Ambulance follows the link:https://github.com/hyperpolymath/palimpsest-license[Palimpsest philosophy]:
+
+* **Boring is good** — Reliable, predictable, no surprises
+* **Evidence over hype** — Show measurements, not marketing
+* **Safety-first** — Never weaken security
+* **Respect users** — No dark patterns, no manipulation
+* **Open by default** — Audit anything, trust nothing
+
+[quote]
+____
+"The best security tool is the one that hardens your system without creating new vulnerabilities—and proves it with receipts."
+____
+
+---
+
+Made with care by the link:https://github.com/hyperpolymath[Hyperpolymath Project].

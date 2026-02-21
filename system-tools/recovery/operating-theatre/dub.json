@@ -1,0 +1,11 @@
+{
+    "name": "operating-theatre",
+    "description": "Plan-first system management and hardening tool",
+    "authors": ["Hyperpolymath"],
+    "license": "AGPL-3.0-or-later",
+    "targetType": "executable",
+    "targetName": "sor",
+    "sourcePaths": ["src"],
+    "importPaths": ["src"],
+    "mainSourceFile": "src/main.d"
+}

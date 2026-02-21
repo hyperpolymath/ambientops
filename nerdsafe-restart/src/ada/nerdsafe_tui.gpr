@@ -1,0 +1,36 @@
+-- SPDX-License-Identifier: AGPL-3.0-or-later
+-- nerdsafe_tui.gpr - GPRbuild project file for nerdsafe-restart TUI
+
+project Nerdsafe_TUI is
+
+   for Source_Dirs use (".");
+   for Object_Dir use "obj";
+   for Exec_Dir use "../../bin";
+   for Main use ("main.adb");
+   for Create_Missing_Dirs use "True";
+
+   package Compiler is
+      for Default_Switches ("Ada") use
+        ("-gnat2022",       -- Ada 2022 standard
+         "-gnatwa",         -- All warnings
+         "-gnatVa",         -- All validity checks
+         "-gnaty",          -- Style checks
+         "-gnatyO",         -- Overriding subprograms must be marked
+         "-gnatQ",          -- Don't quit on errors
+         "-g",              -- Debug info
+         "-O2");            -- Optimization
+   end Compiler;
+
+   package Binder is
+      for Default_Switches ("Ada") use ("-E");  -- Exception traceback
+   end Binder;
+
+   package Linker is
+      for Default_Switches ("Ada") use ("-g");
+   end Linker;
+
+   package Builder is
+      for Executable ("main.adb") use "nerdsafe-restart";
+   end Builder;
+
+end Nerdsafe_TUI;

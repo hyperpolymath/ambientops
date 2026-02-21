@@ -1,0 +1,586 @@
+# Troubleshooting Guide
+
+This guide helps you troubleshoot issues with the Complete Linux Internet Repair Tool itself, as well as common network problems.
+
+## Tool Issues
+
+### Installation Problems
+
+#### Permission Denied During Installation
+
+**Problem:** `install.sh` fails with permission errors
+
+**Solution:**
+```bash
+# Make sure you're running with sudo
+sudo ./install.sh
+
+# Check that install.sh is executable
+chmod +x install.sh
+```
+
+#### Command Not Found After Installation
+
+**Problem:** `network-repair: command not found`
+
+**Solution:**
+```bash
+# Check if symlink was created
+ls -l /usr/local/bin/network-repair
+
+# If not, create it manually
+sudo ln -sf /opt/network-repair/network-repair /usr/local/bin/network-repair
+
+# Or run directly
+/opt/network-repair/network-repair diagnose
+```
+
+### Runtime Issues
+
+#### Script Syntax Errors
+
+**Problem:** `bash: syntax error near unexpected token`
+
+**Solution:**
+```bash
+# Ensure you're using Bash 4.0+
+bash --version
+
+# If on older system, upgrade bash
+# Ubuntu/Debian:
+sudo apt-get update && sudo apt-get install bash
+
+# RHEL/Fedora:
+sudo dnf upgrade bash
+```
+
+#### Module Not Found
+
+**Problem:** `source: file not found`
+
+**Solution:**
+```bash
+# Check installation directory structure
+ls -R /opt/network-repair/
+
+# Reinstall if files are missing
+cd /path/to/source
+sudo ./install.sh
+```
+
+## Network Issues
+
+### DNS Problems
+
+#### DNS Resolution Fails After Repair
+
+**Problem:** DNS still not working after running `repair-dns`
+
+**Diagnosis:**
+```bash
+# Check resolv.conf
+cat /etc/resolv.conf
+
+# Test DNS directly
+dig @8.8.8.8 google.com
+
+# Check if systemd-resolved is interfering
+systemctl status systemd-resolved
+```
+
+**Solutions:**
+
+1. **Manually set DNS:**
+```bash
+# Edit resolv.conf
+sudo nano /etc/resolv.conf
+
+# Add these lines:
+nameserver 8.8.8.8
+nameserver 8.8.4.4
+```
+
+2. **Restart DNS services:**
+```bash
+# Restart systemd-resolved
+sudo systemctl restart systemd-resolved
+
+# Flush DNS cache
+sudo resolvectl flush-caches
+```
+
+3. **Check if resolv.conf is immutable:**
+```bash
+# Check attributes
+lsattr /etc/resolv.conf
+
+# Remove immutable flag if set
+sudo chattr -i /etc/resolv.conf
+```
+
+#### Resolv.conf Keeps Getting Overwritten
+
+**Problem:** DNS configuration reverts after reboot
+
+**Solutions:**
+
+1. **For systemd-resolved:**
+```bash
+# Configure systemd-resolved
+sudo mkdir -p /etc/systemd/resolved.conf.d
+sudo nano /etc/systemd/resolved.conf.d/dns.conf
+
+# Add:
+[Resolve]
+DNS=8.8.8.8 8.8.4.4
+FallbackDNS=1.1.1.1 1.0.0.1
+
+# Restart
+sudo systemctl restart systemd-resolved
+```
+
+2. **For NetworkManager:**
+```bash
+# Get connection name
+nmcli connection show
+
+# Set DNS for connection
+sudo nmcli connection modify "Your-Connection" ipv4.dns "8.8.8.8 8.8.4.4"
+sudo nmcli connection modify "Your-Connection" ipv4.ignore-auto-dns yes
+sudo nmcli connection up "Your-Connection"
+```
+
+3. **Make resolv.conf immutable:**
+```bash
+# After setting correct DNS
+sudo chattr +i /etc/resolv.conf
+```
+
+### Interface Problems
+
+#### Interface Won't Come Up
+
+**Problem:** `repair-network` fails to bring up interface
+
+**Diagnosis:**
+```bash
+# Check if interface exists
+ip link show
+
+# Check kernel messages
+dmesg | grep -i network
+
+# Check if driver is loaded
+lsmod | grep -i network
+```
+
+**Solutions:**
+
+1. **Load network driver:**
+```bash
+# Find your network card
+lspci | grep -i network
+
+# Load appropriate driver (example for e1000)
+sudo modprobe e1000
+
+# Make permanent
+echo "e1000" | sudo tee -a /etc/modules
+```
+
+2. **Check for hardware issues:**
+```bash
+# Test with ethtool
+sudo ethtool eth0
+
+# Check link status
+cat /sys/class/net/eth0/carrier
+```
+
+3. **Reset interface:**
+```bash
+# Complete reset
+sudo ip link set eth0 down
+sudo ip addr flush dev eth0
+sudo ip link set eth0 up
+sudo dhclient eth0
+```
+
+#### No IP Address Assigned
+
+**Problem:** Interface is up but has no IP
+
+**Diagnosis:**
+```bash
+# Check DHCP client
+ps aux | grep dhclient
+
+# Check DHCP logs
+sudo journalctl -u NetworkManager | grep -i dhcp
+```
+
+**Solutions:**
+
+1. **Manually request DHCP:**
+```bash
+# Release current lease
+sudo dhclient -r eth0
+
+# Request new lease
+sudo dhclient -v eth0
+```
+
+2. **Try different DHCP client:**
+```bash
+# Install dhcpcd
+sudo apt-get install dhcpcd5
+
+# Use it
+sudo dhcpcd eth0
+```
+
+3. **Static IP (if DHCP fails):**
+```bash
+# Add static IP temporarily
+sudo ip addr add 192.168.1.100/24 dev eth0
+sudo ip route add default via 192.168.1.1
+```
+
+### Routing Problems
+
+#### No Default Gateway
+
+**Problem:** No route to internet
+
+**Diagnosis:**
+```bash
+# Check routing table
+ip route show
+
+# Check if gateway is reachable
+ping -c 3 192.168.1.1  # Replace with your gateway
+```
+
+**Solutions:**
+
+1. **Add default route manually:**
+```bash
+# Find your gateway
+ip route | grep default
+
+# Add default route
+sudo ip route add default via 192.168.1.1 dev eth0
+```
+
+2. **Make it permanent:**
+
+For Ubuntu with Netplan:
+```yaml
+# /etc/netplan/01-netcfg.yaml
+network:
+  version: 2
+  ethernets:
+    eth0:
+      dhcp4: no
+      addresses: [192.168.1.100/24]
+      gateway4: 192.168.1.1
+      nameservers:
+        addresses: [8.8.8.8, 8.8.4.4]
+```
+
+Apply:
+```bash
+sudo netplan apply
+```
+
+#### Multiple Default Routes
+
+**Problem:** Conflicting default routes
+
+**Solution:**
+```bash
+# List all default routes
+ip route show default
+
+# Remove specific route
+sudo ip route del default via 192.168.1.1 dev eth0
+
+# Keep only the correct one
+sudo ip route add default via 192.168.1.1 dev eth1 metric 100
+```
+
+### Connectivity Problems
+
+#### Can Ping IP but Not Domain Names
+
+**Problem:** `ping 8.8.8.8` works but `ping google.com` fails
+
+**This is a DNS issue.**
+
+**Solution:**
+```bash
+# Repair DNS
+sudo network-repair repair-dns
+
+# Or manually fix
+echo "nameserver 8.8.8.8" | sudo tee /etc/resolv.conf
+```
+
+#### Can Reach Gateway but Not Internet
+
+**Problem:** `ping 192.168.1.1` works but `ping 8.8.8.8` fails
+
+**Diagnosis:**
+```bash
+# Trace route
+traceroute 8.8.8.8
+
+# Check if NAT/firewall is blocking
+sudo iptables -L -n -v
+```
+
+**Solution:**
+```bash
+# May be ISP issue, check with router/modem
+# Or firewall issue
+sudo network-repair diagnose-firewall
+
+# Temporarily disable firewall to test
+sudo ufw disable
+# or
+sudo iptables -F
+```
+
+#### High Latency/Packet Loss
+
+**Problem:** Network is slow or unreliable
+
+**Diagnosis:**
+```bash
+# Check latency
+ping -c 10 8.8.8.8
+
+# Check interface errors
+ip -s link show eth0
+
+# Check for duplex mismatch
+sudo ethtool eth0 | grep -i duplex
+```
+
+**Solutions:**
+
+1. **Check MTU:**
+```bash
+# Test MTU
+ping -M do -s 1472 8.8.8.8
+
+# Adjust MTU if needed
+sudo ip link set eth0 mtu 1400
+```
+
+2. **Check for interference (wireless):**
+```bash
+# Scan for networks
+sudo iwlist wlan0 scan | grep -i channel
+
+# Change channel
+sudo iwconfig wlan0 channel 6
+```
+
+### NetworkManager Issues
+
+#### NetworkManager Not Starting
+
+**Problem:** `systemctl status NetworkManager` shows failed
+
+**Diagnosis:**
+```bash
+# Check logs
+sudo journalctl -u NetworkManager -n 50
+
+# Check configuration
+sudo NetworkManager --print-config
+```
+
+**Solutions:**
+
+1. **Fix configuration:**
+```bash
+# Check config syntax
+sudo nano /etc/NetworkManager/NetworkManager.conf
+
+# Restart
+sudo systemctl restart NetworkManager
+```
+
+2. **Conflict with other network managers:**
+```bash
+# Stop conflicting services
+sudo systemctl stop systemd-networkd
+sudo systemctl disable systemd-networkd
+
+# Restart NetworkManager
+sudo systemctl restart NetworkManager
+```
+
+#### Connection Keeps Disconnecting
+
+**Problem:** NetworkManager connection drops frequently
+
+**Solutions:**
+
+1. **Disable power management (for wireless):**
+```bash
+# Check power management
+iwconfig wlan0 | grep "Power Management"
+
+# Disable
+sudo iwconfig wlan0 power off
+
+# Make permanent
+echo "#!/bin/bash" | sudo tee /etc/pm/power.d/wireless
+echo "iwconfig wlan0 power off" | sudo tee -a /etc/pm/power.d/wireless
+sudo chmod +x /etc/pm/power.d/wireless
+```
+
+2. **Increase connection timeout:**
+```bash
+# Edit connection
+nmcli connection modify "Your-Connection" connection.auth-retries 5
+nmcli connection modify "Your-Connection" ipv4.dhcp-timeout 90
+```
+
+## Firewall Issues
+
+### Tool Can't Check Firewall
+
+**Problem:** Permission denied when checking firewall
+
+**Solution:**
+```bash
+# Run with sudo
+sudo network-repair diagnose-firewall
+```
+
+### Firewall Blocking Internet
+
+**Problem:** Firewall rules blocking legitimate traffic
+
+**Solutions:**
+
+1. **Check UFW:**
+```bash
+# Check status
+sudo ufw status verbose
+
+# Allow outgoing
+sudo ufw default allow outgoing
+
+# Or disable temporarily
+sudo ufw disable
+```
+
+2. **Check iptables:**
+```bash
+# List rules
+sudo iptables -L -n -v
+
+# Allow all outgoing
+sudo iptables -P OUTPUT ACCEPT
+
+# Or flush all rules (CAUTION!)
+sudo iptables -F
+```
+
+## Recovery
+
+### Restore from Backup
+
+If repairs made things worse:
+
+```bash
+# List backups
+ls -lt ~/.network-repair-backups/
+
+# Restore resolv.conf
+sudo cp ~/.network-repair-backups/resolv.conf.TIMESTAMP /etc/resolv.conf
+
+# Restart networking
+sudo systemctl restart NetworkManager
+```
+
+### Complete Network Reset
+
+Last resort:
+
+```bash
+# Stop all network services
+sudo systemctl stop NetworkManager
+sudo systemctl stop systemd-networkd
+
+# Flush everything
+sudo ip addr flush dev eth0
+sudo ip route flush table main
+sudo iptables -F
+
+# Start fresh
+sudo systemctl start NetworkManager
+sudo network-repair --auto-repair repair
+```
+
+## Getting Help
+
+If problems persist:
+
+1. **Gather information:**
+```bash
+# Create diagnostic report
+network-repair --verbose diagnose > /tmp/network-report.txt 2>&1
+
+# Add system info
+uname -a >> /tmp/network-report.txt
+cat /etc/os-release >> /tmp/network-report.txt
+```
+
+2. **Check logs:**
+```bash
+# NetworkManager logs
+sudo journalctl -u NetworkManager -n 100
+
+# System logs
+sudo journalctl -xe
+```
+
+3. **Open an issue:**
+   - Include the diagnostic report
+   - Describe what you were trying to do
+   - Mention your distribution and version
+   - Share any error messages
+
+## Common Error Messages
+
+### "No primary interface found"
+
+**Cause:** No network interface has a default route
+
+**Fix:** `sudo network-repair repair-network`
+
+### "DNS resolution is not working"
+
+**Cause:** DNS servers not configured or not responding
+
+**Fix:** `sudo network-repair repair-dns`
+
+### "Gateway is not reachable"
+
+**Cause:** Routing issue or disconnected network
+
+**Fix:**
+1. Check physical connection
+2. `sudo network-repair repair-routing`
+
+### "NetworkManager is not active"
+
+**Cause:** NetworkManager service not running
+
+**Fix:** `sudo systemctl start NetworkManager`

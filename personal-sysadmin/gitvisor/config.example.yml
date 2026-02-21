@@ -1,0 +1,54 @@
+# SPDX-License-Identifier: MPL-2.0-or-later
+# git-hud configuration
+
+version: 1
+
+# Database connections
+arangodb:
+  url: http://localhost:8529
+  database: git-hud
+  username: root
+  password: ${ARANGO_PASSWORD}
+
+dragonfly:
+  url: redis://localhost:6379
+  database: 0
+
+# Forge credentials
+forges:
+  github:
+    token: ${GITHUB_TOKEN}
+    webhooks:
+      secret: ${GITHUB_WEBHOOK_SECRET}
+  gitlab:
+    token: ${GITLAB_TOKEN}
+  bitbucket:
+    username: ${BITBUCKET_USERNAME}
+    app_password: ${BITBUCKET_APP_PASSWORD}
+
+# Rule engine
+rules:
+  confidence_threshold: 0.85
+  auto_fix_threshold: 0.95
+  max_concurrent_fixes: 10
+
+# Learning
+neural:
+  model: git-hud-patterns-v1
+  update_interval: 24h
+  min_pattern_frequency: 10
+
+# Monitoring
+monitoring:
+  scan_interval: 1h
+  health_check_interval: 5m
+  metrics_port: 9090
+
+# Hooks
+hooks:
+  pre_commit:
+    enabled: true
+    timeout: 30s
+  pre_push:
+    enabled: true
+    timeout: 60s

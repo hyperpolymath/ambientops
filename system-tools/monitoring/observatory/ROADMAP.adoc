@@ -1,0 +1,94 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+= System Observatory Roadmap
+:toc:
+:toclevels: 3
+:icons: font
+
+Development roadmap for System Observatory: the observability layer for AmbientOps.
+
+== Phase 0 — Bootstrap (current)
+
+Deliverables:
+
+* Repo structure + governance + CI
+* README with scope and constraints
+* Contract dependencies identified (`system-tools-contracts`)
+* Language decision: Elixir (primary) + Julia (analytics)
+
+== Phase 1 — Specifications
+
+Deliverables:
+
+* Metrics schema (what we collect, how we store)
+* Run bundle ingestion format
+* Recommendation output format
+* Dashboard data model
+* Timeline event schema
+
+== Phase 2 — Core MVP
+
+Deliverables:
+
+* Metrics store (time series)
+* Run bundle ingestion from Operating Theatre
+* Basic correlation (anomaly ↔ recent change)
+* CLI: `sysobs status`, `sysobs ingest`, `sysobs query`
+
+== Phase 3 — Dashboard
+
+Deliverables:
+
+* Web-based dashboard (ReScript + Deno)
+* Real-time system health view
+* Historical trends
+* Change timeline with annotations
+
+== Phase 4 — Forecasting
+
+Deliverables:
+
+* Julia analytics for trend prediction
+* "Disk full in N days" warnings
+* Pattern recognition
+* Proactive alerts
+
+== Phase 5 — Integrations
+
+Deliverables:
+
+* Ward: provide System Weather data
+* PSA: trend alerts for preventive action
+* Operating Theatre: receive run bundles, emit recommendations
+* feedback-a-tron: alert routing
+
+== Technology decisions
+
+[cols="1,2,2",options="header"]
+|===
+| Component | Language | Rationale
+
+| Core daemon
+| Elixir
+| Observability is allowed Elixir use case; supervision trees
+
+| Analytics/forecasting
+| Julia
+| Batch data processing per RSR
+
+| Dashboard UI
+| ReScript + Deno
+| AmbientOps primary stack
+
+| Metrics store
+| PostgreSQL or SQLite
+| Simple, proven; NOT source of truth
+|===
+
+== Constraints
+
+System Observatory MUST:
+
+* Only observe, never mutate
+* Only recommend, never apply
+* Only cache, never be authoritative
+* Stay strictly optional in the ecosystem

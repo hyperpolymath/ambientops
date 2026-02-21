@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# AI agent permissions for hybrid-automation-router
+# See 0-AI-MANIFEST.a2ml for full agent protocol
+
+User-agent: *
+Allow: /lib/
+Allow: /test/
+Allow: /docs/
+Allow: /examples/
+Allow: /config/
+Disallow: /secrets/
+Disallow: /.env
+
+# AI agents should read 0-AI-MANIFEST.a2ml first
+# SCM files are in .machine_readable/ ONLY
+# License: PMPL-1.0-or-later (Palimpsest License)

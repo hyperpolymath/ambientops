@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: MPL-2.0-or-later
+# Dependabot configuration for nano-aider (Ada project)
+# Note: Dependabot doesn't have native Ada/Alire support
+# This file configures GitHub Actions dependency updates only
+
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "ci"
+      include: "scope"

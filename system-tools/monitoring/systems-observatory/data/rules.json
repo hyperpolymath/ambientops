@@ -1,0 +1,291 @@
+{
+  "categories": {
+    "productivity": [
+      "office", "word", "excel", "powerpoint", "notepad", "writer",
+      "calc", "impress", "libreoffice", "openoffice", "onlyoffice",
+      "notion", "evernote", "joplin", "obsidian", "note", "notes",
+      "trello", "asana", "monday", "todoist", "task", "project",
+      "jira", "confluence", "wiki", "documentation", "grammarly",
+      "writing", "document", "spreadsheet", "presentation"
+    ],
+    "graphics": [
+      "photoshop", "illustrator", "gimp", "inkscape", "krita",
+      "paint", "image", "photo", "design", "drawing", "lightroom",
+      "darktable", "rawtherapee", "figma", "sketch", "canva",
+      "penpot", "autocad", "freecad", "cad", "3ds max", "maya",
+      "blender", "3d", "modeling", "render", "graphic", "vector",
+      "raster", "bitmap", "svg"
+    ],
+    "development": [
+      "vscode", "visual studio", "sublime", "atom", "idea", "pycharm",
+      "eclipse", "netbeans", "code", "editor", "ide", "compiler",
+      "git", "github", "gitlab", "version control", "postman",
+      "insomnia", "api", "debug", "debugger", "terminal", "shell",
+      "vmware", "virtualbox", "vm", "virtual", "docker", "container",
+      "kubernetes", "dev", "developer", "programming", "coding"
+    ],
+    "communication": [
+      "slack", "teams", "zoom", "discord", "skype", "telegram",
+      "whatsapp", "messenger", "chat", "video", "conference",
+      "mattermost", "rocket.chat", "zulip", "element", "matrix",
+      "jitsi", "bigbluebutton", "meet", "call", "voice", "voip",
+      "collaboration", "teamwork", "messaging"
+    ],
+    "media": [
+      "vlc", "spotify", "itunes", "netflix", "youtube", "player",
+      "music", "video", "streaming", "media", "premiere", "kdenlive",
+      "openshot", "shotcut", "davinci", "after effects", "natron",
+      "editing", "audio", "podcast", "mp3", "mp4", "playback",
+      "multimedia", "entertainment"
+    ],
+    "security": [
+      "antivirus", "firewall", "vpn", "password", "norton", "mcafee",
+      "kaspersky", "bitdefender", "security", "protection", "malware",
+      "clamav", "bitwarden", "keepass", "1password", "lastpass",
+      "nordvpn", "expressvpn", "protonvpn", "wireguard", "openvpn",
+      "encryption", "crypto", "secure", "privacy", "authentication",
+      "2fa", "mfa", "multi-factor"
+    ],
+    "utilities": [
+      "cleaner", "optimizer", "backup", "archive", "winrar", "7zip",
+      "compression", "utility", "tool", "ccleaner", "bleachbit",
+      "teamviewer", "rustdesk", "remote", "desktop", "vnc",
+      "dropbox", "google drive", "onedrive", "nextcloud", "syncthing",
+      "cloud", "sync", "storage", "file", "folder", "browser",
+      "chrome", "firefox", "edge", "brave", "web", "internet"
+    ],
+    "gaming": [
+      "steam", "game", "epic", "gog", "gaming", "play", "entertainment",
+      "launcher", "platform"
+    ],
+    "education": [
+      "learning", "education", "tutorial", "course", "training",
+      "study", "academic", "school", "university", "teach", "student"
+    ],
+    "business": [
+      "crm", "erp", "accounting", "invoice", "business", "enterprise",
+      "salesforce", "quickbooks", "suitecrm", "odoo", "tableau",
+      "grafana", "analytics", "data", "visualization", "report",
+      "mailchimp", "mautic", "marketing", "email", "campaign",
+      "customer", "sales", "revenue", "finance", "payroll"
+    ]
+  },
+  "risk_flags": {
+    "telemetry_keywords": [
+      "telemetry", "analytics", "tracking", "metrics", "usage data",
+      "diagnostic data", "crash reports", "performance monitoring",
+      "behavior tracking", "user activity", "statistics collection",
+      "data collection", "phone home", "beacon", "reporting service",
+      "anonymous data", "aggregate data", "usage statistics"
+    ],
+    "ad_keywords": [
+      "ad-supported", "advertisements", "sponsored", "ads",
+      "advertising", "promotional", "marketing", "adware",
+      "banner ads", "popup ads", "video ads", "ad network",
+      "monetization", "ad revenue", "ad tracking"
+    ],
+    "account_keywords": [
+      "requires login", "account required", "sign in required",
+      "registration required", "user account", "must register",
+      "create account", "email verification", "phone verification",
+      "mandatory signup", "subscription", "membership",
+      "user credentials", "authentication required"
+    ],
+    "pii_keywords": [
+      "personal data", "user information", "profile data",
+      "personally identifiable", "PII", "contact information",
+      "email address", "phone number", "location data",
+      "ip address", "device id", "unique identifier",
+      "billing information", "payment details", "credit card",
+      "ssn", "social security", "passport", "driver license",
+      "biometric", "fingerprint", "face recognition",
+      "health data", "medical records"
+    ],
+    "sharing_keywords": [
+      "third party", "partners", "affiliates", "data sharing",
+      "share with", "provide to", "disclose to", "transfer to",
+      "sell data", "monetize data", "data broker", "resell",
+      "partner integration", "api access", "external services",
+      "cloud sync", "server upload"
+    ],
+    "privacy_concerns": [
+      "privacy policy unclear", "may sell data", "retains forever",
+      "no encryption", "unencrypted", "plaintext storage",
+      "weak security", "data breaches", "hacked", "leaked",
+      "surveillance", "monitoring", "spyware", "keylogger",
+      "screen capture", "clipboard access", "microphone access",
+      "camera access", "location tracking", "always on"
+    ],
+    "subscription_keywords": [
+      "monthly fee", "annual subscription", "recurring payment",
+      "auto-renewal", "trial period", "premium tier",
+      "paid upgrade", "freemium", "in-app purchase",
+      "microtransaction", "subscription model"
+    ],
+    "drm_keywords": [
+      "drm", "digital rights management", "copy protection",
+      "activation required", "online activation", "license key",
+      "serial number", "product key", "always online",
+      "internet required", "phone home"
+    ]
+  },
+  "cost_thresholds": {
+    "free": 0.0,
+    "low": 10.0,
+    "medium": 50.0,
+    "high": 100.0,
+    "premium": 500.0,
+    "enterprise": 1000.0
+  },
+  "privacy_weights": {
+    "shares_data": 0.30,
+    "collects_pii": 0.25,
+    "has_telemetry": 0.20,
+    "requires_account": 0.10,
+    "has_ads": 0.10,
+    "drm_enabled": 0.05
+  },
+  "risk_scoring": {
+    "NONE": {
+      "score_min": 0.0,
+      "score_max": 0.1,
+      "description": "No identified privacy risks",
+      "color": "green",
+      "recommendation": "Safe to use"
+    },
+    "LOW": {
+      "score_min": 0.1,
+      "score_max": 0.3,
+      "description": "Minor privacy concerns",
+      "color": "lightgreen",
+      "recommendation": "Generally safe, review settings"
+    },
+    "MEDIUM": {
+      "score_min": 0.3,
+      "score_max": 0.6,
+      "description": "Moderate privacy risks",
+      "color": "yellow",
+      "recommendation": "Review privacy policy carefully"
+    },
+    "HIGH": {
+      "score_min": 0.6,
+      "score_max": 0.8,
+      "description": "Significant privacy concerns",
+      "color": "orange",
+      "recommendation": "Consider alternatives"
+    },
+    "CRITICAL": {
+      "score_min": 0.8,
+      "score_max": 1.0,
+      "description": "Severe privacy violations",
+      "color": "red",
+      "recommendation": "Avoid or replace immediately"
+    }
+  },
+  "foss_benefits": {
+    "transparency": "Source code is publicly auditable",
+    "no_vendor_lock_in": "Freedom to modify and switch",
+    "community_support": "Active developer communities",
+    "privacy": "No hidden telemetry or tracking",
+    "cost": "Usually free or donation-based",
+    "longevity": "Won't disappear if company fails",
+    "customization": "Can be modified to your needs",
+    "security": "Many eyes reviewing code",
+    "standards": "Often follows open standards"
+  },
+  "migration_tips": {
+    "easy": [
+      "Export your data from old application",
+      "Import into new FOSS alternative",
+      "Verify data integrity",
+      "Update bookmarks/shortcuts"
+    ],
+    "medium": [
+      "Read migration guide for specific app",
+      "Backup all data before starting",
+      "Plan for learning curve (1-2 weeks)",
+      "Import data in stages",
+      "Run both apps in parallel temporarily",
+      "Update team/collaborators"
+    ],
+    "high": [
+      "Allocate significant time for migration",
+      "Consider professional migration services",
+      "Train users on new interface",
+      "Create detailed migration plan",
+      "Test thoroughly before full switch",
+      "Maintain legacy access during transition",
+      "Document custom workflows"
+    ]
+  },
+  "feature_parity_threshold": {
+    "excellent": 0.95,
+    "good": 0.85,
+    "acceptable": 0.70,
+    "limited": 0.50,
+    "poor": 0.0
+  },
+  "gdpr_flags": {
+    "right_to_access": ["data export", "download data", "request data"],
+    "right_to_erasure": ["delete account", "remove data", "forget me"],
+    "right_to_portability": ["export format", "csv", "json", "xml"],
+    "right_to_object": ["opt out", "unsubscribe", "disable tracking"],
+    "data_minimization": ["minimal data", "necessary only", "required fields"],
+    "purpose_limitation": ["specific purpose", "limited use", "consent"],
+    "storage_limitation": ["retention period", "auto delete", "expiry"],
+    "accuracy": ["update profile", "correct data", "edit information"],
+    "integrity_confidentiality": ["encryption", "secure", "https", "tls"]
+  },
+  "platform_specific": {
+    "windows": {
+      "package_manager": "winget",
+      "common_paths": [
+        "C:\\Program Files",
+        "C:\\Program Files (x86)",
+        "%APPDATA%",
+        "%LOCALAPPDATA%"
+      ]
+    },
+    "macos": {
+      "package_manager": "brew",
+      "common_paths": [
+        "/Applications",
+        "~/Applications",
+        "/Library",
+        "~/Library"
+      ]
+    },
+    "linux": {
+      "package_managers": ["apt", "dnf", "pacman", "zypper"],
+      "common_paths": [
+        "/usr/bin",
+        "/usr/local/bin",
+        "~/.local/bin",
+        "/opt"
+      ]
+    }
+  },
+  "ambient_settings": {
+    "visual_feedback": {
+      "NONE": {"color": "#00FF00", "symbol": "✓"},
+      "LOW": {"color": "#90EE90", "symbol": "ℹ"},
+      "MEDIUM": {"color": "#FFFF00", "symbol": "⚠"},
+      "HIGH": {"color": "#FFA500", "symbol": "⚠"},
+      "CRITICAL": {"color": "#FF0000", "symbol": "✖"}
+    },
+    "audio_feedback": {
+      "NONE": {"frequency": 0, "duration": 0},
+      "LOW": {"frequency": 440, "duration": 100},
+      "MEDIUM": {"frequency": 660, "duration": 200},
+      "HIGH": {"frequency": 880, "duration": 300},
+      "CRITICAL": {"frequency": 1100, "duration": 500}
+    },
+    "iot_feedback": {
+      "NONE": {"led_color": "green", "intensity": 0},
+      "LOW": {"led_color": "blue", "intensity": 30},
+      "MEDIUM": {"led_color": "yellow", "intensity": 60},
+      "HIGH": {"led_color": "orange", "intensity": 80},
+      "CRITICAL": {"led_color": "red", "intensity": 100}
+    }
+  }
+}

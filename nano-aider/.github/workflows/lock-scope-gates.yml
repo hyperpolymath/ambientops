@@ -1,0 +1,292 @@
+# SPDX-License-Identifier: MPL-2.0-or-later
+# SPDX-FileCopyrightText: 2025 hyperpolymath
+#
+# Lock Scope Safety Gates
+# Enforces immutable constraints from LOCK_SCOPE.md
+
+name: Lock Scope Safety Gates
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+
+jobs:
+  user-safety-gates:
+    name: User Safety Gates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: No shell execution in config files
+        run: |
+          echo "Checking for shell execution patterns in config files..."
+          SHELL_EXEC=$(grep -rE '(system\s*\(|exec\s*\(|popen|spawn|`.*`|\$\(.*\))' \
+            --include="*.yaml" --include="*.yml" --include="*.json" \
+            --include="*.nanorc" --include="*.toml" . 2>/dev/null | \
+            grep -v '.github/workflows' | head -10 || true)
+          if [ -n "$SHELL_EXEC" ]; then
+            echo "❌ Shell execution patterns found in config files:"
+            echo "$SHELL_EXEC"
+            echo ""
+            echo "LOCK_SCOPE violation: Config is data, not code"
+            exit 1
+          fi
+          echo "✅ No shell execution in config files"
+
+      - name: No network transmission patterns
+        run: |
+          echo "Checking for telemetry/network patterns in Ada source..."
+          NETWORK=$(grep -rE '(Socket|HTTP_Client|AWS\.|Curl|telemetry|analytics|tracking)' \
+            --include="*.ads" --include="*.adb" src/ 2>/dev/null | \
+            grep -v '^\s*--' | head -10 || true)
+          if [ -n "$NETWORK" ]; then
+            echo "❌ Network/telemetry patterns detected:"
+            echo "$NETWORK"
+            echo ""
+            echo "LOCK_SCOPE violation: Offline-first, no telemetry"
+            exit 1
+          fi
+          echo "✅ No network transmission patterns"
+
+      - name: No root privilege requirements
+        run: |
+          echo "Checking for root/sudo requirements..."
+          ROOT_REQ=$(grep -rE '(sudo|as root|requires? root|/etc/|/usr/local/)' \
+            --include="*.md" --include="*.adoc" --include="*.txt" \
+            . 2>/dev/null | grep -vi 'optional\|example\|reference' | head -5 || true)
+          # Check for setuid patterns
+          SETUID=$(grep -rE '(setuid|setgid|CAP_|capabilities)' \
+            --include="*.ads" --include="*.adb" --include="*.gpr" \
+            . 2>/dev/null | head -5 || true)
+          if [ -n "$SETUID" ]; then
+            echo "❌ Privilege escalation patterns detected:"
+            echo "$SETUID"
+            echo ""
+            echo "LOCK_SCOPE violation: User-space operation only"
+            exit 1
+          fi
+          echo "✅ No root privilege requirements"
+
+      - name: Filesystem scope check
+        run: |
+          echo "Checking filesystem access scope..."
+          # Block access outside allowed directories
+          BAD_PATHS=$(grep -rE '"/boot|"/sys|"/proc|"/dev/|"/var/log' \
+            --include="*.ads" --include="*.adb" src/ 2>/dev/null | \
+            grep -v '^\s*--' | head -5 || true)
+          if [ -n "$BAD_PATHS" ]; then
+            echo "❌ Out-of-scope filesystem access detected:"
+            echo "$BAD_PATHS"
+            echo ""
+            echo "LOCK_SCOPE violation: Scoped to ~/.config, ~/.nano*, ~/.local only"
+            exit 1
+          fi
+          echo "✅ Filesystem scope verified"
+
+  language-lock-gates:
+    name: Language Lock Gates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Ada source verification
+        run: |
+          echo "Verifying Ada is primary language..."
+          ADA_COUNT=$(find src/ -name "*.ads" -o -name "*.adb" 2>/dev/null | wc -l)
+          if [ "$ADA_COUNT" -eq 0 ]; then
+            echo "❌ No Ada source files found in src/"
+            echo "LOCK_SCOPE violation: Ada is required for core functionality"
+            exit 1
+          fi
+          echo "✅ Found $ADA_COUNT Ada source files"
+
+      - name: No Kotlin/Swift (mobile lock)
+        run: |
+          echo "Checking for banned mobile languages..."
+          KOTLIN=$(find . -name "*.kt" -o -name "*.kts" 2>/dev/null | head -5)
+          SWIFT=$(find . -name "*.swift" 2>/dev/null | head -5)
+          if [ -n "$KOTLIN" ] || [ -n "$SWIFT" ]; then
+            echo "❌ Banned mobile language detected:"
+            [ -n "$KOTLIN" ] && echo "Kotlin: $KOTLIN"
+            [ -n "$SWIFT" ] && echo "Swift: $SWIFT"
+            echo ""
+            echo "LOCK_SCOPE violation: Use Tauri/Dioxus instead"
+            exit 1
+          fi
+          echo "✅ No Kotlin/Swift files"
+
+      - name: SPDX license headers check
+        run: |
+          echo "Checking SPDX headers on Ada files..."
+          MISSING_SPDX=""
+          for file in $(find src/ -name "*.ads" -o -name "*.adb" 2>/dev/null); do
+            if ! head -5 "$file" | grep -q "SPDX-License-Identifier"; then
+              MISSING_SPDX="$MISSING_SPDX$file\n"
+            fi
+          done
+          if [ -n "$MISSING_SPDX" ]; then
+            echo "⚠️ Missing SPDX headers (warning):"
+            echo -e "$MISSING_SPDX"
+          fi
+          echo "✅ SPDX header check complete"
+
+  architectural-gates:
+    name: Architectural Invariant Gates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: No unbounded heap allocation
+        run: |
+          echo "Checking for unbounded heap patterns..."
+          # Look for dangerous allocation patterns
+          UNBOUNDED=$(grep -rE '(Unbounded_String|new\s+\w+\s*\(|Indefinite_)' \
+            --include="*.ads" --include="*.adb" src/ 2>/dev/null | \
+            grep -v '^\s*--' | grep -v 'pragma' | wc -l)
+          if [ "$UNBOUNDED" -gt 20 ]; then
+            echo "⚠️ High heap allocation count ($UNBOUNDED patterns)"
+            echo "Consider stack-based alternatives where possible"
+          fi
+          echo "✅ Heap allocation check complete (found $UNBOUNDED patterns)"
+
+      - name: No external service dependencies
+        run: |
+          echo "Checking for external API dependencies..."
+          EXTERNAL=$(grep -rE '(api\.|\.com/|\.io/|REST|GraphQL|gRPC)' \
+            --include="*.ads" --include="*.adb" src/ 2>/dev/null | \
+            grep -v '^\s*--' | head -5 || true)
+          if [ -n "$EXTERNAL" ]; then
+            echo "❌ External service patterns detected:"
+            echo "$EXTERNAL"
+            echo ""
+            echo "LOCK_SCOPE violation: Fully offline capable"
+            exit 1
+          fi
+          echo "✅ No external service dependencies"
+
+      - name: SPARK contracts preserved
+        run: |
+          echo "Checking SPARK annotation integrity..."
+          # Verify SPARK annotations aren't commented out
+          DISABLED_SPARK=$(grep -rE '^\s*--\s*(pragma\s+SPARK_Mode|with\s+SPARK)' \
+            --include="*.ads" --include="*.adb" src/ 2>/dev/null | head -5 || true)
+          if [ -n "$DISABLED_SPARK" ]; then
+            echo "⚠️ Commented-out SPARK annotations found:"
+            echo "$DISABLED_SPARK"
+            echo "Consider re-enabling or removing if intentional"
+          fi
+          echo "✅ SPARK contract check complete"
+
+      - name: ncurses TUI mode preserved
+        run: |
+          echo "Verifying ncurses TUI dependency..."
+          if ! grep -q "ncursesada\|Terminal_Interface.Curses" alire.toml src/*.ads 2>/dev/null; then
+            echo "⚠️ ncurses dependency not detected"
+            echo "TUI mode must remain available"
+          else
+            echo "✅ ncurses TUI dependency confirmed"
+          fi
+
+  security-boundary-gates:
+    name: Security Boundary Gates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: No weak cryptography
+        run: |
+          echo "Checking for weak crypto usage..."
+          WEAK=$(grep -rEi '(md5|sha1|des|rc4|blowfish)' \
+            --include="*.ads" --include="*.adb" --include="*.gpr" \
+            src/ 2>/dev/null | grep -vi 'sha1sum\|comment\|legacy\|compat' | head -5 || true)
+          if [ -n "$WEAK" ]; then
+            echo "❌ Weak cryptography detected:"
+            echo "$WEAK"
+            echo ""
+            echo "LOCK_SCOPE violation: SHA256+ required"
+            exit 1
+          fi
+          echo "✅ No weak cryptography"
+
+      - name: HTTPS only
+        run: |
+          echo "Checking for HTTP URLs..."
+          HTTP=$(grep -rE 'http://[^l1]' \
+            --include="*.ads" --include="*.adb" --include="*.yaml" --include="*.yml" \
+            . 2>/dev/null | grep -v 'localhost\|127.0.0.1\|example\.com\|schemas\.' | head -5 || true)
+          if [ -n "$HTTP" ]; then
+            echo "❌ HTTP URLs detected (must use HTTPS):"
+            echo "$HTTP"
+            echo ""
+            echo "LOCK_SCOPE violation: HTTPS only"
+            exit 1
+          fi
+          echo "✅ HTTPS only verified"
+
+      - name: No hardcoded secrets
+        run: |
+          echo "Checking for hardcoded secrets..."
+          SECRETS=$(grep -rEi '(api_key|secret|password|token)\s*[=:]\s*"[^"]{16,}"' \
+            --include="*.ads" --include="*.adb" --include="*.yaml" \
+            . 2>/dev/null | grep -vi 'example\|test\|sample\|placeholder' | head -3 || true)
+          if [ -n "$SECRETS" ]; then
+            echo "❌ Potential hardcoded secrets detected!"
+            echo ""
+            echo "LOCK_SCOPE violation: No hardcoded secrets"
+            exit 1
+          fi
+          echo "✅ No hardcoded secrets"
+
+  compatibility-gates:
+    name: Compatibility Lock Gates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: nano 5.x+ compatibility maintained
+        run: |
+          echo "Checking nano version compatibility..."
+          # Verify we don't require nano 8+ only features without fallback
+          if grep -rq 'nano.*[89]\.' src/*.ads 2>/dev/null; then
+            echo "⚠️ Check for nano 5.x fallback support"
+          fi
+          echo "✅ Compatibility check complete"
+
+      - name: XDG directory conventions
+        run: |
+          echo "Verifying XDG directory handling..."
+          if ! grep -rq 'XDG_CONFIG_HOME\|\.config' src/*.ads src/*.adb 2>/dev/null; then
+            echo "⚠️ XDG directory support not detected"
+          else
+            echo "✅ XDG directory conventions supported"
+          fi
+
+      - name: nanorc import compatibility
+        run: |
+          echo "Checking .nanorc import support..."
+          if ! grep -rq '\.nanorc\|nanorc' src/*.ads src/*.adb 2>/dev/null; then
+            echo "⚠️ .nanorc support not detected"
+          else
+            echo "✅ .nanorc import compatibility verified"
+          fi
+
+  summary:
+    name: Lock Scope Summary
+    needs: [user-safety-gates, language-lock-gates, architectural-gates, security-boundary-gates, compatibility-gates]
+    runs-on: ubuntu-latest
+    steps:
+      - name: All gates passed
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║          🔒 LOCK SCOPE SAFETY GATES PASSED ✅               ║"
+          echo "╠══════════════════════════════════════════════════════════════╣"
+          echo "║  ✅ User Safety Gates         - No shell exec, no network   ║"
+          echo "║  ✅ Language Lock Gates       - Ada enforced                ║"
+          echo "║  ✅ Architectural Gates       - Stack-safe, offline-first   ║"
+          echo "║  ✅ Security Boundary Gates   - SHA256+, HTTPS only         ║"
+          echo "║  ✅ Compatibility Gates       - nano 5.x+, XDG, nanorc      ║"
+          echo "╠══════════════════════════════════════════════════════════════╣"
+          echo "║  All immutable constraints verified per LOCK_SCOPE.md       ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"

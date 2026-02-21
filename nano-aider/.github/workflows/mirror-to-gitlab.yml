@@ -1,0 +1,26 @@
+# SPDX-License-Identifier: MPL-2.0-or-later
+name: Mirror to GitLab
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  delete:
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Push to GitLab
+        env:
+          GITLAB_URL: ${{ secrets.GITLAB_MIRROR_URL }}
+        run: |
+          git remote add gitlab "$GITLAB_URL"
+          git push gitlab --all --force
+          git push gitlab --tags --force

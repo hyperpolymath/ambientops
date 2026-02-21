@@ -1,0 +1,7 @@
+# Example URLs file
+# Lines starting with # are comments and will be ignored
+# One URL per line
+
+https://example.com
+https://example.org
+https://httpbin.org

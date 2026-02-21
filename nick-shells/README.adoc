@@ -1,0 +1,296 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-FileCopyrightText: 2025 Jonathan D.A. Jewell <hyperpolymath>
+
+= nick-shells
+
+image:https://img.shields.io/badge/License-PMPL--1.0-blue.svg[License: PMPL-1.0,link="https://github.com/hyperpolymath/palimpsest-license"]
+:toc: macro
+:toclevels: 3
+:icons: font
+
+A modular, secure, POSIX-compatible shell configuration system following the https://github.com/hyperpolymath/rhodium-standard[Rhodium Standard Repository (RSR)] conventions.
+
+toc::[]
+
+== Overview
+
+**nick-shells** provides a known-good baseline shell configuration that you can use as-is or customize by selecting individual modules. It's designed for developers, sysadmins, and anyone who wants a secure, well-organised shell environment.
+
+=== Key Features
+
+* **Modular design** — Pick only the modules you need
+* **Security-first** — Safe defaults, no dangerous practices
+* **RSR-compliant** — PATH setup for Rust, Deno, Guix, Nix
+* **POSIX-compatible** — Works with Bash, Zsh, and POSIX sh
+* **Type-safe configuration** — Nickel schema for validation
+* **Easy installation** — One-command setup with backup/rollback
+
+== Quick Start
+
+[source,bash]
+----
+# Clone
+git clone https://github.com/hyperpolymath/nick-shells.git
+cd nick-shells
+
+# Apply the baseline configuration
+./shell/apply.sh
+
+# Reload your shell
+source ~/.bashrc  # or ~/.zshrc
+----
+
+== Project Structure
+
+[source]
+----
+nick-shells/
+├── shell/                    # Shell configuration
+│   ├── baseline.sh           # Full baseline (sources all modules)
+│   ├── apply.sh              # Installation script
+│   ├── config.ncl            # Nickel configuration schema
+│   ├── modules/              # Individual, composable modules
+│   │   ├── security.sh       # Umask, core dumps, safety aliases
+│   │   ├── xdg.sh            # XDG Base Directory vars
+│   │   ├── locale.sh         # UTF-8 locale defaults
+│   │   ├── history.sh        # History configuration
+│   │   ├── behavior.sh       # Shell options (shopt)
+│   │   ├── aliases.sh        # Common aliases
+│   │   ├── path.sh           # RSR-compliant PATH setup
+│   │   ├── editor.sh         # Editor/pager configuration
+│   │   ├── dev.sh            # Development environment
+│   │   └── prompt.sh         # Informative prompt
+│   └── examples/             # Pre-built configurations
+│       ├── minimal.sh        # Security + XDG only
+│       ├── interactive.sh    # Comfortable interactive use
+│       └── developer.sh      # Full dev environment
+├── .well-known/              # RFC 9116 & AIBDP compliance
+│   ├── security.txt          # Security contact information
+│   ├── aibdp.json            # AI Boundary Declaration Protocol
+│   └── humans.txt            # Credits and acknowledgments
+├── nickel.version            # Pinned Nickel version requirements
+├── justfile                  # Development task runner
+└── must.ncl                  # Must deployment configuration
+----
+
+== Configuration Profiles
+
+=== Full Baseline (Default)
+
+The complete configuration with all modules enabled:
+
+[source,bash]
+----
+. /path/to/nick-shells/shell/baseline.sh
+----
+
+=== Minimal (Servers)
+
+Security hardening and XDG directories only — no aliases, no prompt customization:
+
+[source,bash]
+----
+. /path/to/nick-shells/shell/examples/minimal.sh
+----
+
+=== Interactive
+
+Comfortable shell experience without development tools:
+
+[source,bash]
+----
+. /path/to/nick-shells/shell/examples/interactive.sh
+----
+
+=== Custom (Pick Your Modules)
+
+Source only the modules you need:
+
+[source,bash]
+----
+__NS="/path/to/nick-shells/shell/modules"
+. "$__NS/security.sh"
+. "$__NS/xdg.sh"
+. "$__NS/aliases.sh"
+unset __NS
+----
+
+== Modules Reference
+
+[cols="1,3"]
+|===
+|Module |Description
+
+|`security.sh`
+|Secure umask (022), disable core dumps, safety aliases (`rm -i`, `mv -i`, `cp -i`)
+
+|`xdg.sh`
+|XDG Base Directory environment variables
+
+|`locale.sh`
+|UTF-8 locale defaults (`LANG`, `LC_ALL`)
+
+|`history.sh`
+|10K history with timestamps, deduplication, append mode
+
+|`behavior.sh`
+|Bash options: globstar, cdspell, extglob, checkwinsize
+
+|`aliases.sh`
+|Navigation (`..`, `...`), listing (`ll`, `la`), grep colours
+
+|`path.sh`
+|RSR-compliant PATH for Rust, Deno, Guix, Nix, `~/.local/bin`
+
+|`editor.sh`
+|Auto-detect editor (hx > nvim > vim > vi), less pager config
+
+|`dev.sh`
+|Rust backtrace, Deno cache directory
+
+|`prompt.sh`
+|Coloured prompt with exit code display
+|===
+
+== Installation
+
+=== Automatic (Recommended)
+
+[source,bash]
+----
+./shell/apply.sh
+----
+
+The script:
+
+1. Creates timestamped backups of existing `.bashrc` / `.zshrc`
+2. Adds a source line to load `baseline.sh`
+3. Is idempotent — safe to run multiple times
+
+=== Options
+
+[source,bash]
+----
+./shell/apply.sh --help           # Show all options
+./shell/apply.sh --shell bash     # Install for bash only
+./shell/apply.sh --shell zsh      # Install for zsh only
+./shell/apply.sh --dry-run        # Preview without changes
+./shell/apply.sh --uninstall      # Remove configuration
+----
+
+=== Manual Installation
+
+Add to your `~/.bashrc` or `~/.zshrc`:
+
+[source,bash]
+----
+. "/path/to/nick-shells/shell/baseline.sh"
+----
+
+== Development
+
+=== Requirements
+
+* **Nickel** >= 1.5.0 (recommended: 1.9.0) — for configuration validation
+* **ShellCheck** — for linting shell scripts
+* **shfmt** — for formatting shell scripts
+* **Just** — for task running
+
+=== Task Runner
+
+[source,bash]
+----
+just --list    # Show available tasks
+just test      # Run shellcheck on all modules
+just fmt       # Format shell scripts with shfmt
+just lint      # Run all linters
+just clean     # Remove generated files
+----
+
+=== Nickel Configuration
+
+[source,bash]
+----
+# Validate configuration schema
+nickel typecheck shell/config.ncl
+
+# Export to JSON
+nickel export shell/config.ncl > config.json
+----
+
+== Compatibility
+
+[cols="1,1,2"]
+|===
+|Shell |Supported |Notes
+
+|Bash 4+
+|✅ Full
+|All features work
+
+|Bash 3.x
+|✅ Partial
+|Some shopt options unavailable
+
+|Zsh
+|✅ Full
+|Works with default settings
+
+|sh/dash
+|✅ Basic
+|POSIX subset only
+|===
+
+== Security
+
+See link:SECURITY.md[SECURITY.md] for:
+
+* Vulnerability reporting procedures
+* Coordinated disclosure policy
+* Safe harbour provisions
+* Security best practices
+
+== AI Policy
+
+This project implements the https://github.com/hyperpolymath/consent-aware-http[AI Boundary Declaration Protocol (AIBDP)]. See link:.well-known/aibdp.json[.well-known/aibdp.json] for machine-readable policy.
+
+== Contributing
+
+Contributions are welcome! Please:
+
+1. Follow the https://github.com/hyperpolymath/rhodium-standard[RSR language policy]
+2. Run `just lint` before submitting
+3. Sign your commits
+4. Open an issue before major changes
+
+See link:CODE_OF_CONDUCT.md[CODE_OF_CONDUCT.md] for community guidelines.
+
+== Citation
+
+If you use nick-shells in academic work, please cite:
+
+[source,bibtex]
+----
+@software{nick-shells_2025,
+  author = {Polymath, Hyper},
+  title = {nick-shells},
+  year = {2025},
+  url = {https://github.com/hyperpolymath/nick-shells},
+  license = {MIT OR PMPL-1.0-or-later}
+}
+----
+
+See link:docs/CITATIONS.adoc[docs/CITATIONS.adoc] for additional citation formats.
+
+== License
+
+Dual-licensed under **MIT** OR **PMPL-1.0-or-later**.
+
+See link:LICENSE.txt[LICENSE.txt] for details.
+
+== Links
+
+* https://github.com/hyperpolymath/nick-shells[GitHub Repository]
+* https://github.com/hyperpolymath/nick-shells/issues[Issue Tracker]
+* https://github.com/hyperpolymath/nick-shells/discussions[Discussions]
+* https://github.com/hyperpolymath/rhodium-standard[Rhodium Standard Repository]

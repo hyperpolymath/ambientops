@@ -1,0 +1,36 @@
+= jusys - Citation Guide
+:toc:
+
+== BibTeX
+
+[source,bibtex]
+----
+@software{jusys_2025,
+  author = {Polymath, Hyper},
+  title = {jusys},
+  year = {2025},
+  url = {https://github.com/hyperpolymath/jusys},
+  license = {AGPL-3.0-or-later}
+}
+----
+
+== Harvard Style
+
+Polymath, H. (2025) _jusys_ [Computer software]. Available at: https://github.com/hyperpolymath/jusys
+
+== OSCOLA
+
+Hyper Polymath, 'jusys' (2025) <https://github.com/hyperpolymath/jusys>
+
+== MLA
+
+Polymath, Hyper. "jusys." 2025, github.com/hyperpolymath/jusys.
+
+== APA 7
+
+Polymath, H. (2025). _jusys_ [Computer software]. GitHub. https://github.com/hyperpolymath/jusys
+
+== See Also
+
+* link:../CITATION.cff[CITATION.cff]
+* link:../codemeta.json[codemeta.json]

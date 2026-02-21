@@ -1,0 +1,58 @@
+# GitLab CI/CD Pipeline for Juisys
+
+variables:
+  JULIA_VERSION: "1.8"
+
+stages:
+  - test
+  - lint
+  - security
+  - build
+
+# Test stage
+test:
+  stage: test
+  image: julia:${JULIA_VERSION}
+  script:
+    - julia --project=. -e 'using Pkg; Pkg.instantiate()'
+    - julia --project=. test/runtests.jl
+  coverage: '/Test coverage: \d+\.\d+%/'
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
+
+# Lint stage
+lint:
+  stage: lint
+  image: julia:${JULIA_VERSION}
+  script:
+    - julia --project=. -e 'using Pkg; Pkg.add("JuliaFormatter")'
+    - julia --project=. -e 'using JuliaFormatter; format(".", verbose=true)'
+  allow_failure: true
+
+# Security audit (privacy compliance check)
+security_audit:
+  stage: security
+  image: julia:${JULIA_VERSION}
+  script:
+    - julia --project=. -e 'using Pkg; Pkg.instantiate()'
+    - julia --project=. -e 'include("src/security.jl"); using .Security; checks = Security.self_audit(); println(Security.get_privacy_report())'
+    - echo "Privacy compliance check complete"
+  only:
+    - main
+    - merge_requests
+
+# Build documentation
+build_docs:
+  stage: build
+  image: julia:${JULIA_VERSION}
+  script:
+    - echo "Documentation build (placeholder for Documenter.jl)"
+    - ls -la docs/
+  artifacts:
+    paths:
+      - docs/build/
+  only:
+    - main

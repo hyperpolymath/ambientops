@@ -1,0 +1,168 @@
+image:https://img.shields.io/badge/License-PMPL--1.0-blue.svg[License: PMPL-1.0,link="https://github.com/hyperpolymath/palimpsest-license"]
+image:https://img.shields.io/badge/Philosophy-Palimpsest-indigo.svg[Palimpsest,link="https://github.com/hyperpolymath/palimpsest-license"]
+
+
+// SPDX-License-Identifier: PMPL-1.0-or-later
+= System Observatory
+:toc:
+:toclevels: 3
+:icons: font
+:source-highlighter: rouge
+
+*System Observatory* is the observability layer for AmbientOps — metrics store, correlation engine, and forecasting dashboard.
+
+[IMPORTANT]
+====
+*Project status:* *Specification Pending*
+
+This repository contains governance and specifications only.
+Implementation will follow the AmbientOps contract specifications.
+====
+
+== Philosophy
+
+System Observatory **observes and recommends**. It never applies changes.
+
+[cols="1,1",options="header"]
+|===
+| System Observatory | Other tools
+
+| Observes
+| Acts
+
+| Correlates
+| Executes
+
+| Forecasts
+| Applies
+
+| Recommends
+| Modifies
+
+| NEVER source of truth
+| May hold authoritative state
+|===
+
+== What it does
+
+System Observatory provides:
+
+* **Metrics store** — time series data from system scans
+* **Dashboard** — SolarWinds-like visualization of system health
+* **Change timeline** — correlate anomalies with recent changes (ingests big-up run bundles)
+* **Predictions/recommendations** — non-mutating suggestions for Operating Theatre
+
+== Ecosystem integration
+
+----
+                    ┌───────────────────────────────────────┐
+                    │         System Observatory (You are here)           │
+                    │                                        │
+                    │  ┌─────────┐  ┌─────────┐  ┌────────┐ │
+                    │  │ Metrics │  │Timeline │  │Forecast│ │
+                    │  │  Store  │  │         │  │        │ │
+                    │  └─────────┘  └─────────┘  └────────┘ │
+                    └───────────────┬───────────────────────┘
+                                    │
+         ┌──────────────────────────┼──────────────────────────┐
+         │                          │                          │
+         ▼                          ▼                          ▼
+┌─────────────────┐      ┌─────────────────┐      ┌─────────────────┐
+│ Operating       │      │ Ward            │      │ PSA             │
+│ Theatre         │      │ (System Weather)│      │ (workflows)     │
+│ (receives recs) │      │ (displays state)│      │ (trend alerts)  │
+└─────────────────┘      └─────────────────┘      └─────────────────┘
+----
+
+== Interface with Operating Theatre
+
+System Observatory interfaces with Operating Theatre (big-up) via run bundles:
+
+* **Input**: Operating Theatre → System Observatory: run bundles (snapshot/findings/plan/applied)
+* **Output**: System Observatory → Operating Theatre: current state, alerts, forecasts, recommended plan templates
+
+System Observatory **never applies changes**. It only provides recommendations.
+
+== Planned capabilities
+
+=== Metrics collection
+
+* Disk usage over time
+* Memory pressure trends
+* CPU load patterns
+* Network latency/jitter
+* Process counts and resource consumption
+
+=== Correlation engine
+
+* Match anomalies to recent changes
+* Identify patterns in failures
+* Group related events
+
+=== Forecasting
+
+* "Disk will be full in 7 days at current rate"
+* "Memory pressure increasing — investigate"
+* "This process has been growing steadily"
+
+=== Dashboard
+
+* Real-time system health overview
+* Historical trends
+* Change timeline with annotations
+* Alert management
+
+== Implementation approach
+
+Per AmbientOps language policy:
+
+* **Primary**: Elixir (observability is an allowed Elixir use case)
+* **Data processing**: Julia (batch analytics, forecasting)
+* **Dashboard UI**: ReScript + Deno (if web-based)
+
+[IMPORTANT]
+====
+System Observatory is *observability only*. It MUST NOT become:
+
+* Policy engine
+* IR authority
+* Config source of truth
+* State mutator
+====
+
+== CLI interface (planned)
+
+[source,bash]
+----
+# Check current state
+sysobs status
+
+# Ingest a run bundle from Operating Theatre
+sysobs ingest /path/to/run-bundle/
+
+# Get recommendations
+sysobs recommend
+
+# Start dashboard
+sysobs dashboard
+
+# Query metrics
+sysobs query "disk.usage" --since "7d"
+----
+
+== Ecosystem Analysis
+
+For a comprehensive analysis of integration seams, failure modes, and security considerations across the entire AmbientOps System Tools ecosystem, see:
+
+link:https://github.com/hyperpolymath/system-operating-theatre/blob/main/docs/SEAM-ANALYSIS.adoc[SEAM-ANALYSIS.adoc] in system-operating-theatre
+
+This analysis covers:
+
+* GenServer race condition mitigation
+* Confidence scoring correctness
+* O(n²) correlation optimization
+* "Never source of truth" principle enforcement
+
+== License
+
+PMPL-1.0-or-later.

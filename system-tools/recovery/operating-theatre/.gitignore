@@ -1,0 +1,24 @@
+# D build artifacts
+*.o
+*.obj
+*.a
+*.so
+*.dylib
+*.dll
+*.lib
+
+# Binary
+sor
+
+# DUB
+.dub/
+dub.selections.json
+
+# IDE
+.vscode/
+.idea/
+*.sublime-*
+
+# OS
+.DS_Store
+Thumbs.db

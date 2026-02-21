@@ -1,0 +1,206 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/hyperpolymath/system-tools-contracts/schemas/run-bundle.schema.json",
+  "title": "Run Bundle Layout",
+  "description": "Folder conventions for any run: stable filenames, where receipts/logs/diffs/exports go, cross-platform naming rules.",
+  "type": "object",
+  "required": ["version", "bundle_id", "created_at", "layout"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "bundle_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source_tool": {
+      "type": "string",
+      "enum": ["big-up", "ambient", "a-and-e", "sysobs", "psa"]
+    },
+    "bundle_type": {
+      "type": "string",
+      "enum": ["scan", "plan", "execution", "export", "archive"],
+      "description": "What kind of run this bundle represents"
+    },
+    "layout": {
+      "type": "object",
+      "description": "Directory structure specification",
+      "properties": {
+        "root_dir_pattern": {
+          "type": "string",
+          "default": "{tool}-{timestamp}-{short_id}",
+          "description": "Pattern for root directory name"
+        },
+        "directories": {
+          "type": "object",
+          "description": "Standard subdirectories",
+          "properties": {
+            "snapshots": {
+              "type": "string",
+              "default": "snapshots/",
+              "description": "Before/after system state snapshots"
+            },
+            "logs": {
+              "type": "string",
+              "default": "logs/",
+              "description": "Execution logs"
+            },
+            "diffs": {
+              "type": "string",
+              "default": "diffs/",
+              "description": "Change diffs"
+            },
+            "exports": {
+              "type": "string",
+              "default": "exports/",
+              "description": "Shareable exports (redacted)"
+            },
+            "undo": {
+              "type": "string",
+              "default": "undo/",
+              "description": "Undo/rollback data"
+            },
+            "temp": {
+              "type": "string",
+              "default": ".temp/",
+              "description": "Temporary working files"
+            }
+          }
+        },
+        "files": {
+          "type": "object",
+          "description": "Standard files and their locations",
+          "properties": {
+            "manifest": {
+              "type": "string",
+              "default": "manifest.json",
+              "description": "Bundle manifest (this file)"
+            },
+            "envelope": {
+              "type": "string",
+              "default": "envelope.json",
+              "description": "Evidence Envelope"
+            },
+            "plan": {
+              "type": "string",
+              "default": "plan.json",
+              "description": "Procedure Plan (if applicable)"
+            },
+            "receipt": {
+              "type": "string",
+              "default": "receipt.json",
+              "description": "Execution Receipt (if applicable)"
+            },
+            "receipt_human": {
+              "type": "string",
+              "default": "receipt.txt",
+              "description": "Human-readable receipt"
+            },
+            "summary": {
+              "type": "string",
+              "default": "SUMMARY.md",
+              "description": "Human-readable summary"
+            }
+          }
+        }
+      }
+    },
+    "naming_rules": {
+      "type": "object",
+      "description": "Cross-platform file naming rules",
+      "properties": {
+        "max_filename_length": {
+          "type": "integer",
+          "default": 200,
+          "description": "Maximum filename length for cross-platform compatibility"
+        },
+        "max_path_length": {
+          "type": "integer",
+          "default": 260,
+          "description": "Maximum path length (Windows compatibility)"
+        },
+        "allowed_chars": {
+          "type": "string",
+          "default": "a-zA-Z0-9._-",
+          "description": "Regex character class for allowed filename chars"
+        },
+        "timestamp_format": {
+          "type": "string",
+          "default": "YYYYMMDD-HHmmss",
+          "description": "Timestamp format for filenames"
+        },
+        "reserved_names": {
+          "type": "array",
+          "maxItems": 50,
+          "items": { "type": "string", "maxLength": 16 },
+          "default": ["CON", "PRN", "AUX", "NUL", "COM1", "LPT1"],
+          "description": "Windows reserved names to avoid"
+        }
+      }
+    },
+    "contents": {
+      "type": "array",
+      "description": "Inventory of bundle contents",
+      "maxItems": 1000,
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": { "type": "string" },
+          "type": {
+            "type": "string",
+            "enum": ["manifest", "envelope", "plan", "receipt", "snapshot", "log", "diff", "export", "undo", "other"]
+          },
+          "hash": {
+            "type": "object",
+            "properties": {
+              "algorithm": { "type": "string" },
+              "value": { "type": "string" }
+            }
+          },
+          "size_bytes": { "type": "integer" },
+          "created_at": { "type": "string", "format": "date-time" }
+        }
+      }
+    },
+    "retention": {
+      "type": "object",
+      "description": "Retention policy for this bundle",
+      "properties": {
+        "keep_until": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "policy": {
+          "type": "string",
+          "enum": ["permanent", "timed", "until_undo_expires", "manual"]
+        },
+        "compress_after_days": {
+          "type": "integer"
+        },
+        "delete_temp_after_completion": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
+    "integrity": {
+      "type": "object",
+      "description": "Bundle integrity verification",
+      "properties": {
+        "checksum_file": {
+          "type": "string",
+          "default": "SHA256SUMS"
+        },
+        "signature_file": {
+          "type": "string",
+          "default": "SHA256SUMS.sig"
+        }
+      }
+    }
+  }
+}

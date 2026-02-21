@@ -1,0 +1,151 @@
+= slopctl: The Neurosymbolic Anti-Slop Enforcer
+
+image:[Palimpsest-MPL-1.0,link="https://github.com/hyperpolymath/palimpsest-license"]
+:toc: macro
+:toc-title: Contents
+:icons: font
+:idprefix:
+:idseparator: -
+:sectanchors:
+:experimental:
+
+image:assets/avatar.svg[width=120, align="center"]
+
+[.lead]
+**slopctl** is not a linter. It is a **Cybernetic Control Loop** for Large Language Models.
+
+It wraps stochastic AI models in a deterministic "Truth Sandwich," using a neurosymbolic architecture (Rust + Idris 2) to enforce strict architectural compliance. It rejects "slop"—hallucinations, lazy typing, and sycophancy—by mathematically preventing the model from converging on a sloppy state.
+
+---
+
+toc::[]
+
+== 1. Philosophy: The "Civilisation 8 Ultra" Standard
+
+Standard AI tools optimise for **Probability** (the path of least resistance). This results in "average" code—functional, but structurally weak.
+
+**slopctl** inverts this by optimising for **Fidelity**. It treats the LLM not as an oracle, but as an untrusted stochastic process (System 1) that must be constrained by a formal logic engine (System 3).
+
+[quote, Stafford Beer, 'Designing Freedom']
+"The purpose of a system is what it does."
+
+If your system permits sloppy code, its purpose is slop. **slopctl** changes the purpose.
+
+== 2. Architecture
+
+We implement a **Viable System Model (VSM)** to manage the generation process:
+
+[source,text]
+----
+                  THE "ANTI-SLOP" CONTROL LOOP
+                  ============================
+
+      [ USER INPUT ]
+           |
+           v
+  +--------------------+       (Feedback Signal)
+  |  CYBERNETIC AGENT  |<----------------------------------------+
+  |  (Rust Controller) |                                         |
+  +--------------------+                                         |
+           |                                                     |
+           | (1) Prompt + Constraints                            |
+           v                                                     |
+    +-------------+                                              |
+    |     LLM     |  <-- System 1: The Plant (Stochastic)        |
+    +-------------+                                              |
+           |                                                     |
+           | (2) Raw Output (Draft)                              |
+           v                                                     |
+  +--------------------+                                         |
+  |  LAYER 1: SYNTAX   |  <-- System 2: The Reflex (Tree-sitter) |
+  +--------------------+                                         |
+           |                                                     |
+           +---(FAIL: "Missing Semicolon")-----------------------+
+           |                                                     |
+           | (PASS: Valid Code)                                  |
+           v                                                     |
+  +--------------------+       +--------------------------+      |
+  |  LAYER 2: LOGIC    | <---- |  IDRIS PROOF ENGINE      |      |
+  |  (Semantic Check)  |       |  System 3: The Brain     |      |
+  +--------------------+       +--------------------------+      |
+           |                                 ^                   |
+           +---(FAIL: "Scope Creep")---------|-------------------+
+           |                                 |
+           | (PASS: High Fidelity)           |
+           v                                 |
+    +-------------+                          |
+    | FINAL BUILD |  ------------------------+
+    +-------------+
+----
+
+* **The Muscle (Rust):** Handles TUI, networking, and syntax parsing (Tree-sitter).
+* **The Brain (Idris 2):** Handles semantic validation and theorem proving via Dependent Types.
+* **The Compiler (Zig):** Orchestrates the zero-dependency static build.
+
+== 3. Installation
+
+We prioritise **Oil** for bootstrapping. Reference scripts for other shells (Bash, Fish, Nu, etc.) can be found in `scripts/polyglot_shells.adoc`.
+
+[source,oil]
+----
+#!/usr/bin/env oil
+# scripts/bootstrap.oil
+
+echo "Initialising Slop Control..."
+var components = %[apps/slopctl crates/compliance dsl/idris]
+
+# 1. Build the Brain (Idris -> C -> Zig Static Lib)
+cd dsl/idris
+zig build -Doptimize=ReleaseFast
+cd ../../
+
+# 2. Build the Body (Rust TUI)
+cd apps/slopctl
+cargo build --release
+
+# 3. Verify Compliance
+just audit
+echo "System Ready. Run 'just run' to begin."
+----
+
+== 4. Usage
+
+The project is managed via a `Justfile`. Do not use `make`.
+
+[source,bash]
+----
+# Start the TUI Enforcer
+just run
+
+# Run a strict compliance audit on the codebase itself
+just check
+
+# Deploy to a container (Podman)
+just deploy-podman
+----
+
+=== Configuration
+Configuration is handled via **Nickel** for type-safe contracts. YAML is banned.
+
+* **Policy (`Mustfile`):** Human-readable immutable laws (Constitution).
+* **Settings (`config/slopctl.ncl`):** Machine-readable thresholds.
+
+== 5. Deployment Targets
+
+We officially support the following targets, prioritising OCI compliance:
+
+* **Container:** Podman (Rootless), Docker
+* **OS:** Linux (Fedora Kinoite), Minix, macOS, BSD
+* **Edge:** Generic aarch64/x86_64 targets
+
+== 6. Governance
+
+This repository adheres to the **Strict Compliance** level defined in the `Mustfile`.
+
+* **Language:** Oxford British English.
+* **Typing:** Nominal / Strong / Static.
+* **No Telemetry:** All audits happen locally.
+
+== License
+
+Copyright (c) hyperpolymath. Distributed under the MIT or AGPL for Legal License.

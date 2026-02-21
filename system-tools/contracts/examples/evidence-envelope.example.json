@@ -1,0 +1,51 @@
+{
+  "version": "1.0.0",
+  "envelope_id": "550e8400-e29b-41d4-a716-446655440000",
+  "created_at": "2026-01-02T20:00:00Z",
+  "source": {
+    "tool": "big-up",
+    "tool_version": "1.0.0",
+    "host": {
+      "hostname": "DESKTOP-ABC123",
+      "os": "Windows",
+      "os_version": "10.0.22631",
+      "arch": "x86_64"
+    },
+    "profile": "standard",
+    "pack": "windows-tech-support"
+  },
+  "artifacts": [
+    {
+      "artifact_id": "550e8400-e29b-41d4-a716-446655440010",
+      "type": "snapshot",
+      "path": "snapshots/disk-usage.json",
+      "hash": {
+        "algorithm": "sha256",
+        "value": "abc123def456..."
+      },
+      "size_bytes": 4096,
+      "mime_type": "application/json",
+      "description": "Disk usage snapshot"
+    }
+  ],
+  "findings": [
+    {
+      "finding_id": "disk-low-space-001",
+      "severity": "medium",
+      "category": "disk",
+      "title": "Low disk space on C:",
+      "description": "Drive C: has 15GB free of 256GB (6% free)",
+      "evidence_refs": ["550e8400-e29b-41d4-a716-446655440010"],
+      "recommendation": "Review large files or uninstall unused programs",
+      "auto_fixable": false
+    }
+  ],
+  "metrics": {
+    "disk_c_free_bytes": {
+      "value": 16106127360,
+      "unit": "bytes",
+      "timestamp": "2026-01-02T20:00:00Z"
+    }
+  },
+  "redaction_profile": "standard"
+}

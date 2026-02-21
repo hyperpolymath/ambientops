@@ -1,0 +1,55 @@
+= System Tools Contracts Roadmap
+:toc:
+:toclevels: 3
+:icons: font
+
+Roadmap for defining stable seams across AmbientOps.
+
+== Phase 0 — Bootstrap
+
+Deliverables:
+
+* Repo skeleton: `schemas/`, `examples/`, `tests/`, `docs/`
+* Contract change policy: what is breaking vs non-breaking
+* Versioning scheme (semver)
+
+== Phase 1 — Initial contract set (v0.1)
+
+Deliverables:
+
+* Schema: System Weather payload
+* Schema: Evidence Envelope
+* Schema: Procedure Plan
+* Spec: Run Bundle layout (folder + filenames)
+* Schema: Receipt (machine-readable) + human template conventions
+* Schema: Message Intent (feedback-a-tron)
+
+Include:
+
+* at least one example per contract in `examples/`
+* at least one conformance test per contract in `tests/`
+
+== Phase 2 — Capability tags + profile gates
+
+Deliverables:
+
+* Capability taxonomy (e.g., `net.dns`, `disk.tidy.preview`, `security.firewall`)
+* Audience/profile gates (general/dev/technician) as contract vocabulary
+* Risk class vocabulary (safe/guided/expert)
+* Redaction profiles (minimal/standard/max) and attachment rules
+
+== Phase 3 — Catalog manifests (optional but recommended)
+
+Deliverables:
+
+* Module manifest schema (packs/adapters/themes metadata)
+* Compatibility matrix generation inputs (OS/arch/profile)
+* Stable deep-link intent format (Ward → A&E/Theatre/Records)
+
+== Phase 4 — Stabilisation
+
+Deliverables:
+
+* Contract test harness usable by all repos (CI integration)
+* Backwards compatibility notes and migration guides
+* Public “contract status” table (what’s stable, what’s provisional)

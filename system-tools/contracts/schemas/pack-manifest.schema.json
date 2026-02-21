@@ -1,0 +1,266 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/hyperpolymath/system-tools-contracts/schemas/pack-manifest.schema.json",
+  "title": "Pack Manifest",
+  "description": "Definition of a diagnostic/maintenance pack (e.g., windows-tech-support, linux-server, etc.). Packs bundle checks, actions, and UI configurations.",
+  "type": "object",
+  "required": ["version", "pack_id", "name", "platform", "checks"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "pack_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "description": "Unique identifier (lowercase, hyphens only)"
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable pack name"
+    },
+    "description": {
+      "type": "string"
+    },
+    "platform": {
+      "type": "object",
+      "required": ["os"],
+      "properties": {
+        "os": {
+          "type": "array",
+          "maxItems": 5,
+          "items": {
+            "type": "string",
+            "enum": ["windows", "linux", "macos", "bsd", "any"]
+          }
+        },
+        "os_version_min": { "type": "string" },
+        "os_version_max": { "type": "string" },
+        "arch": {
+          "type": "array",
+          "maxItems": 5,
+          "items": {
+            "type": "string",
+            "enum": ["x86_64", "aarch64", "x86", "arm", "any"]
+          }
+        }
+      }
+    },
+    "author": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "url": { "type": "string", "format": "uri" }
+      }
+    },
+    "license": {
+      "type": "string",
+      "description": "SPDX license identifier"
+    },
+    "repository": {
+      "type": "string",
+      "format": "uri"
+    },
+    "categories": {
+      "type": "array",
+      "maxItems": 13,
+      "items": {
+        "type": "string",
+        "enum": ["disk", "memory", "cpu", "network", "security", "privacy", "startup", "services", "updates", "drivers", "performance", "cleanup", "custom"]
+      }
+    },
+    "checks": {
+      "type": "array",
+      "description": "Diagnostic checks this pack performs",
+      "maxItems": 200,
+      "items": {
+        "$ref": "#/$defs/check"
+      }
+    },
+    "actions": {
+      "type": "array",
+      "description": "Actions this pack can perform",
+      "maxItems": 100,
+      "items": {
+        "$ref": "#/$defs/action"
+      }
+    },
+    "modes": {
+      "type": "object",
+      "description": "Predefined operation modes",
+      "properties": {
+        "quick": {
+          "$ref": "#/$defs/mode"
+        },
+        "standard": {
+          "$ref": "#/$defs/mode"
+        },
+        "deep": {
+          "$ref": "#/$defs/mode"
+        },
+        "custom": {
+          "type": "array",
+          "maxItems": 10,
+          "items": { "$ref": "#/$defs/mode" }
+        }
+      }
+    },
+    "ui": {
+      "type": "object",
+      "description": "UI configuration for this pack",
+      "properties": {
+        "icon": { "type": "string" },
+        "color": { "type": "string" },
+        "sections": {
+          "type": "array",
+          "maxItems": 20,
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string", "maxLength": 64 },
+              "title": { "type": "string", "maxLength": 128 },
+              "description": { "type": "string", "maxLength": 512 },
+              "checks": {
+                "type": "array",
+                "maxItems": 50,
+                "items": { "type": "string", "maxLength": 64 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "dependencies": {
+      "type": "array",
+      "description": "Other packs this pack depends on",
+      "maxItems": 20,
+      "items": {
+        "type": "object",
+        "properties": {
+          "pack_id": { "type": "string", "maxLength": 64 },
+          "version_min": { "type": "string" },
+          "optional": { "type": "boolean", "default": false }
+        }
+      }
+    },
+    "claims": {
+      "type": "object",
+      "description": "Anti-fearware compliance claims",
+      "properties": {
+        "no_fake_counts": {
+          "type": "boolean",
+          "default": true,
+          "description": "Does not inflate or fabricate issue counts"
+        },
+        "evidence_backed": {
+          "type": "boolean",
+          "default": true,
+          "description": "All findings have evidence references"
+        },
+        "user_controlled": {
+          "type": "boolean",
+          "default": true,
+          "description": "User must approve all actions"
+        },
+        "fully_reversible": {
+          "type": "boolean",
+          "default": false,
+          "description": "All actions can be undone"
+        },
+        "open_source": {
+          "type": "boolean",
+          "default": true,
+          "description": "Pack source code is available"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "check": {
+      "type": "object",
+      "required": ["check_id", "name", "category"],
+      "properties": {
+        "check_id": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "category": {
+          "type": "string",
+          "enum": ["disk", "memory", "cpu", "network", "security", "privacy", "startup", "services", "updates", "drivers", "performance", "cleanup", "custom"]
+        },
+        "severity_if_found": {
+          "type": "string",
+          "enum": ["info", "low", "medium", "high", "critical"]
+        },
+        "enabled_by_default": {
+          "type": "boolean",
+          "default": true
+        },
+        "requires_privileges": {
+          "type": "array",
+          "maxItems": 4,
+          "items": { "type": "string", "enum": ["user", "admin", "root", "system"] }
+        },
+        "estimated_duration_seconds": {
+          "type": "integer"
+        },
+        "implementation": {
+          "type": "string",
+          "description": "Reference to implementation module/function"
+        }
+      }
+    },
+    "action": {
+      "type": "object",
+      "required": ["action_id", "name", "risk"],
+      "properties": {
+        "action_id": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "risk": {
+          "type": "string",
+          "enum": ["safe", "guided", "expert"]
+        },
+        "reversibility": {
+          "type": "string",
+          "enum": ["full", "partial", "none"]
+        },
+        "requires_confirmation": {
+          "type": "boolean",
+          "default": true
+        },
+        "addresses_checks": {
+          "type": "array",
+          "maxItems": 50,
+          "items": { "type": "string", "maxLength": 64 },
+          "description": "Which check_ids this action can address"
+        },
+        "implementation": {
+          "type": "string"
+        }
+      }
+    },
+    "mode": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "enabled_checks": {
+          "type": "array",
+          "maxItems": 200,
+          "items": { "type": "string", "maxLength": 64 }
+        },
+        "disabled_checks": {
+          "type": "array",
+          "maxItems": 200,
+          "items": { "type": "string", "maxLength": 64 }
+        },
+        "auto_apply": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether to auto-apply safe fixes"
+        }
+      }
+    }
+  }
+}

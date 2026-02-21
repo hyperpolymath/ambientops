@@ -1,0 +1,295 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+= AmbientOps Language Policy
+:toc:
+:toclevels: 3
+:icons: font
+:source-highlighter: rouge
+
+Language and technology choices for the AmbientOps ecosystem.
+
+== The Two-Layer Model
+
+AmbientOps separates concerns into two architectural layers:
+
+[cols="1,1,2",options="header"]
+|===
+| Layer | Mnemonic | Responsibility
+
+| **D**
+| Drivers / Deployment / Delivery
+| "Makes it happen" — execution, IO, adapters
+
+| **V**
+| Verification / Validation / Veridicality
+| "Is this allowed / true / safe?" — policy, proofs, schemas
+|===
+
+== D Layer: Drivers / Deployment / Delivery
+
+The D layer touches real systems and emits real effects. It's where adapters live and where anything "impure" is quarantined.
+
+=== D Layer Responsibilities
+
+* **Execution drivers** — runbooks/plans produced by core logic get executed here
+  - Backends: Salt, Ansible, SSH, Kubernetes, Terraform, GitHub Actions, etc.
+* **IO boundaries** — file system writes, process spawning, network calls, secrets retrieval
+* **Interop formats** — YAML/HCL/SLS templates as _outputs_, NOT sources of truth
+* **Local agent mechanics** — daemons/agents on machines belong here
+
+=== D Layer Language Rules
+
+[cols="1,2,2",options="header"]
+|===
+| Language | Use Case | Notes
+
+| **D**
+| Primary implementation
+| Core CLI, plan engine, pack runtime, high-velocity implementation
+
+| **ReScript**
+| Core driver orchestration
+| When D-to-JS interop is needed
+
+| **Rust**
+| Optional, targeted
+| Host-agent, low-level exec sandboxing, privileged helpers
+
+| YAML/HCL/SLS
+| Edge formats only
+| Confined to `adapters/<backend>/`, never source of truth
+|===
+
+=== D Layer Repos
+
+* `system-operating-theatre` (Operating Room / big-up) — D-first
+
+== V Layer: Verification / Validation / Veridicality
+
+The V layer prevents AmbientOps from becoming "a clever way to do the wrong thing faster".
+
+=== V Layer Responsibilities
+
+* **Policy validation** — Nickel config validation + policy evaluation + constraints
+* **Plan verification** — "This plan matches policy", "no hidden channels", "no unreviewed side-effects", "idempotence markers present"
+* **Artifact/provenance checks** — signature verification, content-addressing, attestation, append-only log invariants
+* **Schema & protocol conformance** — IR schemas, wire schemas, database schemas; compatibility/upgrade rules
+
+=== V Layer Language Rules
+
+[cols="1,2,2",options="header"]
+|===
+| Language | Use Case | Notes
+
+| **V**
+| Primary implementation
+| Policy engine, plan verification, schema conformance
+
+| **ReScript**
+| Orchestration + checks
+| When JS interop is needed
+
+| **Rust**
+| Optional, isolated
+| Cryptographic verification kernels, fuzzing, fast parsers
+
+| **Elixir**
+| NO (except observability)
+| Never policy truth
+|===
+
+=== V Layer Repos
+
+* `system-emergency-room` (A&E) — V-first (panic-safe intake requires verification)
+
+== AmbientOps Primary (ReScript + Deno)
+
+The AmbientOps umbrella and Ward UI are ReScript-first.
+
+[cols="1,2,2",options="header"]
+|===
+| Component | Language | Notes
+
+| Ward UI (tray/ambient)
+| ReScript + Deno
+| Primary user interface
+
+| Umbrella orchestration
+| ReScript + Deno
+| Ecosystem coordination
+
+| System Weather
+| ReScript
+| Ambient payload generation
+|===
+
+== Rust: Scalpel, Not Default
+
+[IMPORTANT]
+====
+Rust is NOT the default language. It is a scalpel for specific use cases.
+====
+
+=== Allowed Rust Boxes
+
+[cols="1,2,2",options="header"]
+|===
+| Repo Pattern | Purpose | Examples
+
+| `*-agent-rs/`
+| Hardened local agent
+| Process sandboxing, privilege separation, filesystem watching
+
+| `*-verify-rs/`
+| High-assurance verification
+| Hashing, proof parsing, fuzz harnesses
+
+| Agent/verify repos
+| Isolated components
+| `personal-sysadmin` (daemon + Sysinternals-like tools)
+|===
+
+=== Everything Else
+
+Everything else stays ReScript-first (or D/V as appropriate for the layer).
+
+== Elixir: Observability Only
+
+[IMPORTANT]
+====
+Elixir is allowed ONLY for observability and event hubs. NEVER for policy truth.
+====
+
+=== Allowed Elixir Use Cases
+
+* Long-running supervision trees
+* Event ingestion and fanout
+* Live dashboards / operational telemetry hubs
+* MCP servers (protocol glue)
+
+=== Elixir Repos
+
+* `feedback-o-tron` — communications router (event fanout)
+* `hybrid-automation-router` — automation routing (OTP supervision)
+
+=== Elixir Constraints
+
+* MUST NOT become policy engine
+* MUST NOT become IR authority
+* MUST NOT become config source of truth
+* MUST remain strictly optional
+
+== Banned Languages
+
+[cols="1,1,2",options="header"]
+|===
+| Banned | Replacement | Reason
+
+| TypeScript
+| ReScript
+| Type safety without JS ecosystem baggage
+
+| Node.js
+| Deno
+| Security-first runtime
+
+| npm/yarn/pnpm/bun
+| Deno
+| Deno manages deps
+
+| Go
+| Rust
+| Memory safety without GC
+
+| Python
+| ReScript/Rust/D/V
+| SaltStack abandoned; Python completely banned
+
+| Java/Kotlin
+| Rust/Tauri
+| No JVM
+
+| Swift
+| Tauri/Dioxus
+| No Apple lock-in
+|===
+
+== Wire Protocols
+
+=== Bebop (Recommended for JS+Rust)
+
+If wire participants are ReScript/JS + Rust:
+
+* Schemas: `ambientops-protocol/schemas/*.bop`
+* Generated JS: `gen/js/` (consumed by ReScript wrappers)
+* Generated Rust: `gen/rust/`
+* TypeScript: ONLY as generated artifacts (never hand-written)
+
+=== Protobuf (If Elixir Participates)
+
+If Elixir must be a first-class protocol peer, use Protobuf instead of Bebop.
+
+== Database Constraints
+
+[cols="1,2,2",options="header"]
+|===
+| Use Case | Recommended | Notes
+
+| Local-first / dev
+| SQLite
+| Simple, portable
+
+| Shared / team
+| PostgreSQL
+| Concurrency, central state
+
+| Append-only provenance
+| SQLite or Postgres
+| MUST preserve append-only semantics at logical layer
+|===
+
+[IMPORTANT]
+====
+Database is NOT truth. It is a cache/index over signed/canonical artifacts.
+====
+
+== Summary Table
+
+[cols="1,1,1,1",options="header"]
+|===
+| Repo | Layer | Primary Language | Notes
+
+| system-operating-theatre
+| D
+| D
+| Operating Room / big-up
+
+| system-emergency-room
+| V
+| V
+| A&E / emergency-button
+
+| ambientops
+| —
+| ReScript
+| Umbrella / Ward
+
+| feedback-o-tron
+| —
+| Elixir
+| Observability only
+
+| hybrid-automation-router
+| —
+| Elixir
+| Event routing only
+
+| personal-sysadmin
+| Agent
+| Rust
+| Allowed per agent exception
+
+| system-tools-contracts
+| —
+| N/A
+| Schemas only
+|===

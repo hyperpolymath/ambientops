@@ -1,0 +1,76 @@
+# SPDX-License-Identifier: MPL-2.0-or-later
+name: Language Policy Enforcement
+
+on: [push, pull_request]
+
+permissions: read-all
+
+jobs:
+  check:
+    name: Enforce Language Policy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          fetch-depth: 2
+
+      - name: Enforce language policies
+        run: |
+          # This is an Ada/SPARK project
+          # Permitted languages: Ada, SPARK, Bash (for scripts)
+
+          # Block new Python files (except SaltStack)
+          NEW_PY=$(git diff --name-only --diff-filter=A HEAD~1 2>/dev/null | grep -E '\.py$' | grep -v 'salt' || true)
+          if [ -n "$NEW_PY" ]; then
+            echo "❌ New Python files detected. This is an Ada project."
+            echo "$NEW_PY"
+            exit 1
+          fi
+
+          # Block new Ruby files (project migrated from Ruby to Ada)
+          NEW_RB=$(git diff --name-only --diff-filter=A HEAD~1 2>/dev/null | grep -E '\.rb$' || true)
+          if [ -n "$NEW_RB" ]; then
+            echo "❌ New Ruby files detected. This project has migrated to Ada."
+            echo "$NEW_RB"
+            exit 1
+          fi
+
+          # Block new Perl files
+          NEW_PL=$(git diff --name-only --diff-filter=A HEAD~1 2>/dev/null | grep -E '\.(pl|pm)$' || true)
+          if [ -n "$NEW_PL" ]; then
+            echo "❌ New Perl files detected. Use Ada or Bash instead."
+            echo "$NEW_PL"
+            exit 1
+          fi
+
+          # Block new Java/Kotlin files
+          NEW_JAVA=$(git diff --name-only --diff-filter=A HEAD~1 2>/dev/null | grep -E '\.(java|kt)$' || true)
+          if [ -n "$NEW_JAVA" ]; then
+            echo "❌ New Java/Kotlin files detected. Use Ada instead."
+            echo "$NEW_JAVA"
+            exit 1
+          fi
+
+          # Block new Go files
+          NEW_GO=$(git diff --name-only --diff-filter=A HEAD~1 2>/dev/null | grep -E '\.go$' || true)
+          if [ -n "$NEW_GO" ]; then
+            echo "❌ New Go files detected. Use Ada instead."
+            echo "$NEW_GO"
+            exit 1
+          fi
+
+          # Verify Ada files have proper structure
+          NEW_ADA=$(git diff --name-only --diff-filter=A HEAD~1 2>/dev/null | grep -E '\.(ads|adb)$' || true)
+          if [ -n "$NEW_ADA" ]; then
+            echo "✅ New Ada files detected:"
+            echo "$NEW_ADA"
+
+            # Check for SPDX headers
+            for file in $NEW_ADA; do
+              if ! head -5 "$file" | grep -q "SPDX-License-Identifier"; then
+                echo "⚠️  Missing SPDX header in $file"
+              fi
+            done
+          fi
+
+          echo "✅ Language policy check passed"

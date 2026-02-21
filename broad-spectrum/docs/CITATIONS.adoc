@@ -1,0 +1,36 @@
+= broad-spectrum - Citation Guide
+:toc:
+
+== BibTeX
+
+[source,bibtex]
+----
+@software{broad-spectrum_2025,
+  author = {Polymath, Hyper},
+  title = {broad-spectrum},
+  year = {2025},
+  url = {https://github.com/hyperpolymath/broad-spectrum},
+  license = {AGPL-3.0-or-later}
+}
+----
+
+== Harvard Style
+
+Polymath, H. (2025) _broad-spectrum_ [Computer software]. Available at: https://github.com/hyperpolymath/broad-spectrum
+
+== OSCOLA
+
+Hyper Polymath, 'broad-spectrum' (2025) <https://github.com/hyperpolymath/broad-spectrum>
+
+== MLA
+
+Polymath, Hyper. "broad-spectrum." 2025, github.com/hyperpolymath/broad-spectrum.
+
+== APA 7
+
+Polymath, H. (2025). _broad-spectrum_ [Computer software]. GitHub. https://github.com/hyperpolymath/broad-spectrum
+
+== See Also
+
+* link:../CITATION.cff[CITATION.cff]
+* link:../codemeta.json[codemeta.json]

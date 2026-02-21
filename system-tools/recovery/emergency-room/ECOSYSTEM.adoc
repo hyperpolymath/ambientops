@@ -1,0 +1,194 @@
+= System Recovery Ecosystem
+:icons: font
+
+[.lead]
+A unified toolkit for Linux system health—from emergency response to preventive care.
+
+== Overview
+
+[source]
+----
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    SYSTEM HEALTH ECOSYSTEM                              │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│   CRISIS TIER (Immediate Response)                                      │
+│   ════════════════════════════════                                      │
+│                                                                         │
+│   ┌─────────────────────┐    ┌─────────────────────────┐               │
+│   │  emergency-button   │    │  complete-internet-     │               │
+│   │  ─────────────────  │    │  repair                 │               │
+│   │  One-click system   │    │  ───────────────────    │               │
+│   │  recovery. Disk,    │───▶│  Network connectivity   │               │
+│   │  memory, process    │    │  diagnosis & repair     │               │
+│   │  emergencies.       │    │                         │               │
+│   │  [V language]        │    │  [Planned]              │               │
+│   └──────────┬──────────┘    └─────────────────────────┘               │
+│              │                                                          │
+│              ▼                                                          │
+│   DIAGNOSTIC TIER (Understanding)                                       │
+│   ═══════════════════════════════                                       │
+│                                                                         │
+│   ┌─────────────────────┐    ┌─────────────────────────┐               │
+│   │     big-up          │    │   feedback-o-tron       │               │
+│   │  ─────────────────  │    │  ───────────────────    │               │
+│   │  Advanced system    │    │  Incident reporting     │               │
+│   │  diagnostics for    │    │  and documentation.     │               │
+│   │  power users.       │    │  What went wrong?       │               │
+│   │                     │    │                         │               │
+│   │  [D language]       │    │  [Planned]              │               │
+│   │  ✓ EXISTS           │    │                         │               │
+│   └──────────┬──────────┘    └─────────────────────────┘               │
+│              │                                                          │
+│              ▼                                                          │
+│   MANAGEMENT TIER (Control)                                             │
+│   ═════════════════════════                                             │
+│                                                                         │
+│   ┌─────────────────────┐    ┌─────────────────────────┐               │
+│   │     system-observatory           │    │   personal-sysadmin     │               │
+│   │  ─────────────────  │    │  ───────────────────    │               │
+│   │  System management  │    │  AI-assisted Linux      │               │
+│   │  and configuration  │    │  administration.        │               │
+│   │  reconciliation.    │    │  Sysinternals-like.     │               │
+│   │                     │    │                         │               │
+│   │  [Planned]          │    │  [ReScript/Deno]        │               │
+│   │                     │    │  ✓ EXISTS               │               │
+│   └─────────────────────┘    └─────────────────────────┘               │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+----
+
+== Tool Matrix
+
+|===
+|Tool |Status |Language |Purpose |User Level
+
+|emergency-button
+|✓ Active
+|V language
+|Crisis response
+|Everyone
+
+|complete-internet-repair
+|Planned
+|TBD
+|Network recovery
+|Everyone
+
+|big-up
+|✓ Active
+|D
+|Advanced diagnostics
+|Power users
+
+|feedback-o-tron
+|Planned
+|TBD
+|Incident reporting
+|Everyone
+
+|system-observatory
+|Planned
+|TBD
+|System management
+|Intermediate
+
+|personal-sysadmin
+|✓ Active
+|ReScript/Deno
+|AI-assisted admin
+|Everyone
+|===
+
+== Interaction Flows
+
+=== Emergency Flow
+[source]
+----
+User notices problem
+        │
+        ▼
+┌───────────────┐
+│ emergency-    │ ──────────────────────────────────┐
+│ button        │                                   │
+└───────┬───────┘                                   │
+        │                                           │
+        ├── Disk full? ──▶ Clear caches, report     │
+        │                                           │
+        ├── Memory? ────▶ Kill safe processes       │
+        │                                           │
+        ├── Network? ───▶ complete-internet-repair ─┘
+        │
+        ▼
+┌───────────────┐
+│ Problem       │
+│ resolved?     │
+└───────┬───────┘
+        │
+   Yes  │  No
+        │   │
+        │   └──▶ big-up (deep diagnostics)
+        │              │
+        ▼              ▼
+┌───────────────┐ ┌───────────────┐
+│ feedback-     │ │ personal-     │
+│ o-tron        │ │ sysadmin      │
+│ (report)      │ │ (ongoing)     │
+└───────────────┘ └───────────────┘
+----
+
+=== Preventive Flow
+[source]
+----
+┌───────────────┐
+│ personal-     │ ◀─── Scheduled checks
+│ sysadmin      │
+└───────┬───────┘
+        │
+        ├── Disk trending full? ──▶ Alert user
+        │
+        ├── Memory patterns? ─────▶ Recommend action
+        │
+        ├── Security updates? ────▶ system-observatory (apply)
+        │
+        └── Issues found? ────────▶ big-up (investigate)
+----
+
+== Repos
+
+|===
+|Repo |URL |Status
+
+|emergency-button
+|https://github.com/hyperpolymath/emergency-button
+|✓ Active
+
+|big-up
+|https://github.com/hyperpolymath/big-up
+|✓ Active
+
+|personal-sysadmin
+|https://github.com/hyperpolymath/personal-sysadmin
+|✓ Active
+
+|complete-internet-repair
+|TBD
+|Planned
+
+|system-observatory
+|TBD
+|Planned
+
+|feedback-o-tron
+|TBD
+|Planned
+|===
+
+== Design Principles
+
+1. **Immediate tools need no config** — emergency-button works out of the box
+2. **Progressive complexity** — simple tools for simple problems, power tools available
+3. **Offline-first** — crisis tools must work without network
+4. **Safe defaults** — never make things worse
+5. **Handoff protocols** — tools know when to defer to specialists
+6. **Unified reporting** — all tools can feed into feedback-o-tron

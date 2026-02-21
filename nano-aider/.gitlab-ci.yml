@@ -1,0 +1,38 @@
+stages:
+  - build
+  - test
+  - security
+
+variables:
+  ALIRE_VERSION: "2.0.1"
+
+build:
+  stage: build
+  image: ghcr.io/alire-project/docker/gnat-ubuntu-lts:latest
+  before_script:
+    - apt-get update && apt-get install -y libncurses-dev
+  script:
+    - alr build -- -XNANO_AIDER_BUILD_MODE=release
+  artifacts:
+    paths:
+      - bin/nano-aider
+    expire_in: 1 week
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+
+test:
+  stage: test
+  image: ghcr.io/alire-project/docker/gnat-ubuntu-lts:latest
+  needs: ["build"]
+  before_script:
+    - apt-get update && apt-get install -y libncurses-dev
+  script:
+    - ./ci-scripts/test.sh
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+
+sast:
+  stage: security
+include:
+  - template: Security/SAST.gitlab-ci.yml
+  - template: Security/Secret-Detection.gitlab-ci.yml

@@ -1,0 +1,831 @@
+= Performance Ambulance
+:toc:
+:toclevels: 3
+:icons: font
+:source-highlighter: rouge
+
+image:https://img.shields.io/badge/License-PMPL--1.0-blue.svg[License: PMPL-1.0,link="https://github.com/hyperpolymath/palimpsest-license"]
+image:https://img.shields.io/badge/Philosophy-Palimpsest-indigo.svg[Palimpsest,link="https://github.com/hyperpolymath/palimpsest-license"]
+image:https://img.shields.io/badge/Version-1.0.0-success.svg[Version]
+image:https://img.shields.io/badge/Status-Production_Ready-brightgreen.svg[Status]
+
+*Your Linux system is suddenly slow. Performance Ambulance finds out why—and fixes it.*
+
+Performance Ambulance is a comprehensive diagnostic and optimization tool for Linux system performance issues. Unlike sketchy "optimizer" tools or trial-and-error forum advice, it provides *safe, documented, reversible* performance repairs with *full evidence trails*.
+
+[quote]
+____
+"Your deadline is in 2 hours, your system is crawling, and you don't know why. You don't need a performance engineering degree—you need Performance Ambulance."
+____
+
+== The Problem
+
+You've been there:
+
+* System suddenly slow, everything takes forever
+* Application freezing or hanging randomly
+* High CPU usage but nothing shows up in `top`
+* Memory filling up inexplicably
+* Disk at 100% usage, system unresponsive
+* Fans screaming, laptop burning hot
+* "It was fine yesterday" syndrome
+
+You search forums. You find 50 different "solutions". Some say "just add more RAM". Others suggest random `sysctl` tweaks. You don't know which to trust, or if they'll make things worse.
+
+**Performance Ambulance solves this.**
+
+== What It Does
+
+Performance Ambulance provides *systematic, expert-level diagnostics and optimization* for common Linux performance problems—without requiring you to be a performance engineer.
+
+=== 🔍 Comprehensive Diagnostics
+
+Performance Ambulance checks *everything* that can cause performance issues:
+
+[cols="1,3"]
+|===
+|Area |What It Checks
+
+|**CPU**
+|Load averages, per-core usage, context switching rates, IRQ storms, CPU frequency/throttling, process affinity
+
+|**Memory**
+|Available memory, swap usage, page faults, memory leaks, OOM killer activity, cache/buffer stats
+
+|**Disk I/O**
+|iowait times, disk queue depth, I/O scheduler, slow disks, excessive writes, SMART health status
+
+|**Processes**
+|CPU hogs, memory hogs, zombie processes, runaway background tasks, resource limits, nice levels
+
+|**Thermal**
+|CPU/GPU temperatures, thermal throttling, fan speeds, power management states
+
+|**System Resources**
+|File descriptor limits, process limits, kernel parameters, system resource exhaustion
+|===
+
+=== 🔧 Safe, Documented Optimizations
+
+When Performance Ambulance finds problems, it can fix them—*safely*:
+
+* **CPU optimizations**: Kill runaway processes, adjust CPU governor, fix IRQ affinity, tune scheduler
+* **Memory optimizations**: Clear caches, adjust swappiness, kill memory hogs, tune OOM behavior
+* **Disk I/O optimizations**: Switch I/O scheduler, tune readahead, disable problematic services, fix excessive logging
+* **Process management**: Renice CPU hogs, set resource limits, stop unnecessary services
+* **Thermal management**: Adjust CPU frequency limits, improve fan control, disable turbo boost temporarily
+
+Every optimization:
+
+* ✓ Shows you what it will do *before* doing it (dry-run mode)
+* ✓ Creates automatic backups of changed settings
+* ✓ Generates receipts for audit trails
+* ✓ Can be undone if something goes wrong
+
+== Quick Start
+
+=== Installation
+
+[source,bash]
+----
+git clone https://github.com/hyperpolymath/performance-ambulance.git
+cd performance-ambulance
+sudo ./install.sh
+----
+
+Or download and install in one command:
+
+[source,bash]
+----
+curl -fsSL https://raw.githubusercontent.com/hyperpolymath/performance-ambulance/main/install.sh | sudo bash
+----
+
+=== Basic Usage
+
+==== Run Full Diagnostics
+
+[source,bash]
+----
+performance-repair diagnose
+----
+
+This shows you *everything* about your system performance: CPU usage, memory pressure, disk I/O, process activity, thermal state, resource limits.
+
+Sample output:
+
+[source,text]
+----
+[✓] CPU load: 2.4 (8 cores) - Normal
+[✗] CPU0: 98% usage by process 'chromium' (PROBLEM)
+[✗] Context switches: 45000/s (excessive - PROBLEM)
+[✓] Memory: 12.5GB / 16GB used (78%)
+[✗] Swap: 3.2GB / 8GB used (high swap pressure - PROBLEM)
+[✗] Disk sda: 98% iowait (severe bottleneck - PROBLEM)
+[✓] Thermal: CPU 65°C, GPU 58°C (Normal)
+[!] WARNING: Process 'zoom' consuming 4.2GB RAM (leak suspected)
+----
+
+==== Auto-Optimize Everything
+
+If you trust Performance Ambulance to fix everything it found:
+
+[source,bash]
+----
+sudo performance-repair auto-optimize
+----
+
+==== Guided Optimization (Recommended)
+
+For more control, use interactive mode:
+
+[source,bash]
+----
+sudo performance-repair optimize --interactive
+----
+
+This walks you through each issue and asks what you want to do:
+
+[source,text]
+----
+Issue: Process 'chromium' consuming 98% CPU on core 0
+
+Suggested optimization: Kill process 'chromium' (PID 12845)
+
+Details:
+  - Running for 4 hours
+  - 127 threads
+  - Appears stuck in tight loop
+
+[Y] Apply this fix
+[S] Skip
+[D] Show more details
+[Q] Quit
+
+Your choice:
+----
+
+==== Target Specific Problems
+
+Fix just CPU issues:
+
+[source,bash]
+----
+sudo performance-repair optimize cpu
+----
+
+Fix just memory problems:
+
+[source,bash]
+----
+sudo performance-repair optimize memory
+----
+
+Other targets: `disk`, `thermal`, `processes`, `limits`
+
+==== Dry-Run Mode
+
+See what *would* be changed without actually changing it:
+
+[source,bash]
+----
+sudo performance-repair optimize --dry-run
+----
+
+Perfect for understanding what's wrong or verifying before production changes.
+
+== Real-World Scenarios
+
+=== Scenario 1: "System Suddenly Slow, Everything Lags"
+
+This is the classic "I didn't change anything but now it's crawling" problem.
+
+[source,bash]
+----
+$ performance-repair diagnose
+
+[✗] Disk sda: 100% iowait - severe I/O bottleneck
+[!] Process 'journald' writing 400MB/s to disk (excessive)
+[!] 12,000 log writes/second detected
+
+$ sudo performance-repair optimize disk
+
+Creating backup of journald config...
+Setting rate limiting: 10000 messages/30s
+Restarting systemd-journald...
+Monitoring I/O... iowait dropped from 98% to 5%
+
+[✓] Disk I/O optimized. System should be responsive now.
+----
+
+=== Scenario 2: "High CPU But Nothing Shows in Top"
+
+CPU usage is high but `top` shows nothing obvious.
+
+[source,bash]
+----
+$ performance-repair diagnose cpu
+
+[✗] Context switches: 65000/s (excessive)
+[✗] IRQ 129 (nvidia): 45000 interrupts/s (storm detected)
+[!] Possible driver issue or hardware fault
+
+$ sudo performance-repair optimize cpu
+
+Detected IRQ storm on nvidia driver
+Recommended: Reload nvidia kernel module
+
+Proceed? [y/N]: y
+
+Unloading nvidia modules...
+Reloading nvidia driver...
+Monitoring IRQ rate... dropped from 45000/s to 120/s
+
+[✓] IRQ storm resolved. CPU usage normalized.
+----
+
+=== Scenario 3: "Memory Filling Up, Everything Swapping"
+
+System has plenty of RAM but keeps using swap heavily.
+
+[source,bash]
+----
+$ performance-repair diagnose memory
+
+[✗] Swap usage: 7.2GB / 8GB (90% - excessive)
+[✗] Memory pressure: HIGH
+[!] Process 'electron' (Slack): 3.8GB resident, 2.1GB swap
+[!] Swappiness: 60 (too aggressive for desktop)
+
+$ sudo performance-repair optimize memory
+
+Reducing swappiness from 60 to 10...
+Clearing swap cache...
+Restarting memory hog 'slack' (y/N)? y
+Killing process 28472...
+Monitoring memory... swap usage now 0.3GB (normal)
+
+[✓] Memory pressure relieved. Swap usage normalized.
+----
+
+=== Scenario 4: "Application Keeps Freezing"
+
+An application hangs randomly, sometimes recovers, sometimes doesn't.
+
+[source,bash]
+----
+$ performance-repair diagnose processes
+
+[✗] Process 'zoom' has 847 threads (excessive)
+[✗] File descriptor usage: 982/1024 (96% - limit reached)
+[!] Process hitting ulimit, likely cause of freezing
+
+$ sudo performance-repair optimize limits --target zoom
+
+Increasing file descriptor limit for zoom:
+  - Soft limit: 1024 → 8192
+  - Hard limit: 4096 → 16384
+Creating systemd drop-in for permanent fix...
+
+[✓] Resource limits increased. Restart 'zoom' to apply.
+----
+
+=== Scenario 5: "Laptop Running Hot, Fan Constantly On"
+
+System is overheating, thermal throttling, battery draining fast.
+
+[source,bash]
+----
+$ performance-repair diagnose thermal
+
+[✗] CPU temperature: 94°C (critical - throttling)
+[✗] CPU governor: performance (forcing max frequency)
+[!] Turbo boost enabled while on battery
+[!] Fan speed: 4200 RPM (maxed out)
+
+$ sudo performance-repair optimize thermal
+
+Setting CPU governor to 'powersave'...
+Disabling turbo boost temporarily...
+Setting max CPU frequency to 2.4GHz (was 4.2GHz)...
+Monitoring temperature... dropping from 94°C to 68°C
+
+[✓] Thermal issue resolved. System should run cooler.
+----
+
+== Part of AmbientOps
+
+Performance Ambulance is a *procedure pack* in the link:https://github.com/hyperpolymath/ambientops[AmbientOps ecosystem], which uses a "hospital model" for system tools:
+
+* **Ward** — Daily ambient system health ("System Weather")
+* **Emergency Room** — Panic-safe emergency diagnostics
+* **Operating Room** — Planned procedures (Performance Ambulance lives here)
+* **Records** — Receipts, undo tokens, shareable help bundles
+
+Performance Ambulance integrates with:
+
+* **Operating Theatre** for procedure orchestration
+* **Ward** for surfacing performance signals in ambient UI
+* **Emergency Room** for performance emergencies (quick handoff)
+* **Records** for generating shareable incident bundles
+
+See `docs/AMBIENTOPS_INTEGRATION.adoc` for details.
+
+== Safety Guarantees
+
+Performance Ambulance follows *AmbientOps safety principles*:
+
+=== ✓ Evidence-First, Not Fearware
+
+No "847 CRITICAL ISSUES DETECTED" scareware. Performance Ambulance shows you *measurements*, not hype.
+
+Instead of: "Your system is 94% slower!"
+
+You get: "Disk sda iowait: 95%. Process journald: 380MB/s writes. Normal: <10MB/s. Diagnosis: Excessive logging causing I/O bottleneck."
+
+=== ✓ Non-Destructive by Default
+
+Diagnostics are *completely read-only*. No changes without your approval.
+
+Optimizations:
+
+* Create automatic timestamped backups
+* Prefer tuning over killing (unless process is clearly stuck)
+* Avoid "nuke from orbit" approaches
+* Provide undo receipts for all changes
+
+=== ✓ Explicit Approval Required
+
+No silent changes. Every optimization shows:
+
+* What it will do
+* Why it's needed
+* What can go wrong
+* How to undo it
+
+You approve each change (or use `--yes` if you're confident).
+
+=== ✓ Never Kills Critical Processes
+
+Performance Ambulance will **NEVER**:
+
+* Kill system-critical processes (init, systemd, kernel threads)
+* Kill your desktop environment or window manager
+* Kill SSH sessions (if you're connected remotely)
+* Disable security controls
+* Make permanent changes without documentation
+
+Safe-to-kill detection:
+
+* Application processes only (never system daemons without approval)
+* Checks process tree to avoid killing parents of critical processes
+* Warns before killing anything with open network connections
+* Never kills processes owned by other users (without explicit flag)
+
+=== ✓ Works Offline
+
+Performance Ambulance doesn't require internet to diagnose or optimize (obviously).
+
+All diagnostics and optimizations work *completely offline*.
+
+== Command Reference
+
+[cols="2,3"]
+|===
+|Command |Description
+
+|`performance-repair diagnose`
+|Run all diagnostics
+
+|`performance-repair diagnose <target>`
+|Diagnose specific area (cpu\|memory\|disk\|processes\|thermal\|limits)
+
+|`sudo performance-repair optimize`
+|Interactive guided optimization
+
+|`sudo performance-repair optimize <target>`
+|Optimize specific area
+
+|`sudo performance-repair auto-optimize`
+|Automatically fix all detected issues
+
+|`sudo performance-repair optimize --dry-run`
+|Show what would be changed (no actual changes)
+
+|`performance-repair status`
+|Quick performance health check
+
+|`performance-repair top-processes`
+|Show top CPU/memory consumers
+
+|`performance-repair check-thermal`
+|Check temperatures and throttling
+
+|`performance-repair profile <pid>`
+|Profile a specific process
+
+|`performance-repair version`
+|Show version info
+
+|`performance-repair help`
+|Show help message
+|===
+
+=== Options
+
+[cols="1,3"]
+|===
+|Option |Description
+
+|`-v, --verbose`
+|Show detailed output
+
+|`-q, --quiet`
+|Minimal output
+
+|`-y, --yes`
+|Auto-approve all changes (dangerous!)
+
+|`--dry-run`
+|Preview changes only
+
+|`--no-color`
+|Disable colored output
+
+|`--log <file>`
+|Write log to file
+
+|`--backup-dir <dir>`
+|Custom backup directory
+
+|`--interactive`
+|Guided mode (ask before each change)
+
+|`--target <name>`
+|Target specific process/device
+|===
+
+== Advanced Features
+
+=== Performance Profiling
+
+Profile a process to understand what it's doing:
+
+[source,bash]
+----
+performance-repair profile --pid 12845
+----
+
+Shows:
+
+* CPU time breakdown by thread
+* System call distribution
+* Memory allocation patterns
+* I/O operations
+* Lock contention
+
+=== Regression Detection
+
+Detect performance degradation over time:
+
+[source,bash]
+----
+performance-repair baseline --create baseline-2026-01-29
+----
+
+Later, compare:
+
+[source,bash]
+----
+performance-repair compare --baseline baseline-2026-01-29
+----
+
+Shows what changed:
+
+[source,text]
+----
+Performance Regression Detected:
+
+Baseline (2026-01-29):
+  - Boot time: 18s
+  - Memory at idle: 2.1GB
+  - Processes at idle: 247
+
+Current (2026-01-30):
+  - Boot time: 34s (+89% REGRESSION)
+  - Memory at idle: 3.8GB (+81% REGRESSION)
+  - Processes at idle: 312 (+26%)
+
+New processes:
+  - snapd (not previously running)
+  - evolution-data-server (not previously running)
+
+Recommendation: Disable snapd if not needed
+----
+
+=== Export Incident Bundles
+
+Generate a shareable diagnostic bundle for forums/support:
+
+[source,bash]
+----
+performance-repair export --bundle /tmp/performance-issue
+----
+
+Creates:
+
+[source,text]
+----
+/tmp/performance-issue/
+├── diagnostics.txt           # Full diagnostic output
+├── system-info.txt           # OS, kernel, hardware
+├── process-snapshot.txt      # All running processes
+├── performance-profile/      # Performance data
+│   ├── cpu-usage.txt
+│   ├── memory-usage.txt
+│   ├── disk-io.txt
+│   └── thermal.txt
+├── logs/                     # Relevant logs
+│   ├── syslog-performance.log
+│   ├── dmesg.log
+│   └── journal-performance.log
+└── metadata.json             # Machine-readable summary
+----
+
+The bundle *automatically sanitizes* sensitive info (usernames, paths).
+
+=== Backup Management
+
+List all backups:
+
+[source,bash]
+----
+performance-repair list-backups
+----
+
+Restore from backup:
+
+[source,bash]
+----
+sudo performance-repair restore --backup 2026-01-29_14-30-22
+----
+
+=== JSON Output
+
+For scripting/automation:
+
+[source,bash]
+----
+performance-repair diagnose --format json
+----
+
+Returns structured JSON with all diagnostic results.
+
+=== Real-Time Monitoring
+
+Watch performance metrics in real-time:
+
+[source,bash]
+----
+performance-repair monitor
+----
+
+Shows live dashboard with:
+
+* CPU usage per core
+* Memory/swap pressure
+* Disk I/O rates
+* Top processes
+* Temperature graphs
+
+== Distribution Support
+
+Performance Ambulance works on:
+
+* ✓ Ubuntu / Debian (fully supported)
+* ✓ Fedora / RHEL / CentOS (fully supported)
+* ✓ Arch Linux (fully supported)
+* ✓ openSUSE (supported)
+* ⚠ Other systemd-based distros (best-effort)
+
+Hardware support:
+
+* ✓ Intel CPUs (thermal monitoring, frequency scaling)
+* ✓ AMD CPUs (thermal monitoring, frequency scaling)
+* ✓ NVIDIA GPUs (thermal monitoring via nvidia-smi)
+* ✓ AMD GPUs (thermal monitoring via rocm-smi)
+* ⚠ Other hardware (basic monitoring)
+
+== Technical Details
+
+=== Architecture
+
+[source,text]
+----
+performance-repair
+├── src/main.d               # CLI entry point (D lang)
+├── src/orchestrator/        # Orchestration logic (D)
+│   ├── diagnostics.d
+│   ├── optimizer.d
+│   └── scheduler.d
+├── src/profilers/           # Performance-critical profiling (Rust)
+│   ├── cpu_profiler.rs      # CPU usage tracking
+│   ├── memory_profiler.rs   # Memory allocation tracking
+│   ├── io_profiler.rs       # Disk I/O monitoring
+│   └── thermal.rs           # Temperature monitoring
+├── src/diagnostics/         # Diagnostic modules
+│   ├── cpu.d
+│   ├── memory.d
+│   ├── disk.d
+│   ├── processes.d
+│   ├── thermal.d
+│   └── limits.d
+├── src/optimizations/       # Optimization modules
+│   ├── cpu.d
+│   ├── memory.d
+│   ├── disk.d
+│   ├── processes.d
+│   └── thermal.d
+└── src/utils/               # Core utilities
+    ├── backup.d             # Backup/restore
+    ├── colors.d             # Terminal colors
+    ├── logging.d            # Logging framework
+    ├── privileges.d         # Root/sudo handling
+    └── system.d             # OS/hardware detection
+----
+
+=== Requirements
+
+* D compiler (DMD/LDC/GDC) for core orchestration
+* Rust toolchain for performance-critical profilers
+* Standard Linux utilities: `top`, `ps`, `iostat`, `vmstat`
+* systemd (for service management)
+* Root/sudo for optimizations (diagnostics work without root)
+
+=== Implementation Language
+
+Performance Ambulance uses a *hybrid architecture*:
+
+* **D** for core orchestration (robust, fast, cross-distro compatible)
+* **Rust** for performance-critical profiling (zero-overhead, memory-safe)
+
+Why D for orchestration?
+
+* Fast compilation and execution
+* Systems programming without C's pitfalls
+* Excellent string handling for parsing `/proc`, `/sys`
+* Built-in unit testing and contracts
+* Good C interop for system calls
+
+Why Rust for profilers?
+
+* Zero-overhead abstractions
+* Memory safety without garbage collection
+* Excellent for high-frequency sampling
+* Can be called from D via C FFI
+
+Per Rhodium Standard Repository (RSR) guidelines.
+
+=== Profiler Architecture
+
+The Rust profilers are compiled as shared libraries (`.so`) and called from D:
+
+[source,d]
+----
+// D code calls Rust profiler
+extern (C) void start_cpu_profiler(int pid);
+extern (C) CPUProfile get_cpu_profile(int pid);
+
+auto profile = get_cpu_profile(12845);
+writeln("CPU time: ", profile.cpu_time_ms, "ms");
+----
+
+[source,rust]
+----
+// Rust profiler implementation
+#[no_mangle]
+pub extern "C" fn get_cpu_profile(pid: i32) -> CPUProfile {
+    // High-frequency sampling using perf_event
+    // ...
+}
+----
+
+This gives us D's productivity for orchestration and Rust's performance for critical paths.
+
+== Why Performance Ambulance?
+
+=== vs. Manual Forum Fixes
+
+|===
+|Manual Fixes |Performance Ambulance
+
+|Search 10 forum threads
+|One command
+
+|Copy-paste random `sysctl` tweaks
+|Safe, tested optimizations
+
+|Hope it works
+|Evidence-based diagnostics
+
+|No undo if it breaks
+|Automatic backups + undo
+
+|"Works on Ubuntu 16.04"
+|Works on modern distros
+
+|Might destroy your system
+|Never breaks critical processes
+|===
+
+=== vs. "System Optimizer" Tools
+
+Those sketchy "Speed up your Linux!" tools?
+
+* They lie about problems to scare you
+* They disable security features
+* They kill processes randomly
+* They want your credit card
+
+Performance Ambulance:
+
+* ✓ Open source (review the code)
+* ✓ No telemetry, no tracking
+* ✓ No "premium upsells"
+* ✓ Evidence-based, no fake errors
+* ✓ Safety-first design
+
+=== vs. Learning Everything Yourself
+
+Learning performance engineering is great, but when your deadline is in 2 hours and your system is crawling, you don't have time for a systems programming course.
+
+Performance Ambulance is *teaching-friendly*:
+
+* Explains what it finds in plain English
+* Shows the commands it runs
+* Documents why each fix works
+* References are included (learn at your own pace)
+
+You can learn while fixing, not instead of fixing.
+
+== Roadmap
+
+=== v1.1 (Q1 2026)
+
+* GPU performance diagnostics (NVIDIA/AMD)
+* Network I/O performance analysis
+* Container/VM performance diagnostics
+* Enhanced process profiling (perf integration)
+
+=== v1.2 (Q2 2026) 🎯 **Current Target**
+
+* Power management optimization (laptop battery life)
+* Startup/boot time optimization
+* Kernel parameter tuning recommendations
+* Test coverage >90%
+* Plugin architecture (beta)
+* Performance regression CI integration
+
+See link:ROADMAP.adoc[ROADMAP.adoc] for the complete roadmap to v1.2 and beyond.
+
+== Contributing
+
+We welcome contributions! See link:CONTRIBUTING.adoc[CONTRIBUTING.adoc].
+
+Priority areas for v1.2:
+
+* GPU performance diagnostics
+* Container performance profiling
+* Boot time optimization
+* Test coverage improvements
+* Documentation for additional distros
+
+== Support
+
+* Issues: https://github.com/hyperpolymath/performance-ambulance/issues
+* Discussions: https://github.com/hyperpolymath/performance-ambulance/discussions
+* Security issues: See link:SECURITY.md[SECURITY.md]
+
+== License
+
+Performance Ambulance is licensed under PMPL-1.0-or-later (Palimpsest Meta-Permissive License).
+
+See link:LICENSE[LICENSE] for details.
+
+== Philosophy
+
+Performance Ambulance follows the link:https://github.com/hyperpolymath/palimpsest-license[Palimpsest philosophy]:
+
+* **Boring is good** — Reliable, predictable, no surprises
+* **Evidence over hype** — Show measurements, not marketing
+* **Safety-first** — Never break what's working
+* **Respect users** — No dark patterns, no manipulation
+* **Open by default** — Audit anything, trust nothing
+
+[quote]
+____
+"The best system tool is the one you never notice—until you desperately need it, and it just works."
+____
+
+---
+
+Made with care by the link:https://github.com/hyperpolymath[Hyperpolymath Project].

@@ -1,0 +1,34 @@
+# SPDX-License-Identifier: MIT OR AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2025 Jonathan D.A. Jewell <hyperpolymath>
+
+cff-version: 1.2.0
+title: nick-shells
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - family-names: Jewell
+    given-names: Jonathan D.A.
+    alias: hyperpolymath
+    orcid: https://orcid.org/0000-0000-0000-0000
+repository-code: https://github.com/hyperpolymath/nick-shells
+url: https://github.com/hyperpolymath/nick-shells
+abstract: >-
+  A modular, secure, POSIX-compatible shell configuration
+  system following the Rhodium Standard Repository (RSR)
+  conventions. Provides known-good baseline configurations
+  for Bash, Zsh, and POSIX sh with security hardening,
+  RSR-compliant PATH setup, and type-safe Nickel schemas.
+keywords:
+  - shell
+  - bash
+  - zsh
+  - dotfiles
+  - configuration
+  - posix
+  - security
+  - nickel
+license: MIT OR AGPL-3.0-or-later
+version: 0.1.0
+date-released: 2025-01-01

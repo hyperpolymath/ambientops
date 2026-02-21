@@ -1,0 +1,254 @@
+image:https://img.shields.io/badge/License-MPL_2.0-blue.svg[MPL-2.0-or-later,link="https://opensource.org/licenses/MPL-2.0"]
+// SPDX-License-Identifier: MPL-2.0-or-later
+= nerdsafe-restart: Pre-Reboot Validation for Paranoid Sysadmins
+
+
+
+:toc: macro
+:toclevels: 2
+:icons: font
+
+image:https://img.shields.io/badge/Ada-2012-green.svg[Ada 2012]
+image:https://img.shields.io/badge/Philosophy-Palimpsest-indigo.svg[Palimpsest,link="https://github.com/hyperpolymath/palimpsest-license"]
+
+== License & Philosophy
+
+This project must declare **MPL-2.0-or-later** for platform/tooling compatibility.
+
+Philosophy: **Palimpsest**. The Palimpsest-MPL (PMPL) text is provided in `license/PMPL-1.0.txt`, and the canonical source is the palimpsest-license repository.
+
+toc::[]
+
+== Overview
+
+*nerdsafe-restart* is a pre-reboot validation tool that simulates system restart conditions to catch configuration errors _before_ they strand you at a broken login prompt.
+
+[quote]
+"Measure twice, reboot once."
+
+=== What It Validates
+
+[cols="1,2,1"]
+|===
+| Category | Checks | Risk Level
+
+| *Shell Configuration*
+| Syntax validation, module loading, PATH integrity
+| Critical
+
+| *Critical Services*
+| SSH, display manager, network
+| Critical
+
+| *Filesystem*
+| Mount points, fstab entries, disk space
+| High
+
+| *Boot Loader*
+| GRUB/systemd-boot config, kernel presence
+| Critical
+
+| *SELinux/AppArmor*
+| Policy consistency, context validation
+| Medium
+
+| *Pending Updates*
+| rpm-ostree staged, dnf transactions
+| Medium
+
+| *User Environment*
+| Login shell, home directory, permissions
+| High
+|===
+
+== Quick Start
+
+[source,bash]
+----
+# Run full validation
+nerdsafe-restart check
+
+# Quick check (shell + critical only)
+nerdsafe-restart check --quick
+
+# Paranoid mode (everything + formal verification)
+nerdsafe-restart check --paranoid
+
+# Dry-run reboot (simulate without actual reboot)
+nerdsafe-restart simulate
+
+# If all checks pass, reboot
+nerdsafe-restart check && systemctl reboot
+----
+
+== Installation
+
+=== From Source (Ada)
+
+[source,bash]
+----
+# Requires GNAT (GCC Ada compiler)
+git clone https://github.com/hyperpolymath/nerdsafe-restart
+cd nerdsafe-restart
+gprbuild -P nerdsafe_restart.gpr
+sudo cp bin/nerdsafe-restart /usr/local/bin/
+----
+
+=== Shell Script (Portable)
+
+[source,bash]
+----
+# Quick install of shell version
+curl -fsSL https://raw.githubusercontent.com/hyperpolymath/nerdsafe-restart/main/nerdsafe-restart.sh \
+  -o ~/.local/bin/nerdsafe-restart
+chmod +x ~/.local/bin/nerdsafe-restart
+----
+
+== Validation Levels
+
+=== Quick (`--quick`)
+
+Fast checks for common issues:
+
+* Shell config syntax (`bash -n`)
+* Critical PATH entries exist
+* Login shell is valid
+* Home directory accessible
+
+=== Standard (default)
+
+Comprehensive pre-reboot validation:
+
+* All quick checks
+* Full shell startup simulation
+* Service status (sshd, display-manager)
+* Filesystem mount validation
+* Pending system updates check
+
+=== Thorough (`--thorough`)
+
+Extended validation:
+
+* All standard checks
+* Boot loader configuration
+* Kernel and initramfs presence
+* SELinux/AppArmor policy check
+* Network configuration
+* Firewall rules
+
+=== Paranoid (`--paranoid`)
+
+Maximum validation:
+
+* All thorough checks
+* Formal verification with ShellCheck
+* Full service dependency graph
+* Disk health (SMART)
+* Memory test scheduling
+* Recovery environment validation
+
+== Exit Codes
+
+[cols="1,2"]
+|===
+| Code | Meaning
+
+| 0 | All checks passed - safe to reboot
+| 1 | Warnings detected - review recommended
+| 2 | Errors detected - do not reboot
+| 3 | Critical failures - system may not boot
+|===
+
+== Integration
+
+=== With modshells
+
+nerdsafe-restart integrates with link:https://github.com/hyperpolymath/modshells[modshells] for shell configuration validation:
+
+[source,bash]
+----
+# Validate modshells configuration
+nerdsafe-restart check --modshells ~/.bashrc.d
+----
+
+=== As Pre-Reboot Hook
+
+[source,bash]
+----
+# /etc/systemd/system/nerdsafe-restart.service
+[Unit]
+Description=Pre-reboot validation
+DefaultDependencies=no
+Before=shutdown.target reboot.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/nerdsafe-restart check --quick
+----
+
+=== CI/CD Integration
+
+[source,yaml]
+----
+# .github/workflows/validate.yml
+- name: Pre-deployment validation
+  run: nerdsafe-restart check --thorough
+----
+
+== Configuration
+
+Configuration file: `~/.config/nerdsafe-restart/config.toml`
+
+[source,toml]
+----
+[validation]
+level = "standard"
+shell_config = "~/.bashrc"
+modshells_path = "~/.bashrc.d"
+
+[checks]
+shell = true
+services = true
+filesystem = true
+bootloader = true
+selinux = true
+
+[output]
+format = "text"  # text, json, sarif
+color = true
+verbose = false
+----
+
+== Immutable OS Support
+
+Special support for immutable/atomic distributions:
+
+[cols="1,2"]
+|===
+| Distribution | Features
+
+| *Fedora Silverblue/Kinoite*
+| rpm-ostree staged deployment validation, ostree commit verification
+
+| *NixOS*
+| Generation validation, closure verification
+
+| *Vanilla OS*
+| ABRoot partition validation
+
+| *openSUSE MicroOS*
+| Transactional update verification
+|===
+
+== Related Projects
+
+* link:https://github.com/hyperpolymath/modshells[modshells] - Modular shell configuration manager
+* link:https://github.com/hyperpolymath/cicd-hyper-a[cicd-hyper-a] - CI/CD intelligence platform
+
+== License
+
+PMPL-1.0-or-later
+
+== Contributing
+
+See link:CONTRIBUTING.md[CONTRIBUTING.md]

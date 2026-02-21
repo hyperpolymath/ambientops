@@ -1,0 +1,108 @@
+= displace - A Cross-Platform Verified File Copy Utility
+
+image:https://img.shields.io/badge/Language-Rust-orange.svg[Rust]
+image:https://img.shields.io/badge/OS-Linux%7CMacOS%7CBSD%7CMinix%7CRISCV%7CUnix-blue.svg[OS Support]
+image:https://img.shields.io/badge/License-PMPL--1.0-blue.svg[License: PMPL-1.0,link="https://github.com/hyperpolymath/palimpsest-license"]
+image:https://img.shields.io/badge/Philosophy-Palimpsest-indigo.svg[Palimpsest,link="https://github.com/hyperpolymath/palimpsest-license"]
+image:https://img.shields.io/badge/Verified%20Container-Protocol%20Compliant-green.svg[Verified Container Protocol Compliant]
+
+
+:toc: left
+:toclevels: 3
+
+*A high-performance, cross-platform command-line utility for fast and verified file and directory copying, designed to integrate seamlessly with the Verified Container Specification ecosystem.*
+
+== Overview
+
+`displace` aims to provide a robust and efficient alternative to standard file copying utilities, with an emphasis on cryptographic verification for supply-chain security. Built in Rust for speed and reliability, it supports a wide range of operating systems and architectures, from traditional Linux/Unix systems to specialized environments like Minix and RISC-V.
+
+Its core functionality focuses on high-speed recursive file and directory copying. Beyond basic data transfer, `displace` is designed from the ground up to produce and consume artifacts compliant with the https://github.com/hyperpolymath/verified-container-spec[Verified Container Specification], ensuring integrity and provenance throughout the software supply chain.
+
+== Features
+
+*   **Cross-Platform Compatibility**: Designed for Linux, macOS, BSD, Minix, Unix-like systems, and RISC-V architectures.
+*   **High Performance**: Leverages Rust's zero-cost abstractions for optimal speed in file system operations.
+*   **Recursive Copying**: Efficiently copies entire directory trees.
+*   **Verified Container Protocol Integration (Producer)**:
+    *   Generates SLSA Provenance (Software Lineage) during its build.
+    *   Produces SPDX SBOM (Software Bill of Of Materials).
+    *   Creates cryptographically signed Attestation Bundles, including transparency log proofs.
+    *   Distributes verification metadata via OCI Referrers API.
+*   **Containerized Deployment**: Provides a minimal, secure container image built with Chainguard base images, ready for deployment in verified environments.
+*   **Robust Error Handling**: Graceful handling of file system errors.
+
+== Usage
+
+=== Native Execution
+
+To build and run `displace` from source:
+
+```bash
+# Clone the repository
+git clone https://github.com/hyperpolymath/displace.git # Placeholder: update with actual repo URL
+cd displace
+
+# Build the project
+cargo build --release
+
+# Run the executable
+# Example: Copy source_directory to destination_directory
+./target/release/displace <SOURCE_PATH> <DESTINATION_PATH>
+```
+
+=== Containerized Execution
+
+`displace` can be run within a container for isolated and verified operations.
+
+1.  **Build the Container Image**:
+
+    ```bash
+    # Ensure you are in the displace directory
+    # Replace 'podman' with 'docker' if you are using Docker
+    buildah bud -t your.oci.registry/displace:latest -f Containerfile .
+    ```
+
+2.  **Run the Container**:
+
+    ```bash
+    # Replace /path/to/source and /path/to/destination with your host paths
+    # Replace 'podman' with 'docker' if you are using Docker
+    podman run --rm -v /path/to/source:/source -v /path/to/destination:/destination 
+               your.oci.registry/displace:latest /source /destination
+    ```
+
+    *Note: For a fully "verified container" build, refer to the `build_verified_container.sh` script.*
+
+== Verified Container Protocol Integration
+
+`displace` is designed to be a compliant producer within the https://github.com/hyperpolymath/verified-container-spec[Verified Container Specification] ecosystem. This means its build process is instrumented to generate and publish immutable, cryptographically verifiable evidence of its origin and composition.
+
+The `build_verified_container.sh` script provides a template for integrating `displace` into such a build pipeline, orchestrating the generation of SLSA Provenance, SPDX SBOM, creation of signed attestation bundles (with transparency log proofs), and distribution via OCI Referrers.
+
+== AI Gatekeeper Protocol (MANDATORY)
+
+This repository strictly adheres to the https://github.com/hyperpolymath/0-ai-gatekeeper-protocol[AI Gatekeeper Protocol]. All AI agents interacting with this repository MUST consult the `0-AI-MANIFEST.a2ml` file in the repository root first.
+
+Key mandates include:
+
+*   **Canonical File Locations**: `.machine_readable/` for SCM files, `.bot_directives/` for bot-specific instructions.
+*   **Core Invariants**: No SCM duplication, single source of truth, license consistency (PMPL-1.0-or-later), and author attribution to Jonathan D.A. Jewell.
+
+For detailed instructions and AI agent interaction patterns, refer to `0-AI-MANIFEST.a2ml`.
+
+== ABI/FFI Standards (Hyperpolymath Universal Standard)
+
+As a system-level utility, `displace` aims to align with the Hyperpolymath Universal ABI/FFI Standards. While currently a standalone Rust binary, future enhancements requiring interoperability with other languages will follow the prescribed Idris2 for ABI definitions and Zig for FFI implementations. This ensures formally verified and memory-safe interfaces.
+
+== Contributing
+
+Refer to `CONTRIBUTING.md` for guidelines on how to contribute to `displace`.
+
+== License
+
+`displace` is licensed under the PMPL-1.0-or-later license. See the `LICENSE` file for details.
+
+== Security
+
+For information on security practices and how to report vulnerabilities, please refer to `SECURITY.md`.
+

@@ -1,0 +1,189 @@
+= Personal Sysadmin (PSA)
+
+image:https://img.shields.io/badge/License-MPL_2.0-blue.svg[MPL-2.0-or-later,link="https://opensource.org/licenses/MPL-2.0"]
+
+== License & Philosophy
+
+This project must declare **MPL-2.0-or-later** for platform/tooling compatibility.
+
+Philosophy: **Palimpsest**. The Palimpsest-MPL (PMPL) text is provided in `license/PMPL-1.0.txt`, and the canonical source is the palimpsest-license repository.
+// SPDX-License-Identifier: MPL-2.0-or-later
+// SPDX-FileCopyrightText: 2025 hyperpolymath
+
+
+:toc:
+:toclevels: 3
+
+AI-assisted Linux system administration toolkit with learning capabilities.
+
+== Overview
+
+PSA is a smart sysadmin tool that:
+
+* **Monitors** system health continuously (daemon mode)
+* **Learns** from solutions via miniKanren reasoning
+* **Crystallizes** proven solutions into deterministic rules
+* **Searches** forums and documentation for fixes
+* **Shares** solutions across device mesh via P2P
+* **Uses** local SLM with Claude fallback for complex issues
+
+== Architecture
+
+[source]
+----
+┌─────────────────────────────────────────────────────────┐
+│                    Personal Sysadmin                     │
+├─────────────────────────────────────────────────────────┤
+│  CLI (psa)              │  TUI (psa-tui, Ada)           │
+├─────────────────────────────────────────────────────────┤
+│                    Daemon (background)                   │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐   │
+│  │ Monitor  │ │ Rules    │ │ Lifecycle│ │ Health   │   │
+│  │          │ │ Engine   │ │ Manager  │ │ Check    │   │
+│  └──────────┘ └──────────┘ └──────────┘ └──────────┘   │
+├─────────────────────────────────────────────────────────┤
+│  Tools (Sysinternals-like)                              │
+│  ┌────────┐ ┌────────┐ ┌────────┐ ┌────────┐ ┌────────┐│
+│  │Process │ │Network │ │Disk    │ │Service │ │Security││
+│  └────────┘ └────────┘ └────────┘ └────────┘ └────────┘│
+├─────────────────────────────────────────────────────────┤
+│  AI Layer                                               │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐                │
+│  │ Local SLM│ │ Claude   │ │ ESN/LSM  │                │
+│  │ (Ollama) │ │ Fallback │ │ Anomaly  │                │
+│  └──────────┘ └──────────┘ └──────────┘                │
+├─────────────────────────────────────────────────────────┤
+│  Storage & Communication                                │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐   │
+│  │ ArangoDB │ │Dragonfly │ │ Forum    │ │ P2P Mesh │   │
+│  │ (Graph)  │ │ (Cache)  │ │ Search   │ │ (libp2p) │   │
+│  └──────────┘ └──────────┘ └──────────┘ └──────────┘   │
+└─────────────────────────────────────────────────────────┘
+----
+
+== Security
+
+PSA is designed for security:
+
+* **Containerized** with Wolfi base image (minimal attack surface)
+* **Unix socket IPC** only (no network exposure)
+* **Seccomp filtering** restricts syscalls
+* **Landlock** for filesystem isolation
+* **No outbound network** by default (whitelist for forum search)
+* **Non-root** execution
+
+== Rules System
+
+Solutions follow a "crystallization" pattern:
+
+1. **AI solves** a new problem
+2. Solution **tested** and gains confidence
+3. When threshold reached, **crystallized** into deterministic rule
+4. Rules checked **FIRST**, AI only when no rule matches
+
+Each rule has full provenance:
+
+* Original source (forum, AI, manual, mesh peer)
+* Decision path (what led to this rule)
+* Version history (git-like)
+* Success/failure stats
+
+== Usage
+
+[source,bash]
+----
+# System health
+psa health
+
+# Process management (like Process Explorer)
+psa process list --sort cpu
+psa process tree
+psa process watch 1234
+
+# Network (like TCPView)
+psa network connections
+psa network listen
+psa network watch
+
+# Disk management
+psa disk usage
+psa disk large --min-size 100M
+
+# Service management (like Autoruns)
+psa service list --failed
+psa service startup
+
+# Security scanning
+psa security scan
+psa security audit
+
+# AI-assisted diagnosis
+psa diagnose "nvidia driver not loading"
+psa diagnose "high memory usage" --local-only
+
+# Search for solutions
+psa search "fedora bluetooth not working"
+psa search "systemd service failing" --online
+
+# Learn from a solution
+psa learn --category networking < solution.md
+
+# P2P mesh
+psa mesh discover
+psa mesh sync
+
+# Daemon mode (background)
+psa daemon
+
+# Interactive TUI
+psa-tui
+----
+
+== Installation
+
+=== From Source
+
+[source,bash]
+----
+# Build Rust components
+cargo build --release
+
+# Install
+cargo install --path .
+
+# Build Ada TUI (optional)
+cd tui-ada
+gprbuild -P psa_tui.gpr -XBUILD=release
+----
+
+=== Container
+
+[source,bash]
+----
+# Build
+nerdctl build -t personal-sysadmin:latest .
+
+# Run daemon
+nerdctl compose -f nerdctl-compose.yaml up -d
+
+# Run with ArangoDB + Dragonfly
+nerdctl compose -f nerdctl-compose.yaml --profile storage --profile cache up -d
+----
+
+== Requirements
+
+* Linux (Fedora, Arch, Ubuntu, etc.)
+* Rust 1.75+ (for building)
+* Optional: Ollama (for local SLM)
+* Optional: ArangoDB (for persistent storage)
+* Optional: Dragonfly (for caching)
+* Optional: GNAT (for Ada TUI)
+
+== Related Projects
+
+* link:https://github.com/hyperpolymath/esn[esn] - Echo State Network for anomaly detection
+* link:https://github.com/hyperpolymath/lsm[lsm] - Liquid State Machine for temporal patterns
+
+== License
+
+PMPL-1.0-or-later

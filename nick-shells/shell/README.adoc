@@ -1,0 +1,319 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-FileCopyrightText: 2025 Jonathan D.A. Jewell <hyperpolymath>
+
+= Known-Good Baseline Shell Configuration
+:toc: macro
+:toclevels: 2
+:icons: font
+
+A minimal, secure, POSIX-compatible shell configuration that follows the https://github.com/hyperpolymath/rhodium-standard[Rhodium Standard Repository] conventions.
+
+toc::[]
+
+== Quick Start
+
+[source,bash]
+----
+# Clone and apply
+git clone https://github.com/hyperpolymath/nick-shells.git
+cd nick-shells/shell
+chmod +x apply.sh
+./apply.sh
+
+# Restart your shell or reload
+source ~/.bashrc  # or ~/.zshrc
+----
+
+== Directory Structure
+
+[source]
+----
+shell/
+├── baseline.sh          # Full baseline (sources all modules)
+├── apply.sh             # Installation script
+├── config.ncl           # Nickel configuration schema
+├── README.adoc          # This documentation
+├── modules/             # Individual, composable modules
+│   ├── security.sh      # Umask, core dumps, safety aliases
+│   ├── xdg.sh           # XDG Base Directory vars
+│   ├── locale.sh        # UTF-8 locale defaults
+│   ├── history.sh       # History configuration
+│   ├── behavior.sh      # Shell options (shopt)
+│   ├── aliases.sh       # Common aliases
+│   ├── path.sh          # RSR-compliant PATH setup
+│   ├── editor.sh        # Editor/pager configuration
+│   ├── dev.sh           # Development environment
+│   └── prompt.sh        # Informative prompt
+└── examples/            # Pre-built configurations
+    ├── minimal.sh       # Security + XDG only (servers)
+    ├── interactive.sh   # Comfortable interactive use
+    └── developer.sh     # Full dev environment
+----
+
+== Configuration Profiles
+
+=== Full Baseline (Default)
+
+Sources all modules. Equivalent to `examples/developer.sh`.
+
+[source,bash]
+----
+. /path/to/nick-shells/shell/baseline.sh
+----
+
+=== Minimal (Servers)
+
+Just security hardening and XDG directories. No aliases, no prompt customization.
+
+[source,bash]
+----
+. /path/to/nick-shells/shell/examples/minimal.sh
+----
+
+=== Interactive
+
+Comfortable shell experience without development tools.
+
+[source,bash]
+----
+. /path/to/nick-shells/shell/examples/interactive.sh
+----
+
+=== Custom (Pick Your Modules)
+
+Source only the modules you need:
+
+[source,bash]
+----
+# In your ~/.bashrc
+__NS="/path/to/nick-shells/shell/modules"
+
+. "$__NS/security.sh"
+. "$__NS/xdg.sh"
+. "$__NS/history.sh"
+. "$__NS/aliases.sh"
+# Skip: locale, behavior, path, editor, dev, prompt
+
+unset __NS
+----
+
+== Modules Reference
+
+[cols="1,3"]
+|===
+|Module |Description
+
+|`security.sh`
+|Secure umask (022), disable core dumps, safety aliases (`rm -i`, `mv -i`, `cp -i`)
+
+|`xdg.sh`
+|XDG Base Directory environment variables (`XDG_CONFIG_HOME`, etc.)
+
+|`locale.sh`
+|UTF-8 locale defaults (`LANG`, `LC_ALL`)
+
+|`history.sh`
+|10K history, timestamps, deduplication, append mode
+
+|`behavior.sh`
+|Bash options: globstar, cdspell, extglob, checkwinsize
+
+|`aliases.sh`
+|Directory listing (`ll`, `la`), navigation (`..`, `...`), grep colors
+
+|`path.sh`
+|RSR-compliant PATH for Rust, Deno, Guix, Nix, `~/.local/bin`
+
+|`editor.sh`
+|Auto-detect editor (hx > nvim > vim > vi), less pager config
+
+|`dev.sh`
+|Rust backtrace, Deno cache directory
+
+|`prompt.sh`
+|Colored prompt with exit code display: `[1] user@host:~/dir $`
+|===
+
+== Nickel Configuration
+
+This project uses https://nickel-lang.org[Nickel] for type-safe configuration.
+
+=== Version Requirements
+
+See `nickel.version` in the repository root:
+
+[source]
+----
+Minimum:     1.5.0
+Recommended: 1.9.0
+----
+
+=== Schema
+
+The `config.ncl` file defines the configuration schema:
+
+[source,bash]
+----
+# Typecheck the config
+nickel typecheck config.ncl
+
+# Export to JSON
+nickel export config.ncl > config.json
+----
+
+== Installation
+
+=== Automatic (Recommended)
+
+[source,bash]
+----
+./apply.sh
+----
+
+This script:
+
+1. Backs up your existing `.bashrc` / `.zshrc`
+2. Adds a source line to load `baseline.sh`
+3. Is idempotent (safe to run multiple times)
+
+==== Options
+
+[source,bash]
+----
+./apply.sh --help
+
+# Install for specific shell only
+./apply.sh --shell bash
+./apply.sh --shell zsh
+
+# Preview changes without applying
+./apply.sh --dry-run
+
+# Remove the baseline
+./apply.sh --uninstall
+----
+
+=== Manual Installation
+
+Add this line to your `~/.bashrc` or `~/.zshrc`:
+
+[source,bash]
+----
+# Full baseline
+. "/path/to/nick-shells/shell/baseline.sh"
+
+# Or a lighter profile
+. "/path/to/nick-shells/shell/examples/minimal.sh"
+----
+
+== Customization
+
+=== Adding Your Own Settings
+
+Create a file `~/.config/shell/local.sh` with your customizations:
+
+[source,bash]
+----
+# ~/.config/shell/local.sh
+
+# Your aliases
+alias g='git'
+alias k='kubectl'
+
+# Your exports
+export MY_CUSTOM_VAR="value"
+----
+
+Then source it after baseline in your `.bashrc`:
+
+[source,bash]
+----
+. "/path/to/nick-shells/shell/baseline.sh"
+[ -f "$XDG_CONFIG_HOME/shell/local.sh" ] && . "$XDG_CONFIG_HOME/shell/local.sh"
+----
+
+=== Overriding Defaults
+
+Since modules are sourced in order, you can override any setting in your local config:
+
+[source,bash]
+----
+# Override editor preference
+export EDITOR='nano'
+
+# Disable the safety aliases
+unalias rm mv cp
+
+# Change history size
+HISTSIZE=50000
+----
+
+== Compatibility
+
+[cols="1,1,2"]
+|===
+|Shell |Supported |Notes
+
+|Bash 4+
+|✅ Full
+|All features work
+
+|Bash 3.x
+|✅ Partial
+|Some shopt options may not be available
+
+|Zsh
+|✅ Full
+|Works with default settings
+
+|sh/dash
+|✅ Basic
+|POSIX subset only
+|===
+
+== Troubleshooting
+
+=== "command not found" after installation
+
+Your `$PATH` might not include the baseline paths yet. Either:
+
+* Start a new terminal session
+* Run `source ~/.bashrc` (or `~/.zshrc`)
+
+=== Module not found errors
+
+Ensure the `modules/` directory exists alongside `baseline.sh`:
+
+[source,bash]
+----
+ls -la /path/to/nick-shells/shell/modules/
+----
+
+=== Conflicts with existing config
+
+The apply script creates timestamped backups:
+
+[source,bash]
+----
+~/.bashrc.backup.20250127_143022
+----
+
+To restore:
+
+[source,bash]
+----
+cp ~/.bashrc.backup.20250127_143022 ~/.bashrc
+----
+
+=== Uninstalling
+
+[source,bash]
+----
+./apply.sh --uninstall
+----
+
+Or manually remove the `# nick-shells baseline` line from your RC file.
+
+== License
+
+Dual-licensed under MIT OR AGPL-3.0-or-later. See link:../LICENSE.txt[LICENSE.txt].

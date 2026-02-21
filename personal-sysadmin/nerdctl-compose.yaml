@@ -1,0 +1,148 @@
+# SPDX-License-Identifier: MPL-2.0-or-later
+# Personal Sysadmin - nerdctl compose configuration
+#
+# Usage:
+#   nerdctl compose -f nerdctl-compose.yaml up -d
+#   nerdctl compose -f nerdctl-compose.yaml logs -f
+#   nerdctl compose -f nerdctl-compose.yaml down
+
+version: "3"
+
+services:
+  psa:
+    build:
+      context: .
+      dockerfile: Containerfile
+    image: personal-sysadmin:latest
+    container_name: psa
+    restart: unless-stopped
+
+    # Security hardening
+    security_opt:
+      - no-new-privileges:true
+      - seccomp:./seccomp.json
+    cap_drop:
+      - ALL
+    cap_add:
+      # Minimal capabilities needed for system monitoring
+      - SYS_PTRACE  # For process info (can be removed if not needed)
+    read_only: true
+
+    # Network isolation - no network access by default
+    # Uncomment network_mode for forum search capability
+    # network_mode: none
+    networks:
+      - psa-internal
+
+    # Mount host system info (read-only)
+    volumes:
+      # Host system access (read-only)
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /etc/os-release:/host/etc/os-release:ro
+
+      # Persistent data
+      - psa-data:/home/psa/.local/share/psa
+      - psa-cache:/home/psa/.cache/psa
+
+      # Unix socket for IPC (created by host)
+      - type: bind
+        source: /run/user/${UID:-1000}/psa.sock
+        target: /run/psa.sock
+
+      # Tmpfs for runtime data
+      - type: tmpfs
+        target: /tmp
+        tmpfs:
+          size: 100M
+          mode: 1777
+
+    environment:
+      - RUST_LOG=info
+      - PSA_HOST_PROC=/host/proc
+      - PSA_HOST_SYS=/host/sys
+
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          cpus: "0.1"
+          memory: 64M
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/psa", "health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # Optional: ArangoDB for persistent storage
+  arangodb:
+    image: arangodb:latest
+    container_name: psa-arangodb
+    restart: unless-stopped
+    profiles:
+      - storage  # Only start with: nerdctl compose --profile storage up
+
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+    networks:
+      - psa-internal
+
+    volumes:
+      - arangodb-data:/var/lib/arangodb3
+
+    environment:
+      - ARANGO_NO_AUTH=1  # Internal network only, no auth needed
+      # For production: use ARANGO_ROOT_PASSWORD
+
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+
+  # Optional: Dragonfly for caching
+  dragonfly:
+    image: docker.dragonflydb.io/dragonflydb/dragonfly:latest
+    container_name: psa-dragonfly
+    restart: unless-stopped
+    profiles:
+      - cache  # Only start with: nerdctl compose --profile cache up
+
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+    networks:
+      - psa-internal
+
+    volumes:
+      - dragonfly-data:/data
+
+    command: ["--maxmemory", "128mb", "--proactor_threads", "1"]
+
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 192M
+
+networks:
+  psa-internal:
+    driver: bridge
+    internal: true  # No external network access
+
+volumes:
+  psa-data:
+  psa-cache:
+  arangodb-data:
+  dragonfly-data:

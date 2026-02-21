@@ -1,0 +1,361 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+= SCM Files Guide (STATE.scm, META.scm, ECOSYSTEM.scm)
+:toc:
+:toclevels: 3
+:icons: font
+:source-highlighter: rouge
+
+Guide for maintaining Guile Scheme checkpoint files across the AmbientOps ecosystem.
+
+== Overview
+
+Every AmbientOps repository SHOULD have three `.scm` checkpoint files at the root:
+
+[cols="1,2,2",options="header"]
+|===
+| File | Purpose | Update Frequency
+
+| `STATE.scm`
+| Current project state, progress, blockers
+| Every session / milestone
+
+| `META.scm`
+| Architecture decisions, development practices
+| When principles or major decisions change
+
+| `ECOSYSTEM.scm`
+| Project's place in the ecosystem, relationships
+| When integrations or relationships change
+|===
+
+== STATE.scm — Project State
+
+=== Purpose
+
+STATE.scm tracks the _current_ state of the project:
+
+* What phase are we in?
+* What's working?
+* What's blocked?
+* What's next?
+
+=== When to Update
+
+[cols="1,2",options="header"]
+|===
+| Event | Action
+
+| Session start
+| Read STATE.scm, understand current position
+
+| Task completed
+| Update `current-position`, mark milestones
+
+| Blocker encountered
+| Add to `blockers-and-issues`
+
+| Session end
+| Ensure STATE.scm reflects current state
+
+| Milestone reached
+| Update `overall-completion`, add to `session-history`
+|===
+
+=== Pruning Rules
+
+[IMPORTANT]
+====
+STATE.scm must be pruned regularly to prevent staleness.
+====
+
+* **Remove resolved blockers** — once fixed, move to session history or delete
+* **Archive old session entries** — keep last 5-10 sessions, archive older ones
+* **Update completion percentages** — must reflect actual state, not aspirations
+* **Delete obsolete milestones** — if plan changed, remove outdated items
+
+=== Template
+
+[source,scheme]
+----
+;; SPDX-License-Identifier: PMPL-1.0-or-later
+;; STATE.scm - Current project state
+
+(define project-state
+  `((metadata
+      ((version . "1.0.0")
+       (schema-version . "1")
+       (created . "YYYY-MM-DDTHH:MM:SS+00:00")
+       (updated . "YYYY-MM-DDTHH:MM:SS+00:00")
+       (project . "Project Name")
+       (repo . "repo-name")))
+
+    (current-position
+      ((phase . "Phase N: Description")
+       (overall-completion . 40)  ; percentage
+       (working-features . ("feature1" "feature2"))))
+
+    (route-to-mvp
+      ((milestones
+        ((v0.1 . ((items . ("Task 1" "Task 2"))))
+         (v0.2 . ((items . ("Task 3" "Task 4"))))))))
+
+    (blockers-and-issues
+      ((critical . ())
+       (high . ())
+       (medium . ())
+       (low . ())))
+
+    (critical-next-actions
+      ((immediate . ("Next action 1"))
+       (this-week . ("Action 2"))
+       (this-month . ("Action 3"))))
+
+    (session-history
+      ((("2026-01-02" . ((accomplishments . ("Did X" "Did Y")))))))))
+----
+
+=== Recovery from Broken State
+
+If STATE.scm becomes stale or corrupted:
+
+1. **Check git history** — `git log -p STATE.scm`
+2. **Restore last known good** — `git checkout <commit> -- STATE.scm`
+3. **Rebuild from scratch** if needed — use template above
+4. **Verify against README/ROADMAP** — ensure consistency
+
+== META.scm — Architecture Decisions
+
+=== Purpose
+
+META.scm captures _why_ decisions were made:
+
+* Architecture Decision Records (ADRs)
+* Development practices
+* Design rationale
+
+=== When to Update
+
+[cols="1,2",options="header"]
+|===
+| Event | Action
+
+| Major architecture decision
+| Add to `architecture-decisions`
+
+| New development practice adopted
+| Update `development-practices`
+
+| Design rationale discussion
+| Add to `design-rationale`
+|===
+
+=== Template
+
+[source,scheme]
+----
+;; SPDX-License-Identifier: PMPL-1.0-or-later
+;; META.scm - Project metadata and architectural decisions
+
+(define project-meta
+  `((version . "1.0.0")
+
+    (architecture-decisions
+      (((id . "adr-001")
+        (title . "Use V language for verification layer")
+        (status . "accepted")  ; proposed | accepted | deprecated | superseded | rejected
+        (date . "2026-01-02")
+        (context . "Need a language suited for policy and verification")
+        (decision . "Use V language for all verification layer code")
+        (consequences . ("Fast compilation" "Strong safety guarantees")))))
+
+    (development-practices
+      ((code-style . "v-fmt")
+       (security . "openssf-scorecard")
+       (testing . "property-based")
+       (versioning . "semver")
+       (documentation . "asciidoc")
+       (branching . "trunk-based")))
+
+    (design-rationale
+      (((topic . "why-v-not-rust")
+        (explanation . "V provides verification semantics; Rust reserved for agent boxes"))))))
+----
+
+=== ADR Status Values
+
+* `proposed` — under discussion
+* `accepted` — approved and in effect
+* `deprecated` — superseded but still present
+* `superseded` — replaced by another ADR (reference it)
+* `rejected` — considered but not adopted
+
+== ECOSYSTEM.scm — Ecosystem Position
+
+=== Purpose
+
+ECOSYSTEM.scm documents how this project relates to others:
+
+* What other projects does it depend on?
+* What projects depend on it?
+* What's the integration contract?
+
+=== When to Update
+
+[cols="1,2",options="header"]
+|===
+| Event | Action
+
+| New integration added
+| Add to `integrates-with`
+
+| Dependency relationship changes
+| Update `related-projects`
+
+| Project role clarified
+| Update `role` and `position-in-ecosystem`
+|===
+
+=== Template
+
+[source,scheme]
+----
+;; SPDX-License-Identifier: PMPL-1.0-or-later
+;; ECOSYSTEM.scm - Project ecosystem position
+
+(ecosystem
+  (version "1.0")
+  (name "project-name")
+  (type "component")  ; component | umbrella | library | tool
+  (purpose "One-line description")
+
+  (position-in-ecosystem
+    (tier "crisis")  ; crisis | diagnostic | management | observability
+    (layer "V"))     ; D | V | - (neither)
+
+  (related-projects
+    ((name "system-operating-theatre")
+     (relationship "sibling-standard")
+     (description "Receives handoffs for deeper diagnostics"))
+    ((name "feedback-o-tron")
+     (relationship "downstream-consumer")
+     (description "Receives incident bundles for reporting")))
+
+  (integrates-with
+    ((complete-internet-repair "network recovery handoff")
+     (personal-sysadmin "preventive maintenance")
+     (system-tools-contracts "schema conformance")))
+
+  (what-this-is
+    ("Panic-safe intake for crises"
+     "Evidence capture and bundle creation"
+     "Safe handoff to appropriate tools"))
+
+  (what-this-is-not
+    ("Not a full system management suite"
+     "Not a replacement for big-up/Operating Room"
+     "Not an AI assistant")))
+----
+
+== Relationship Types
+
+Use these standard relationship types in ECOSYSTEM.scm:
+
+[cols="1,2",options="header"]
+|===
+| Type | Meaning
+
+| `sibling-standard`
+| Same ecosystem, peer relationship
+
+| `downstream-consumer`
+| This project produces, they consume
+
+| `upstream-provider`
+| They produce, this project consumes
+
+| `potential-consumer`
+| May integrate in future
+
+| `inspiration`
+| Influenced design but no direct integration
+|===
+
+== Session Protocol for LLMs
+
+=== Session Start
+
+1. Read all three `.scm` files
+2. Understand current state from STATE.scm
+3. Check for any blockers or critical issues
+4. Review recent session history
+
+=== During Session
+
+1. Update STATE.scm as tasks complete
+2. Add blockers immediately when encountered
+3. Keep `current-position` accurate
+
+=== Session End
+
+1. **Update STATE.scm** — ensure all work is captured
+2. **Add session entry** to history with accomplishments
+3. **Prune stale items** — remove resolved blockers, outdated milestones
+4. **Update completion %** if significant progress made
+
+=== On Major Decisions
+
+1. Add ADR to META.scm
+2. Update design rationale if needed
+
+=== On Integration Changes
+
+1. Update ECOSYSTEM.scm relationships
+2. Ensure consistency with README.adoc
+
+== Validation
+
+[source,bash]
+----
+# Validate Scheme syntax (requires guile)
+guile -c '(load "STATE.scm")'
+guile -c '(load "META.scm")'
+guile -c '(load "ECOSYSTEM.scm")'
+----
+
+== Common Mistakes
+
+[cols="1,2",options="header"]
+|===
+| Mistake | Fix
+
+| STATE.scm not updated
+| Update at end of EVERY session
+
+| Blockers left after resolution
+| Prune resolved blockers promptly
+
+| Completion % inflated
+| Be honest; 40% is better than fake 80%
+
+| ECOSYSTEM.scm out of sync
+| Check when adding new integrations
+
+| ADRs missing context
+| Include the WHY, not just the WHAT
+|===
+
+== Media Types (for tooling)
+
+[cols="1,2",options="header"]
+|===
+| File | Media Type
+
+| STATE.scm
+| `application/state+scheme`
+
+| META.scm
+| `application/meta+scheme`
+
+| ECOSYSTEM.scm
+| `application/vnd.ecosystem+scm`
+|===

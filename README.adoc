@@ -131,3 +131,8 @@ External tools that integrate with AmbientOps but live in their own repos:
 == License
 
 PMPL-1.0-or-later (Palimpsest License).
+
+
+== Architecture
+
+See link:TOPOLOGY.md[TOPOLOGY.md] for a visual architecture map and completion dashboard.

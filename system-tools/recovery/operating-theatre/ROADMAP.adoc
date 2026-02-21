@@ -1,0 +1,137 @@
+= Operating Room Roadmap
+:toc:
+:toclevels: 3
+:icons: font
+
+Development roadmap for Operating Room (formerly big-up): the plan-first “doer” in the AmbientOps ecosystem.
+
+== Current state
+
+[cols="1,2,1",options="header"]
+|===
+| Phase | Focus | Status
+
+| Phase 0
+| Infrastructure + governance
+| ✓ Complete
+
+| Phase 1
+| Specifications + contracts
+| ⏳ In Progress
+
+| Phase 2
+| MVP implementation (Scan→Plan→Apply→Undo→Receipt)
+| ⏳ Started (basic CLI)
+
+| Phase 3
+| Packs/adapters + integrations + packaging
+| 🔲 Not Started
+
+| Phase 4
+| Release + distribution
+| 🔲 Not Started
+|===
+
+== Phase 0: Infrastructure (complete)
+
+Deliverables:
+
+* Multi-forge mirroring (GitHub → GitLab, Codeberg, Bitbucket)
+* Instant-sync automation on push/release
+* Governance policy in `.claude/CLAUDE.md`
+* Initial repo structure
+
+== Phase 1: Specifications & contracts (pending)
+
+Deliverables:
+
+* Feature specifications (what we do / do not do)
+* CLI interface definitions (verbs + stable flags)
+* Security model (least privilege, logging, reversibility)
+* Evidence formats:
+  - Evidence Envelope (scan output)
+  - Plan format (approved steps)
+  - Run bundle layout (folders + naming)
+  - Receipt format (human-readable + machine-readable)
+* Pack system spec:
+  - pack manifest
+  - capability detection
+  - just-in-time install prompts (later if packs are separate repos)
+* Ecosystem seam files (as needed): `STATE.scm` / `META.scm` / `ECOSYSTEM.scm`
+
+== Phase 2: Core MVP (Scan→Plan→Apply→Undo→Receipt)
+
+=== Current implementation
+
+Basic `sor` CLI with system maintenance commands:
+
+* `optimize` - System optimization (NVIDIA, firewall, journal, network)
+* `cleanup` - Cache and temp file cleaning
+* `sync` - Repository synchronization
+* `check` - Check repos for uncommitted changes
+* `analyze` - GitHub workflow failure analysis
+* `pages` - GitHub Pages status check
+
+=== Remaining deliverables
+
+* Core CLI:
+  - `detect`, `scan`, `plan`, `apply`, `undo`, `receipt`, `export`
+* Plan engine:
+  - produces a plan with preview + reversibility labels
+  - refuses to apply without explicit approval
+* Apply runner:
+  - executes step-by-step with robust logging
+  - captures exit codes + evidence artifacts
+* Undo system:
+  - undo tokens generated during apply
+  - clear labeling: reversible / partial / not reversible
+* Receipt generator:
+  - “what checked”, “what changed”, “what not changed (and why)”
+  - includes evidence pointers and undo instructions
+* One “Typical” safe pack implemented end-to-end (pick one OS first)
+
+== Phase 3: Packs, adapters, integrations, packaging
+
+Deliverables:
+
+* Safe packs (Typical):
+  - Windows-safe, Linux-safe, macOS-safe (order by priority)
+* Technician pack (Expert-gated):
+  - Windows-tech (DISM/SFC workflows etc.) with strict warnings + receipts
+* Adapters:
+  - user-supplied external tool integration where useful (no bundling)
+* Integrations:
+  - AmbientOps “Ward” deep-links into plans
+  - PSA handoff for “Crisis Mode”
+  - JuliaDashboard timeline ingest of run bundles
+  - feedback-a-tron message intents + redaction presets
+  - HAR policy-gated execution hooks (optional)
+* Packaging:
+  - installers and/or portable builds per OS
+  - (optional) Guix/Nix definitions as secondary distribution paths
+
+== Phase 4: Release & distribution
+
+Deliverables:
+
+* v0.1.0 release: MVP + one safe pack + receipts/undo
+* Release automation (changelog, signed artifacts/hashes)
+* User docs (calm, non-fearware tone)
+* Contribution guide for packs/themes/adapters
+
+== Technology decision (resolved for now)
+
+*Primary:* **D** (core implementation)
+*Targeted components:* **Rust** (privileged/safety-critical helpers), when needed.
+
+This keeps development fast while reserving Rust for the most sensitive execution paths.
+
+== Contributing
+
+Contributions are welcome once Phase 1 specifications land.
+
+All contributions must:
+
+* follow repository policy in `.claude/CLAUDE.md`
+* avoid fearware claims and dark patterns
+* keep scan non-mutating; apply explicit; undo + receipt mandatory

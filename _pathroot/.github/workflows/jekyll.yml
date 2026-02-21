@@ -1,0 +1,27 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+name: Jekyll Build & Test
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions: read-all
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: ruby/setup-ruby@f8cf14e635c2ba2c0f287d9b0c5f442c52c91bee # v1.210.0
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+      - name: Build Jekyll site
+        run: |
+          if [ -f "Gemfile" ]; then
+            bundle exec jekyll build
+          else
+            echo "No Gemfile found, skipping Jekyll build"
+          fi

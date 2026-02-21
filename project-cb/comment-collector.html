@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<!-- SPDX-License-Identifier: MIT -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Comment Collector</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 12px;
+      background: #1a1a1a;
+      color: #e0e0e0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    header {
+      background: #252525;
+      padding: 6px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #333;
+    }
+
+    header h1 { font-size: 13px; font-weight: 600; }
+
+    .header-buttons { display: flex; gap: 6px; }
+    .header-buttons button {
+      padding: 4px 10px;
+      font-size: 11px;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    .btn-save { background: #4caf50; color: white; }
+    .btn-save.dirty { background: #ff9800; }
+    .btn-discard { background: #f44336; color: white; }
+    .btn-export { background: #4a9eff; color: white; }
+    .btn-restore { background: #9c27b0; color: white; }
+    .btn-clear { background: #444; color: #ccc; }
+    .dirty-indicator { color: #ff9800; font-size: 10px; margin-left: 6px; }
+
+    .zones {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 4px;
+      padding: 4px;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .zone {
+      background: #222;
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border: 2px solid transparent;
+      transition: border-color 0.15s;
+    }
+
+    .zone.drag-over {
+      border-color: #4a9eff;
+      background: #1a2a3a;
+    }
+
+    .zone-header {
+      padding: 6px 8px;
+      font-weight: 600;
+      font-size: 11px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .zone-framework .zone-header { background: #2d4a2d; }
+    .zone-margin .zone-header { background: #4a3d2d; }
+    .zone-inline .zone-header { background: #2d3d4a; }
+    .zone-summary .zone-header { background: #4a2d4a; }
+
+    .zone-count {
+      background: rgba(255,255,255,0.15);
+      padding: 1px 6px;
+      border-radius: 8px;
+      font-size: 10px;
+    }
+
+    .zone-hint {
+      color: #666;
+      font-size: 10px;
+      padding: 8px;
+      text-align: center;
+      font-style: italic;
+    }
+
+    .zone-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 4px;
+    }
+
+    .comment {
+      background: #2a2a2a;
+      border-radius: 4px;
+      margin-bottom: 4px;
+      border-left: 3px solid #666;
+      position: relative;
+    }
+
+    .comment.clean { border-color: #4caf50; }
+    .comment.issues { border-color: #ffc107; }
+
+    .comment-text {
+      padding: 6px 8px;
+      padding-right: 28px;
+      font-size: 11px;
+      line-height: 1.4;
+      white-space: pre-wrap;
+      word-break: break-word;
+      cursor: text;
+      min-height: 24px;
+    }
+
+    .comment-text:focus {
+      outline: none;
+      background: #333;
+    }
+
+    /* Error highlighting in text */
+    .err-punct { background: rgba(255, 193, 7, 0.3); border-bottom: 2px wavy #ffc107; }
+    .err-caps { background: rgba(255, 152, 0, 0.3); border-bottom: 2px wavy #ff9800; }
+    .err-space { background: rgba(255, 87, 34, 0.3); border-bottom: 2px wavy #ff5722; }
+    .err-typo { background: rgba(244, 67, 54, 0.4); border-bottom: 2px wavy #f44336; }
+
+    .comment-delete {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      background: none;
+      border: none;
+      color: #666;
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1;
+      padding: 2px;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+
+    .comment:hover .comment-delete, .comment:hover .comment-tags { opacity: 1; }
+    .comment-delete:hover { color: #ff6b6b; }
+
+    .comment-tags {
+      position: absolute;
+      top: 4px;
+      right: 22px;
+      background: none;
+      border: none;
+      color: #666;
+      cursor: pointer;
+      font-size: 12px;
+      line-height: 1;
+      padding: 2px;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+    .comment-tags:hover { color: #4a9eff; }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #333;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 11px;
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; }
+
+    /* Tags */
+    .tag-badges { display: flex; gap: 2px; padding: 2px 8px 4px; flex-wrap: wrap; }
+    .tag-badge {
+      font-size: 9px;
+      padding: 1px 4px;
+      border-radius: 3px;
+      color: white;
+      font-weight: 500;
+    }
+
+    /* Tag filter bar */
+    .zone-filters {
+      display: flex;
+      gap: 2px;
+      padding: 3px 6px;
+      background: rgba(0,0,0,0.2);
+      flex-wrap: wrap;
+    }
+    .filter-btn {
+      font-size: 9px;
+      padding: 2px 5px;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      background: #333;
+      color: #999;
+      transition: all 0.15s;
+    }
+    .filter-btn:hover { background: #444; color: #ccc; }
+    .filter-btn.active { color: white; }
+
+    /* Tag picker popup */
+    .tag-picker {
+      position: fixed;
+      background: #2a2a2a;
+      border: 1px solid #444;
+      border-radius: 6px;
+      padding: 8px;
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+    .tag-picker-title { font-size: 10px; color: #888; margin-bottom: 6px; }
+    .tag-picker-options { display: flex; flex-direction: column; gap: 4px; }
+    .tag-option {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+    }
+    .tag-option:hover { background: #333; }
+    .tag-option input { margin: 0; }
+    .tag-picker-done {
+      margin-top: 8px;
+      padding: 4px 12px;
+      background: #4a9eff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+      width: 100%;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #1a1a1a; }
+    ::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>📋 Collector<span class="dirty-indicator" id="dirty-indicator"></span></h1>
+    <div class="header-buttons">
+      <button class="btn-save" id="btn-save" onclick="saveSession()">Save</button>
+      <button class="btn-discard" onclick="discardSession()" title="Discard unsaved changes">Discard</button>
+      <button class="btn-restore" onclick="restorePrevious()" title="Restore previous saved version">Undo</button>
+      <button class="btn-export" onclick="exportAll()">Export</button>
+      <button class="btn-clear" onclick="clearAll()">Clear</button>
+    </div>
+  </header>
+
+  <div class="zones">
+    <div class="zone zone-framework" data-cat="framework">
+      <div class="zone-header">
+        <span>📝 Framework</span>
+        <span class="zone-count" id="count-framework">0</span>
+      </div>
+      <div class="zone-filters" id="filters-framework"></div>
+      <div class="zone-hint">Drag opening/closing comments here</div>
+      <div class="zone-list" id="list-framework"></div>
+    </div>
+
+    <div class="zone zone-margin" data-cat="margin">
+      <div class="zone-header">
+        <span>📌 Margin</span>
+        <span class="zone-count" id="count-margin">0</span>
+      </div>
+      <div class="zone-filters" id="filters-margin"></div>
+      <div class="zone-hint">Drag margin annotations here</div>
+      <div class="zone-list" id="list-margin"></div>
+    </div>
+
+    <div class="zone zone-inline" data-cat="inline">
+      <div class="zone-header">
+        <span>✏️ In-Text</span>
+        <span class="zone-count" id="count-inline">0</span>
+      </div>
+      <div class="zone-filters" id="filters-inline"></div>
+      <div class="zone-hint">Drag inline insertions here</div>
+      <div class="zone-list" id="list-inline"></div>
+    </div>
+
+    <div class="zone zone-summary" data-cat="summary">
+      <div class="zone-header">
+        <span>📊 Summary</span>
+        <span class="zone-count" id="count-summary">0</span>
+      </div>
+      <div class="zone-filters" id="filters-summary"></div>
+      <div class="zone-hint">Drag summary comments here</div>
+      <div class="zone-list" id="list-summary"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY = 'comment-collector-v5';
+const STORAGE_KEY_PREV = 'comment-collector-v5-prev';
+
+// Comment type tags
+const TAGS = {
+  content: { label: 'Content', color: '#4caf50', abbr: 'C' },
+  'structure-overall': { label: 'Overall Structure', color: '#2196f3', abbr: 'OS' },
+  'structure-detail': { label: 'Detailed Structure', color: '#03a9f4', abbr: 'DS' },
+  evidencing: { label: 'Evidencing', color: '#ff9800', abbr: 'E' },
+  conventions: { label: 'Conventions', color: '#9c27b0', abbr: 'Cv' }
+};
+
+// Data structure: { category: [{ text: string, tags: string[] }] }
+let data = {
+  framework: [],
+  margin: [],
+  inline: [],
+  summary: []
+};
+
+// Active filter per category (null = show all)
+let filters = {
+  framework: null,
+  margin: null,
+  inline: null,
+  summary: null
+};
+
+let savedData = null;  // Last saved state
+let isDirty = false;   // Has unsaved changes
+
+// Error patterns with markers
+const errorChecks = [
+  {
+    name: 'no-end-punct',
+    class: 'err-punct',
+    // Check applied to whole string, not regex replace
+    check: (t) => t.length > 10 && !/[.!?:;]$/.test(t.trim())
+  },
+  {
+    name: 'no-start-cap',
+    class: 'err-caps',
+    regex: /^([a-z])/,
+    replace: '<span class="err-caps">$1</span>'
+  },
+  {
+    name: 'mid-caps',
+    class: 'err-caps',
+    regex: /\b([a-z]+)([A-Z])([a-z]*)\b/g,
+    replace: '$1<span class="err-caps">$2</span>$3',
+    exclude: /JavaScript|GitHub|PhD|iPhone|macOS/
+  },
+  {
+    name: 'double-space',
+    class: 'err-space',
+    regex: /(  +)/g,
+    replace: '<span class="err-space">$1</span>'
+  },
+  {
+    name: 'no-space-after-punct',
+    class: 'err-space',
+    regex: /([.!?,;])([a-zA-Z])/g,
+    replace: '<span class="err-space">$1</span>$2'
+  },
+  {
+    name: 'typo',
+    class: 'err-typo',
+    regex: /\b(teh|adn|taht|hte|yuo|yuor|thier|recieve|seperate|occured|definately)\b/gi,
+    replace: '<span class="err-typo">$1</span>'
+  }
+];
+
+function highlightErrors(text) {
+  let html = escapeHtml(text);
+  let hasErrors = false;
+
+  // Apply regex-based highlights
+  for (const check of errorChecks) {
+    if (check.regex) {
+      if (check.exclude && check.exclude.test(text)) continue;
+      const before = html;
+      html = html.replace(check.regex, check.replace);
+      if (html !== before) hasErrors = true;
+    }
+  }
+
+  // Check whole-string conditions
+  for (const check of errorChecks) {
+    if (check.check && check.check(text)) {
+      hasErrors = true;
+    }
+  }
+
+  return { html, hasErrors };
+}
+
+function escapeHtml(text) {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function load() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    try {
+      data = JSON.parse(saved);
+      savedData = JSON.parse(saved);  // Keep copy of saved state
+    } catch(e) {}
+  }
+  render();
+  updateDirtyState();
+}
+
+function markDirty() {
+  isDirty = true;
+  updateDirtyState();
+}
+
+function updateDirtyState() {
+  const indicator = document.getElementById('dirty-indicator');
+  const btn = document.getElementById('btn-save');
+  if (isDirty) {
+    indicator.textContent = ' (unsaved)';
+    btn.classList.add('dirty');
+  } else {
+    indicator.textContent = '';
+    btn.classList.remove('dirty');
+  }
+}
+
+function saveSession() {
+  // Backup current saved state to previous
+  if (savedData) {
+    localStorage.setItem(STORAGE_KEY_PREV, JSON.stringify(savedData));
+  }
+  // Save current working state
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  savedData = JSON.parse(JSON.stringify(data));
+  isDirty = false;
+  updateDirtyState();
+  toast('Saved');
+}
+
+function restorePrevious() {
+  const prev = localStorage.getItem(STORAGE_KEY_PREV);
+  if (!prev) {
+    toast('No previous version');
+    return;
+  }
+  if (!confirm('Restore previous saved version? Current unsaved changes will be lost.')) return;
+  try {
+    data = JSON.parse(prev);
+    savedData = JSON.parse(prev);
+    localStorage.setItem(STORAGE_KEY, prev);
+    isDirty = false;
+    render();
+    updateDirtyState();
+    toast('Restored previous version');
+  } catch(e) {
+    toast('Restore failed');
+  }
+}
+
+function render() {
+  for (const cat of Object.keys(data)) {
+    renderFilters(cat);
+    renderCategory(cat);
+  }
+}
+
+function renderFilters(cat) {
+  const container = document.getElementById('filters-' + cat);
+  const activeFilter = filters[cat];
+
+  let html = `<button class="filter-btn ${!activeFilter ? 'active' : ''}" onclick="setFilter('${cat}', null)">All</button>`;
+
+  for (const [tag, info] of Object.entries(TAGS)) {
+    const isActive = activeFilter === tag;
+    html += `<button class="filter-btn ${isActive ? 'active' : ''}" style="${isActive ? 'background:' + info.color : ''}" onclick="setFilter('${cat}', '${tag}')">${info.abbr}</button>`;
+  }
+
+  container.innerHTML = html;
+}
+
+function setFilter(cat, tag) {
+  filters[cat] = tag;
+  renderFilters(cat);
+  renderCategory(cat);
+}
+
+function renderCategory(cat) {
+  const list = document.getElementById('list-' + cat);
+  const count = document.getElementById('count-' + cat);
+  const hint = list.parentElement.querySelector('.zone-hint');
+
+  // Filter items
+  const activeFilter = filters[cat];
+  const items = data[cat].filter(item => {
+    if (!activeFilter) return true;
+    return item.tags && item.tags.includes(activeFilter);
+  });
+
+  count.textContent = data[cat].length + (activeFilter ? ` (${items.length})` : '');
+  hint.style.display = data[cat].length ? 'none' : 'block';
+
+  list.innerHTML = items.map((item, filteredIdx) => {
+    // Find actual index in unfiltered data
+    const actualIdx = data[cat].indexOf(item);
+    const text = typeof item === 'string' ? item : item.text;
+    const tags = typeof item === 'string' ? [] : (item.tags || []);
+    const { html, hasErrors } = highlightErrors(text);
+
+    const tagBadges = tags.map(t => {
+      const info = TAGS[t];
+      return info ? `<span class="tag-badge" style="background:${info.color}">${info.abbr}</span>` : '';
+    }).join('');
+
+    return `
+      <div class="comment ${hasErrors ? 'issues' : 'clean'}" data-cat="${cat}" data-idx="${actualIdx}">
+        <div class="comment-text" contenteditable="true" data-cat="${cat}" data-idx="${actualIdx}">${html}</div>
+        ${tagBadges ? `<div class="tag-badges">${tagBadges}</div>` : ''}
+        <button class="comment-delete" onclick="deleteComment('${cat}', ${actualIdx})">×</button>
+        <button class="comment-tags" onclick="editTags('${cat}', ${actualIdx}, event)" title="Edit tags">🏷</button>
+      </div>
+    `;
+  }).join('');
+}
+
+function addComment(cat, text, tags = []) {
+  if (!text || !text.trim()) return;
+  const trimmed = text.trim();
+
+  // Avoid exact duplicates in same category
+  const isDupe = data[cat].some(item => {
+    const itemText = typeof item === 'string' ? item : item.text;
+    return itemText === trimmed;
+  });
+  if (isDupe) {
+    toast('Already there');
+    return;
+  }
+
+  data[cat].push({ text: trimmed, tags: tags });
+  markDirty();
+  renderCategory(cat);
+  toast('Added to ' + cat);
+}
+
+function updateComment(cat, idx, newText) {
+  if (!newText.trim()) {
+    deleteComment(cat, idx);
+    return;
+  }
+  const item = data[cat][idx];
+  if (typeof item === 'string') {
+    data[cat][idx] = { text: newText.trim(), tags: [] };
+  } else {
+    item.text = newText.trim();
+  }
+  markDirty();
+  // Don't re-render while editing - just mark dirty
+}
+
+function deleteComment(cat, idx) {
+  data[cat].splice(idx, 1);
+  markDirty();
+  renderCategory(cat);
+}
+
+// Tag picker popup
+let currentPicker = null;
+
+function editTags(cat, idx, event) {
+  event.stopPropagation();
+  closePicker();
+
+  const item = data[cat][idx];
+  const currentTags = typeof item === 'string' ? [] : (item.tags || []);
+
+  const picker = document.createElement('div');
+  picker.className = 'tag-picker';
+  picker.innerHTML = `
+    <div class="tag-picker-title">Select tags:</div>
+    <div class="tag-picker-options">
+      ${Object.entries(TAGS).map(([tag, info]) => `
+        <label class="tag-option">
+          <input type="checkbox" value="${tag}" ${currentTags.includes(tag) ? 'checked' : ''}>
+          <span class="tag-badge" style="background:${info.color}">${info.abbr}</span>
+          ${info.label}
+        </label>
+      `).join('')}
+    </div>
+    <button class="tag-picker-done">Done</button>
+  `;
+
+  // Position near click
+  picker.style.left = Math.min(event.clientX, window.innerWidth - 180) + 'px';
+  picker.style.top = Math.min(event.clientY, window.innerHeight - 200) + 'px';
+
+  document.body.appendChild(picker);
+  currentPicker = picker;
+
+  picker.querySelector('.tag-picker-done').onclick = () => {
+    const selected = Array.from(picker.querySelectorAll('input:checked')).map(cb => cb.value);
+    updateTags(cat, idx, selected);
+    closePicker();
+  };
+
+  // Close on outside click
+  setTimeout(() => {
+    document.addEventListener('click', closePicker);
+  }, 10);
+}
+
+function updateTags(cat, idx, tags) {
+  const item = data[cat][idx];
+  if (typeof item === 'string') {
+    data[cat][idx] = { text: item, tags: tags };
+  } else {
+    item.tags = tags;
+  }
+  markDirty();
+  renderCategory(cat);
+}
+
+function closePicker() {
+  if (currentPicker) {
+    currentPicker.remove();
+    currentPicker = null;
+    document.removeEventListener('click', closePicker);
+  }
+}
+
+function clearAll() {
+  const total = Object.values(data).flat().length;
+  if (!total || !confirm('Clear all ' + total + ' comments? (Remember to Save to make permanent)')) return;
+  data = { framework: [], margin: [], inline: [], summary: [] };
+  markDirty();
+  render();
+  toast('Cleared (unsaved)');
+}
+
+function discardSession() {
+  if (!isDirty) return;
+  if (!confirm('Discard all unsaved changes and reload from last save?')) return;
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    data = JSON.parse(saved);
+    savedData = JSON.parse(saved);
+  } else {
+    data = { framework: [], margin: [], inline: [], summary: [] };
+    savedData = null;
+  }
+  isDirty = false;
+  render();
+  updateDirtyState();
+  toast('Discarded changes');
+}
+
+// Warn before leaving with unsaved changes
+window.addEventListener('beforeunload', e => {
+  if (isDirty) {
+    e.preventDefault();
+    e.returnValue = 'You have unsaved changes.';
+  }
+});
+
+function exportAll() {
+  const total = Object.values(data).flat().length;
+  if (!total) { toast('Nothing to export'); return; }
+
+  const date = new Date().toISOString().split('T')[0];
+  let scm = `;; SPDX-License-Identifier: MIT
+;; Collected Comments - ${date}
+
+(comment-collection
+  (exported "${new Date().toISOString()}")
+`;
+
+  for (const [cat, items] of Object.entries(data)) {
+    if (!items.length) continue;
+    scm += `\n  (category "${cat}"\n`;
+    items.forEach((item, i) => {
+      const text = typeof item === 'string' ? item : item.text;
+      const tags = typeof item === 'string' ? [] : (item.tags || []);
+      const escaped = text.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n');
+      if (tags.length > 0) {
+        scm += `    (comment (text "${escaped}") (tags ${tags.map(t => `"${t}"`).join(' ')}))\n`;
+      } else {
+        scm += `    (comment "${escaped}")\n`;
+      }
+    });
+    scm += '  )\n';
+  }
+  scm += ')\n';
+
+  const blob = new Blob([scm], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'comments-' + date + '.scm';
+  a.click();
+  toast('Exported ' + total);
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 1200);
+}
+
+// === DRAG AND DROP ===
+
+document.querySelectorAll('.zone').forEach(zone => {
+  zone.addEventListener('dragover', e => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+    zone.classList.add('drag-over');
+  });
+
+  zone.addEventListener('dragleave', e => {
+    zone.classList.remove('drag-over');
+  });
+
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.classList.remove('drag-over');
+
+    const text = e.dataTransfer.getData('text/plain');
+    const cat = zone.dataset.cat;
+    if (text && cat) {
+      addComment(cat, text);
+    }
+  });
+});
+
+// === INLINE EDITING ===
+
+document.addEventListener('blur', e => {
+  if (e.target.classList.contains('comment-text')) {
+    const cat = e.target.dataset.cat;
+    const idx = parseInt(e.target.dataset.idx);
+    const newText = e.target.innerText;
+    updateComment(cat, idx, newText);
+    // Re-render to update error highlighting
+    renderCategory(cat);
+  }
+}, true);
+
+// Prevent enter creating new lines - save on enter
+document.addEventListener('keydown', e => {
+  if (e.target.classList.contains('comment-text') && e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    e.target.blur();
+  }
+});
+
+// === INIT ===
+load();
+</script>
+</body>
+</html>

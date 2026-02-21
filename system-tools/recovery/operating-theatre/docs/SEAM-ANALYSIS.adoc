@@ -1,0 +1,983 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+= System Tools Ecosystem: Seam Analysis
+:toc: left
+:toclevels: 3
+:sectnums:
+:icons: font
+:source-highlighter: rouge
+
+== Executive Summary
+
+This document analyzes the integration seams, failure modes, and attack surfaces across the AmbientOps System Tools ecosystem. The ecosystem comprises four interconnected repositories following a hub-satellite architecture:
+
+[cols="1,1,2,1"]
+|===
+|Repository |Type |Purpose |Layer
+
+|system-tools-contracts
+|Hub
+|JSON schemas defining data contracts
+|Foundation
+
+|system-operating-theatre
+|Satellite
+|D-layer orchestration, policy packs, hooks
+|D (Drivers/Deployment)
+
+|system-emergency-room
+|Satellite
+|V-layer emergency trigger and diagnostics
+|V (Verification/Validation)
+
+|system-observatory
+|Satellite
+|Observability metrics and correlation
+|Monitoring
+|===
+
+=== Critical Findings Summary
+
+[cols="1,1,3,1"]
+|===
+|Severity |Count |Category |Priority
+
+|CRITICAL
+|4
+|Race conditions, command injection, principle violations
+|Immediate
+
+|HIGH
+|8
+|Schema validation gaps, enforcement failures
+|Sprint 1
+
+|MEDIUM
+|12
+|Performance, ergonomics, documentation
+|Sprint 2-3
+
+|LOW
+|6
+|Polish, optimization, future-proofing
+|Backlog
+|===
+
+== Architecture Overview
+
+=== Data Flow Topology
+
+[source]
+----
+                    ┌─────────────────────────────────┐
+                    │    system-tools-contracts       │
+                    │         (Hub - Schemas)         │
+                    └───────────────┬─────────────────┘
+                                    │ defines contracts
+           ┌────────────────────────┼────────────────────────┐
+           │                        │                        │
+           ▼                        ▼                        ▼
+┌──────────────────┐    ┌──────────────────┐    ┌──────────────────┐
+│ system-emergency │    │ system-operating │    │      system-observatory       │
+│      -room       │───▶│     -theatre     │───▶│  (Observability) │
+│   (V-layer)      │    │    (D-layer)     │    │                  │
+└──────────────────┘    └──────────────────┘    └──────────────────┘
+        │                        │                        │
+        │ triggers               │ feeds                  │
+        └───────────────────────▶└───────────────────────▶│
+                                                          ▼
+                                              ┌──────────────────┐
+                                              │   Dashboards &   │
+                                              │   Forecasting    │
+                                              └──────────────────┘
+----
+
+=== Integration Seams
+
+[cols="1,1,2"]
+|===
+|Seam ID |Connection |Data Exchanged
+
+|SEAM-01
+|contracts → emergency-room
+|evidence-envelope.schema.json
+
+|SEAM-02
+|contracts → theatre
+|procedure-plan.schema.json, pack-manifest.schema.json
+
+|SEAM-03
+|contracts → system-observatory
+|run-bundle.schema.json, system-weather.schema.json
+
+|SEAM-04
+|emergency-room → theatre
+|Incident triggers procedure execution
+
+|SEAM-05
+|theatre → system-observatory
+|Execution results feed observability
+
+|SEAM-06
+|system-observatory → emergency-room
+|Anomaly detection triggers incidents
+
+|SEAM-07
+|all → contracts
+|Schema validation on all payloads
+|===
+
+== Critical Issues
+
+=== CRIT-001: GenServer Race Condition in System Observatory Correlator
+
+*Location:* `system-observatory/lib/system-observatory/correlator.ex`
+
+*Description:* The correlator uses `handle_cast` for adding correlations but `handle_call` for retrieval. Under high load, correlations may be added after a retrieval has already started its calculation, leading to inconsistent results.
+
+[source,elixir]
+----
+# Current (vulnerable)
+def handle_cast({:add, event}, state) do
+  # Non-blocking add
+end
+
+def handle_call(:get_correlations, _from, state) do
+  # Blocking get - may miss concurrent casts
+end
+----
+
+*Impact:* Data inconsistency in correlation results; missed correlations during high-throughput scenarios.
+
+*Remediation:*
+[source,elixir]
+----
+# Option 1: Make both synchronous
+def handle_call({:add, event}, _from, state) do
+  {:reply, :ok, add_event(state, event)}
+end
+
+# Option 2: Snapshot-based reads
+def handle_call(:get_correlations, _from, state) do
+  snapshot = :ets.tab2list(state.correlation_table)
+  {:reply, calculate_from_snapshot(snapshot), state}
+end
+----
+
+=== CRIT-002: Command Injection in Emergency Room Backup
+
+*Location:* `system-emergency-room/src/backup.v`
+
+*Description:* User-controlled paths are interpolated into shell commands without sanitization.
+
+[source,v]
+----
+// Current (vulnerable)
+fn execute_backup(path string) {
+    os.execute('tar -czf backup.tar.gz ${path}')  // INJECTION VECTOR
+}
+----
+
+*Impact:* Arbitrary command execution via crafted file paths (e.g., `; rm -rf /`).
+
+*Remediation:*
+[source,v]
+----
+// Fixed: Use array-based execution
+fn execute_backup(path string) !BackupResult {
+    // Validate path contains no shell metacharacters
+    if path.contains_any_of([';', '|', '&', '$', '`', '\n']) {
+        return error('Invalid characters in path')
+    }
+
+    // Use exec with argument array, not shell interpolation
+    result := os.execute_with_args(['tar', '-czf', 'backup.tar.gz', path])
+    return result
+}
+----
+
+=== CRIT-003: "Never Source of Truth" Principle Violation
+
+*Location:* `system-observatory/lib/system-observatory/metrics/store.ex`
+
+*Principle from ECOSYSTEM.scm:*
+[source,scheme]
+----
+(what-this-is-not
+  "NEVER source of truth - only observes")
+----
+
+*Violation:* System Observatory stores derived state that other systems query as authoritative:
+
+1. Correlation confidence scores are used to make routing decisions
+2. System weather calculations drive alerting thresholds
+3. No provenance tracking to indicate data is derived
+
+*Impact:* Systems making decisions based on potentially stale or incomplete observational data.
+
+*Remediation:*
+1. Add `derived_at` timestamps to all stored metrics
+2. Add `source_events` array for provenance
+3. Add TTL/staleness indicators
+4. Document clearly that all System Observatory data is advisory
+
+=== CRIT-004: Cross-Schema Reference Chain Unvalidated
+
+*Location:* `system-tools-contracts/schemas/*.json`
+
+*Description:* The evidence-envelope → procedure-plan → receipt chain references are defined but never validated end-to-end:
+
+[source,json]
+----
+// evidence-envelope.schema.json
+{
+  "properties": {
+    "recommended_plan_id": { "type": "string" }  // References procedure-plan
+  }
+}
+
+// procedure-plan.schema.json
+{
+  "properties": {
+    "receipt_ref": { "type": "string" }  // References receipt
+  }
+}
+----
+
+*Impact:* Invalid references pass schema validation but fail at runtime.
+
+*Remediation:*
+[source,typescript]
+----
+// lib/cross-validator.ts
+export function validateCrossReferences(
+  envelope: EvidenceEnvelope,
+  plans: Map<string, ProcedurePlan>,
+  receipts: Map<string, Receipt>
+): ValidationResult {
+  const errors: string[] = [];
+
+  if (envelope.recommended_plan_id && !plans.has(envelope.recommended_plan_id)) {
+    errors.push(`Referenced plan ${envelope.recommended_plan_id} not found`);
+  }
+
+  // ... validate full chain
+  return { valid: errors.length === 0, errors };
+}
+----
+
+== High Severity Issues
+
+=== HIGH-001: Anti-Fearware Rules Without Automated Enforcement
+
+*Location:* `system-operating-theatre/docs/ANTI-FEARWARE-DESIGN.adoc`
+
+*Description:* 40+ anti-fearware rules exist in documentation but zero are enforced:
+
+[source,asciidoc]
+----
+// Rule example from ANTI-FEARWARE-DESIGN.adoc
+"All displayed counts MUST be backed by enumerable evidence"
+
+// Current enforcement: NONE
+----
+
+*Impact:* Anti-fearware principles exist only on paper; implementations can violate them freely.
+
+*Remediation Matrix:*
+[cols="2,2,1"]
+|===
+|Rule Category |Enforcement Mechanism |Priority
+
+|Evidence-backed counts
+|Schema `minItems: 1` on evidence arrays
+|P0
+
+|No fake urgency
+|Workflow lint for urgency keywords
+|P1
+
+|Clear provenance
+|Required `source` field in schemas
+|P0
+
+|No dark patterns
+|UI component library with built-in compliance
+|P2
+|===
+
+=== HIGH-002: Hook Bypass via --no-verify
+
+*Location:* `system-operating-theatre/hooks/*.sh`
+
+*Description:* Git hooks can be bypassed with `--no-verify` flag.
+
+*Impact:* All validation hooks become advisory, not mandatory.
+
+*Remediation:*
+1. Implement CI-side validation that cannot be bypassed
+2. Add webhook-based validation on push
+3. Document that `--no-verify` commits will be rejected by CI
+
+=== HIGH-003: Unbounded Array Sizes in Schemas
+
+*Location:* `system-tools-contracts/schemas/*.json`
+
+*Description:* Arrays lack `maxItems` constraints:
+
+[source,json]
+----
+{
+  "evidence": {
+    "type": "array",
+    "items": { "$ref": "#/definitions/evidence-item" }
+    // NO maxItems - DoS vector
+  }
+}
+----
+
+*Impact:* Denial of service via payload inflation.
+
+*Remediation:*
+[source,json]
+----
+{
+  "evidence": {
+    "type": "array",
+    "items": { "$ref": "#/definitions/evidence-item" },
+    "maxItems": 1000,
+    "minItems": 1
+  }
+}
+----
+
+=== HIGH-004: PII Capture Without Redaction
+
+*Location:* `system-emergency-room/src/capture.v`
+
+*Description:* Diagnostic capture includes environment variables, command history, and logs that may contain sensitive data.
+
+*Impact:* Incident bundles may contain credentials, API keys, or personal information.
+
+*Remediation:*
+[source,v]
+----
+// Add redaction patterns
+const pii_patterns = [
+    r'(?i)(password|passwd|pwd)\s*[=:]\s*\S+',
+    r'(?i)(api[_-]?key|secret|token)\s*[=:]\s*\S+',
+    r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b',
+    r'\b\d{3}-\d{2}-\d{4}\b',  // SSN
+]
+
+fn redact_sensitive(content string) string {
+    mut result := content
+    for pattern in pii_patterns {
+        result = result.replace_regex(pattern, '[REDACTED]')
+    }
+    return result
+}
+----
+
+=== HIGH-005: Idempotency Collision Risk
+
+*Location:* `system-emergency-room/src/incident.v`
+
+*Description:* Incident IDs use second-precision timestamps:
+
+[source,v]
+----
+fn generate_incident_id() string {
+    return 'INC-${time.now().unix}'  // Second precision = collision risk
+}
+----
+
+*Impact:* Multiple incidents in same second get same ID.
+
+*Remediation:*
+[source,v]
+----
+fn generate_incident_id() string {
+    return 'INC-${time.now().unix_nano()}-${rand.uuid_v4()[0..8]}'
+}
+----
+
+=== HIGH-006: Confidence Scoring Inversion
+
+*Location:* `system-observatory/lib/system-observatory/correlator.ex`
+
+*Description:* Confidence scoring logic is inverted - more correlated changes yield *lower* confidence:
+
+[source,elixir]
+----
+# Current (inverted logic)
+def calculate_confidence(changes) do
+  1.0 / length(changes)  # More changes = less confidence???
+end
+----
+
+*Impact:* Correlation results are backwards; high-confidence correlations reported as low.
+
+*Remediation:*
+[source,elixir]
+----
+def calculate_confidence(changes, baseline_rate) do
+  # Confidence should increase with:
+  # - More correlated events
+  # - Temporal proximity
+  # - Causal chain completeness
+  base = min(1.0, length(changes) / baseline_rate)
+  temporal_factor = calculate_temporal_proximity(changes)
+  base * temporal_factor
+end
+----
+
+=== HIGH-007: O(n²) Correlation Calculation
+
+*Location:* `system-observatory/lib/system-observatory/correlator.ex`
+
+*Description:* Every correlation check compares against all historical events.
+
+*Impact:* Performance degrades quadratically with event volume.
+
+*Remediation:*
+1. Add time-window based indexing
+2. Use bloom filters for quick negative lookups
+3. Partition events by correlation key
+
+=== HIGH-008: Path Traversal in Schema Validation
+
+*Location:* `system-tools-contracts/schemas/*.json`
+
+*Description:* Path fields lack traversal guards:
+
+[source,json]
+----
+{
+  "file_path": {
+    "type": "string"
+    // Allows "../../../etc/passwd"
+  }
+}
+----
+
+*Remediation:*
+[source,json]
+----
+{
+  "file_path": {
+    "type": "string",
+    "pattern": "^(?!.*\\.\\.)(?!.*//)[a-zA-Z0-9_./-]+$"
+  }
+}
+----
+
+== Medium Severity Issues
+
+=== MED-001: Missing Error Aggregation Pattern
+
+*Location:* All subsystems
+
+*Description:* Each subsystem handles errors independently with no aggregation pattern for cross-system failures.
+
+*Remediation:* Implement structured error envelope:
+[source,typescript]
+----
+interface SystemError {
+  code: string;           // e.g., "SEAM-04-TIMEOUT"
+  origin: string;         // Originating subsystem
+  chain: SystemError[];   // Upstream errors
+  recoverable: boolean;
+  suggested_action: string;
+}
+----
+
+=== MED-002: No Circuit Breaker Between Subsystems
+
+*Description:* Subsystem failures cascade without circuit breakers.
+
+*Remediation:* Add circuit breaker at each seam:
+[source,elixir]
+----
+defmodule CircuitBreaker do
+  @failure_threshold 5
+  @reset_timeout_ms 30_000
+
+  def call(seam_id, fun) do
+    case get_state(seam_id) do
+      :open -> {:error, :circuit_open}
+      :half_open -> try_and_maybe_close(seam_id, fun)
+      :closed -> try_and_maybe_open(seam_id, fun)
+    end
+  end
+end
+----
+
+=== MED-003: Inconsistent Timestamp Formats
+
+*Description:* Different subsystems use different timestamp formats.
+
+[cols="1,2"]
+|===
+|Subsystem |Format
+
+|contracts
+|ISO 8601 string
+
+|emergency-room
+|Unix timestamp (seconds)
+
+|theatre
+|ISO 8601 string
+
+|system-observatory
+|Elixir DateTime struct
+|===
+
+*Remediation:* Standardize on ISO 8601 with timezone in all schemas and implementations.
+
+=== MED-004: Missing Correlation IDs for Tracing
+
+*Description:* No mechanism to trace a request across all subsystems.
+
+*Remediation:* Add correlation ID header/field:
+[source,json]
+----
+{
+  "x_correlation_id": {
+    "type": "string",
+    "format": "uuid",
+    "description": "Unique ID for tracing across subsystems"
+  }
+}
+----
+
+=== MED-005: Schema Version Drift Risk
+
+*Description:* No mechanism to ensure all subsystems use compatible schema versions.
+
+*Remediation:*
+1. Add schema version to all payloads
+2. Implement compatibility matrix in contracts repo
+3. CI validation of version compatibility
+
+=== MED-006: No Graceful Degradation Paths
+
+*Description:* If System Observatory is down, other systems have no fallback behavior.
+
+*Remediation:* Define degraded operation modes:
+[cols="1,2,2"]
+|===
+|Subsystem Down |Affected |Degraded Behavior
+
+|system-observatory
+|All
+|Queue events locally, continue operation
+
+|theatre
+|emergency-room
+|Store triggers, retry when available
+
+|contracts (validation)
+|All
+|Log warning, allow passthrough with flag
+|===
+
+=== MED-007: Missing Health Check Endpoints
+
+*Description:* No standardized health check pattern.
+
+*Remediation:* Add to contracts:
+[source,json]
+----
+// health-check.schema.json
+{
+  "type": "object",
+  "required": ["status", "subsystem", "timestamp"],
+  "properties": {
+    "status": { "enum": ["healthy", "degraded", "unhealthy"] },
+    "subsystem": { "type": "string" },
+    "dependencies": {
+      "type": "object",
+      "additionalProperties": { "enum": ["up", "down", "unknown"] }
+    }
+  }
+}
+----
+
+=== MED-008: Glob Injection in Shell Scripts
+
+*Location:* `system-emergency-room/scripts/*.sh`
+
+*Description:* Unquoted globs can expand unexpectedly.
+
+*Remediation:*
+[source,bash]
+----
+# Before (vulnerable)
+for file in $DIR/*; do
+
+# After (safe)
+for file in "${DIR}"/*; do
+----
+
+=== MED-009 through MED-012: Documentation Gaps
+
+* MED-009: Missing sequence diagrams for cross-system flows
+* MED-010: No runbook for common failure scenarios
+* MED-011: API documentation incomplete
+* MED-012: No architecture decision records (ADRs)
+
+== Low Severity Issues
+
+=== LOW-001: Inconsistent Naming Conventions
+
+*Description:* Mix of snake_case and camelCase across repos.
+
+=== LOW-002: Missing Telemetry Hooks
+
+*Description:* No instrumentation points for external monitoring.
+
+=== LOW-003: Test Coverage Gaps at Seams
+
+*Description:* Unit tests exist but integration tests between subsystems are missing.
+
+=== LOW-004: No Load Testing Harness
+
+*Description:* No way to test system under realistic load.
+
+=== LOW-005: Missing Chaos Engineering Support
+
+*Description:* No fault injection mechanisms for resilience testing.
+
+=== LOW-006: Log Format Inconsistency
+
+*Description:* Different subsystems use different log formats.
+
+== Remediation Roadmap
+
+=== Immediate (This Week)
+
+[cols="1,2,1"]
+|===
+|ID |Action |Owner
+
+|CRIT-001
+|Fix GenServer race condition
+|System Observatory
+
+|CRIT-002
+|Sanitize path inputs in backup.v
+|Emergency Room
+
+|HIGH-004
+|Add PII redaction to capture
+|Emergency Room
+
+|HIGH-005
+|Fix incident ID generation
+|Emergency Room
+|===
+
+=== Sprint 1 (2 Weeks)
+
+[cols="1,2,1"]
+|===
+|ID |Action |Owner
+
+|CRIT-003
+|Add provenance tracking to System Observatory
+|System Observatory
+
+|CRIT-004
+|Implement cross-schema validator
+|Contracts
+
+|HIGH-001
+|Add schema constraints for anti-fearware
+|Theatre + Contracts
+
+|HIGH-003
+|Add maxItems to all arrays
+|Contracts
+
+|HIGH-006
+|Fix confidence scoring
+|System Observatory
+
+|HIGH-008
+|Add path traversal guards
+|Contracts
+|===
+
+=== Sprint 2 (4 Weeks)
+
+[cols="1,2,1"]
+|===
+|ID |Action |Owner
+
+|HIGH-002
+|CI-based hook enforcement
+|Theatre
+
+|HIGH-007
+|Optimize correlation algorithm
+|System Observatory
+
+|MED-001
+|Implement error envelope
+|All
+
+|MED-002
+|Add circuit breakers
+|All
+
+|MED-003
+|Standardize timestamps
+|All
+
+|MED-004
+|Add correlation IDs
+|Contracts
+|===
+
+=== Sprint 3 (6 Weeks)
+
+[cols="1,2,1"]
+|===
+|ID |Action |Owner
+
+|MED-005
+|Schema version compatibility
+|Contracts
+
+|MED-006
+|Degraded operation modes
+|All
+
+|MED-007
+|Health check endpoints
+|All
+
+|MED-008
+|Fix shell script injection
+|Emergency Room
+
+|MED-009-012
+|Documentation updates
+|All
+|===
+
+=== Backlog
+
+All LOW-* issues plus:
+
+* Integration test suite across all subsystems
+* Load testing harness
+* Chaos engineering framework
+* Monitoring dashboard
+
+== Testing Strategy
+
+=== Unit Tests (Per Subsystem)
+
+Already implemented in v1.0.0 release.
+
+=== Integration Tests (Cross-Seam)
+
+[source,typescript]
+----
+// tests/integration/seam_test.ts
+Deno.test("SEAM-01: evidence-envelope validates against schema", async () => {
+  const envelope = await emergencyRoom.createIncident();
+  const result = await contracts.validate("evidence-envelope", envelope);
+  assertEquals(result.valid, true);
+});
+
+Deno.test("SEAM-04: emergency triggers theatre execution", async () => {
+  const incident = await emergencyRoom.createIncident();
+  const execution = await theatre.handleTrigger(incident);
+  assertEquals(execution.started, true);
+});
+----
+
+=== Contract Tests (Schema Evolution)
+
+[source,typescript]
+----
+// tests/contract/backwards_compat_test.ts
+Deno.test("Schema v1.0 payloads validate against v1.1", async () => {
+  const v1Payload = loadFixture("evidence-envelope-v1.0.json");
+  const v11Schema = loadSchema("evidence-envelope-v1.1.json");
+  const result = validate(v1Payload, v11Schema);
+  assertEquals(result.valid, true);
+});
+----
+
+=== Chaos Tests (Resilience)
+
+[source,typescript]
+----
+// tests/chaos/circuit_breaker_test.ts
+Deno.test("System degrades gracefully when System Observatory unavailable", async () => {
+  await chaos.killService("system-observatory");
+  const incident = await emergencyRoom.createIncident();
+  // Should succeed, queue metrics for later
+  assertEquals(incident.created, true);
+  assertEquals(incident.metrics_queued, true);
+});
+----
+
+== Security Considerations
+
+=== Attack Surface Summary
+
+[cols="1,2,2"]
+|===
+|Vector |Risk |Mitigation
+
+|Path Injection
+|Command execution, file access
+|Input sanitization, path guards
+
+|Payload Inflation
+|DoS via large arrays
+|maxItems constraints
+
+|Schema Bypass
+|Invalid data accepted
+|CI validation, runtime checks
+
+|Hook Bypass
+|Validation skipped
+|CI enforcement, webhooks
+
+|PII Leakage
+|Credentials in logs
+|Redaction patterns
+
+|Timing Attacks
+|ID prediction
+|UUID-based IDs
+|===
+
+=== Security Testing Checklist
+
+* [ ] Fuzz testing on all schema validators
+* [ ] Penetration testing on path handling
+* [ ] SAST scan on all codebases
+* [ ] Dependency vulnerability scan
+* [ ] Secret scanning in CI
+
+== Conclusion
+
+The System Tools ecosystem has a solid architectural foundation with clear separation of concerns. The critical issues identified are fixable within the immediate and Sprint 1 timeframes. Key priorities:
+
+1. **Fix race conditions** in System Observatory correlator
+2. **Sanitize all inputs** in emergency-room
+3. **Enforce anti-fearware rules** via schema constraints
+4. **Add cross-schema validation** for reference chains
+5. **Implement circuit breakers** for resilience
+
+With these remediations, the system will be more dependable, secure, and maintainable.
+
+== Appendix A: Seam Diagram
+
+[source]
+----
+┌─────────────────────────────────────────────────────────────────────────┐
+│                        system-tools-contracts                            │
+│  ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌────────────┐           │
+│  │ evidence-  │ │ procedure- │ │  receipt   │ │ run-bundle │           │
+│  │ envelope   │ │   plan     │ │            │ │            │           │
+│  └─────┬──────┘ └─────┬──────┘ └─────┬──────┘ └─────┬──────┘           │
+│        │SEAM-01       │SEAM-02       │              │SEAM-03           │
+└────────┼──────────────┼──────────────┼──────────────┼───────────────────┘
+         │              │              │              │
+         ▼              ▼              ▼              ▼
+┌────────────────┐ ┌────────────────┐    ┌────────────────────────────────┐
+│system-emergency│ │system-operating│    │            system-observatory               │
+│     -room      │ │    -theatre    │    │  ┌────────────────────────┐   │
+│                │ │                │    │  │    metrics/store.ex    │   │
+│ ┌────────────┐ │ │ ┌────────────┐ │    │  │ (CRIT-001: race cond.) │   │
+│ │ backup.v   │ │ │ │  hooks/    │ │    │  └────────────────────────┘   │
+│ │(CRIT-002)  │ │ │ │(HIGH-002)  │ │    │  ┌────────────────────────┐   │
+│ └────────────┘ │ │ └────────────┘ │    │  │   correlator.ex        │   │
+│ ┌────────────┐ │ │                │    │  │ (HIGH-006,007)         │   │
+│ │ capture.v  │ │ └────────────────┘    │  └────────────────────────┘   │
+│ │(HIGH-004)  │ │         │              │                              │
+│ └────────────┘ │         │SEAM-05       │                              │
+│                │         ▼              │                              │
+│                │─────────────────────────                              │
+│                │     SEAM-04            │                              │
+└────────────────┘─────────────────────────────────────────────────────────
+         │                                               │
+         │                   SEAM-06                     │
+         └───────────────────────────────────────────────┘
+----
+
+== Appendix B: Issue Cross-Reference
+
+[cols="1,1,1,1"]
+|===
+|Issue |Subsystem |File(s) |Related Issues
+
+|CRIT-001
+|system-observatory
+|correlator.ex
+|HIGH-006, HIGH-007
+
+|CRIT-002
+|emergency-room
+|backup.v
+|MED-008
+
+|CRIT-003
+|system-observatory
+|store.ex
+|MED-004
+
+|CRIT-004
+|contracts
+|*.schema.json
+|HIGH-003, HIGH-008
+
+|HIGH-001
+|theatre
+|ANTI-FEARWARE-DESIGN.adoc
+|CRIT-004
+
+|HIGH-002
+|theatre
+|hooks/*.sh
+|—
+
+|HIGH-003
+|contracts
+|*.schema.json
+|CRIT-004
+
+|HIGH-004
+|emergency-room
+|capture.v
+|—
+
+|HIGH-005
+|emergency-room
+|incident.v
+|—
+
+|HIGH-006
+|system-observatory
+|correlator.ex
+|CRIT-001
+
+|HIGH-007
+|system-observatory
+|correlator.ex
+|CRIT-001
+
+|HIGH-008
+|contracts
+|*.schema.json
+|CRIT-004
+|===

@@ -1,0 +1,358 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+= MoSCoW Analysis: AmbientOps Ecosystem
+:toc:
+:toclevels: 3
+:icons: font
+
+Prioritized requirements for the AmbientOps system tools ecosystem.
+
+== Ecosystem Overview
+
+[cols="1,2,1",options="header"]
+|===
+| Component | Purpose | Language
+
+| system-operating-theatre
+| Plan-first operations (scan→plan→apply→undo→receipt)
+| D
+
+| system-observatory
+| Observation and monitoring, metrics correlation
+| Elixir
+
+| system-emergency-room
+| Recovery and crisis response
+| TBD
+
+| system-tools-contracts
+| Shared contracts and specifications
+| V/Nickel
+
+| ambientops-observatory
+| Dashboard and visualization
+| Elixir/Julia
+
+| system-flare
+| Alerting and notifications
+| TBD
+
+| system-freeze-ejector
+| System unfreezing utilities
+| TBD
+|===
+
+== Operating Theatre MoSCoW
+
+=== MUST (v1.0)
+
+[cols="1,3,1",options="header"]
+|===
+| ID | Requirement | Status
+
+| OT-M01
+| scan command collects evidence without changes
+| ✓ Done
+
+| OT-M02
+| plan command generates reviewable action plan
+| ✓ Done
+
+| OT-M03
+| apply command executes approved plan only
+| ✓ Done
+
+| OT-M04
+| undo command rolls back reversible changes
+| ✓ Done
+
+| OT-M05
+| receipt command shows audit trail
+| ✓ Done
+
+| OT-M06
+| Run bundles saved for Observatory
+| ✓ Done
+
+| OT-M07
+| Secure file permissions on cache/run dirs
+| ✓ Done
+
+| OT-M08
+| Input validation on all paths
+| ⚠ Partial
+
+| OT-M09
+| No shell injection vulnerabilities
+| ⚠ Needs review
+
+| OT-M10
+| Build and run on Fedora Kinoite
+| ⏳ Needs toolbox
+|===
+
+=== SHOULD (v1.0)
+
+[cols="1,3,1",options="header"]
+|===
+| ID | Requirement | Status
+
+| OT-S01
+| system pack with optimization steps
+| ✓ Done
+
+| OT-S02
+| cleanup pack with cache removal
+| ✓ Done
+
+| OT-S03
+| repos pack with git sync
+| ✓ Done
+
+| OT-S04
+| Configurable paths (not hardcoded)
+| ✗ Not done
+
+| OT-S05
+| JSON schema versioning
+| ✗ Not done
+
+| OT-S06
+| Comprehensive error handling
+| ⚠ Partial
+
+| OT-S07
+| Man page or --help documentation
+| ✓ Done
+|===
+
+=== COULD (post-v1)
+
+[cols="1,3,1",options="header"]
+|===
+| ID | Requirement | Status
+
+| OT-C01
+| workflows pack for GitHub analysis
+| ✗ Not started
+
+| OT-C02
+| SQLite storage instead of JSON
+| ✗ Not started
+
+| OT-C03
+| Run bundle encryption
+| ✗ Not started
+
+| OT-C04
+| Ward integration (live status)
+| ✗ Not started
+
+| OT-C05
+| Emergency Room handoff
+| ✗ Not started
+
+| OT-C06
+| PSA alerting integration
+| ✗ Not started
+|===
+
+== Observatory MoSCoW
+
+=== MUST (v1.0)
+
+[cols="1,3,1",options="header"]
+|===
+| ID | Requirement | Status
+
+| SO-M01
+| Ingest run bundles from Operating Theatre
+| ⏳ Spec only
+
+| SO-M02
+| Store time-series metrics
+| ⏳ Spec only
+
+| SO-M03
+| Basic dashboard UI
+| ⏳ Spec only
+
+| SO-M04
+| Never source of truth (read-only stance)
+| ✓ Documented
+|===
+
+=== SHOULD (v1.0)
+
+[cols="1,3,1",options="header"]
+|===
+| ID | Requirement | Status
+
+| SO-S01
+| Correlate changes with anomalies
+| ⏳ Spec only
+
+| SO-S02
+| Generate recommendations for Theatre
+| ⏳ Spec only
+
+| SO-S03
+| Change timeline visualization
+| ⏳ Spec only
+|===
+
+== Emergency Room MoSCoW
+
+=== MUST (v1.0)
+
+[cols="1,3,1",options="header"]
+|===
+| ID | Requirement | Status
+
+| ER-M01
+| Receive crisis handoff from PSA
+| ⏳ Spec only
+
+| ER-M02
+| Guided recovery workflows
+| ⏳ Spec only
+
+| ER-M03
+| Undo token consumption from Theatre
+| ⏳ Spec only
+
+| ER-M04
+| Recovery receipt generation
+| ⏳ Spec only
+|===
+
+== Ecosystem Integration MoSCoW
+
+=== MUST (v1.0)
+
+[cols="1,3,1",options="header"]
+|===
+| ID | Requirement | Status
+
+| ECO-M01
+| Run bundle format specification
+| ⚠ Implicit only
+
+| ECO-M02
+| Theatre → Observatory bundle export
+| ✓ Done
+
+| ECO-M03
+| Shared contracts in system-tools-contracts
+| ⏳ Not done
+
+| ECO-M04
+| Consistent SPDX licensing across repos
+| ✓ Done
+|===
+
+=== SHOULD (v1.0)
+
+[cols="1,3,1",options="header"]
+|===
+| ID | Requirement | Status
+
+| ECO-S01
+| Observatory → Theatre recommendations
+| ✗ Not done
+
+| ECO-S02
+| Theatre → Emergency Room handoff
+| ✗ Not done
+
+| ECO-S03
+| Ward displays real-time Theatre status
+| ✗ Not done
+
+| ECO-S04
+| PSA receives Theatre receipts
+| ✗ Not done
+|===
+
+=== COULD (post-v1)
+
+[cols="1,3,1",options="header"]
+|===
+| ID | Requirement | Status
+
+| ECO-C01
+| Distributed tracing across components
+| ✗ Not done
+
+| ECO-C02
+| Unified CLI for ecosystem
+| ✗ Not done
+
+| ECO-C03
+| Fleet management (multiple machines)
+| ✗ Not done
+|===
+
+== Summary by Component
+
+=== Operating Theatre
+
+[cols="1,1,1",options="header"]
+|===
+| Priority | Total | Complete
+
+| MUST | 10 | 7 (70%)
+| SHOULD | 7 | 4 (57%)
+| COULD | 6 | 0 (0%)
+|===
+
+=== Observatory
+
+[cols="1,1,1",options="header"]
+|===
+| Priority | Total | Complete
+
+| MUST | 4 | 1 (25%)
+| SHOULD | 3 | 0 (0%)
+|===
+
+=== Emergency Room
+
+[cols="1,1,1",options="header"]
+|===
+| Priority | Total | Complete
+
+| MUST | 4 | 0 (0%)
+|===
+
+=== Ecosystem Integration
+
+[cols="1,1,1",options="header"]
+|===
+| Priority | Total | Complete
+
+| MUST | 4 | 2 (50%)
+| SHOULD | 4 | 0 (0%)
+| COULD | 3 | 0 (0%)
+|===
+
+== Next Steps
+
+=== Immediate (Operating Theatre v1)
+
+1. Fix OT-M08: Input validation on paths
+2. Fix OT-M09: Security review of shell commands
+3. Fix OT-M10: Verify build in toolbox
+4. Complete OT-S04: Configuration file support
+5. Complete OT-S05: JSON schema versioning
+
+=== Short-term (Ecosystem v0.5)
+
+1. Complete ECO-M03: Formalize contracts
+2. Begin SO-M01: Observatory ingestion
+3. Document run bundle format (ECO-M01)
+
+=== Medium-term (Ecosystem v1)
+
+1. Observatory implementation
+2. Emergency Room implementation
+3. All ecosystem integrations

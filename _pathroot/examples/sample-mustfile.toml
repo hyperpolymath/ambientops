@@ -1,0 +1,35 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Sample Mustfile for demonstrating mustorch orchestrator
+
+[project]
+name = "pathroot-demo"
+version = "0.1.0"
+description = "Demonstration of Mustfile orchestration"
+
+[requirements]
+must_have = ["deno.json", "rescript.json"]
+
+[tasks.validate]
+description = "Validate _pathroot structure"
+run = [
+    "deno run --allow-read --allow-env src/Validate.mjs"
+]
+
+[tasks.build-rescript]
+description = "Build ReScript modules"
+run = [
+    "rescript build"
+]
+
+[tasks.test]
+description = "Run validation tests"
+depends_on = ["build-rescript"]
+run = [
+    "deno test --allow-read --allow-write --allow-env"
+]
+
+[tasks.info]
+description = "Show platform information"
+run = [
+    "deno run --allow-read --allow-env src/nicaug/NicaugCLI.mjs info"
+]

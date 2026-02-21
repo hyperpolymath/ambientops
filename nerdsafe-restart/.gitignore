@@ -1,0 +1,12 @@
+# Build artifacts
+bin/
+src/ada/obj/
+
+# Editor backups
+*~
+*.swp
+*.bak
+
+# OS files
+.DS_Store
+Thumbs.db

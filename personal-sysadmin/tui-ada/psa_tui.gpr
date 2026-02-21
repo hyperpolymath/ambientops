@@ -1,0 +1,41 @@
+-- SPDX-License-Identifier: AGPL-3.0-or-later
+-- Personal Sysadmin TUI - Ada project file
+
+project PSA_TUI is
+
+   for Source_Dirs use ("src");
+   for Object_Dir use "obj";
+   for Exec_Dir use "bin";
+   for Main use ("psa_tui.adb");
+
+   type Build_Type is ("debug", "release");
+   Build : Build_Type := external ("BUILD", "debug");
+
+   package Compiler is
+      case Build is
+         when "debug" =>
+            for Default_Switches ("Ada") use
+              ("-g",           -- Debug info
+               "-gnatwa",      -- All warnings
+               "-gnatVa",      -- All validity checks
+               "-gnata",       -- Assertions enabled
+               "-gnatQ",       -- Don't quit on errors
+               "-gnatf");      -- Full error output
+         when "release" =>
+            for Default_Switches ("Ada") use
+              ("-O3",          -- Maximum optimization
+               "-gnatp",       -- Suppress all checks (production)
+               "-gnatwa",      -- All warnings
+               "-gnatn");      -- Inline subprograms
+      end case;
+   end Compiler;
+
+   package Binder is
+      for Default_Switches ("Ada") use ("-E"); -- Store traceback
+   end Binder;
+
+   package Linker is
+      for Default_Switches ("Ada") use ("-lncurses"); -- Link ncurses for TUI
+   end Linker;
+
+end PSA_TUI;

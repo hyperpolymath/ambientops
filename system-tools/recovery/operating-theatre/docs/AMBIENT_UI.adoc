@@ -1,0 +1,396 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+= Ambient UI Design
+:toc:
+:toclevels: 3
+:icons: font
+:source-highlighter: rouge
+
+This document defines the ambient UI layer — the "Ward" component that provides glanceable, non-intrusive system health awareness.
+
+== Philosophy
+
+The ambient UI embodies "System Weather" — always-available awareness without demands for attention.
+
+=== Design Principles
+
+[cols="1,2",options="header"]
+|===
+| Principle | Implementation
+
+| Glanceable
+| State visible in <1 second
+
+| Non-intrusive
+| Never interrupts work unprompted
+
+| Calm
+| No flashing, no urgency theater
+
+| Honest
+| States reflect reality, not marketing
+
+| Optional
+| Can be hidden without losing function
+|===
+
+=== What Ambient UI is NOT
+
+* Not a notification spam machine
+* Not a sales funnel
+* Not a dashboard requiring attention
+* Not a badge collector
+* Not an anxiety generator
+
+== System Weather Model
+
+The ambient UI communicates through a simple weather metaphor:
+
+[cols="1,2,2,1",options="header"]
+|===
+| State | Meaning | Visual | Action
+
+| **Calm**
+| All good, nothing to do
+| Sun / Clear
+| None required
+
+| **Watch**
+| Something to be aware of
+| Cloud / Overcast
+| Review when convenient
+
+| **Act**
+| Recommended action available
+| Storm / Rain
+| Address soon
+|===
+
+=== State Transitions
+
+[source]
+----
+    ┌───────────────────────────────────────────┐
+    │                                           │
+    │   ┌──────┐                                │
+    │   │ Calm │ ◄────────────────────┐         │
+    │   └──┬───┘                      │         │
+    │      │ Issue detected           │ Resolved│
+    │      ▼                          │         │
+    │   ┌───────┐                     │         │
+    │   │ Watch │ ◄───────────┐       │         │
+    │   └──┬────┘             │       │         │
+    │      │ Threshold crossed│Drops  │         │
+    │      ▼                  │below  │         │
+    │   ┌─────┐               │       │         │
+    │   │ Act │ ──────────────┴───────┘         │
+    │   └─────┘                                 │
+    │                                           │
+    └───────────────────────────────────────────┘
+----
+
+== Visual Design
+
+=== Indicator States
+
+==== Calm (Default)
+
+[source]
+----
+ ┌─────┐
+ │  ☀  │  Subtle, muted color
+ └─────┘  No badge, no animation
+          Tooltip: "System health: Good"
+----
+
+* Color: Muted blue or green
+* Animation: None
+* Badge: None
+* Tooltip: Brief positive status
+
+==== Watch
+
+[source]
+----
+ ┌─────┐
+ │  ☁  │  Slightly more prominent
+ └─────┘  Optional small badge
+          Tooltip: "1 item to review"
+----
+
+* Color: Muted amber
+* Animation: None (no pulsing!)
+* Badge: Optional count (small, subtle)
+* Tooltip: What to be aware of
+
+==== Act
+
+[source]
+----
+ ┌─────┐
+ │  🌧  │  More visible, but still calm
+ └─────┘  Badge with count
+          Tooltip: "2 recommended actions"
+----
+
+* Color: Muted orange or coral
+* Animation: Subtle glow (not flashing)
+* Badge: Action count
+* Tooltip: Specific recommended actions
+
+=== What We Avoid
+
+* Red as primary color (anxiety-inducing)
+* Flashing or pulsing animations
+* Exclamation marks in badges
+* Numbers larger than reality
+* Countdown timers
+* Sound alerts by default
+
+== Interaction Design
+
+=== Click/Tap: Popover
+
+Single click opens a compact popover:
+
+[source]
+----
+┌────────────────────────────────────────┐
+│ System Health: Good                    │
+├────────────────────────────────────────┤
+│ ● Disk: 47GB free (53%)      [Good]    │
+│ ● Memory: 8GB / 16GB         [Good]    │
+│ ● Updates: Current           [Good]    │
+├────────────────────────────────────────┤
+│ Last scan: 2 hours ago                 │
+│                                        │
+│ [Quick Scan]              [Open Dashboard]│
+└────────────────────────────────────────┘
+----
+
+==== Popover Contents
+
+. **Headline**: Overall state (1 line)
+. **Key metrics**: 3-4 most relevant (with state indicators)
+. **Last scan time**: When data was collected
+. **Quick actions**: 1-2 primary actions
+
+=== Double-Click: Dashboard
+
+Opens the full Operating Theatre dashboard.
+
+=== Right-Click: Context Menu
+
+[source]
+----
+┌──────────────────────────┐
+│ Quick Scan               │
+│ Open Dashboard           │
+│ ─────────────────────────│
+│ Pause Notifications      │
+│ Settings                 │
+│ ─────────────────────────│
+│ About                    │
+│ Quit                     │
+└──────────────────────────┘
+----
+
+== Notification Policy
+
+=== When to Notify
+
+Notifications are exceptional, not routine.
+
+[cols="1,2,1",options="header"]
+|===
+| Trigger | Notification | Type
+
+| Disk critically low (<5%)
+| "Disk almost full"
+| Toast
+
+| Security update critical
+| "Security update available"
+| Toast
+
+| Scan completed (user-initiated)
+| "Scan complete"
+| Badge only
+
+| Background scan complete
+| None
+| Badge update only
+
+| State change Calm→Watch
+| None
+| Icon change only
+
+| State change Watch→Act
+| "1 item needs attention" (optional)
+| Toast (if enabled)
+|===
+
+=== When NOT to Notify
+
+* Routine scan completions
+* Minor state changes
+* "Good news" notifications
+* Marketing or upgrade prompts
+* Anything that could be shown in the popover instead
+
+=== Notification Settings
+
+Users control notification behavior:
+
+[source,json]
+----
+{
+  "notifications": {
+    "enabled": true,
+    "critical_only": false,
+    "quiet_hours": {
+      "enabled": true,
+      "start": "22:00",
+      "end": "08:00"
+    },
+    "cooldown_minutes": 60,
+    "sound": false
+  }
+}
+----
+
+== Data Flow
+
+=== Sources
+
+The ambient UI aggregates data from:
+
+. **System Observatory**: Metrics, trends, forecasts
+. **Operating Theatre**: Last scan results
+. **A&E**: Panic-safe intake status
+. **System APIs**: Live metrics (memory, disk)
+
+=== Update Frequency
+
+[cols="1,2,2",options="header"]
+|===
+| Data Type | Update Interval | Source
+
+| Live metrics
+| 30-60 seconds
+| Direct API calls
+
+| Scan results
+| On completion
+| Operating Theatre
+
+| Trends/forecasts
+| 5-15 minutes
+| System Observatory
+
+| State calculation
+| On data change
+| Local aggregation
+|===
+
+=== Payload Format
+
+See `system-tools-contracts/schemas/ambient-payload.schema.json` and `system-tools-contracts/schemas/system-weather.schema.json`.
+
+== Platform Integration
+
+=== Windows
+
+* System tray icon
+* Native toast notifications
+* Jump list integration
+* Startup registration (optional)
+
+=== macOS
+
+* Menu bar icon
+* Notification Center integration
+* Launch Agent registration
+
+=== Linux
+
+* System tray (various implementations)
+* Desktop notifications (freedesktop)
+* XDG autostart
+
+== Accessibility
+
+=== Screen Readers
+
+* State announced on focus
+* Popover fully navigable
+* Meaningful alt text for icons
+
+=== Color Blindness
+
+* States distinguishable by shape, not just color
+* High contrast mode support
+* Badge patterns in addition to colors
+
+=== Motion Sensitivity
+
+* All animations respect `prefers-reduced-motion`
+* No essential information conveyed only through animation
+
+== Anti-Fearware Compliance
+
+=== Forbidden Elements
+
+* Flashing red icons
+* Bouncing or shaking animations
+* Exclamation marks in normal states
+* Numbers that grow without user action
+* "CRITICAL" labels for non-critical items
+* Any form of countdown
+* Sounds for non-critical events
+
+=== Required Elements
+
+* Calm default state
+* Clear, honest state descriptions
+* User control over notifications
+* Ability to completely hide indicator
+* Respect for system quiet hours
+
+== Implementation
+
+=== Technology
+
+* **Cross-platform core**: ReScript + Deno
+* **Native bindings**: Platform-specific tray APIs
+* **Data layer**: Receives ambient-payload via IPC
+
+=== API
+
+[source,typescript]
+----
+interface AmbientUI {
+  // State management
+  setState(state: "calm" | "watch" | "act"): void;
+  updatePayload(payload: AmbientPayload): void;
+
+  // User interaction
+  onPopoverOpen(callback: () => void): void;
+  onDashboardOpen(callback: () => void): void;
+  onQuickAction(action: string, callback: () => void): void;
+
+  // Notifications
+  showNotification(notification: Notification): void;
+  clearNotifications(): void;
+
+  // Visibility
+  show(): void;
+  hide(): void;
+  isVisible(): boolean;
+}
+----
+
+== Related Documents
+
+* link:ANTI-FEARWARE.adoc[Anti-Fearware Principles]
+* `system-tools-contracts/schemas/ambient-payload.schema.json`
+* `system-tools-contracts/schemas/system-weather.schema.json`

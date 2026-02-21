@@ -1,0 +1,18 @@
+name = "symlink_manager"
+description = "Cross-platform symbolic link management for Ada"
+version = "0.1.0"
+authors = ["Hyper Polymath"]
+maintainers = ["Hyper Polymath <hyperpolymath@example.com>"]
+maintainers-logins = ["hyperpolymath"]
+licenses = "PMPL-1.0-or-later"
+website = "https://github.com/hyperpolymath/ada-symlink-manager"
+tags = ["filesystem", "symlink", "symbolic-link", "cross-platform", "utilities"]
+
+[gpr-externals]
+SYMLINK_MANAGER_BUILD_MODE = ["release", "debug"]
+
+[gpr-set-externals]
+SYMLINK_MANAGER_BUILD_MODE = "release"
+
+[[depends-on]]
+gnat = ">=12"

@@ -1,0 +1,95 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+= Immutable Linux Auditor — Roadmap
+:toc: macro
+:toclevels: 2
+:icons: font
+
+[.lead]
+*Status: Awaiting Project Specification*
+
+toc::[]
+
+== Current Phase
+
+=== Phase 0: Infrastructure [COMPLETE]
+
+[cols="1,1,3",options="header"]
+|===
+| Item | Status | Notes
+
+| Repository creation
+| [x] Done
+| GitHub primary
+
+| Security policy
+| [x] Done
+| `SECURITY.md`
+
+| Multi-forge mirroring
+| [x] Done
+| GitLab, Codeberg, Bitbucket
+
+| Instant sync automation
+| [x] Done
+| Dispatch-triggered propagation
+
+| Development standards
+| [x] Done
+| Hyperpolymath language policy
+|===
+
+== Planned Phases
+
+____
+The following phases are tentative placeholders. Detailed specification to be uploaded.
+____
+
+=== Phase 1: Specification
+
+* [ ] Upload project specification
+* [ ] Define target immutable distributions
+** NixOS
+** Guix System
+** Fedora Silverblue/Kinoite
+** VanillaOS
+** Others TBD
+* [ ] Define audit scope and capabilities
+* [ ] Design architecture document
+
+=== Phase 2: Core Implementation
+
+* [ ] Project scaffolding (Rust/Cargo or as specified)
+* [ ] Core audit engine
+* [ ] Configuration parser(s)
+* [ ] Initial audit rules
+
+=== Phase 3: Distribution Support
+
+* [ ] NixOS module/configuration auditing
+* [ ] Guix system declaration auditing
+* [ ] OSTree-based system support
+* [ ] Flatpak/container layer analysis
+
+=== Phase 4: Reporting & Integration
+
+* [ ] Report generation (multiple formats)
+* [ ] CI/CD integration
+* [ ] Policy-as-code support
+
+=== Phase 5: Release
+
+* [ ] Documentation
+* [ ] Package distribution (Guix, Nix, crates.io)
+* [ ] v1.0.0 release
+
+== Timeline
+
+No timeline estimates provided. Development proceeds based on specification and contributor availability.
+
+== Contributing
+
+Contribution guidelines will be established after specification upload.
+
+== Contact
+
+See repository maintainers via `git log` or CODEOWNERS.

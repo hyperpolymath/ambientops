@@ -1,0 +1,36 @@
+= Panoptes - Citation Guide
+:toc:
+
+== BibTeX
+
+[source,bibtex]
+----
+@software{panoptes_2025,
+  author = {Polymath, Hyper},
+  title = {Panoptes},
+  year = {2025},
+  url = {https://github.com/hyperpolymath/Panoptes},
+  license = {AGPL-3.0-or-later}
+}
+----
+
+== Harvard Style
+
+Polymath, H. (2025) _Panoptes_ [Computer software]. Available at: https://github.com/hyperpolymath/Panoptes
+
+== OSCOLA
+
+Hyper Polymath, 'Panoptes' (2025) <https://github.com/hyperpolymath/Panoptes>
+
+== MLA
+
+Polymath, Hyper. "Panoptes." 2025, github.com/hyperpolymath/Panoptes.
+
+== APA 7
+
+Polymath, H. (2025). _Panoptes_ [Computer software]. GitHub. https://github.com/hyperpolymath/Panoptes
+
+== See Also
+
+* link:../CITATION.cff[CITATION.cff]
+* link:../codemeta.json[codemeta.json]

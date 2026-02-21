@@ -1,0 +1,163 @@
+= Ada Path Environment
+image:https://img.shields.io/badge/License-MPL_2.0-blue.svg[MPL-2.0-or-later,link="https://opensource.org/licenses/MPL-2.0"]
+
+
+:author: Hyper Polymath
+:toc:
+:source-highlighter: rouge
+
+Cross-platform PATH environment variable management library for Ada.
+
+== Features
+
+* Parse PATH into individual entries
+* Add/remove PATH entries with validation
+* Auto-detect Windows (`;`) vs POSIX (`:`) separator
+* Validate directory existence before adding
+* Find executables in PATH
+* Remove invalid/duplicate entries
+* JSON serialization for results
+
+== Installation
+
+=== Using Alire
+
+[source,bash]
+----
+alr with path_environment
+----
+
+=== Manual
+
+Add to your GPR project:
+
+[source,ada]
+----
+with "path_environment.gpr";
+----
+
+== Usage
+
+[source,ada]
+----
+with Path_Environment;
+with Ada.Text_IO;
+
+procedure Example is
+   use Path_Environment;
+   use Ada.Text_IO;
+begin
+   --  Check current PATH status
+   Put_Line ("Total entries: " & Natural'Image (Path_Entry_Count));
+   Put_Line ("Valid entries: " & Natural'Image (Valid_Entry_Count));
+   Put_Line (Path_Summary_JSON);
+
+   --  Add a directory to PATH
+   declare
+      Result : constant Path_Result := Add_To_Path ("/opt/myapp/bin", Prepend);
+   begin
+      if Result.Success then
+         Put_Line ("Added successfully");
+      else
+         Put_Line ("Error: " & To_String (Result.Message));
+      end if;
+   end;
+
+   --  Find an executable
+   declare
+      Git_Path : constant String := Find_Executable ("git");
+   begin
+      if Git_Path /= "" then
+         Put_Line ("Found git at: " & Git_Path);
+      else
+         Put_Line ("git not found in PATH");
+      end if;
+   end;
+
+   --  Check if executable exists
+   if Executable_Exists ("cargo") then
+      Put_Line ("Rust toolchain is available");
+   end if;
+
+   --  Clean up invalid entries
+   declare
+      Result : constant Path_Result := Clean_Invalid_Entries;
+   begin
+      Put_Line (To_String (Result.Message));
+   end;
+
+   --  List all entries with validity
+   declare
+      Entries : constant Path_Entry_Vectors.Vector := Get_Path_Entries_With_Validity;
+   begin
+      for E of Entries loop
+         Put_Line ((if E.Is_Valid then "[OK] " else "[!!] ") & To_String (E.Path));
+      end loop;
+   end;
+end Example;
+----
+
+== API Reference
+
+=== Types
+
+[source,ada]
+----
+type Add_Position is (Prepend, Append);
+
+type Path_Entry is record
+   Path     : Unbounded_String;
+   Is_Valid : Boolean;  --  True if directory exists
+end record;
+
+type Path_Result is record
+   Success  : Boolean;
+   Message  : Unbounded_String;
+   New_Path : Unbounded_String;
+end record;
+----
+
+=== Functions
+
+|===
+| Function | Description
+
+| `Path_Separator` | Get platform path separator (`;` or `:`)
+| `Is_Windows` | Check if running on Windows
+| `Get_Path_String` | Get raw PATH string
+| `Get_Path_Entries` | Get PATH as vector of strings
+| `Get_Path_Entries_With_Validity` | Get PATH with validity flags
+| `Path_Contains` | Check if PATH contains entry
+| `Is_Valid_Path_Entry` | Check if path is valid directory
+| `Path_Entry_Count` | Count total PATH entries
+| `Valid_Entry_Count` | Count valid PATH entries
+| `Add_To_Path` | Add entry to PATH
+| `Remove_From_Path` | Remove entry from PATH
+| `Clean_Invalid_Entries` | Remove non-existent directories
+| `Remove_Duplicates` | Remove duplicate entries
+| `Find_Executable` | Find executable in PATH
+| `Executable_Exists` | Check if executable exists
+| `Result_To_JSON` | Convert result to JSON
+| `Path_Summary_JSON` | Get PATH summary as JSON
+|===
+
+== Platform Notes
+
+=== Windows
+
+* Uses `;` as path separator
+* Searches for executables with `.exe`, `.cmd`, `.bat`, `.com` extensions
+* Detects Windows via `WINDIR` or `SystemRoot` environment variables
+
+=== POSIX (Linux, macOS, etc.)
+
+* Uses `:` as path separator
+* Checks executable permission bit for `Find_Executable`
+
+== License
+
+PMPL-1.0-or-later
+
+== Contributing
+
+Contributions welcome! Please submit pull requests to the GitHub repository.

@@ -1,0 +1,158 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/hyperpolymath/system-tools-contracts/schemas/system-weather.schema.json",
+  "title": "System Weather Payload",
+  "description": "Payload for the Ward (ambient) UI showing system health state: Calm/Watch/Act with explanations and notification hints.",
+  "type": "object",
+  "required": ["version", "timestamp", "state", "summary"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "state": {
+      "type": "string",
+      "enum": ["calm", "watch", "act"],
+      "description": "calm=all good, watch=something to monitor, act=action recommended"
+    },
+    "summary": {
+      "type": "string",
+      "description": "Brief human-readable explanation (1-2 sentences)"
+    },
+    "details": {
+      "type": "string",
+      "description": "Longer explanation if user wants more info"
+    },
+    "categories": {
+      "type": "object",
+      "description": "Per-category health status",
+      "additionalProperties": {
+        "$ref": "#/$defs/category_status"
+      }
+    },
+    "evidence_pointers": {
+      "type": "array",
+      "description": "References to supporting evidence",
+      "maxItems": 50,
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["envelope", "finding", "metric", "log"]
+          },
+          "ref": { "type": "string" },
+          "label": { "type": "string" }
+        }
+      }
+    },
+    "notifications": {
+      "type": "object",
+      "description": "Notification/cooldown hints for Ward",
+      "properties": {
+        "should_notify": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether Ward should show a notification"
+        },
+        "notification_type": {
+          "type": "string",
+          "enum": ["silent", "badge", "toast", "alert"],
+          "default": "silent"
+        },
+        "cooldown_until": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Don't notify again until this time"
+        },
+        "snooze_options": {
+          "type": "array",
+          "maxItems": 5,
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": { "type": "string", "maxLength": 64 },
+              "duration_seconds": { "type": "integer", "minimum": 0 }
+            }
+          }
+        }
+      }
+    },
+    "actions": {
+      "type": "array",
+      "description": "Suggested actions user can take",
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "properties": {
+          "action_id": { "type": "string" },
+          "label": { "type": "string" },
+          "description": { "type": "string" },
+          "priority": {
+            "type": "string",
+            "enum": ["low", "medium", "high"]
+          },
+          "handler": {
+            "type": "string",
+            "enum": ["open_theatre", "open_a_and_e", "open_psa", "open_settings", "dismiss", "snooze", "custom"]
+          },
+          "parameters": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    "trends": {
+      "type": "object",
+      "description": "Trend indicators from System Observatory",
+      "properties": {
+        "disk_usage": { "$ref": "#/$defs/trend" },
+        "memory_pressure": { "$ref": "#/$defs/trend" },
+        "cpu_load": { "$ref": "#/$defs/trend" },
+        "overall": { "$ref": "#/$defs/trend" }
+      }
+    },
+    "source": {
+      "type": "object",
+      "description": "Where this weather data came from",
+      "properties": {
+        "tool": { "type": "string" },
+        "last_scan": { "type": "string", "format": "date-time" },
+        "next_scan": { "type": "string", "format": "date-time" },
+        "scan_profile": { "type": "string" }
+      }
+    }
+  },
+  "$defs": {
+    "category_status": {
+      "type": "object",
+      "properties": {
+        "state": {
+          "type": "string",
+          "enum": ["calm", "watch", "act"]
+        },
+        "summary": { "type": "string" },
+        "metric_value": { "type": ["number", "string"] },
+        "metric_unit": { "type": "string" },
+        "threshold_warning": { "type": ["number", "string"] },
+        "threshold_critical": { "type": ["number", "string"] }
+      }
+    },
+    "trend": {
+      "type": "object",
+      "properties": {
+        "direction": {
+          "type": "string",
+          "enum": ["improving", "stable", "degrading"]
+        },
+        "rate": { "type": "string" },
+        "forecast": { "type": "string" }
+      }
+    }
+  }
+}

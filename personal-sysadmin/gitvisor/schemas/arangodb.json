@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "git-hud ArangoDB Schema",
+  "description": "Schema for git-hud graph database",
+  
+  "collections": {
+    "repos": {
+      "type": "document",
+      "schema": {
+        "type": "object",
+        "required": ["_key", "forge", "owner", "name"],
+        "properties": {
+          "_key": { "type": "string", "pattern": "^[a-z]+/[a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+$" },
+          "forge": { "enum": ["github", "gitlab", "bitbucket", "codeberg", "sourcehut", "gitea"] },
+          "owner": { "type": "string" },
+          "name": { "type": "string" },
+          "languages": { "type": "array", "items": { "type": "string" } },
+          "health_score": { "type": "integer", "minimum": 0, "maximum": 100 },
+          "last_scan": { "type": "string", "format": "date-time" },
+          "issues": { "type": "array", "items": { "type": "string" } },
+          "rules_applied": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    
+    "rules": {
+      "type": "document",
+      "schema": {
+        "type": "object",
+        "required": ["_key", "name", "type", "logtalk"],
+        "properties": {
+          "_key": { "type": "string", "pattern": "^r[0-9]+$" },
+          "name": { "type": "string" },
+          "type": { "enum": ["preventive", "curative", "diagnostic"] },
+          "priority": { "enum": ["critical", "high", "medium", "low"] },
+          "logtalk": { "type": "string" },
+          "origin": { "enum": ["manual", "neural_distillation", "imported"] },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+          "applied_count": { "type": "integer", "minimum": 0 },
+          "success_rate": { "type": "number", "minimum": 0, "maximum": 1 }
+        }
+      }
+    },
+    
+    "patterns": {
+      "type": "document",
+      "schema": {
+        "type": "object",
+        "required": ["_key", "description", "detection"],
+        "properties": {
+          "_key": { "type": "string" },
+          "description": { "type": "string" },
+          "detection": { "type": "string" },
+          "frequency": { "type": "integer", "minimum": 0 },
+          "distilled_rules": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    
+    "fixes": {
+      "type": "document",
+      "schema": {
+        "type": "object",
+        "required": ["_key", "repo", "rule", "action", "timestamp", "result"],
+        "properties": {
+          "_key": { "type": "string" },
+          "repo": { "type": "string" },
+          "rule": { "type": "string" },
+          "action": { "enum": ["inject_file", "modify_file", "delete_file", "create_pr", "add_hook"] },
+          "file": { "type": "string" },
+          "timestamp": { "type": "string", "format": "date-time" },
+          "result": { "enum": ["success", "failure", "pending"] }
+        }
+      }
+    }
+  },
+  
+  "edge_collections": {
+    "repo_depends_on": {
+      "from": ["repos"],
+      "to": ["repos"]
+    },
+    "rule_fixes": {
+      "from": ["rules"],
+      "to": ["patterns"]
+    },
+    "derived_from": {
+      "from": ["rules"],
+      "to": ["rules"]
+    }
+  },
+  
+  "graphs": {
+    "git-hud_graph": {
+      "edge_definitions": [
+        { "collection": "repo_depends_on", "from": ["repos"], "to": ["repos"] },
+        { "collection": "rule_fixes", "from": ["rules"], "to": ["patterns"] },
+        { "collection": "derived_from", "from": ["rules"], "to": ["rules"] }
+      ]
+    }
+  }
+}

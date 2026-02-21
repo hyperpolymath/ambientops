@@ -1,0 +1,35 @@
+name = "nano_aider"
+description = "Ada TUI for nano/micro Editor Configuration - Discover and manage hidden options"
+version = "0.1.0"
+
+authors = ["Jonathan D.A. Jewell"]
+maintainers = ["Jonathan D.A. Jewell <jonathan.jewell@gmail.com>"]
+maintainers-logins = ["hyperpolymath"]
+
+licenses = "MIT OR AGPL-3.0-or-later"
+website = "https://github.com/hyperpolymath/nano-aider"
+tags = ["terminal", "tui", "nano", "micro", "editor", "configuration", "ncurses"]
+
+[[depends-on]]
+ncursesada = "^6.0.0"
+
+[gpr-externals]
+NANO_AIDER_BUILD_MODE = ["debug", "release", "spark"]
+
+[gpr-set-externals]
+NANO_AIDER_BUILD_MODE = "debug"
+
+[[actions]]
+type = "post-fetch"
+command = ["echo", "Welcome to nano-aider! Run 'alr build' to compile."]
+
+[build-switches]
+"*".ada_version = "Ada_2022"
+"*".style_checks = "GNAT"
+"*".runtime_checks = "Yes"
+release.optimization = "Speed"
+debug.optimization = "Debug"
+
+[origin]
+url = "git+https://github.com/hyperpolymath/nano-aider.git"
+commit = "main"

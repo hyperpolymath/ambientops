@@ -1,0 +1,288 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+= Seams Analysis: System Operating Theatre
+:toc:
+:toclevels: 3
+:icons: font
+
+Analysis of integration seams within Operating Theatre and with the AmbientOps ecosystem.
+
+== Seam Categories
+
+[cols="1,3",options="header"]
+|===
+| Category | Focus
+| Smooth | Ergonomics + dependability
+| Seal | Security + performance
+| Shine | Fit for distribution
+|===
+
+== Operating Theatre Internal Seams
+
+=== Core Module Seams
+
+==== types.d ↔ engine.d
+
+[cols="1,1,3",options="header"]
+|===
+| Seam | Status | Notes
+
+| Smooth
+| ✓ Good
+| Types are well-defined, engine uses them consistently
+
+| Seal
+| ⚠ Needs work
+| Missing input validation on Step commands
+
+| Shine
+| ⚠ Needs work
+| No documentation comments on public types
+|===
+
+==== engine.d ↔ ecosystem.d
+
+[cols="1,1,3",options="header"]
+|===
+| Seam | Status | Notes
+
+| Smooth
+| ✓ Good
+| RunBundle creation flows naturally from ApplyResult
+
+| Seal
+| ⚠ Needs work
+| Observatory export should verify path before write
+
+| Shine
+| ✓ Good
+| Clear separation of concerns
+|===
+
+==== security.d ↔ all modules
+
+[cols="1,1,3",options="header"]
+|===
+| Seam | Status | Notes
+
+| Smooth
+| ⚠ Needs work
+| Security functions not yet called in all code paths
+
+| Seal
+| ⚠ Needs work
+| sanitizePath() not applied to Step commands
+
+| Shine
+| ✓ Good
+| Security module is well-documented
+|===
+
+=== Pack Module Seams
+
+==== system.d scan → plan
+
+[cols="1,1,3",options="header"]
+|===
+| Seam | Status | Notes
+
+| Smooth
+| ✓ Good
+| ScanEnvelope flows to planSystemOptimization
+
+| Seal
+| ⚠ Needs work
+| Commands contain hardcoded paths, no validation
+
+| Shine
+| ⚠ Needs work
+| Missing pack metadata (version, author)
+|===
+
+==== cleanup.d scan → plan
+
+[cols="1,1,3",options="header"]
+|===
+| Seam | Status | Notes
+
+| Smooth
+| ✓ Good
+| Cleanup targets well-defined
+
+| Seal
+| ⚠ Needs work
+| Path globs should be validated
+
+| Shine
+| ✓ Good
+| Priority system works well
+|===
+
+==== repos.d scan → plan
+
+[cols="1,1,3",options="header"]
+|===
+| Seam | Status | Notes
+
+| Smooth
+| ✓ Good
+| Repository detection works
+
+| Seal
+| ⚠ Needs work
+| No validation of repo paths before git commands
+
+| Shine
+| ⚠ Needs work
+| Could detect more repo metadata
+|===
+
+=== CLI Seams
+
+==== main.d → pack modules
+
+[cols="1,1,3",options="header"]
+|===
+| Seam | Status | Notes
+
+| Smooth
+| ✓ Good
+| Command dispatch is clean
+
+| Seal
+| ⚠ Needs work
+| getopt exceptions not caught gracefully
+
+| Shine
+| ✓ Good
+| Help text is comprehensive
+|===
+
+==== main.d → persistence (JSON files)
+
+[cols="1,1,3",options="header"]
+|===
+| Seam | Status | Notes
+
+| Smooth
+| ⚠ Needs work
+| JSON errors silently ignored
+
+| Seal
+| ✓ Good
+| secureFile() called on saved files
+
+| Shine
+| ⚠ Needs work
+| No schema versioning for JSON files
+|===
+
+== Ecosystem Integration Seams
+
+=== Operating Theatre → Observatory
+
+[cols="1,1,3",options="header"]
+|===
+| Seam | Status | Notes
+
+| Smooth
+| ⚠ Needs work
+| Observatory inbox path hardcoded
+
+| Seal
+| ⚠ Needs work
+| No authentication/verification of Observatory
+
+| Shine
+| ⚠ Needs work
+| Run bundle format not formally specified
+|===
+
+=== Operating Theatre → Emergency Room
+
+[cols="1,1,3",options="header"]
+|===
+| Seam | Status | Notes
+
+| Smooth
+| ✗ Not implemented
+| No integration yet
+
+| Seal
+| ✗ Not implemented
+| -
+
+| Shine
+| ✗ Not implemented
+| -
+|===
+
+=== Operating Theatre → Ward
+
+[cols="1,1,3",options="header"]
+|===
+| Seam | Status | Notes
+
+| Smooth
+| ✗ Not implemented
+| No integration yet
+
+| Seal
+| ✗ Not implemented
+| -
+
+| Shine
+| ✗ Not implemented
+| -
+|===
+
+== Summary
+
+=== Internal Seams Score
+
+[cols="1,1,1,1",options="header"]
+|===
+| Module | Smooth | Seal | Shine
+
+| core/types.d | ✓ | ⚠ | ⚠
+| core/engine.d | ✓ | ⚠ | ✓
+| core/security.d | ⚠ | ⚠ | ✓
+| core/ecosystem.d | ✓ | ⚠ | ✓
+| packs/system.d | ✓ | ⚠ | ⚠
+| packs/cleanup.d | ✓ | ⚠ | ✓
+| packs/repos.d | ✓ | ⚠ | ⚠
+| main.d | ✓ | ⚠ | ✓
+|===
+
+=== Ecosystem Seams Score
+
+[cols="1,1,1,1",options="header"]
+|===
+| Integration | Smooth | Seal | Shine
+
+| → Observatory | ⚠ | ⚠ | ⚠
+| → Emergency Room | ✗ | ✗ | ✗
+| → Ward | ✗ | ✗ | ✗
+|===
+
+== Priority Fixes
+
+=== MUST (for v1)
+
+1. **Seal**: Apply sanitizePath() to all Step commands
+2. **Seal**: Validate paths before file operations
+3. **Smooth**: Catch and handle getopt exceptions
+4. **Shine**: Add version to JSON schema
+
+=== SHOULD (for v1)
+
+1. **Smooth**: Make Observatory inbox path configurable
+2. **Seal**: Add command whitelisting for safety
+3. **Shine**: Add docstrings to all public functions
+4. **Shine**: Add pack metadata (version, description)
+
+=== COULD (post-v1)
+
+1. **Smooth**: Emergency Room integration
+2. **Smooth**: Ward integration
+3. **Seal**: Run bundle signing
+4. **Shine**: Formal run bundle schema specification

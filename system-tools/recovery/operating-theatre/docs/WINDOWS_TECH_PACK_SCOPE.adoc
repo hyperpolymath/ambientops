@@ -1,0 +1,386 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+= Windows Tech Support Pack Scope
+:toc:
+:toclevels: 3
+:icons: font
+:source-highlighter: rouge
+
+This document defines the scope of the `windows-tech-support` pack — the primary consumer-facing diagnostic pack for Windows 10/11 systems.
+
+== Overview
+
+The Windows Tech Support Pack provides diagnostics and maintenance capabilities for everyday Windows users — the kind of checks a tech-savvy friend or IT support person would perform.
+
+== Target Audience
+
+* Home users maintaining their own computers
+* Family IT support ("Can you look at my computer?")
+* Small business self-support
+* Tech support professionals (first-line diagnostics)
+
+== Platform Requirements
+
+[cols="1,2",options="header"]
+|===
+| Requirement | Value
+
+| Operating System
+| Windows 10 (1903+), Windows 11
+
+| Architecture
+| x86_64 (ARM64 planned)
+
+| Minimum Disk Space
+| 100MB for pack installation
+
+| Privileges
+| User for most checks; Admin for some actions
+|===
+
+== Included Checks
+
+=== Disk Space Analysis
+
+[cols="1,2,1",options="header"]
+|===
+| Check ID | Description | Severity
+
+| `disk-space-overview`
+| Overall disk usage per drive
+| Info → High (by %)
+
+| `temp-files-scan`
+| Windows and user temp directories
+| Low
+
+| `downloads-scan`
+| Downloads folder analysis
+| Info
+
+| `recycle-bin-scan`
+| Recycle bin contents
+| Info
+
+| `windows-update-cache`
+| Old update files
+| Low
+
+| `browser-cache-scan`
+| Browser cache sizes
+| Info
+|===
+
+=== Startup Analysis
+
+[cols="1,2,1",options="header"]
+|===
+| Check ID | Description | Severity
+
+| `startup-programs`
+| Programs that run at login
+| Info
+
+| `startup-impact`
+| Measured boot time impact
+| Low → Medium
+
+| `scheduled-tasks`
+| User-defined scheduled tasks
+| Info
+
+| `services-non-default`
+| Third-party services
+| Info
+|===
+
+=== System Health
+
+[cols="1,2,1",options="header"]
+|===
+| Check ID | Description | Severity
+
+| `memory-usage`
+| Current memory pressure
+| Info → High
+
+| `cpu-baseline`
+| CPU usage at idle
+| Info
+
+| `disk-health`
+| SMART status (if available)
+| Info → Critical
+
+| `windows-updates`
+| Pending security updates
+| Low → Critical
+
+| `driver-updates`
+| Available driver updates
+| Info
+|===
+
+=== Security Baseline
+
+[cols="1,2,1",options="header"]
+|===
+| Check ID | Description | Severity
+
+| `windows-defender-status`
+| Defender enabled and current
+| Medium → High
+
+| `firewall-status`
+| Windows Firewall state
+| Medium
+
+| `user-accounts`
+| Account security overview
+| Info
+
+| `uac-level`
+| UAC configuration
+| Info → Medium
+
+| `bitlocker-status`
+| Disk encryption state
+| Info
+|===
+
+== Included Actions
+
+=== Safe Actions (risk: safe)
+
+[cols="1,2,1",options="header"]
+|===
+| Action ID | Description | Reversibility
+
+| `clear-temp-files`
+| Remove old temp files
+| Partial
+
+| `clear-browser-cache`
+| Clear browser caches
+| Partial
+
+| `empty-recycle-bin`
+| Empty Recycle Bin
+| None (but user's choice)
+
+| `disable-startup-item`
+| Disable startup program
+| Full
+
+| `enable-startup-item`
+| Re-enable startup program
+| Full
+|===
+
+=== Guided Actions (risk: guided)
+
+[cols="1,2,1",options="header"]
+|===
+| Action ID | Description | Reversibility
+
+| `uninstall-program`
+| Uninstall via standard APIs
+| None
+
+| `clear-update-cache`
+| Remove old Windows Update files
+| Partial
+
+| `run-disk-cleanup`
+| Invoke Windows Disk Cleanup
+| Partial
+
+| `optimize-drives`
+| Defragment/TRIM drives
+| None (but safe)
+|===
+
+=== Expert Actions (risk: expert)
+
+[cols="1,2,1",options="header"]
+|===
+| Action ID | Description | Reversibility
+
+| `disable-service`
+| Disable a Windows service
+| Full
+
+| `reset-network-stack`
+| Reset TCP/IP stack
+| Partial
+
+| `repair-windows-image`
+| Run DISM repair
+| None
+|===
+
+== Excluded from Scope
+
+The following are explicitly **NOT** included in this pack:
+
+=== Registry "Cleaning"
+
+* No registry scanning for "errors"
+* No registry "optimization"
+* No orphaned registry key removal
+
+**Reason**: Registry cleaning provides no measurable benefit and risks breaking applications.
+
+=== RAM "Optimization"
+
+* No memory "boosting"
+* No RAM disk creation
+* No page file manipulation
+
+**Reason**: Windows memory management is sophisticated; interference causes harm.
+
+=== "Performance Tuning"
+
+* No automatic service disabling
+* No "disable telemetry" bundles
+* No visual effects "optimization"
+
+**Reason**: These are user preferences, not diagnostics.
+
+=== Deep Malware Scanning
+
+* No antivirus functionality
+* No rootkit detection
+* No behavioral analysis
+
+**Reason**: Leave to dedicated security tools (Windows Defender, etc.).
+
+== Modes Configuration
+
+=== Quick Mode (30 seconds)
+
+* `disk-space-overview`
+* `memory-usage`
+* `startup-programs` (count only)
+* `windows-defender-status`
+* `windows-updates` (pending count)
+
+=== Standard Mode (2-5 minutes)
+
+All Quick checks plus:
+
+* `temp-files-scan`
+* `downloads-scan`
+* `recycle-bin-scan`
+* `startup-impact`
+* `cpu-baseline`
+* `driver-updates`
+
+=== Deep Mode (10-30 minutes)
+
+All Standard checks plus:
+
+* `disk-health` (full SMART)
+* `browser-cache-scan`
+* `windows-update-cache`
+* `services-non-default`
+* `scheduled-tasks`
+* `user-accounts`
+
+== Evidence Collection
+
+=== Artifacts Produced
+
+[cols="1,2,1",options="header"]
+|===
+| Artifact Type | Contents | Size Estimate
+
+| Disk snapshot
+| Per-drive usage, top directories
+| ~10KB
+
+| Startup list
+| Programs, paths, measured impact
+| ~5KB
+
+| Service list
+| Non-default services, states
+| ~5KB
+
+| Update status
+| Pending updates, last check time
+| ~2KB
+
+| Security baseline
+| Defender, Firewall, UAC states
+| ~3KB
+|===
+
+=== Privacy Considerations
+
+* No full file listings (only aggregates)
+* No file content capture
+* No browsing history
+* Paths redacted in exports by default
+* Username replacement in shared receipts
+
+== Anti-Fearware Compliance
+
+=== Claims
+
+[source,json]
+----
+{
+  "no_fake_counts": true,
+  "evidence_backed": true,
+  "user_controlled": true,
+  "fully_reversible": false,
+  "open_source": true
+}
+----
+
+=== Severity Mapping
+
+* Info: General information, no action needed
+* Low: Minor optimization available
+* Medium: Worth addressing when convenient
+* High: Should address soon (e.g., disk >90%)
+* Critical: Immediate attention (disk full, updates critical)
+
+=== Forbidden Patterns
+
+This pack will never:
+
+* Report "X registry errors found"
+* Claim "performance improved by Y%"
+* Show fake progress bars
+* Use countdown timers
+* Recommend paid software
+
+== Implementation Notes
+
+=== Language
+
+* Primary: D (core checks and actions)
+* Privileged helpers: Rust (in `windows-tech-support-agent-rs/`)
+
+=== Windows APIs Used
+
+* `GetDiskFreeSpaceExW` — Disk space
+* `WMI` — Hardware info, services
+* Task Scheduler API — Startup programs
+* Windows Update API — Update status
+* Security Center API — Defender/Firewall status
+* SMART via WMI — Disk health
+
+=== Privilege Model
+
+* Most checks: User level
+* Service management: Admin required
+* Disk Cleanup integration: Admin recommended
+* SMART access: Admin recommended
+
+== Related Documents
+
+* link:PACKS_AND_MODES.adoc[Packs and Modes] — Pack system overview
+* link:ANTI-FEARWARE.adoc[Anti-Fearware Principles]
+* link:CLAIMS_POLICY.adoc[Claims Policy]

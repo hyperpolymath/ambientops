@@ -1,0 +1,239 @@
+= Ada Terminal ANSI
+image:https://img.shields.io/badge/License-MPL_2.0-blue.svg[MPL-2.0-or-later,link="https://opensource.org/licenses/MPL-2.0"]
+
+
+:author: Hyper Polymath
+:toc:
+:source-highlighter: rouge
+
+Lightweight ANSI terminal utilities for Ada - a simple alternative to ncurses.
+
+== Features
+
+* Screen clearing and cursor control
+* Alternate screen buffer (for full-screen TUI apps)
+* Foreground/background colors (standard, 256-color, true color RGB)
+* Text attributes (bold, italic, underline, etc.)
+* Terminal size detection
+* Cursor visibility control
+* No external dependencies (pure Ada + standard library)
+
+== When to Use This
+
+Use *Ada Terminal ANSI* when you need:
+
+* Simple TUI without ncurses complexity
+* Basic colored output
+* Progress bars or status displays
+* Interactive CLI tools
+
+Use *ncurses* when you need:
+
+* Complex window/panel management
+* Mouse input handling
+* Wide character support
+* Maximum terminal compatibility
+
+== Installation
+
+=== Using Alire
+
+[source,bash]
+----
+alr with terminal_ansi
+----
+
+=== Manual
+
+Add to your GPR project:
+
+[source,ada]
+----
+with "terminal_ansi.gpr";
+----
+
+== Usage
+
+=== Basic Example
+
+[source,ada]
+----
+with Terminal_ANSI;
+with Ada.Text_IO;
+
+procedure Example is
+   use Terminal_ANSI;
+   use Ada.Text_IO;
+begin
+   --  Simple colored output
+   Set_Foreground (FG_Green);
+   Set_Attribute (Attr_Bold);
+   Put_Line ("Success!");
+   Reset_Attributes;
+
+   --  Move cursor and write
+   Move_Cursor (10, 20);
+   Put ("At row 10, column 20");
+end Example;
+----
+
+=== Full-Screen TUI Application
+
+[source,ada]
+----
+with Terminal_ANSI;
+with Ada.Text_IO;
+
+procedure TUI_App is
+   use Terminal_ANSI;
+   use Ada.Text_IO;
+
+   Size : Terminal_Size;
+begin
+   --  Initialize enters alternate screen and sets up terminal
+   Initialize;
+
+   Size := Get_Terminal_Size;
+
+   --  Draw header
+   Move_Cursor (1, 1);
+   Set_Background (BG_Blue);
+   Set_Foreground (FG_White);
+   Set_Attribute (Attr_Bold);
+   Put ("My TUI Application");
+   Reset_Attributes;
+
+   --  Draw content
+   Move_Cursor (3, 1);
+   Put_Line ("Terminal size: " &
+     Natural'Image (Size.Rows) & " x " &
+     Natural'Image (Size.Cols));
+
+   --  Wait for input
+   Move_Cursor (Size.Rows, 1);
+   Put ("Press Enter to exit...");
+   Flush_Output;
+
+   declare
+      Dummy : String := Get_Line;
+   begin
+      null;
+   end;
+
+   --  Finalize restores original screen
+   Finalize;
+end TUI_App;
+----
+
+=== Colors
+
+[source,ada]
+----
+--  Standard 16 colors
+Set_Foreground (FG_Red);
+Set_Background (BG_Yellow);
+
+--  256-color palette
+Set_Foreground_256 (202);  --  Orange
+Set_Background_256 (17);   --  Dark blue
+
+--  True color (24-bit RGB)
+Set_Foreground_RGB (255, 128, 0);   --  Orange
+Set_Background_RGB (0, 32, 64);     --  Dark blue
+----
+
+== API Reference
+
+=== Terminal Size
+
+[source,ada]
+----
+type Terminal_Size is record
+   Rows : Natural := 24;
+   Cols : Natural := 80;
+end record;
+
+function Get_Terminal_Size return Terminal_Size;
+function Get_Rows return Natural;
+function Get_Cols return Natural;
+----
+
+=== Screen Control
+
+|===
+| Procedure | Description
+
+| `Clear_Screen` | Clear entire screen
+| `Clear_To_End` | Clear from cursor to end of screen
+| `Clear_Line` | Clear entire current line
+| `Clear_Line_To_End` | Clear from cursor to end of line
+|===
+
+=== Cursor Control
+
+|===
+| Procedure | Description
+
+| `Cursor_Home` | Move cursor to (1, 1)
+| `Move_Cursor (Row, Col)` | Move cursor to position
+| `Cursor_Up (N)` | Move cursor up N lines
+| `Cursor_Down (N)` | Move cursor down N lines
+| `Cursor_Left (N)` | Move cursor left N columns
+| `Cursor_Right (N)` | Move cursor right N columns
+| `Save_Cursor` | Save current cursor position
+| `Restore_Cursor` | Restore saved cursor position
+| `Show_Cursor` | Make cursor visible
+| `Hide_Cursor` | Make cursor invisible
+|===
+
+=== Alternate Screen
+
+|===
+| Procedure | Description
+
+| `Enter_Alternate_Screen` | Switch to alternate screen buffer
+| `Exit_Alternate_Screen` | Return to main screen buffer
+| `Initialize` | Full setup (alternate screen + hide cursor)
+| `Finalize` | Full cleanup (restore screen + show cursor)
+|===
+
+=== Colors
+
+[source,ada]
+----
+type Foreground_Color is
+  (FG_Default,
+   FG_Black, FG_Red, FG_Green, FG_Yellow,
+   FG_Blue, FG_Magenta, FG_Cyan, FG_White,
+   FG_Bright_Black, FG_Bright_Red, FG_Bright_Green, FG_Bright_Yellow,
+   FG_Bright_Blue, FG_Bright_Magenta, FG_Bright_Cyan, FG_Bright_White);
+
+type Background_Color is (...)  --  Same pattern
+
+procedure Set_Foreground (Color : Foreground_Color);
+procedure Set_Background (Color : Background_Color);
+procedure Set_Foreground_256 (Color : Natural);  --  0-255
+procedure Set_Background_256 (Color : Natural);  --  0-255
+procedure Set_Foreground_RGB (R, G, B : Natural);
+procedure Set_Background_RGB (R, G, B : Natural);
+----
+
+=== Text Attributes
+
+[source,ada]
+----
+type Text_Attribute is
+  (Attr_Reset, Attr_Bold, Attr_Dim, Attr_Italic, Attr_Underline,
+   Attr_Blink, Attr_Reverse, Attr_Hidden, Attr_Strikethrough);
+
+procedure Set_Attribute (Attr : Text_Attribute);
+procedure Reset_Attributes;
+----
+
+== License
+
+PMPL-1.0-or-later
+
+== Contributing
+
+Contributions welcome! Please submit pull requests to the GitHub repository.

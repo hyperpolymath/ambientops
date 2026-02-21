@@ -1,0 +1,100 @@
+{
+  "$schema": "https://hyperpolymath.github.io/consent-aware-http/schemas/aibdp-schema-v0.2.json",
+  "aibdp_version": "0.2",
+  "contact": "mailto:ai-policy@hyperpolymath.org",
+  "policies": {
+    "training": {
+      "status": "conditional",
+      "conditions": [
+        "Attribution required per license terms",
+        "Must respect dual MIT/AGPL-3.0-or-later licensing",
+        "Commercial training requires AGPL-3.0-or-later compliance"
+      ],
+      "rationale": "Open source software - training permitted with proper attribution and license compliance"
+    },
+    "indexing": {
+      "status": "allowed",
+      "rationale": "Public repository intended for discovery"
+    },
+    "summarization": {
+      "status": "allowed",
+      "rationale": "Documentation summarization aids discoverability"
+    },
+    "question_answering": {
+      "status": "allowed",
+      "rationale": "Helping users understand shell configuration is beneficial"
+    },
+    "generation": {
+      "status": "conditional",
+      "conditions": [
+        "Generated content must include attribution",
+        "Must not misrepresent as original work"
+      ],
+      "rationale": "Code generation from examples permitted with attribution"
+    },
+    "fine_tuning": {
+      "status": "conditional",
+      "conditions": [
+        "Must comply with AGPL-3.0-or-later for derivative models",
+        "Attribution required"
+      ],
+      "rationale": "Fine-tuning permitted under copyleft terms"
+    },
+    "embedding": {
+      "status": "allowed",
+      "rationale": "Embedding for semantic search aids discovery"
+    },
+    "commercial_training": {
+      "status": "conditional",
+      "conditions": [
+        "Must comply with AGPL-3.0-or-later",
+        "Source attribution required",
+        "Model outputs must preserve license notices"
+      ],
+      "rationale": "Commercial use permitted under AGPL terms"
+    }
+  },
+  "special_provisions": {
+    "academic_research": {
+      "status": "encouraged",
+      "purpose": [
+        "Shell security research",
+        "Configuration management studies",
+        "Developer experience analysis"
+      ]
+    },
+    "educational_use": {
+      "status": "encouraged",
+      "purpose": [
+        "Teaching shell scripting best practices",
+        "Security education",
+        "Open source contribution training"
+      ]
+    },
+    "standards_development": {
+      "status": "encouraged",
+      "purpose": [
+        "POSIX shell compatibility research",
+        "Configuration language development"
+      ]
+    }
+  },
+  "enforcement": {
+    "mechanism": "legal",
+    "description": "Violations may constitute license infringement under applicable copyright law"
+  },
+  "metadata": {
+    "created": "2025-01-01",
+    "author": "hyperpolymath",
+    "organization": "Hyper Polymath",
+    "repository": "https://github.com/hyperpolymath/nick-shells"
+  },
+  "philosophy": {
+    "core_principles": [
+      "Open source promotes innovation",
+      "Attribution respects creators",
+      "Copyleft ensures reciprocity",
+      "Transparency builds trust"
+    ]
+  }
+}

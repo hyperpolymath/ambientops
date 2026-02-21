@@ -1,0 +1,124 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# HAR (Hybrid Automation Router) Compose Configuration
+# Compatible with: nerdctl compose, podman-compose, docker compose
+#
+# Usage (in priority order):
+#   nerdctl compose -f deploy/compose.yaml up -d
+#   podman-compose -f deploy/compose.yaml up -d
+#   docker compose -f deploy/compose.yaml up -d
+
+name: har
+
+services:
+  # ==========================================================================
+  # HAR Node 1 (Primary)
+  # ==========================================================================
+  har-node1:
+    build:
+      context: ..
+      dockerfile: deploy/Containerfile
+    image: har:latest
+    container_name: har-node1
+    hostname: har-node1
+    environment:
+      - RELEASE_NODE=har@har-node1
+      - RELEASE_COOKIE=${HAR_COOKIE:-har_secure_cookie_change_me}
+      - HAR_CLUSTER_NODES=har@har-node2,har@har-node3
+      - PHX_HOST=${PHX_HOST:-localhost}
+      - PHX_SERVER=true
+      - PORT=4000
+      - SECRET_KEY_BASE=${SECRET_KEY_BASE:-generate_with_mix_phx_gen_secret}
+    ports:
+      - "4000:4000"    # Web interface
+      - "4369:4369"    # EPMD
+    networks:
+      - har-network
+    volumes:
+      - har-data:/app/data
+      - ./routing_table.yaml:/app/priv/routing_table.yaml:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+
+  # ==========================================================================
+  # HAR Node 2 (Replica)
+  # ==========================================================================
+  har-node2:
+    build:
+      context: ..
+      dockerfile: deploy/Containerfile
+    image: har:latest
+    container_name: har-node2
+    hostname: har-node2
+    environment:
+      - RELEASE_NODE=har@har-node2
+      - RELEASE_COOKIE=${HAR_COOKIE:-har_secure_cookie_change_me}
+      - HAR_CLUSTER_NODES=har@har-node1,har@har-node3
+      - PHX_SERVER=true
+      - PORT=4000
+    networks:
+      - har-network
+    volumes:
+      - har-data:/app/data:ro
+    depends_on:
+      har-node1:
+        condition: service_healthy
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1G
+
+  # ==========================================================================
+  # HAR Node 3 (Replica)
+  # ==========================================================================
+  har-node3:
+    build:
+      context: ..
+      dockerfile: deploy/Containerfile
+    image: har:latest
+    container_name: har-node3
+    hostname: har-node3
+    environment:
+      - RELEASE_NODE=har@har-node3
+      - RELEASE_COOKIE=${HAR_COOKIE:-har_secure_cookie_change_me}
+      - HAR_CLUSTER_NODES=har@har-node1,har@har-node2
+      - PHX_SERVER=true
+      - PORT=4000
+    networks:
+      - har-network
+    volumes:
+      - har-data:/app/data:ro
+    depends_on:
+      har-node1:
+        condition: service_healthy
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1G
+
+networks:
+  har-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+
+volumes:
+  har-data:
+    driver: local

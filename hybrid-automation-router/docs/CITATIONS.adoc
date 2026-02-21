@@ -1,0 +1,36 @@
+= hybrid-automation-router - Citation Guide
+:toc:
+
+== BibTeX
+
+[source,bibtex]
+----
+@software{hybrid-automation-router_2025,
+  author = {Polymath, Hyper},
+  title = {hybrid-automation-router},
+  year = {2025},
+  url = {https://github.com/hyperpolymath/hybrid-automation-router},
+  license = {AGPL-3.0-or-later}
+}
+----
+
+== Harvard Style
+
+Polymath, H. (2025) _hybrid-automation-router_ [Computer software]. Available at: https://github.com/hyperpolymath/hybrid-automation-router
+
+== OSCOLA
+
+Hyper Polymath, 'hybrid-automation-router' (2025) <https://github.com/hyperpolymath/hybrid-automation-router>
+
+== MLA
+
+Polymath, Hyper. "hybrid-automation-router." 2025, github.com/hyperpolymath/hybrid-automation-router.
+
+== APA 7
+
+Polymath, H. (2025). _hybrid-automation-router_ [Computer software]. GitHub. https://github.com/hyperpolymath/hybrid-automation-router
+
+== See Also
+
+* link:../CITATION.cff[CITATION.cff]
+* link:../codemeta.json[codemeta.json]

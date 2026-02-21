@@ -1,0 +1,30 @@
+/* TEAM */
+Creator: Jonathan D.A. Jewell
+Handle: hyperpolymath
+GitHub: https://github.com/hyperpolymath
+Role: Lead Developer, Maintainer
+
+/* THANKS */
+Name: The Nickel Team
+URL: https://nickel-lang.org/
+Note: For creating the Nickel configuration language
+
+Name: ShellCheck Contributors
+URL: https://www.shellcheck.net/
+Note: For excellent shell script analysis
+
+Name: Just Contributors
+URL: https://just.systems/
+Note: For the just command runner
+
+Name: RSR Community
+URL: https://github.com/hyperpolymath/rhodium-standard
+Note: For the Rhodium Standard Repository conventions
+
+/* SITE */
+Last update: 2025-01-01
+Language: English
+Standards: POSIX, XDG Base Directory, RFC 9116, AIBDP
+Doctype: AsciiDoc, Markdown, Nickel
+Components: Bash, Zsh, POSIX sh
+IDE: Helix, Neovim

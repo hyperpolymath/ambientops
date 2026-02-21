@@ -1,0 +1,97 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# nerdsafe-restart: Kinoite Environment Simulation Container
+#
+# This container replicates a Fedora Kinoite 43 environment with the user's
+# actual shell configuration to validate restart safety.
+#
+# Build:
+#   nerdctl build -t nerdsafe-restart:kinoite -f Containerfile.kinoite .
+#
+# Run (mount home directory read-only):
+#   nerdctl run --rm -v $HOME:$HOME:ro nerdsafe-restart:kinoite check --paranoid
+
+FROM registry.fedoraproject.org/fedora:43
+
+LABEL org.opencontainers.image.title="nerdsafe-restart-kinoite"
+LABEL org.opencontainers.image.description="Kinoite environment simulation for pre-reboot validation"
+LABEL org.opencontainers.image.source="https://github.com/hyperpolymath/nerdsafe-restart"
+
+# =============================================================================
+# CRITICAL BOOTSTRAP COMPONENTS
+# =============================================================================
+# These are the minimal packages required to:
+# 1. Parse and validate shell configuration
+# 2. Simulate shell startup
+# 3. Check critical system paths
+# 4. Run formal verification (ShellCheck)
+#
+# Order matters - install in dependency order:
+# Layer 1: Core utilities (coreutils, bash, findutils)
+# Layer 2: Text processing (grep, gawk, sed)
+# Layer 3: Validation tools (ShellCheck, procps)
+# Layer 4: User environment simulation
+
+# Layer 1: Absolute minimum for shell execution
+RUN dnf install -y --setopt=install_weak_deps=False \
+    bash \
+    coreutils-single \
+    && dnf clean all
+
+# Layer 2: Text processing for config parsing
+RUN dnf install -y --setopt=install_weak_deps=False \
+    findutils \
+    grep \
+    gawk \
+    sed \
+    && dnf clean all
+
+# Layer 3: Validation and process tools
+RUN dnf install -y --setopt=install_weak_deps=False \
+    ShellCheck \
+    procps-ng \
+    util-linux \
+    diffutils \
+    file \
+    && dnf clean all
+
+# Layer 4: Common shell tools that configs might reference
+RUN dnf install -y --setopt=install_weak_deps=False \
+    git \
+    which \
+    ncurses \
+    && dnf clean all
+
+# =============================================================================
+# ENVIRONMENT SIMULATION
+# =============================================================================
+
+# Create user structure (will be overlaid by mount)
+ARG USER_UID=1000
+ARG USER_GID=1000
+ARG USER_NAME=hyper
+
+RUN groupadd -g ${USER_GID} ${USER_NAME} && \
+    useradd -u ${USER_UID} -g ${USER_GID} -m -s /bin/bash ${USER_NAME}
+
+# Copy validation scripts
+COPY nerdsafe-restart.sh /usr/local/bin/nerdsafe-restart
+COPY bootstrap-check.sh /usr/local/bin/bootstrap-check
+RUN chmod +x /usr/local/bin/nerdsafe-restart /usr/local/bin/bootstrap-check
+
+# Copy modular bash configuration template
+# (Will be overlaid by volume mount with actual config)
+COPY --chown=${USER_UID}:${USER_GID} bashrc.d-template/ /home/${USER_NAME}/.bashrc.d/
+
+# Working directory
+WORKDIR /home/${USER_NAME}
+USER ${USER_NAME}
+
+# Environment variables to simulate Kinoite
+ENV SHELL=/bin/bash
+ENV TERM=xterm-256color
+ENV XDG_CONFIG_HOME=/home/${USER_NAME}/.config
+ENV XDG_DATA_HOME=/home/${USER_NAME}/.local/share
+ENV XDG_CACHE_HOME=/home/${USER_NAME}/.cache
+
+ENTRYPOINT ["/usr/local/bin/nerdsafe-restart"]
+CMD ["check"]

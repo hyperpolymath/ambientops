@@ -1,0 +1,10 @@
+[package]
+name = "displace"
+version = "0.1.0"
+edition = "2024"
+description = "A high-performance, cross-platform command-line utility for fast and verified file and directory copying, designed for the Verified Container Specification ecosystem."
+keywords = ["file-copy", "cross-platform", "cli", "verified-container", "rust", "supply-chain-security"]
+authors = ["Jonathan D.A. Jewell <jonathan.jewell@open.ac.uk>"]
+
+[dependencies]
+

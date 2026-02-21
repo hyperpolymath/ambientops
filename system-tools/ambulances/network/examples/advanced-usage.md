@@ -1,0 +1,463 @@
+# Advanced Usage Examples
+
+This document provides advanced usage examples and integration scenarios.
+
+## Custom Diagnostic Workflows
+
+### Selective Diagnostics
+
+```bash
+#!/bin/bash
+# Run only network-related diagnostics
+
+network-repair diagnose-network
+network-repair diagnose-routing
+```
+
+### Conditional Repairs
+
+```bash
+#!/bin/bash
+# Repair based on specific conditions
+
+# Check DNS
+if ! network-repair diagnose-dns >/dev/null 2>&1; then
+    echo "DNS issues detected"
+    sudo network-repair repair-dns
+fi
+
+# Check connectivity
+if ! ping -c 3 8.8.8.8 >/dev/null 2>&1; then
+    echo "Connectivity issues detected"
+    sudo network-repair repair-all
+fi
+```
+
+## Integration Examples
+
+### Pre-deployment Network Check
+
+```bash
+#!/bin/bash
+# Ensure network is working before deployment
+
+echo "Checking network connectivity..."
+
+if ! network-repair diagnose; then
+    echo "Network issues detected!"
+
+    read -p "Attempt automatic repair? (y/n): " -n 1 -r
+    echo
+
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        sudo network-repair --auto-repair repair
+
+        # Verify fix
+        if network-repair diagnose; then
+            echo "Network repaired successfully!"
+        else
+            echo "Failed to repair network. Aborting deployment."
+            exit 1
+        fi
+    else
+        echo "Aborting deployment."
+        exit 1
+    fi
+fi
+
+echo "Network is healthy. Proceeding with deployment..."
+# Continue with deployment
+```
+
+### Monitoring Script
+
+```bash
+#!/bin/bash
+# Continuous network monitoring with repair
+
+LOGFILE="/var/log/network-monitor.log"
+CHECK_INTERVAL=300  # 5 minutes
+
+while true; do
+    timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+
+    if ! network-repair --quiet diagnose; then
+        echo "[${timestamp}] Network issues detected" >> "${LOGFILE}"
+
+        # Attempt repair
+        if sudo network-repair --auto-repair repair >> "${LOGFILE}" 2>&1; then
+            echo "[${timestamp}] Network repaired successfully" >> "${LOGFILE}"
+
+            # Send notification (example)
+            # mail -s "Network Repaired" admin@example.com < /dev/null
+        else
+            echo "[${timestamp}] Failed to repair network" >> "${LOGFILE}"
+
+            # Send alert (example)
+            # mail -s "ALERT: Network Repair Failed" admin@example.com < /dev/null
+        fi
+    fi
+
+    sleep ${CHECK_INTERVAL}
+done
+```
+
+### Docker Container Network Repair
+
+```dockerfile
+# Dockerfile
+FROM ubuntu:22.04
+
+RUN apt-get update && apt-get install -y \
+    iproute2 \
+    iputils-ping \
+    dnsutils \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY . /opt/network-repair
+RUN chmod +x /opt/network-repair/network-repair
+
+ENTRYPOINT ["/opt/network-repair/network-repair"]
+CMD ["diagnose"]
+```
+
+```bash
+# Build and run
+docker build -t network-repair .
+docker run --rm --network host --cap-add=NET_ADMIN network-repair diagnose
+```
+
+## Custom DNS Configuration
+
+### Using Specific DNS Servers
+
+```bash
+#!/bin/bash
+# Configure custom DNS servers
+
+# Use Google DNS
+DEFAULT_DNS_SERVERS="8.8.8.8 8.8.4.4" sudo network-repair repair-dns
+
+# Use Cloudflare DNS
+DEFAULT_DNS_SERVERS="1.1.1.1 1.0.0.1" sudo network-repair repair-dns
+
+# Use Quad9 DNS
+DEFAULT_DNS_SERVERS="9.9.9.9 149.112.112.112" sudo network-repair repair-dns
+
+# Use multiple providers
+DEFAULT_DNS_SERVERS="8.8.8.8 1.1.1.1 9.9.9.9" sudo network-repair repair-dns
+```
+
+### Corporate Network DNS
+
+```bash
+#!/bin/bash
+# Use corporate DNS servers
+
+# Set corporate DNS
+export DEFAULT_DNS_SERVERS="10.0.0.1 10.0.0.2"
+
+# Repair DNS configuration
+sudo -E network-repair repair-dns
+
+# Verify
+dig @10.0.0.1 internal.corp.example.com
+```
+
+## Multi-Interface Scenarios
+
+### Prioritize Specific Interface
+
+```bash
+#!/bin/bash
+# Ensure specific interface is primary
+
+PRIMARY_INTERFACE="eth0"
+
+# Bring up interface
+sudo ip link set "${PRIMARY_INTERFACE}" up
+
+# Remove other default routes
+sudo ip route del default || true
+
+# Add default route via specific interface
+GATEWAY=$(ip route | grep "${PRIMARY_INTERFACE}" | grep -oP 'src \K[\d.]+' | head -1)
+sudo ip route add default via "${GATEWAY}" dev "${PRIMARY_INTERFACE}"
+
+# Verify
+network-repair diagnose-routing
+```
+
+### Bonding/Teaming Setup Check
+
+```bash
+#!/bin/bash
+# Verify bonded interface configuration
+
+BOND_INTERFACE="bond0"
+
+# Check if bond exists
+if ! ip link show "${BOND_INTERFACE}" >/dev/null 2>&1; then
+    echo "Bond interface ${BOND_INTERFACE} not found"
+    exit 1
+fi
+
+# Check bond status
+cat /proc/net/bonding/"${BOND_INTERFACE}"
+
+# Run diagnostics
+network-repair diagnose-network
+network-repair diagnose-routing
+```
+
+## VPN Integration
+
+### Pre-VPN Connection Check
+
+```bash
+#!/bin/bash
+# Ensure network is working before VPN connection
+
+echo "Checking network before VPN connection..."
+
+if ! network-repair diagnose; then
+    echo "Network issues detected. Repairing..."
+    sudo network-repair --auto-repair repair
+fi
+
+# Connect to VPN
+echo "Connecting to VPN..."
+sudo openvpn --config /etc/openvpn/client.conf
+```
+
+### Post-VPN Diagnostics
+
+```bash
+#!/bin/bash
+# Verify network after VPN connection
+
+# Connect VPN
+sudo openvpn --config /etc/openvpn/client.conf --daemon
+
+sleep 5
+
+# Check routing (should show VPN routes)
+network-repair diagnose-routing
+
+# Check DNS (should use VPN DNS)
+network-repair diagnose-dns
+
+# Verify VPN connectivity
+if ping -c 3 10.8.0.1 >/dev/null 2>&1; then
+    echo "VPN connection successful"
+else
+    echo "VPN connection failed"
+    sudo killall openvpn
+    sudo network-repair repair-all
+fi
+```
+
+## Ansible Integration
+
+### Playbook Example
+
+```yaml
+---
+- name: Ensure network connectivity
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Install network-repair tool
+      copy:
+        src: /path/to/complete-linux-internet-repair/
+        dest: /opt/network-repair/
+        mode: '0755'
+
+    - name: Run network diagnostics
+      command: /opt/network-repair/network-repair diagnose
+      register: diagnostic_result
+      failed_when: false
+      changed_when: false
+
+    - name: Repair network if issues found
+      command: /opt/network-repair/network-repair --auto-repair repair
+      when: diagnostic_result.rc != 0
+
+    - name: Verify network connectivity
+      command: ping -c 3 8.8.8.8
+      register: ping_result
+      failed_when: ping_result.rc != 0
+```
+
+## Systemd Integration
+
+### Network Repair Service
+
+```ini
+# /etc/systemd/system/network-repair.service
+[Unit]
+Description=Network Repair Service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/network-repair diagnose
+ExecStartPost=/bin/sh -c 'if [ $$EXIT_STATUS -ne 0 ]; then /usr/local/bin/network-repair --auto-repair repair; fi'
+RemainAfterExit=yes
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+```
+
+### Network Repair Timer
+
+```ini
+# /etc/systemd/system/network-repair.timer
+[Unit]
+Description=Network Repair Timer
+Requires=network-repair.service
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=1h
+AccuracySec=1min
+
+[Install]
+WantedBy=timers.target
+```
+
+Enable:
+```bash
+sudo systemctl enable network-repair.timer
+sudo systemctl start network-repair.timer
+sudo systemctl status network-repair.timer
+```
+
+## Logging and Alerting
+
+### Advanced Logging
+
+```bash
+#!/bin/bash
+# Comprehensive logging setup
+
+# Enable file logging
+export LOG_TO_FILE=true
+export LOG_FILE="/var/log/network-repair/repair-$(date +%Y%m%d).log"
+export LOG_LEVEL=DEBUG
+export VERBOSE=true
+
+# Create log directory
+sudo mkdir -p /var/log/network-repair
+
+# Run with comprehensive logging
+sudo -E network-repair diagnose 2>&1 | tee -a "${LOG_FILE}"
+
+# Rotate logs
+find /var/log/network-repair -name "repair-*.log" -mtime +30 -delete
+```
+
+### Email Alerts
+
+```bash
+#!/bin/bash
+# Email alerts on network issues
+
+ADMIN_EMAIL="admin@example.com"
+
+# Run diagnostics
+if ! network-repair diagnose > /tmp/network-diag.txt 2>&1; then
+    # Issues found, send alert
+    mail -s "Network Issues Detected on $(hostname)" "${ADMIN_EMAIL}" < /tmp/network-diag.txt
+
+    # Attempt repair
+    if sudo network-repair --auto-repair repair > /tmp/network-repair.txt 2>&1; then
+        mail -s "Network Repaired on $(hostname)" "${ADMIN_EMAIL}" < /tmp/network-repair.txt
+    else
+        mail -s "URGENT: Network Repair Failed on $(hostname)" "${ADMIN_EMAIL}" < /tmp/network-repair.txt
+    fi
+fi
+
+rm -f /tmp/network-diag.txt /tmp/network-repair.txt
+```
+
+### Slack/Discord Notifications
+
+```bash
+#!/bin/bash
+# Send notifications to Slack
+
+SLACK_WEBHOOK="https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+
+send_slack_message() {
+    local message="$1"
+    curl -X POST -H 'Content-type: application/json' \
+        --data "{\"text\":\"${message}\"}" \
+        "${SLACK_WEBHOOK}"
+}
+
+# Run diagnostics
+if ! network-repair diagnose; then
+    send_slack_message "⚠️ Network issues detected on $(hostname)"
+
+    if sudo network-repair --auto-repair repair; then
+        send_slack_message "✅ Network repaired successfully on $(hostname)"
+    else
+        send_slack_message "❌ Failed to repair network on $(hostname)"
+    fi
+fi
+```
+
+## Testing and Development
+
+### Test in Virtual Machine
+
+```bash
+#!/bin/bash
+# Create test environment in VM
+
+# Break network intentionally
+sudo ip link set eth0 down
+sudo rm /etc/resolv.conf
+
+# Run repair
+sudo network-repair --auto-repair repair
+
+# Verify fix
+ping -c 3 google.com
+```
+
+### Simulate Network Issues
+
+```bash
+#!/bin/bash
+# Test script - simulates various network issues
+
+# Save current state
+ip addr show > /tmp/ip-backup.txt
+ip route show > /tmp/route-backup.txt
+cp /etc/resolv.conf /tmp/resolv.conf.backup
+
+# Simulate DNS issue
+sudo rm /etc/resolv.conf
+sudo touch /etc/resolv.conf
+
+# Test repair
+echo "Testing DNS repair..."
+sudo network-repair repair-dns
+
+# Restore and test routing
+echo "Testing routing repair..."
+sudo ip route del default
+sudo network-repair repair-routing
+
+# Cleanup
+echo "Test complete"
+```
+
+This advanced usage guide demonstrates the flexibility and power of the Complete Linux Internet Repair Tool in various scenarios and environments.

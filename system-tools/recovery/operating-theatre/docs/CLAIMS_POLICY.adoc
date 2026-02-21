@@ -1,0 +1,292 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+= Claims Policy
+:toc:
+:toclevels: 3
+:icons: font
+:source-highlighter: rouge
+
+This document defines what claims Operating Theatre and AmbientOps tools are permitted to make, and how those claims must be supported.
+
+== Claim Categories
+
+=== Space Claims
+
+Claims about disk space:
+
+[cols="1,2,2",options="header"]
+|===
+| Claim Type | Requirement | Example
+
+| Space recovered
+| Must measure actual bytes freed
+| "Freed 1.2GB from temp files"
+
+| Space available
+| Must use OS API accurately
+| "47GB free of 500GB"
+
+| Space by category
+| Must enumerate actual files
+| "Downloads: 12GB in 847 files"
+|===
+
+==== Forbidden Space Claims
+
+* "Could free up to X" without actual measurement
+* Claiming potential space without scanning
+* Rounding up aggressively
+* Counting the same space multiple times
+
+=== Performance Claims
+
+Claims about system speed:
+
+[cols="1,2,2",options="header"]
+|===
+| Claim Type | Requirement | Example
+
+| Boot time
+| Must measure actual boot time
+| "Boot time: 42 seconds"
+
+| Startup impact
+| Must measure with/without
+| "This app adds ~3s to boot"
+
+| Memory usage
+| Must use OS metrics
+| "Chrome: 1.2GB across 12 processes"
+|===
+
+==== Forbidden Performance Claims
+
+* "Registry cleaning improves performance"
+* "Speed up your PC by X%" (without measurement)
+* "Remove errors to improve speed"
+* Any benchmark not actually performed
+
+=== Security Claims
+
+Claims about security status:
+
+[cols="1,2,2",options="header"]
+|===
+| Claim Type | Requirement | Example
+
+| Vulnerability present
+| CVE reference or equivalent
+| "CVE-2024-1234 affects installed version"
+
+| Security update available
+| OS/vendor API confirmation
+| "Windows security update KB5034441 pending"
+
+| Exposure detected
+| Verifiable evidence
+| "Port 3389 open to internet (RDP)"
+|===
+
+==== Forbidden Security Claims
+
+* "Your computer is at risk" (without specific evidence)
+* Generic "security issues found" counts
+* Implying danger from cosmetic issues
+* Claiming security benefit from cleanup
+
+=== Count Claims
+
+Claims about numbers of items:
+
+[cols="1,2,2",options="header"]
+|===
+| Claim Type | Requirement | Example
+
+| Files found
+| Actual enumeration
+| "Found 1,234 temp files"
+
+| Issues found
+| Distinct, meaningful issues
+| "3 items to review"
+
+| Items cleaned
+| Actual items processed
+| "Removed 847 files"
+|===
+
+==== Forbidden Count Claims
+
+* Inflating by counting sub-items
+* "5,847 registry errors" (meaningless metric)
+* Counting potential issues as actual
+* Combining unrelated counts for larger number
+
+== Claim Evidence Requirements
+
+Every claim must be backed by evidence in the Evidence Envelope.
+
+=== Evidence Levels
+
+[cols="1,2,3",options="header"]
+|===
+| Level | Description | When Required
+
+| **L1: Direct**
+| Exact measurement or enumeration
+| All claims about specific values
+
+| **L2: Derived**
+| Calculated from L1 evidence
+| Summaries, aggregations
+
+| **L3: Inferred**
+| Logical conclusion from evidence
+| Recommendations, correlations
+|===
+
+=== Evidence Format
+
+[source,json]
+----
+{
+  "claim": {
+    "type": "space_recovered",
+    "value": 1288490188,
+    "unit": "bytes",
+    "human_readable": "1.2GB"
+  },
+  "evidence": {
+    "level": "L1",
+    "method": "file_enumeration_and_deletion",
+    "artifacts": [
+      {
+        "artifact_id": "uuid-1",
+        "description": "List of deleted files with sizes",
+        "hash": "sha256:abc..."
+      }
+    ],
+    "verification": {
+      "reproducible": true,
+      "command": "sysobs verify-claim --receipt-id xyz"
+    }
+  }
+}
+----
+
+== Severity Mapping
+
+Claims must use appropriate severity:
+
+[cols="1,3,1",options="header"]
+|===
+| Claim Type | Severity Criteria | Max Default
+
+| Temp files exist
+| Size-based (>1GB = Medium)
+| Low
+
+| Startup items
+| Impact-based (>5s = Medium)
+| Low
+
+| Disk space low
+| Percentage (<10% = High)
+| High
+
+| Security update missing
+| Criticality of update
+| Critical
+
+| Old browser cache
+| Age and size
+| Info
+
+| Duplicate files
+| User review needed
+| Info
+|===
+
+== Forbidden Claim Patterns
+
+The following claim patterns are explicitly forbidden:
+
+=== Inflation Patterns
+
+* "5,847 registry errors" — Registry entries are not "errors"
+* "Performance degraded by 47%" — Unmeasured claim
+* "Critical issues detected" — For non-critical findings
+* "Your PC is slower than 89% of users" — Fake comparison
+
+=== Pressure Patterns
+
+* "Fix now before it's too late"
+* "These issues are getting worse"
+* "Other users fixed these issues"
+* Any countdown or urgency timer
+
+=== Vague Patterns
+
+* "Issues found" without specifics
+* "Problems detected" without evidence
+* "Errors" for non-error conditions
+* "Risks" without specific threat
+
+== Language Standards
+
+=== Allowed Phrases
+
+[cols="1,1",options="header"]
+|===
+| Instead of | Use
+
+| "5,847 errors found!"
+| "Found 3 items to review"
+
+| "Your PC is at CRITICAL risk!"
+| "1 security update available"
+
+| "Speed up your PC!"
+| "Startup time: 42 seconds"
+
+| "Clean registry for performance"
+| (Don't make this claim at all)
+
+| "Problems detected"
+| "Disk space: 85% used"
+|===
+
+=== Tone Guidelines
+
+* Neutral, informative tone
+* Specific over vague
+* Measured over estimated
+* Conservative over aggressive
+* Educational over alarming
+
+== Compliance Checking
+
+Claims are checked at multiple points:
+
+=== Development Time
+
+* CI checks for banned phrases
+* Schema validation for claim structure
+* Evidence reference validation
+
+=== Runtime
+
+* Severity validation against criteria
+* Evidence completeness check
+* Count inflation detection
+
+=== Pack Certification
+
+* Claims audit for new packs
+* Evidence chain verification
+* User testing for clarity
+
+== Related Documents
+
+* link:ANTI-FEARWARE.adoc[Anti-Fearware Principles] — Design philosophy
+* link:PACKS_AND_MODES.adoc[Packs and Modes] — Pack certification
+* `system-tools-contracts/schemas/evidence-envelope.schema.json` — Evidence schema

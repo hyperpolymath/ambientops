@@ -1,0 +1,35 @@
+{
+  "name": "broad-spectrum",
+  "version": "1.0.0",
+  "sources": [
+    {
+      "dir": "src",
+      "subdirs": true
+    }
+  ],
+  "package-specs": [
+    {
+      "module": "es6",
+      "in-source": true
+    }
+  ],
+  "suffix": ".js",
+  "bs-dependencies": [
+    "@rescript/core"
+  ],
+  "gentypeconfig": {
+    "language": "typescript",
+    "module": "es6",
+    "shims": {},
+    "debug": {
+      "all": false,
+      "basic": false
+    }
+  },
+  "warnings": {
+    "error": "+101+8"
+  },
+  "bsc-flags": [
+    "-open RescriptCore"
+  ]
+}

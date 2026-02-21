@@ -1,0 +1,4 @@
+fail_on: deny
+reports:
+  json: care_teardown_report.json
+  junit: care_teardown_report.xml

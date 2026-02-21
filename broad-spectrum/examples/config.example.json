@@ -1,0 +1,14 @@
+{
+  "maxDepth": 3,
+  "followExternal": false,
+  "timeout": 30000,
+  "userAgent": "BroadSpectrum-Auditor/1.0",
+  "checkAccessibility": true,
+  "checkPerformance": true,
+  "checkSEO": true,
+  "reportFormat": "console",
+  "verbose": false,
+  "maxConcurrency": 10,
+  "retryAttempts": 3,
+  "retryDelay": 1000
+}

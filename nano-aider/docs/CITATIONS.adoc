@@ -1,0 +1,36 @@
+= nano-aider - Citation Guide
+:toc:
+
+== BibTeX
+
+[source,bibtex]
+----
+@software{nano-aider_2025,
+  author = {Polymath, Hyper},
+  title = {nano-aider},
+  year = {2025},
+  url = {https://github.com/hyperpolymath/nano-aider},
+  license = {MIT OR AGPL-3.0-or-later}
+}
+----
+
+== Harvard Style
+
+Polymath, H. (2025) _nano-aider_ [Computer software]. Available at: https://github.com/hyperpolymath/nano-aider
+
+== OSCOLA
+
+Hyper Polymath, 'nano-aider' (2025) <https://github.com/hyperpolymath/nano-aider>
+
+== MLA
+
+Polymath, Hyper. "nano-aider." 2025, github.com/hyperpolymath/nano-aider.
+
+== APA 7
+
+Polymath, H. (2025). _nano-aider_ [Computer software]. GitHub. https://github.com/hyperpolymath/nano-aider
+
+== See Also
+
+* link:../LICENSE.txt[LICENSE.txt]
+* link:../README.adoc[README.adoc]

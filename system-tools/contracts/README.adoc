@@ -1,0 +1,114 @@
+= System Tools Contracts
+
+image:https://img.shields.io/badge/License-PMPL--1.0-blue.svg[License: PMPL-1.0,link="https://github.com/hyperpolymath/palimpsest-license"]
+image:https://img.shields.io/badge/Philosophy-Palimpsest-indigo.svg[Palimpsest,link="https://github.com/hyperpolymath/palimpsest-license"]
+
+:toc:
+:toclevels: 3
+:icons: font
+:source-highlighter: rouge
+
+System Tools Contracts defines the *stable seams* between AmbientOps components.
+
+This repo exists so the ecosystem can be modular without becoming fragile:
+Ward, A&E, Operating Theatre, Records, Systems Observatory, PSA, HAR, and feedback-a-tron can evolve independently while still inter-operating.
+
+[IMPORTANT]
+====
+*Project status:* *Initial contract set in progress*
+
+This repo should stay small, boring, and stable.
+====
+
+== What lives here
+
+* Schemas (JSON Schema and/or other formal specs) for shared artifacts
+* Versioning rules for contracts (compatibility guarantees)
+* Reference examples and test vectors
+* Minimal conformance checks (“does this artifact satisfy the contract?”)
+
+== What does NOT live here
+
+* Large implementations
+* OS-specific behaviour
+* Packs/adapters/themes
+
+== Contract set (initial)
+
+=== System Weather payload
+Used by the Ward UI.
+
+* “Calm / Watch / Act” state
+* brief explanation and evidence pointers
+* cooldown/notification hints (Ward enforces)
+
+=== Evidence Envelope
+Produced by A&E intake and Theatre scans.
+
+* run metadata (time, host, profile)
+* references to collected artifacts (paths, hashes)
+* redaction hints (for sharing)
+
+=== Procedure Plan
+Theatre plan representation:
+
+* ordered steps with previews
+* risk labels (safe/guided/expert)
+* reversibility labels (reversible/partial/none)
+* required privileges
+
+=== Run Bundle layout
+Folder conventions for any run:
+
+* stable filenames for “what happened”
+* where receipts, logs, diffs, and exports go
+* cross-platform naming rules
+
+=== Receipt (human + machine)
+The trust anchor:
+
+* what checked
+* what changed (and why)
+* what did NOT change (and why)
+* undo/rollback guidance
+* evidence pointers
+
+=== Message Intent (feedback-a-tron)
+How tools request messages:
+
+* audience (user/helper/forum/vendor)
+* content + attachments + redaction profile
+* routing hints (targets, tags, severity)
+
+== Versioning
+
+Contracts are versioned.
+Components should declare:
+
+* minimum supported contract version
+* maximum tested contract version
+* feature flags/capabilities used
+
+== Directory layout
+
+* `schemas/` — machine-readable contracts
+* `examples/` — reference bundles and sample artifacts
+* `tests/` — conformance tests and fixtures
+* `docs/` — versioning rules, change policy, contribution rules
+
+== Ecosystem Analysis
+
+For a comprehensive analysis of integration seams, failure modes, and security considerations across the entire AmbientOps System Tools ecosystem, see:
+
+link:https://github.com/hyperpolymath/system-operating-theatre/blob/main/docs/SEAM-ANALYSIS.adoc[SEAM-ANALYSIS.adoc] in system-operating-theatre
+
+This analysis covers:
+
+* Cross-schema reference validation
+* DoS prevention via payload constraints
+* Path traversal guards
+* Contract versioning strategy
+
+== Roadmap
+
+See `ROADMAP.adoc`.

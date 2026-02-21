@@ -1,0 +1,174 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/hyperpolymath/system-tools-contracts/schemas/ambient-payload.schema.json",
+  "title": "Ambient Payload",
+  "description": "Data format for the ambient (Ward) UI layer. Minimal, glanceable system state for the dock/tray indicator.",
+  "type": "object",
+  "required": ["version", "timestamp", "indicator"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "indicator": {
+      "type": "object",
+      "description": "Dock/tray indicator state",
+      "required": ["state"],
+      "properties": {
+        "state": {
+          "type": "string",
+          "enum": ["calm", "watch", "act"],
+          "description": "Overall system state"
+        },
+        "icon": {
+          "type": "string",
+          "enum": ["sun", "cloud", "storm", "custom"],
+          "description": "Icon to display"
+        },
+        "color": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$",
+          "description": "Hex color for indicator"
+        },
+        "badge": {
+          "type": "object",
+          "description": "Optional badge overlay",
+          "properties": {
+            "show": { "type": "boolean", "default": false },
+            "count": { "type": "integer", "minimum": 0 },
+            "type": {
+              "type": "string",
+              "enum": ["number", "dot", "exclamation"]
+            }
+          }
+        },
+        "tooltip": {
+          "type": "string",
+          "description": "Hover tooltip text"
+        },
+        "animation": {
+          "type": "string",
+          "enum": ["none", "pulse", "bounce", "glow"],
+          "default": "none"
+        }
+      }
+    },
+    "popover": {
+      "type": "object",
+      "description": "Quick popover content (click on indicator)",
+      "properties": {
+        "headline": {
+          "type": "string",
+          "description": "One-line summary"
+        },
+        "subtext": {
+          "type": "string",
+          "description": "Secondary information"
+        },
+        "metrics": {
+          "type": "array",
+          "description": "Key metrics to display",
+          "maxItems": 4,
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": { "type": "string" },
+              "value": { "type": "string" },
+              "state": {
+                "type": "string",
+                "enum": ["good", "warning", "critical"]
+              },
+              "trend": {
+                "type": "string",
+                "enum": ["up", "down", "stable"]
+              }
+            }
+          }
+        },
+        "quick_actions": {
+          "type": "array",
+          "description": "Quick action buttons",
+          "maxItems": 3,
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": { "type": "string" },
+              "action": {
+                "type": "string",
+                "enum": ["open_dashboard", "quick_scan", "dismiss", "snooze", "settings"]
+              },
+              "primary": { "type": "boolean", "default": false }
+            }
+          }
+        },
+        "last_scan": {
+          "type": "object",
+          "properties": {
+            "timestamp": { "type": "string", "format": "date-time" },
+            "relative": { "type": "string" },
+            "result": { "type": "string" }
+          }
+        }
+      }
+    },
+    "notifications": {
+      "type": "object",
+      "description": "Notification configuration",
+      "properties": {
+        "pending": {
+          "type": "array",
+          "maxItems": 20,
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "type": {
+                "type": "string",
+                "enum": ["info", "warning", "action_required"]
+              },
+              "title": { "type": "string" },
+              "body": { "type": "string" },
+              "action_url": { "type": "string" },
+              "dismissible": { "type": "boolean", "default": true },
+              "expires_at": { "type": "string", "format": "date-time" }
+            }
+          }
+        },
+        "cooldown": {
+          "type": "object",
+          "properties": {
+            "active": { "type": "boolean" },
+            "until": { "type": "string", "format": "date-time" },
+            "reason": { "type": "string" }
+          }
+        }
+      }
+    },
+    "schedule": {
+      "type": "object",
+      "description": "Scheduled scan information",
+      "properties": {
+        "next_scan": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "scan_type": {
+          "type": "string",
+          "enum": ["quick", "standard", "deep"]
+        },
+        "auto_enabled": {
+          "type": "boolean"
+        }
+      }
+    },
+    "weather_ref": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Reference to full System Weather payload for details"
+    }
+  }
+}

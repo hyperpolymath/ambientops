@@ -1,0 +1,78 @@
+# SPDX-License-Identifier: MPL-2.0-or-later
+# SPDX-FileCopyrightText: 2025 hyperpolymath
+#
+# CarecTL Profile: discovery-assist
+# Reproducible assist flow for nano hidden option discovery
+
+name: discovery-assist
+version: "1.0.0"
+description: Reproducible workflow for discovering hidden nano/micro options
+
+fail_on: warn
+reports:
+  json: care_discovery_report.json
+  junit: care_discovery_report.xml
+
+# Assist flow steps (reproducible sequence)
+steps:
+  - id: detect_editor
+    name: Detect installed editor
+    command: "which nano micro 2>/dev/null | head -1"
+    expect: path
+    required: true
+
+  - id: check_version
+    name: Verify editor version
+    command: "${EDITOR:-nano} --version | head -1"
+    expect: "GNU nano"
+    required: true
+
+  - id: locate_config
+    name: Find existing configuration
+    paths:
+      - ~/.nanorc
+      - ~/.config/nano/nanorc
+      - /etc/nanorc
+    action: report
+
+  - id: scan_hidden
+    name: Run nano-aider discovery scan
+    command: "nano-aider --list --format=json"
+    output: discovered_options.json
+    required: true
+
+  - id: diff_current
+    name: Compare against current config
+    action: diff
+    inputs:
+      - discovered_options.json
+      - current_config
+    output: missing_options.json
+
+  - id: generate_report
+    name: Generate discovery report
+    template: discovery_report.md
+    variables:
+      total_options: "{{ steps.scan_hidden.count }}"
+      missing_options: "{{ steps.diff_current.count }}"
+      editor_version: "{{ steps.check_version.output }}"
+
+# Output artifacts
+artifacts:
+  - discovered_options.json
+  - missing_options.json
+  - discovery_report.md
+
+# Validation rules
+validation:
+  - rule: nano_version_minimum
+    check: "version >= 5.0"
+    severity: error
+
+  - rule: config_readable
+    check: "config_path is readable"
+    severity: warn
+
+  - rule: no_deprecated_options
+    check: "deprecated_count == 0"
+    severity: warn

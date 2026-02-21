@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  juisys:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: juisys:latest
+    container_name: juisys
+    stdin_open: true
+    tty: true
+    volumes:
+      # Mount for report exports (optional)
+      - ./reports:/app/reports
+    environment:
+      - JULIA_NUM_THREADS=auto
+    # No network access enforced (privacy guarantee)
+    network_mode: none
+    labels:
+      - "com.juisys.privacy=local-only"
+      - "com.juisys.gdpr=compliant"

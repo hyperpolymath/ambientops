@@ -1,0 +1,171 @@
+---
+title: Comment Bank
+author: Tutor
+created: 2026-01-05
+version: 0.1.0
+---
+
+# Comment Bank
+
+A human-readable reference for feedback comments, organised for quick lookup while marking.
+
+---
+
+## 📝 Framework
+{.category #framework}
+
+Opening/closing comments, overall structure.
+
+### Openings
+
+> Thank you for your submission. I've read through your work and have the following feedback.
+{#fw-001}
+
+> Hi {student-name}, thank you for submitting {tma}. {overall-impression}
+{#fw-002 .template}
+
+### Closings
+
+> Overall, this is a solid piece of work. Keep up the good effort.
+{#fw-003}
+
+> Please review the specific feedback below and feel free to ask questions on the forum if anything is unclear.
+{#fw-004}
+
+> Best regards,
+> {tutor-name}
+> {module} Tutor
+{#fw-005 .template}
+
+---
+
+## 📌 Margin
+{.category #margin}
+
+Short annotations for document margins. Quick, punchy.
+
+### Positive
+
+| Shortcut | Text |
+|----------|------|
+| `+good` | Good point |
+| `+well` | Well explained |
+| `+example` | Excellent example |
+
+### Concerns
+
+| Shortcut | Text |
+|----------|------|
+| `?unclear` | Unclear - please expand |
+| `?source` | Source needed |
+| `?check` | Check this |
+| `?meaning` | What do you mean here? |
+
+### Structure
+
+| Shortcut | Text |
+|----------|------|
+| `~link` | Link to previous point |
+
+---
+
+## ✏️ In-Text
+{.category #inline}
+
+Comments inserted within the student's answer. Use `[square brackets]` to show they're insertions.
+
+### Referencing
+
+- **Harvard format**: Please use Harvard referencing format: (Author, Year).
+  {#in-001}
+
+- **Missing reference**: [Reference needed to support this claim]
+  {#in-002}
+
+### Clarity
+
+- **Rephrase**: [Consider rephrasing for clarity]
+  {#in-003}
+
+- **Define term**: [Technical term - define on first use]
+  {#in-004}
+
+### Quality
+
+- **Grammar**: [Check grammar/spelling here]
+  {#in-005}
+
+- **Logic gap**: [The connection here isn't clear - how does this follow?]
+  {#in-006}
+
+- **Strengthen**: [Good point - strengthen with specific evidence]
+  {#in-007}
+
+---
+
+## 📊 Summary
+{.category #summary}
+
+Longer comments for overall feedback sections.
+
+### Positive Feedback
+
+> You demonstrate a clear understanding of the key concepts. Your explanations are accurate and well-structured.
+{#sm-001 .positive}
+
+### Development Areas
+
+> While you've covered the basics well, try to go deeper in your analysis. Ask yourself 'why' and 'how' to develop your points further.
+{#sm-002 .development}
+
+> The structure of your answer could be improved. Consider using headings to organise your response around the question's sub-parts.
+{#sm-003 .structure}
+
+> Your referencing needs attention throughout. Remember: every claim from an external source needs a citation, and all citations need a full reference in your bibliography.
+{#sm-004 .referencing}
+
+### Higher-Level Skills
+
+> You've described the topic well, but at this level we're looking for critical evaluation. Consider: What are the limitations? What alternatives exist? What evidence supports or contradicts this view?
+{#sm-005 .critical}
+
+> Good theoretical understanding. To strengthen your work, try to include practical examples that show how these concepts apply in real situations.
+{#sm-006 .practical}
+
+### Encouragement
+
+> This submission shows improvement from your previous work. You've clearly taken the earlier feedback on board. Keep building on this progress.
+{#sm-007 .progress}
+
+---
+
+## 📁 Collected
+{.category #collected}
+
+_Comments collected during marking sessions appear here after import._
+
+---
+
+## Quick Reference Card
+
+### Margin Shortcuts
+
+```
++good     +well      +example
+?unclear  ?source    ?check    ?meaning
+~link
+```
+
+### Common Patterns
+
+| Issue | Quick Response |
+|-------|----------------|
+| No references | sm-004 (referencing pattern) |
+| Too descriptive | sm-005 (critical thinking) |
+| Unclear structure | sm-003 (structure) |
+| Good but shallow | sm-002 (depth) |
+| Shows improvement | sm-007 (encouragement) |
+
+---
+
+_Last updated: 2026-01-05_

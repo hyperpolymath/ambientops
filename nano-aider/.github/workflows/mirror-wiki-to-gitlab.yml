@@ -1,0 +1,23 @@
+# SPDX-License-Identifier: MPL-2.0-or-later
+name: Mirror Wiki to GitLab
+
+on:
+  gollum:  # Triggered when wiki pages are created or updated
+
+jobs:
+  mirror-wiki:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone GitHub Wiki
+        run: |
+          git clone https://github.com/${{ github.repository }}.wiki.git wiki
+        continue-on-error: true  # Wiki might not exist yet
+
+      - name: Push Wiki to GitLab
+        if: success()
+        env:
+          GITLAB_WIKI_URL: ${{ secrets.GITLAB_WIKI_MIRROR_URL }}
+        run: |
+          cd wiki
+          git remote add gitlab "$GITLAB_WIKI_URL"
+          git push gitlab --all --force

@@ -1,0 +1,186 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+defmodule HAR.DataPlane.Transformers.ChefTest do
+  @moduledoc """
+  Tests for the Chef recipe transformer.
+
+  Verifies that semantic graph operations are correctly converted to
+  Chef Ruby DSL format with resource declarations, actions, notification
+  chains, and guard clauses.
+  """
+
+  use ExUnit.Case, async: true
+
+  alias HAR.DataPlane.Transformers.Chef
+  alias HAR.Semantic.{Graph, Operation}
+
+  describe "transform/2 - package operations" do
+    test "transforms package_install to package resource with install action" do
+      graph =
+        build_graph([
+          Operation.new(:package_install, %{name: "nginx"})
+        ])
+
+      assert {:ok, output} = Chef.transform(graph)
+      assert is_binary(output)
+      assert output =~ "package"
+      assert output =~ "nginx"
+      assert output =~ ":install"
+    end
+
+    test "transforms package_remove to package resource with remove action" do
+      graph =
+        build_graph([
+          Operation.new(:package_remove, %{name: "apache2"})
+        ])
+
+      assert {:ok, output} = Chef.transform(graph)
+      assert output =~ "package"
+      assert output =~ ":remove"
+    end
+
+    test "transforms package_upgrade to package resource with upgrade action" do
+      graph =
+        build_graph([
+          Operation.new(:package_upgrade, %{name: "openssl"})
+        ])
+
+      assert {:ok, output} = Chef.transform(graph)
+      assert output =~ "package"
+      assert output =~ ":upgrade"
+    end
+  end
+
+  describe "transform/2 - service operations" do
+    test "transforms service_start to service resource with start action" do
+      graph =
+        build_graph([
+          Operation.new(:service_start, %{name: "nginx"})
+        ])
+
+      assert {:ok, output} = Chef.transform(graph)
+      assert is_binary(output)
+      assert output =~ "service"
+      assert output =~ "nginx"
+      assert output =~ ":start"
+    end
+
+    test "transforms service_stop to service resource with stop action" do
+      graph =
+        build_graph([
+          Operation.new(:service_stop, %{name: "apache2"})
+        ])
+
+      assert {:ok, output} = Chef.transform(graph)
+      assert output =~ "service"
+      assert output =~ ":stop"
+    end
+  end
+
+  describe "transform/2 - user operations" do
+    test "transforms user_create to user resource with create action" do
+      graph =
+        build_graph([
+          Operation.new(:user_create, %{name: "deploy", shell: "/bin/bash", home: "/home/deploy"})
+        ])
+
+      assert {:ok, output} = Chef.transform(graph)
+      assert is_binary(output)
+      assert output =~ "user"
+      assert output =~ "deploy"
+      assert output =~ ":create"
+      assert output =~ "/bin/bash"
+    end
+  end
+
+  describe "transform/2 - execute operations" do
+    test "transforms command_run to execute resource" do
+      graph =
+        build_graph([
+          Operation.new(:command_run, %{name: "reload-config", command: "systemctl daemon-reload"})
+        ])
+
+      assert {:ok, output} = Chef.transform(graph)
+      assert is_binary(output)
+      assert output =~ "execute"
+      assert output =~ "reload-config"
+      assert output =~ ":run"
+    end
+
+    test "transforms shell_run to bash resource" do
+      graph =
+        build_graph([
+          Operation.new(:shell_run, %{name: "setup-env", command: "source /etc/profile && setup"})
+        ])
+
+      assert {:ok, output} = Chef.transform(graph)
+      assert output =~ "bash"
+      assert output =~ "setup-env"
+    end
+  end
+
+  describe "transform/2 - cookbook name" do
+    test "includes default cookbook name in header" do
+      graph =
+        build_graph([
+          Operation.new(:package_install, %{name: "curl"})
+        ])
+
+      assert {:ok, output} = Chef.transform(graph)
+      assert output =~ "generated"
+    end
+
+    test "uses custom cookbook name from options" do
+      graph =
+        build_graph([
+          Operation.new(:package_install, %{name: "curl"})
+        ])
+
+      assert {:ok, output} = Chef.transform(graph, cookbook_name: "webserver")
+      assert output =~ "webserver"
+    end
+  end
+
+  describe "transform/2 - multiple operations" do
+    test "renders multiple resource blocks" do
+      graph =
+        build_graph([
+          Operation.new(:package_install, %{name: "nginx"}),
+          Operation.new(:service_start, %{name: "nginx"}),
+          Operation.new(:user_create, %{name: "www-data"})
+        ])
+
+      assert {:ok, output} = Chef.transform(graph)
+      assert output =~ "package"
+      assert output =~ "service"
+      assert output =~ "user"
+    end
+  end
+
+  describe "transform/2 - HAR header" do
+    test "includes HAR generation comment" do
+      graph =
+        build_graph([
+          Operation.new(:package_install, %{name: "vim"})
+        ])
+
+      assert {:ok, output} = Chef.transform(graph)
+      assert output =~ "Generated by HAR"
+    end
+  end
+
+  describe "validate/1" do
+    test "validates a well-formed graph" do
+      graph = build_graph([Operation.new(:package_install, %{name: "nginx"})])
+      assert :ok = Chef.validate(graph)
+    end
+  end
+
+  # Helper to build a test graph from a list of operations
+  defp build_graph(operations) do
+    Graph.new(
+      vertices: operations,
+      edges: [],
+      metadata: %{source: :test}
+    )
+  end
+end

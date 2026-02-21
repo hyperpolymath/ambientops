@@ -1,0 +1,83 @@
+-------------------------------------------------------------------------------
+--  nano-aider GNAT Project File
+--  Copyright (C) 2024-2025 Jonathan D.A. Jewell
+--  SPDX-License-Identifier: MIT OR AGPL-3.0-or-later
+-------------------------------------------------------------------------------
+
+with "ncursesada";
+
+project Nano_Aider is
+
+   type Build_Mode_Type is ("debug", "release", "spark");
+   Build_Mode : Build_Mode_Type := external ("NANO_AIDER_BUILD_MODE", "debug");
+
+   for Source_Dirs use ("src");
+   for Object_Dir use "obj/" & Build_Mode;
+   for Exec_Dir use "bin";
+   for Main use ("nano_aider.adb");
+   for Create_Missing_Dirs use "True";
+
+   package Compiler is
+      Common_Switches := (
+         "-gnat2022",        -- Ada 2022 standard
+         "-gnatwae",         -- Warnings as errors
+         "-gnatwa",          -- Enable all warnings
+         "-gnatyg",          -- GNAT style checks
+         "-gnatyu",          -- Check unnecessary blank lines
+         "-gnatx",           -- Suppress cross-reference information
+         "-gnatVa"           -- Validity checking
+      );
+
+      case Build_Mode is
+         when "debug" =>
+            for Switches ("Ada") use Common_Switches & (
+               "-g",           -- Debug info
+               "-O0",          -- No optimization
+               "-gnata",       -- Enable assertions
+               "-gnatf",       -- Full error messages
+               "-gnateE"       -- Extra info in exceptions
+            );
+         when "release" =>
+            for Switches ("Ada") use Common_Switches & (
+               "-O3",          -- Maximum optimization
+               "-gnatn",       -- Enable inlining
+               "-gnatp"        -- Suppress all checks (production)
+            );
+         when "spark" =>
+            for Switches ("Ada") use Common_Switches & (
+               "-g",           -- Debug info for proofs
+               "-O1",          -- Light optimization
+               "-gnata"        -- Assertions for SPARK
+            );
+      end case;
+   end Compiler;
+
+   package Binder is
+      for Switches ("Ada") use ("-Es");  -- Symbolic traceback
+   end Binder;
+
+   package Linker is
+      for Switches ("Ada") use ("-lncurses");
+   end Linker;
+
+   package Builder is
+      for Executable ("nano_aider.adb") use "nano-aider";
+   end Builder;
+
+   package Pretty_Printer is
+      for Default_Switches ("Ada") use (
+         "--max-line-length=80",
+         "--indentation=3",
+         "--indent-continuation=2"
+      );
+   end Pretty_Printer;
+
+   package Prove is
+      for Proof_Switches ("Ada") use (
+         "-j0",           -- Use all CPUs
+         "--level=2",     -- Medium proof level
+         "--timeout=60"   -- 60 second timeout per proof
+      );
+   end Prove;
+
+end Nano_Aider;

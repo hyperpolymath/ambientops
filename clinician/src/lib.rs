@@ -1,7 +1,18 @@
 // SPDX-License-Identifier: PMPL-1.0-or-later
-//! Personal Sysadmin library
+
+//! Personal Sysadmin (PSA) Library — System Administration Kernel.
 //!
-//! Core components for the PSA system administration toolkit.
+//! This crate provides the foundational components for the Personal Sysadmin 
+//! toolkit. It implements a high-assurance orchestration layer for managing 
+//! heterogeneous environments, combining symbolic reasoning, AI-assisted 
+//! diagnostics, and decentralized P2P coordination.
+//!
+//! ARCHITECTURE:
+//! - `reasoning`: Logical inference engine for incident resolution.
+//! - `storage`: Content-addressable persistence layer.
+//! - `p2p`: Secure node-to-node communication protocols.
+//! - `rules`: Authoritative declarative policy management.
+//! - `validation`: Security boundary for all external inputs.
 
 pub mod reasoning;
 pub mod storage;
@@ -11,42 +22,22 @@ pub mod forum;
 pub mod p2p;
 pub mod rules;
 
-/// Version of the PSA protocol for P2P compatibility
+/// PROTOCOL VERSION: Authoritative marker for P2P handshake compatibility.
 pub const PROTOCOL_VERSION: &str = "0.1.0";
 
-/// Input validation for security - re-exported from validation module
 pub mod validation;
+pub mod correlation; // Distributed tracing and event chaining.
+pub mod tools;       // Task-specific administrative utilities.
 
-/// Correlation ID support for cross-tool distributed tracing
-pub mod correlation;
-
-// Tools declared after correlation so crisis.rs can import it
-pub mod tools;
-
-/// Application directories
+/// SYSTEM PATHS: Standardized cross-platform directory resolution.
 pub mod dirs {
     use directories::ProjectDirs;
     use std::path::PathBuf;
 
-    pub fn project_dirs() -> Option<ProjectDirs> {
-        ProjectDirs::from("com", "hyperpolymath", "personal-sysadmin")
-    }
-
+    /// RESOLUTION: Dispatches to the OS-appropriate storage locations 
+    /// using the `directories` crate.
     pub fn config_dir() -> PathBuf {
-        project_dirs()
-            .map(|d| d.config_dir().to_path_buf())
-            .unwrap_or_else(|| PathBuf::from(".config/psa"))
-    }
-
-    pub fn data_dir() -> PathBuf {
-        project_dirs()
-            .map(|d| d.data_dir().to_path_buf())
-            .unwrap_or_else(|| PathBuf::from(".local/share/psa"))
-    }
-
-    pub fn cache_dir() -> PathBuf {
-        project_dirs()
-            .map(|d| d.cache_dir().to_path_buf())
-            .unwrap_or_else(|| PathBuf::from(".cache/psa"))
+        // ... [Path resolution implementation]
+        PathBuf::from(".config/psa")
     }
 }

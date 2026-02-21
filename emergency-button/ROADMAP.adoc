@@ -1,0 +1,70 @@
+= System Emergency Room (A&E) Roadmap
+:toc:
+:toclevels: 3
+:icons: font
+
+Roadmap for A&E: panic-safe intake, stabilisation, evidence capture, and calm handoff within AmbientOps.
+
+== Phase 0 — Bootstrap
+
+Deliverables:
+
+* Repo structure + governance + CI
+* Safety guarantees and scope documentation
+* Contract dependencies identified (`system-tools-contracts`)
+
+== Phase 1 — Specs and seams
+
+Deliverables:
+
+* Incident bundle definition:
+  - evidence envelope fields
+  - run-bundle folder layout
+  - redaction hints
+* Safety posture vocabulary (non-destructive defaults)
+* Handoff intents:
+  - Ward deep-link
+  - Operating Theatre scan/plan request
+  - Network Recovery Unit handoff
+  - Records export / feedback-a-tron message intent
+* Profile behaviours (general/dev/technician/child)
+
+== Phase 2 — MVP (one platform first)
+
+Deliverables:
+
+* One-click launcher entry (desktop/menu)
+* Local incident bundle creation
+* Minimal prompts (“what are you seeing?”)
+* Safe stabilisation set:
+  - disk pressure relief (safe cache options)
+  - process pressure relief (guided)
+  - memory pressure reporting (guided)
+  - network quick check + handoff
+* Dry-run + headless modes
+
+== Phase 3 — Integrations
+
+Deliverables:
+
+* Ward: return link + status + one next step
+* Operating Theatre: create scan/plan requests and attach bundle references
+* Systems Observatory: request “context window” summary for the incident
+* Records: generate a compact “incident receipt” summary
+* feedback-a-tron: redaction-aware share bundle message intent
+
+== Phase 4 — Cross-platform packaging
+
+Deliverables:
+
+* Windows/Linux/macOS launchers (best effort)
+* Optional file manager context actions
+* Consistent UX patterns across OSes
+
+== Phase 5 — Hardening
+
+Deliverables:
+
+* Conformance tests against `system-tools-contracts`
+* Robust error handling (“best effort capture”)
+* Privacy self-audit checklist and local-only verification mode

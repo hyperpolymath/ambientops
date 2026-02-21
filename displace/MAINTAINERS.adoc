@@ -1,0 +1,37 @@
+= MAINTAINERS: displace - Cross-Platform Verified File Copy Utility
+
+:toc: left
+:toclevels: 3
+
+*This document lists the maintainers and key contributors responsible for the `displace` project.*
+
+== Core Maintainers
+
+*   **Jonathan D.A. Jewell** <jonathan.jewell@open.ac.uk>
+    *   **Roles**: Project Lead, Architecture, Core Development, Verified Container Integration.
+    *   **Keys**: Associated `builder` and `trust-store-updater` keys in the project's Trust Store.
+
+== Contributing Maintainers
+
+[Placeholder: Add names and contact information for other contributing maintainers, their roles, and associated key IDs if applicable.]
+
+== Communication
+
+*   **Issues**: GitHub Issues (linked from the main repository).
+*   **Discussions**: GitHub Discussions (if enabled).
+*   **Security Reports**: Refer to `SECURITY.md`.
+
+== How to Become a Maintainer
+
+Maintainers are individuals who have demonstrated sustained high-quality contributions to the project, a deep understanding of its goals and technical aspects, and a commitment to fostering a positive community.
+
+If you are interested in becoming a maintainer, please:
+
+1.  Consistently contribute to the project (code, documentation, reviews).
+2.  Demonstrate adherence to the project's Code of Conduct and standards.
+3.  Actively participate in discussions and provide constructive feedback.
+4.  Express your interest to the existing core maintainers.
+
+---
+
+[This document will be updated as the project grows and its maintainer base expands.]

@@ -1,0 +1,28 @@
+# github.com/hyperpolymath/must-spec v1.0
+version: 1.0
+identity: "rhodium-authority"
+
+config:
+  engine: nickel
+  source: "./ncl/main.ncl"
+
+# Every major option and useful concatenation
+targets:
+  # Primary: Podman Immutable Route
+  container:
+    if: "has_podman"
+    steps:
+      - run: nicaug build-container
+      - run: podman run --name {{project.short_alias}} -d {{project.name}}
+
+  # Secondary: Native Package Managers
+  system:
+    steps:
+      - run: nicaug inject --nala --ostree --scoop --brew
+      - run: must update-man-pages # Professional CLI docs
+
+  # Tertiary: Cloud & Shell Sync
+  sync:
+    steps:
+      - run: bash scripts/all-shells.sh --sync
+      - run: must check-mounts --all

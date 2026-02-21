@@ -1,0 +1,4 @@
+fail_on: warn
+reports:
+  json: care_onboarding_report.json
+  junit: care_onboarding_report.xml

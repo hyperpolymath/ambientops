@@ -1,0 +1,330 @@
+# Basic Usage Examples
+
+This document provides common usage examples for the Complete Linux Internet Repair Tool.
+
+## Quick Diagnostics
+
+### Check All Network Issues
+
+```bash
+# Run complete diagnostics
+network-repair diagnose
+```
+
+Output example:
+```
+=== Network Interface Check ===
+→ Available network interfaces
+  eth0
+    Status: UP
+    IP: 192.168.1.100
+    MAC: 00:11:22:33:44:55
+
+=== Routing Table Check ===
+→ Checking default route
+✓ Default route found
+  Gateway: 192.168.1.1
+
+=== DNS Configuration Check ===
+→ Checking /etc/resolv.conf
+✓ Found 2 nameserver(s)
+```
+
+### Check Specific Issues
+
+```bash
+# Check DNS only
+network-repair diagnose-dns
+
+# Check network interfaces only
+network-repair diagnose-network
+
+# Check routing only
+network-repair diagnose-routing
+```
+
+## Basic Repairs
+
+### Auto-Repair All Issues
+
+```bash
+# Diagnose and automatically repair
+sudo network-repair --auto-repair diagnose
+```
+
+### Repair Specific Issues
+
+```bash
+# Fix DNS problems
+sudo network-repair repair-dns
+
+# Fix network interface issues
+sudo network-repair repair-network
+
+# Fix routing problems
+sudo network-repair repair-routing
+```
+
+## Interactive Mode
+
+### Guided Troubleshooting
+
+```bash
+# Launch interactive mode
+sudo network-repair interactive
+```
+
+This provides a menu:
+```
+╔═══════════════════════════════════════════════════════════╗
+║   Complete Linux Internet Repair Tool                    ║
+║   Interactive Guided Mode                                ║
+╚═══════════════════════════════════════════════════════════╝
+
+What would you like to do?
+
+  1) Run complete diagnostics
+  2) Run specific diagnostic
+  3) Attempt automatic repairs
+  4) Run specific repair
+  5) View backup files
+  6) Exit
+
+Enter choice [1-6]:
+```
+
+## Advanced Usage
+
+### Verbose Output
+
+```bash
+# See detailed diagnostic information
+network-repair --verbose diagnose
+```
+
+### Dry Run
+
+```bash
+# See what would be changed without making changes
+sudo network-repair --dry-run repair
+```
+
+Output example:
+```
+[WARN] DRY RUN MODE - No changes will be made
+
+=== DNS Configuration Repair ===
+→ Would add DNS servers to /etc/resolv.conf
+→ Would restart systemd-resolved
+```
+
+### Logging to File
+
+```bash
+# Save detailed logs
+network-repair --log-file /tmp/network-repair.log diagnose
+
+# View the log
+cat /tmp/network-repair.log
+```
+
+### Quiet Mode
+
+```bash
+# Show only errors
+network-repair --quiet diagnose
+```
+
+## Common Scenarios
+
+### Scenario 1: No Internet After System Update
+
+```bash
+# Step 1: Diagnose the issue
+network-repair diagnose
+
+# Step 2: If DNS or routing issues found, auto-repair
+sudo network-repair --auto-repair diagnose
+```
+
+### Scenario 2: DNS Not Resolving
+
+```bash
+# Check DNS
+network-repair diagnose-dns
+
+# Fix DNS
+sudo network-repair repair-dns
+
+# Verify fix
+ping google.com
+```
+
+### Scenario 3: Interface is Down
+
+```bash
+# Check interfaces
+network-repair diagnose-network
+
+# Bring up interfaces and renew DHCP
+sudo network-repair repair-network
+
+# Verify
+ip addr show
+```
+
+### Scenario 4: No Default Route
+
+```bash
+# Check routing
+network-repair diagnose-routing
+
+# Fix routing
+sudo network-repair repair-routing
+
+# Verify
+ip route show
+```
+
+### Scenario 5: NetworkManager Issues
+
+```bash
+# Check NetworkManager
+network-repair diagnose-all
+
+# Repair NetworkManager
+sudo network-repair repair-all
+
+# Or use interactive mode for guided repair
+sudo network-repair interactive
+```
+
+## Working with Backups
+
+### View Backups
+
+```bash
+# List all backups
+ls -lh ~/.network-repair-backups/
+```
+
+### Restore from Backup
+
+```bash
+# Manually restore a backup
+sudo cp ~/.network-repair-backups/resolv.conf.20250122_143052 /etc/resolv.conf
+```
+
+## Configuration
+
+### Using Environment Variables
+
+```bash
+# Enable verbose mode
+VERBOSE=true network-repair diagnose
+
+# Change log level
+LOG_LEVEL=DEBUG network-repair diagnose
+
+# Use custom DNS servers
+DEFAULT_DNS_SERVERS="8.8.8.8 1.1.1.1" sudo network-repair repair-dns
+
+# Change backup directory
+BACKUP_DIR=/tmp/backups sudo network-repair repair
+```
+
+### Using Configuration File
+
+Edit `/opt/network-repair/config/defaults.conf` (after installation):
+
+```bash
+# Enable logging to file
+LOG_TO_FILE=true
+LOG_FILE=/var/log/network-repair.log
+
+# Enable verbose output by default
+VERBOSE=true
+
+# Always run in interactive mode
+INTERACTIVE=true
+```
+
+## Troubleshooting the Tool
+
+### Permission Denied
+
+```bash
+# Make sure you're using sudo for repairs
+sudo network-repair repair
+
+# Check file permissions
+ls -l /opt/network-repair/
+```
+
+### Command Not Found
+
+```bash
+# If not installed, run directly
+./network-repair diagnose
+
+# Or install it
+sudo ./install.sh
+```
+
+### Getting Help
+
+```bash
+# View help
+network-repair --help
+
+# View version
+network-repair --version
+```
+
+## Integration with Other Tools
+
+### Using in Scripts
+
+```bash
+#!/bin/bash
+# Example: Check network before running backup
+
+if ! network-repair diagnose >/dev/null 2>&1; then
+    echo "Network issues detected, attempting repair..."
+    sudo network-repair --auto-repair diagnose
+fi
+
+# Proceed with backup
+./backup.sh
+```
+
+### Cron Job for Monitoring
+
+```bash
+# Add to crontab: Check network every hour
+0 * * * * /usr/local/bin/network-repair diagnose --quiet || /usr/local/bin/network-repair --auto-repair repair
+```
+
+### Systemd Service
+
+Create `/etc/systemd/system/network-repair-monitor.service`:
+
+```ini
+[Unit]
+Description=Network Repair Monitor
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/network-repair diagnose
+ExecStartPost=/bin/sh -c 'if [ $? -ne 0 ]; then /usr/local/bin/network-repair --auto-repair repair; fi'
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Enable:
+```bash
+sudo systemctl enable network-repair-monitor.service
+sudo systemctl start network-repair-monitor.service
+```

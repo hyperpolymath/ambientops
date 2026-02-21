@@ -1,0 +1,531 @@
+= nano-aider Roadmap
+Jonathan D.A. Jewell <jonathan.jewell@gmail.com>
+:toc: macro
+:toc-title: Version Roadmap
+:toclevels: 2
+:icons: font
+:source-highlighter: rouge
+:experimental:
+:sectanchors:
+
+*Development Roadmap: v0.1.0 to v10.0.0*
+
+[.lead]
+This document outlines the development trajectory for nano-aider from its initial alpha release through to the mature v10.0.0 milestone. Each version includes specific deliverables, quality gates, and distribution targets.
+
+toc::[]
+
+== Version Overview
+
+[cols="1,1,2,1"]
+|===
+|Version |Codename |Focus |Status
+
+|v0.1.0
+|*Genesis*
+|Initial Ada TUI foundation
+|*Current*
+
+|v0.2.0
+|*Discovery*
+|Option detection engine
+|Planned
+
+|v0.3.0
+|*Navigator*
+|Full TUI navigation
+|Planned
+
+|v0.4.0
+|*Scribe*
+|Configuration export
+|Planned
+
+|v0.5.0
+|*Chameleon*
+|Profile management
+|Planned
+
+|v1.0.0
+|*Milestone*
+|First stable release
+|Planned
+
+|v2.0.0
+|*Bifrost*
+|micro editor support
+|Planned
+
+|v3.0.0
+|*Sentinel*
+|SPARK verification
+|Planned
+
+|v4.0.0
+|*Scholar*
+|Documentation engine
+|Planned
+
+|v5.0.0
+|*Polyglot*
+|i18n/l10n support
+|Planned
+
+|v6.0.0
+|*Artisan*
+|Theme customization
+|Planned
+
+|v7.0.0
+|*Conduit*
+|Plugin architecture
+|Planned
+
+|v8.0.0
+|*Oracle*
+|AI-assisted config
+|Planned
+
+|v9.0.0
+|*Citadel*
+|Enterprise features
+|Planned
+
+|v10.0.0
+|*Zenith*
+|Feature complete
+|Future
+|===
+
+---
+
+== Phase 1: Foundation (v0.1.0 - v0.5.0)
+
+=== v0.1.0 "Genesis" -- Initial Alpha
+*Status:* CURRENT
+
+==== Deliverables
+* [x] Ada 2022 project structure
+* [x] Basic ncurses TUI framework
+* [x] Category-based option organization
+* [x] Static hidden option database
+* [x] GNAT project file with build modes
+* [x] Alire package manifest
+* [x] README.adoc documentation
+* [x] ROADMAP.adoc (this document)
+
+==== Technical Specifications
+* Ada 2022 standard compliance
+* ncursesada dependency
+* Debug/Release/SPARK build modes
+* Cross-platform directory structure
+
+==== Quality Gates
+* Compiles without warnings (debug mode)
+* Basic smoke test passes
+* Documentation complete
+
+---
+
+=== v0.2.0 "Discovery" -- Option Detection Engine
+
+==== Deliverables
+* [ ] Parse `nano --help` output dynamically
+* [ ] Detect nano version from binary
+* [ ] Scan `/usr/share/nano/*.nanorc` for syntax files
+* [ ] Parse existing `~/.nanorc` configuration
+* [ ] Build runtime option database
+* [ ] Categorize options by functionality
+* [ ] Mark hidden/undocumented options
+
+==== New Features
+* Dynamic option discovery based on installed nano version
+* Support for nano versions 2.0 through 8.x
+* Option availability tracking by version
+* Syntax file enumeration
+
+==== Technical Tasks
+* [ ] Implement `Nano_Aider.Discovery` package
+* [ ] Add subprocess execution for `nano --help`
+* [ ] Create option database record types
+* [ ] Implement version comparison logic
+* [ ] Add unit tests for discovery
+
+---
+
+=== v0.3.0 "Navigator" -- Full TUI Navigation
+
+==== Deliverables
+* [ ] Complete keyboard navigation (vim-style + arrows)
+* [ ] Search functionality with highlighting
+* [ ] Option detail view with full descriptions
+* [ ] Scroll indicators and position tracking
+* [ ] Mouse support (optional)
+* [ ] Window resize handling
+* [ ] Help overlay system
+
+==== New Features
+* Fuzzy search across all options
+* Option value preview
+* Breadcrumb navigation
+* Quick jump to category
+
+==== Technical Tasks
+* [ ] Refactor TUI into window management system
+* [ ] Implement search algorithm with ranking
+* [ ] Add panel support for overlays
+* [ ] Handle terminal resize signals
+* [ ] Optional mouse event processing
+
+---
+
+=== v0.4.0 "Scribe" -- Configuration Export
+
+==== Deliverables
+* [ ] Export to `.nanorc` format
+* [ ] Export to micro `settings.json`
+* [ ] Export to Markdown documentation
+* [ ] Import existing configuration
+* [ ] Diff view between current and exported
+* [ ] Backup before overwrite protection
+
+==== New Features
+* One-click configuration export
+* Configuration validation before save
+* Comment preservation during import/export
+* Export with documentation comments
+
+==== Technical Tasks
+* [ ] Implement `Nano_Aider.Export` package
+* [ ] Create configuration serializers
+* [ ] Add file validation routines
+* [ ] Implement backup mechanism
+
+---
+
+=== v0.5.0 "Chameleon" -- Profile Management
+
+==== Deliverables
+* [ ] Built-in profiles (Minimal, Developer, Writer, Power User)
+* [ ] User-defined profile creation
+* [ ] Profile switching with preview
+* [ ] Profile import/export
+* [ ] Profile comparison tool
+
+==== New Features
+* Quick profile switching (F1-F4 keys)
+* Profile inheritance (extend from base)
+* Conditional profiles (by file extension)
+* Profile recommendations
+
+==== Technical Tasks
+* [ ] Implement `Nano_Aider.Profiles` package fully
+* [ ] Create profile storage format
+* [ ] Add profile validation
+* [ ] Implement comparison diffing
+
+---
+
+== Phase 2: Stability (v1.0.0)
+
+=== v1.0.0 "Milestone" -- First Stable Release
+*Target:* Production Ready
+
+==== Release Criteria
+* All Phase 1 features complete and tested
+* Zero known critical bugs
+* Documentation complete and reviewed
+* Performance benchmarks established
+* Security audit passed
+
+==== Distribution Targets
+
+[cols="1,2,1"]
+|===
+|Target |Description |Priority
+
+|Alire
+|Ada package manager
+|HIGH
+
+|GitHub Releases
+|Binary releases for Linux/macOS
+|HIGH
+
+|AUR
+|Arch User Repository
+|MEDIUM
+
+|Homebrew
+|macOS package manager
+|MEDIUM
+
+|Debian/Ubuntu
+|`.deb` packages
+|MEDIUM
+
+|Fedora/RHEL
+|`.rpm` packages
+|LOW
+|===
+
+==== Package Preparation
+* [ ] Create release automation workflow
+* [ ] Build static binaries for distribution
+* [ ] Generate man pages
+* [ ] Create shell completions (bash, zsh, fish)
+* [ ] Establish version numbering policy
+
+---
+
+== Phase 3: Expansion (v2.0.0 - v5.0.0)
+
+=== v2.0.0 "Bifrost" -- micro Editor Support
+
+==== Deliverables
+* [ ] micro editor option discovery
+* [ ] `settings.json` parsing and generation
+* [ ] Keybinding import from micro
+* [ ] Unified interface for both editors
+* [ ] Editor-specific profile sections
+
+==== Distribution
+* Update all existing packages
+* Expand testing matrix
+
+---
+
+=== v3.0.0 "Sentinel" -- SPARK Verification
+
+==== Deliverables
+* [ ] SPARK annotations on critical code paths
+* [ ] GNATprove integration in CI
+* [ ] Formal verification of file operations
+* [ ] Memory safety proofs
+* [ ] Overflow protection proofs
+
+==== Quality Improvements
+* Zero runtime exceptions in verified code
+* Documented proof artifacts
+* Verification coverage report
+
+---
+
+=== v4.0.0 "Scholar" -- Documentation Engine
+
+==== Deliverables
+* [ ] Built-in option documentation viewer
+* [ ] Link to nano manpage sections
+* [ ] Example configuration snippets
+* [ ] Interactive tutorials
+* [ ] Searchable documentation index
+
+---
+
+=== v5.0.0 "Polyglot" -- Internationalization
+
+==== Deliverables
+* [ ] Gettext-based i18n framework
+* [ ] Initial translations (en, de, fr, es, pt)
+* [ ] RTL language support
+* [ ] Locale-aware formatting
+* [ ] Translation contribution guide
+
+---
+
+== Phase 4: Enhancement (v6.0.0 - v8.0.0)
+
+=== v6.0.0 "Artisan" -- Theme Customization
+
+==== Deliverables
+* [ ] Custom TUI color themes
+* [ ] Theme import/export
+* [ ] 16/256/TrueColor support
+* [ ] Theme preview mode
+* [ ] Accessibility color schemes
+
+---
+
+=== v7.0.0 "Conduit" -- Plugin Architecture
+
+==== Deliverables
+* [ ] Ada plugin API
+* [ ] Dynamic plugin loading
+* [ ] Plugin marketplace integration
+* [ ] Sandboxed plugin execution
+* [ ] Official plugin repository
+
+---
+
+=== v8.0.0 "Oracle" -- AI-Assisted Configuration
+
+==== Deliverables
+* [ ] Local LLM integration (optional)
+* [ ] Configuration recommendations
+* [ ] Natural language option search
+* [ ] Conflict detection and resolution
+* [ ] Best practices suggestions
+
+---
+
+== Phase 5: Maturity (v9.0.0 - v10.0.0)
+
+=== v9.0.0 "Citadel" -- Enterprise Features
+
+==== Deliverables
+* [ ] Centralized configuration management
+* [ ] LDAP/AD integration for policies
+* [ ] Audit logging
+* [ ] Compliance reporting
+* [ ] Multi-user profile sync
+
+---
+
+=== v10.0.0 "Zenith" -- Feature Complete
+
+==== Milestone Criteria
+* All planned features implemented
+* Comprehensive test coverage (>90%)
+* Full SPARK verification of core
+* Translations in 10+ languages
+* Active plugin ecosystem
+* Stable API with semantic versioning
+
+==== Long-Term Support
+* v10.x will be an LTS branch
+* Security updates for 5 years
+* Bug fixes for 3 years
+* Feature freeze (new features in v11.x)
+
+---
+
+== Distribution Strategy
+
+=== Package Availability by Version
+
+[cols="2,1,1,1,1,1"]
+|===
+|Package Manager |v1.0 |v2.0 |v5.0 |v10.0 |Notes
+
+|Alire (Ada)
+|Yes
+|Yes
+|Yes
+|Yes
+|Primary distribution
+
+|GitHub Releases
+|Yes
+|Yes
+|Yes
+|Yes
+|Binary releases
+
+|AUR (Arch)
+|Yes
+|Yes
+|Yes
+|Yes
+|Community maintained
+
+|Homebrew (macOS)
+|Yes
+|Yes
+|Yes
+|Yes
+|Official tap
+
+|Debian/Ubuntu
+|
+|Yes
+|Yes
+|Yes
+|After v2.0 stability
+
+|Fedora/RHEL
+|
+|Yes
+|Yes
+|Yes
+|After v2.0 stability
+
+|FreeBSD Ports
+|
+|
+|Yes
+|Yes
+|After v5.0
+
+|Nix/NixOS
+|
+|
+|Yes
+|Yes
+|After v5.0
+
+|Guix
+|
+|
+|
+|Yes
+|After v10.0 LTS
+
+|Alpine Linux
+|
+|
+|Yes
+|Yes
+|Minimal dependency build
+|===
+
+=== Release Cadence
+
+* **Alpha releases (0.x):** Every 4-6 weeks
+* **Minor releases (x.Y.0):** Every 3-4 months
+* **Patch releases (x.y.Z):** As needed for security/bugs
+* **Major releases:** ~12-18 months
+
+---
+
+== Contributing to the Roadmap
+
+This roadmap is a living document. Contributions are welcome:
+
+1. **Feature Requests:** Open a GitHub issue with `[ROADMAP]` prefix
+2. **Version Proposals:** Submit a PR modifying this document
+3. **Priority Feedback:** Comment on existing roadmap issues
+
+=== Voting on Features
+
+Features are prioritized based on:
+
+* Community votes (thumbs up on issues)
+* Maintainer capacity
+* Technical dependencies
+* Security implications
+
+---
+
+== Changelog
+
+[cols="1,1,3"]
+|===
+|Date |Version |Change
+
+|2025-12
+|0.1.0
+|Ruby to Ada migration complete; documentation cleanup; workflow updates
+
+|2024-12
+|0.1.0
+|Initial roadmap created
+
+|===
+
+---
+
+[.text-center]
+*Building the future of terminal editor configuration, one version at a time.*
+
+[.text-center]
+https://github.com/hyperpolymath/nano-aider[nano-aider on GitHub]

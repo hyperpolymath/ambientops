@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+project_dir="/var/mnt/eclipse/repos/a2ml"
+if [ ! -x "$project_dir/bin/a2ml" ]; then
+  echo "A2ML binary not found; build the repo first." >&2
+  exit 1
+fi
+
+export A2ML_MODE="attested"
+exec "$project_dir/bin/a2ml" "$@"

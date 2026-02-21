@@ -1,0 +1,91 @@
+= Total Recall
+
+image:[Palimpsest-MPL-1.0,link="https://github.com/hyperpolymath/palimpsest-license"]
+:toc: preamble
+:toclevels: 2
+:icons: font
+:source-highlighter: rouge
+
+**Project specification to be uploaded shortly.**
+
+== Status
+
+[cols="1,3"]
+|===
+| Phase | Specification pending
+| Code | None yet
+| Docs | Infrastructure templates only
+|===
+
+This repository has been initialised with the https://github.com/hyperpolymath/RSR-template-repo[RSR (Rhodium Standard Repository)] template infrastructure but awaits project specification and implementation.
+
+== What's Here Now
+
+The following infrastructure is in place:
+
+=== Build & Automation
+* `justfile` — RSR-standard task runner with ~50 recipes for build, test, lint, docs, containers, security, and validation
+* `.editorconfig` — Consistent editor settings
+* `.gitattributes` / `.gitignore` — Git configuration
+
+=== CI/CD Workflows
+* CodeQL analysis
+* Guix/Nix policy enforcement
+* Instant-sync for forge propagation
+* Jekyll GitHub Pages
+* Mirror workflow
+* Quality checks
+* RSR antipattern detection
+* Security scorecard
+* Well-known file enforcement
+
+=== Community & Governance
+* `CODE_OF_CONDUCT.md` — Contributor Covenant 2.1 (template)
+* `CONTRIBUTING.md` — Contribution guidelines (template)
+* `SECURITY.md` — Security policy (template)
+* Issue templates for bugs, features, docs, and questions
+
+=== Documentation
+* `docs/CITATIONS.adoc` — Citation formats (BibTeX, Harvard, OSCOLA, MLA, APA)
+
+== Technology Stack
+
+Per the https://github.com/hyperpolymath[Hyperpolymath] language policy:
+
+[cols="1,2"]
+|===
+| Primary | ReScript, Rust, Gleam
+| Runtime | Deno
+| Mobile | Tauri 2.0+ / Dioxus
+| Packages | Guix (primary), Nix (fallback)
+| Config | Nickel, Guile Scheme
+|===
+
+See `.claude/CLAUDE.md` for the complete language policy and banned technologies.
+
+== Getting Started
+
+[source,bash]
+----
+# Clone
+git clone https://github.com/hyperpolymath/total-recall.git
+cd total-recall
+
+# View available tasks
+just
+
+# Validate RSR compliance (will show missing files until project is set up)
+just validate-rsr
+----
+
+== Roadmap
+
+See link:ROADMAP.adoc[ROADMAP.adoc] for planned development phases.
+
+== License
+
+PMPL-1.0-or-later — See link:LICENSE.txt[LICENSE.txt]
+
+== Contact
+
+Hyperpolymath — https://github.com/hyperpolymath

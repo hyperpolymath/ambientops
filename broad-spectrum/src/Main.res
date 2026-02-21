@@ -1,0 +1,56 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+
+/**
+ * Broad-Spectrum Website Auditor — CLI Entry Point (ReScript).
+ *
+ * This module implements the command-line interface for the website 
+ * auditing engine. It manages argument parsing, file ingestion, 
+ * and the orchestration of the asynchronous audit pipeline.
+ *
+ * AUDIT DIMENSIONS:
+ * 1. **Accessibility**: Automated WCAG compliance checks.
+ * 2. **Performance**: Measures loading speed and resource efficiency.
+ * 3. **SEO**: Evaluates search engine optimization and metadata quality.
+ * 4. **Links**: Recursive crawl to identify broken internal/external links.
+ *
+ * RUNTIME: Executes within the Deno environment, utilizing FFI bindings 
+ * for OS-level tasks (filesystem, process exit).
+ */
+
+let version = "1.0.0"
+
+// HELP SYSTEM: Displays usage instructions and available options.
+let printHelp = () => {
+  // ... [Help text implementation]
+}
+
+/**
+ * ARGUMENT PARSER: Maps CLI flags to a structured `parsedArgs` record.
+ * Handles type conversion for integers (timeouts, depth) and 
+ * provides sane defaults.
+ */
+let parseArgs = (args: array<string>): parsedArgs => {
+  // ... [Iterative scanning of the process argument list]
+}
+
+/**
+ * MAIN ORCHESTRATOR: The primary application loop.
+ * 
+ * SEQUENCE:
+ * 1. BOOT: Ingest arguments and verify required parameters (--url or --file).
+ * 2. CONFIGURE: Initialize the `Auditor` with user-specified options.
+ * 3. EXECUTE: Trigger the multi-threaded crawl and analysis.
+ * 4. REPORT: Serialize results to the requested format (Console, JSON, HTML).
+ * 5. TERMINATE: Exit with a non-zero code if any critical failures occurred.
+ */
+let main = async () => {
+  let args = parseArgs(DenoBindings.args)
+  // ... [Implementation of the audit workflow]
+}
+
+// EXECUTION: Invokes the main function and catches fatal boot-time errors.
+let _ = main()->Promise.catch(error => {
+  DenoBindings.consoleError("Fatal error during auditor startup.")
+  DenoBindings.exit(1)
+  Promise.resolve()
+})

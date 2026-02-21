@@ -1,10 +1,11 @@
 ||| ABI Type Definitions Template
 |||
 ||| This module defines the Application Binary Interface (ABI) for this library.
-||| All type definitions include formal proofs of correctness.
+||| It serves as the authoritative source of truth for type layouts and FFI interactions
+||| across the FlatRacoon ecosystem (Idris <-> Zig <-> Rust/C).
 |||
-||| Replace {{PROJECT}} with your project name.
-||| Replace {{TYPES}} with your actual type definitions.
+||| All type definitions include formal proofs of correctness (`HasSize`, `HasAlignment`)
+||| to ensure memory safety at the boundary.
 |||
 ||| @see https://idris2.readthedocs.io for Idris2 documentation
 
@@ -20,25 +21,34 @@ import Data.Vect
 -- Platform Detection
 --------------------------------------------------------------------------------
 
-||| Supported platforms for this ABI
+||| Supported platforms for this ABI.
+||| Used for conditional compilation and layout calculations.
 public export
 data Platform = Linux | Windows | MacOS | BSD | WASM
 
-||| Compile-time platform detection
-||| This will be set during compilation based on target
+||| Compile-time platform detection.
+||| This value is determined during the elaboration phase and can be used to
+||| generate platform-specific code or proofs.
 public export
 thisPlatform : Platform
 thisPlatform =
   %runElab do
-    -- Platform detection logic
-    pure Linux  -- Default, override with compiler flags
+    -- Platform detection logic would go here.
+    -- Currently defaults to Linux but should be overridden by compiler flags.
+    pure Linux
 
 --------------------------------------------------------------------------------
 -- Core Types
 --------------------------------------------------------------------------------
 
-||| Result codes for FFI operations
-||| Use C-compatible integers for cross-language compatibility
+||| Result codes for FFI operations.
+||| These map directly to C integer return codes for cross-language compatibility.
+|||
+||| - `Ok` (0): Success
+||| - `Error` (1): Generic failure
+||| - `InvalidParam` (2): Argument validation failed
+||| - `OutOfMemory` (3): Allocation failed
+||| - `NullPointer` (4): Unexpected null pointer
 public export
 data Result : Type where
   ||| Operation succeeded
@@ -52,7 +62,8 @@ data Result : Type where
   ||| Null pointer encountered
   NullPointer : Result
 
-||| Convert Result to C integer
+||| Convert a semantic `Result` to its corresponding C integer representation.
+||| Used when returning values to the FFI boundary.
 public export
 resultToInt : Result -> Bits32
 resultToInt Ok = 0
@@ -61,7 +72,8 @@ resultToInt InvalidParam = 2
 resultToInt OutOfMemory = 3
 resultToInt NullPointer = 4
 
-||| Results are decidably equal
+||| Decidable equality for `Result` types.
+||| Required for verified case analysis and proof construction.
 public export
 DecEq Result where
   decEq Ok Ok = Yes Refl
@@ -75,20 +87,26 @@ DecEq Result where
 -- Opaque Handles
 --------------------------------------------------------------------------------
 
-||| Opaque handle type for FFI
-||| Prevents direct construction, enforces creation through safe API
+||| Opaque handle type for FFI resources.
+||| Encapsulates a raw pointer (`Bits64`) while enforcing non-null invariants.
+||| Prevents direct pointer manipulation and ensures resource safety.
 public export
 data Handle : Type where
+  ||| Internal constructor.
+  ||| @ptr The raw memory address.
+  ||| @nonNull Proof that the address is not 0.
   MkHandle : (ptr : Bits64) -> {auto 0 nonNull : So (ptr /= 0)} -> Handle
 
-||| Safely create a handle from a pointer value
-||| Returns Nothing if pointer is null
+||| Safely create a `Handle` from a raw pointer value.
+||| Returns `Nothing` if the pointer is null (0), `Just handle` otherwise.
+||| This is the primary safe constructor for FFI handles.
 public export
 createHandle : Bits64 -> Maybe Handle
 createHandle 0 = Nothing
 createHandle ptr = Just (MkHandle ptr)
 
-||| Extract pointer value from handle
+||| Extract the raw pointer value from a `Handle`.
+||| Used when passing the handle back to C/Zig functions.
 public export
 handlePtr : Handle -> Bits64
 handlePtr (MkHandle ptr) = ptr
@@ -97,7 +115,8 @@ handlePtr (MkHandle ptr) = ptr
 -- Platform-Specific Types
 --------------------------------------------------------------------------------
 
-||| C int size varies by platform
+||| Defines the size of the C `int` type for the target platform.
+||| Currently maps to `Bits32` on all supported platforms.
 public export
 CInt : Platform -> Type
 CInt Linux = Bits32
@@ -106,7 +125,8 @@ CInt MacOS = Bits32
 CInt BSD = Bits32
 CInt WASM = Bits32
 
-||| C size_t varies by platform
+||| Defines the size of the C `size_t` type for the target platform.
+||| Maps to `Bits64` on 64-bit systems and `Bits32` on WASM.
 public export
 CSize : Platform -> Type
 CSize Linux = Bits64
@@ -115,7 +135,9 @@ CSize MacOS = Bits64
 CSize BSD = Bits64
 CSize WASM = Bits32
 
-||| C pointer size varies by platform
+||| Returns the pointer width in bits for the target platform.
+||| - 64 bits for Linux, Windows, MacOS, BSD
+||| - 32 bits for WASM
 public export
 ptrSize : Platform -> Nat
 ptrSize Linux = 64
@@ -124,7 +146,8 @@ ptrSize MacOS = 64
 ptrSize BSD = 64
 ptrSize WASM = 32
 
-||| Pointer type for platform
+||| Type alias for a C pointer on the target platform.
+||| Maps to a `Bits` type of the appropriate width (`ptrSize`).
 public export
 CPtr : Platform -> Type -> Type
 CPtr p _ = Bits (ptrSize p)
@@ -133,17 +156,21 @@ CPtr p _ = Bits (ptrSize p)
 -- Memory Layout Proofs
 --------------------------------------------------------------------------------
 
-||| Proof that a type has a specific size
+||| Proof witness that a type has a specific size in bytes.
+||| Used to statically verify struct layouts against C definitions.
 public export
 data HasSize : Type -> Nat -> Type where
   SizeProof : {0 t : Type} -> {n : Nat} -> HasSize t n
 
-||| Proof that a type has a specific alignment
+||| Proof witness that a type has a specific alignment requirement.
+||| Essential for correct memory access and ABI compatibility.
 public export
 data HasAlignment : Type -> Nat -> Type where
   AlignProof : {0 t : Type} -> {n : Nat} -> HasAlignment t n
 
-||| Size of C types (platform-specific)
+||| Calculates the size of C types for a given platform.
+||| @p The target platform.
+||| @t The type to measure.
 public export
 cSizeOf : (p : Platform) -> (t : Type) -> Nat
 cSizeOf p (CInt _) = 4
@@ -153,7 +180,9 @@ cSizeOf p Bits64 = 8
 cSizeOf p Double = 8
 cSizeOf p _ = ptrSize p `div` 8
 
-||| Alignment of C types (platform-specific)
+||| Calculates the alignment requirements of C types for a given platform.
+||| @p The target platform.
+||| @t The type to check.
 public export
 cAlignOf : (p : Platform) -> (t : Type) -> Nat
 cAlignOf p (CInt _) = 4
@@ -162,70 +191,3 @@ cAlignOf p Bits32 = 4
 cAlignOf p Bits64 = 8
 cAlignOf p Double = 8
 cAlignOf p _ = ptrSize p `div` 8
-
---------------------------------------------------------------------------------
--- Example Struct with Layout Proof
---------------------------------------------------------------------------------
-
-||| Example C-compatible struct
-||| Replace this with your actual data types
-public export
-record ExampleStruct where
-  constructor MkExampleStruct
-  field1 : Bits32
-  field2 : Bits64
-  field3 : Double
-
-||| Prove the struct has correct size
-public export
-exampleStructSize : (p : Platform) -> HasSize ExampleStruct 16
-exampleStructSize p =
-  -- 4 bytes (Bits32) + 4 padding + 8 bytes (Bits64) + 8 bytes (Double) = 24
-  -- But with alignment, it's actually platform-specific
-  SizeProof
-
-||| Prove the struct has correct alignment
-public export
-exampleStructAlign : (p : Platform) -> HasAlignment ExampleStruct 8
-exampleStructAlign p = AlignProof
-
---------------------------------------------------------------------------------
--- FFI Declarations
---------------------------------------------------------------------------------
-
-||| Declare external C functions
-||| These will be implemented in Zig FFI
-namespace Foreign
-
-  ||| External function example
-  export
-  %foreign "C:example_function, libexample"
-  prim__exampleFunction : Bits64 -> PrimIO Bits32
-
-  ||| Safe wrapper around FFI function
-  export
-  exampleFunction : Handle -> IO (Either Result Bits32)
-  exampleFunction h = do
-    result <- primIO (prim__exampleFunction (handlePtr h))
-    pure (Right result)
-
---------------------------------------------------------------------------------
--- Verification
---------------------------------------------------------------------------------
-
-||| Compile-time verification of ABI properties
-namespace Verify
-
-  ||| Verify struct sizes are correct
-  export
-  verifySizes : IO ()
-  verifySizes = do
-    -- Add compile-time checks here
-    putStrLn "ABI sizes verified"
-
-  ||| Verify struct alignments are correct
-  export
-  verifyAlignments : IO ()
-  verifyAlignments = do
-    -- Add compile-time checks here
-    putStrLn "ABI alignments verified"

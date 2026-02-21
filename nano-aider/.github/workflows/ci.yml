@@ -1,0 +1,105 @@
+# SPDX-License-Identifier: MPL-2.0-or-later
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  ALIRE_VERSION: 2.0.1
+
+jobs:
+  build:
+    name: Build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            alire_platform: x86_64-linux
+          - os: macos-latest
+            alire_platform: x86_64-macos
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install ncurses (Ubuntu)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libncurses-dev
+
+      - name: Install ncurses (macOS)
+        if: runner.os == 'macOS'
+        run: brew install ncurses
+
+      - name: Install Alire
+        uses: alire-project/setup-alire@v5
+        with:
+          version: ${{ env.ALIRE_VERSION }}
+
+      - name: Build (Debug)
+        run: |
+          alr build -- -XNANO_AIDER_BUILD_MODE=debug
+
+      - name: Build (Release)
+        run: |
+          alr build -- -XNANO_AIDER_BUILD_MODE=release
+
+      - name: Run tests
+        run: |
+          ./ci-scripts/test.sh
+
+      - name: Upload binary artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: nano-aider-${{ matrix.os }}
+          path: bin/nano-aider
+
+  spark:
+    name: SPARK Verification
+    runs-on: ubuntu-latest
+    continue-on-error: true
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install GNAT and SPARK
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gnat gnatprove libncurses-dev
+
+      - name: Install Alire
+        uses: alire-project/setup-alire@v5
+        with:
+          version: ${{ env.ALIRE_VERSION }}
+
+      - name: Run GNATprove
+        run: |
+          alr exec -- gnatprove -P nano_aider.gpr --level=1 --report=all || true
+
+  lint:
+    name: Code Quality
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install GNAT
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gnat libncurses-dev
+
+      - name: Install Alire
+        uses: alire-project/setup-alire@v5
+        with:
+          version: ${{ env.ALIRE_VERSION }}
+
+      - name: Check style
+        run: |
+          alr build -- -XNANO_AIDER_BUILD_MODE=debug -gnatyg -gnatwe || echo "Style check completed"

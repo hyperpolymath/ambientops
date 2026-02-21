@@ -1,0 +1,235 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+= Anti-Fearware Design Principles
+:toc:
+:toclevels: 3
+:icons: font
+:source-highlighter: rouge
+
+This document defines the anti-fearware design principles that govern Operating Theatre (big-up) and all related AmbientOps system tools.
+
+== The Problem: Fearware
+
+Traditional "system optimizer" tools use dark patterns to:
+
+* **Inflate problem counts** — "5,847 registry errors found!"
+* **Create urgency** — countdown timers, flashing warnings
+* **Mislead about impact** — "Your PC is at CRITICAL risk!"
+* **Obscure actual changes** — "Cleaned 2.3GB!" (of what?)
+* **Push unnecessary purchases** — "Upgrade to fix these issues!"
+
+These tactics exploit users' legitimate concerns about their computers.
+
+== Our Commitment: Anti-Fearware
+
+Operating Theatre and all AmbientOps tools commit to the opposite approach.
+
+=== Core Principles
+
+[cols="1,2,2",options="header"]
+|===
+| Principle | What It Means | How We Enforce It
+
+| **Evidence-First**
+| Every finding must have verifiable evidence
+| Findings reference specific files, metrics, or logs
+
+| **Honest Severity**
+| Severity matches actual impact
+| "Info" for cosmetic, "High" only for real problems
+
+| **No Fake Counts**
+| Numbers represent real, distinct issues
+| No inflating by counting sub-items separately
+
+| **Transparent Actions**
+| Users see exactly what will change
+| Preview before apply, diff after
+
+| **Reversibility-First**
+| Prefer actions that can be undone
+| Backups before changes, undo bundles always
+
+| **No Dark Patterns**
+| No manipulation tactics
+| No countdowns, no fear copy, no fake urgency
+|===
+
+=== What We Will NEVER Do
+
+* Display inflated "error counts" or "issues found"
+* Use countdown timers to pressure decisions
+* Show fake "scanning" animations for effect
+* Claim "registry cleaning improves performance"
+* Display warnings about non-problems
+* Auto-download or install third-party software
+* Use scare tactics like "CRITICAL" for minor issues
+* Require payment to see what was "found"
+* Show "before/after" metrics without evidence
+* Claim speed improvements without measurement
+
+=== What We WILL Do
+
+* Show evidence for every finding
+* Explain in plain language what each issue means
+* Let users make informed decisions at their pace
+* Provide clear undo paths for all changes
+* Generate receipts documenting what was checked and changed
+* Be transparent about what we can and cannot determine
+* Acknowledge uncertainty when appropriate
+* Respect user time and attention
+
+== Severity Classification
+
+Severity levels must accurately reflect actual impact:
+
+[cols="1,2,3",options="header"]
+|===
+| Level | Criteria | Examples
+
+| **Info**
+| No action required; informational only
+| "Windows Update pending", "Disk 70% full"
+
+| **Low**
+| Minor optimization opportunity
+| "Unused startup entry", "Old temp files"
+
+| **Medium**
+| Worth addressing but not urgent
+| "Outdated driver available", "Large log accumulation"
+
+| **High**
+| Should be addressed soon
+| "Disk 95% full", "Critical security update missing"
+
+| **Critical**
+| Immediate attention required
+| "Disk full", "Known malware signature detected"
+|===
+
+=== Severity Anti-Patterns (Forbidden)
+
+* Marking cosmetic issues as "High" or "Critical"
+* Inflating severity to encourage action
+* Using "Critical" for performance suggestions
+* Marking old files as security risks without evidence
+
+== UI/UX Requirements
+
+=== Language Guidelines
+
+DO use:
+
+* "Found 3 items to review"
+* "Disk usage: 85GB of 100GB (85%)"
+* "This startup program slows boot by ~3 seconds"
+* "Optional: remove unused language packs (saves ~500MB)"
+
+DO NOT use:
+
+* "5,847 ERRORS DETECTED!"
+* "Your computer is at RISK!"
+* "CRITICAL: Action required immediately!"
+* "Performance degraded by 47%!" (unmeasured)
+
+=== Visual Design
+
+* No red flashing elements
+* No countdown timers
+* No progress bars that move faster at the end
+* No fake "deep scan" animations
+* Calm, professional appearance
+* Clear distinction between Info/Warning/Action states
+
+=== Decision Points
+
+When users must make choices:
+
+* Present options neutrally
+* Default to the safer/reversible option
+* Never auto-select the more aggressive action
+* Allow "Skip" or "Decide later" without penalty
+* No guilt-tripping for conservative choices
+
+== Evidence Requirements
+
+Every finding MUST include:
+
+[source,json]
+----
+{
+  "finding_id": "disk-low-space-001",
+  "severity": "high",
+  "category": "disk",
+  "title": "Low disk space on C:",
+  "evidence_refs": ["artifact-uuid-1", "artifact-uuid-2"],
+  "evidence_summary": "85GB used of 100GB (85%)",
+  "measurement_method": "Windows GetDiskFreeSpaceEx API",
+  "recommendation": "Review large files or uninstall unused programs",
+  "auto_fixable": false
+}
+----
+
+=== Evidence Chain
+
+. **Artifact**: Raw collected data (file list, metric value, log entry)
+. **Reference**: UUID linking finding to artifact
+. **Summary**: Human-readable interpretation
+. **Method**: How the measurement was taken
+. **Confidence**: Certainty level of the finding
+
+== Receipts
+
+Every scan and every apply action produces a receipt:
+
+=== Receipt Contents (Minimum)
+
+. What was checked (scope)
+. When it was checked (timestamp)
+. What was found (findings with evidence refs)
+. What was changed (actions taken)
+. What was NOT changed (and why)
+. How to undo (if applicable)
+. Full artifact references
+
+=== Receipt Integrity
+
+* Receipts are cryptographically signed
+* Artifacts are content-addressed (hash-based)
+* Receipts reference exact artifact versions
+* Tampering is detectable
+
+== Compliance Verification
+
+Packs and modules must pass anti-fearware compliance checks:
+
+=== Pack Claims
+
+Every pack declares:
+
+[source,json]
+----
+{
+  "claims": {
+    "no_fake_counts": true,
+    "evidence_backed": true,
+    "user_controlled": true,
+    "fully_reversible": false,
+    "open_source": true
+  }
+}
+----
+
+=== Automated Checks
+
+* Finding severity matches criteria
+* All findings have evidence_refs
+* No banned phrases in UI text
+* Reversibility accurately declared
+* No countdown or pressure UI elements
+
+== Related Documents
+
+* link:CLAIMS_POLICY.adoc[Claims Policy] — Specific claim rules
+* link:PACKS_AND_MODES.adoc[Packs and Modes] — Pack certification
+* `system-tools-contracts/schemas/` — Evidence schemas

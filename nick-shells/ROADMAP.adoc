@@ -1,0 +1,95 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-FileCopyrightText: 2025 Jonathan D.A. Jewell <hyperpolymath>
+
+= nick-shells Roadmap
+:toc:
+:icons: font
+
+This document tracks the development progress of nick-shells.
+
+== Phase 0: Infrastructure ✓
+
+[cols="1,3,1"]
+|===
+|Status |Item |Notes
+
+|✓ |Repository governance scaffolding |Complete
+|✓ |Multi-forge sync (GitHub, GitLab, Bitbucket, Codeberg) |Complete
+|✓ |RSR language policy enforcement |Complete
+|✓ |Security scanning pipeline |Complete
+|✓ |Well-known standards compliance |Complete
+|===
+
+== Phase 1: Core Shell Configuration ✓
+
+[cols="1,3,1"]
+|===
+|Status |Item |Notes
+
+|✓ |Modular shell architecture |10 modules
+|✓ |Security hardening module |Umask, core dumps, safety aliases
+|✓ |XDG Base Directory support |Standards-compliant
+|✓ |History configuration |Timestamps, deduplication
+|✓ |RSR-compliant PATH setup |Rust, Deno, Guix, Nix
+|✓ |Editor/pager configuration |Auto-detection
+|✓ |Informative prompt |Exit code display
+|✓ |Example configurations |Minimal, interactive, developer
+|✓ |Installation script |Backup, rollback, idempotent
+|✓ |Nickel configuration schema |Type-safe validation
+|===
+
+== Phase 2: Tooling & Compliance ✓
+
+[cols="1,3,1"]
+|===
+|Status |Item |Notes
+
+|✓ |Proper SECURITY.md |Full vulnerability disclosure policy
+|✓ |CITATION.cff |Machine-readable citation
+|✓ |codemeta.json |Software metadata standard
+|✓ |RFC 9116 security.txt |Well-known security contact
+|✓ |AIBDP ai.txt/aibdp.json |AI boundary declaration
+|✓ |humans.txt |Credits and acknowledgments
+|✓ |justfile with real commands |ShellCheck, shfmt integration
+|✓ |Must/Nickel deployment config |Type-safe task definitions
+|===
+
+== Phase 3: Enhanced Features
+
+[cols="1,3,1"]
+|===
+|Status |Item |Notes
+
+|⏳ |Zsh-specific module |Oh-My-Zsh compatibility
+|⏳ |Fish shell support |Alternative shell
+|⏳ |Starship prompt integration |Optional modern prompt
+|⏳ |Plugin system |User-contributed modules
+|⏳ |Online documentation |GitHub Pages site
+|===
+
+== Phase 4: Ecosystem Integration
+
+[cols="1,3,1"]
+|===
+|Status |Item |Notes
+
+|⏳ |Guix package |guix.scm manifest
+|⏳ |Nix flake |flake.nix
+|⏳ |Homebrew formula |macOS/Linux package
+|⏳ |AUR package |Arch Linux
+|===
+
+== Version History
+
+[cols="1,2,3"]
+|===
+|Version |Date |Changes
+
+|0.1.0
+|2025
+|Initial release with modular shell configuration
+|===
+
+== Contributing
+
+See link:README.adoc[README.adoc] for contribution guidelines and link:SECURITY.md[SECURITY.md] for security policy.

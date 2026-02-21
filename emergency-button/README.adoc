@@ -1,0 +1,204 @@
+= System Emergency Room (A&E)
+
+image:https://img.shields.io/badge/License-PMPL--1.0-blue.svg[License: PMPL-1.0,link="https://github.com/hyperpolymath/palimpsest-license"]
+image:https://img.shields.io/badge/Philosophy-Palimpsest-indigo.svg[Palimpsest,link="https://github.com/hyperpolymath/palimpsest-license"]
+
+
+:toc:
+:toclevels: 3
+:icons: font
+:source-highlighter: rouge
+
+When everything is on fire, press this button.
+
+System Emergency Room (A&E) is the panic-safe intake for the AmbientOps ecosystem:
+one-click stabilisation, evidence capture, and calm handoff to the right next step.
+
+[IMPORTANT]
+====
+*Project status:* *Specification Pending*
+
+This repository may currently contain scaffolding or policy only.
+Implementation and detailed specs will land next.
+====
+
+== Philosophy
+
+A&E is not a sysadmin suite. It is a *fire extinguisher*.
+
+[cols="1,1",options="header"]
+|===
+| A&E | Other tools
+
+| Panic mode
+| Calm, methodical
+
+| One entry point
+| Many options
+
+| Immediate stabilisation
+| Long-term solutions
+
+| Works offline
+| May need connectivity
+
+| Safe defaults
+| Powerful options
+|===
+
+A&E is designed for users who are overwhelmed: “I just need it to work.”
+
+== The button
+
+The core interaction is intentionally simple:
+
+*Menu / launcher / desktop shortcut / file-manager action → A&E*
+
+CLI (for scripts):
+
+----
+system-emergency-room
+----
+
+That’s it.
+
+== What it does (design intent)
+
+A&E follows a strict sequence:
+
+1. *Stabilise*
+   * offer safe, reversible “safety posture” toggles (default: non-destructive)
+   * reduce the chance of panic-click damage
+
+2. *Capture*
+   * create an incident bundle (evidence envelope + artifacts)
+   * prompt for a short human description (“what are you seeing?”)
+
+3. *Handoff*
+   * to Ward (System Weather + one next step)
+   * to Operating Theatre (scan/plan for targeted fixes)
+   * to Network Recovery Unit (if it’s a network emergency)
+   * to Personal Sysadmin (if enabled)
+   * to Records / feedback-a-tron (share bundle, redaction-aware)
+
+== Ecosystem integration
+
+A&E is the first responder in the AmbientOps hospital model:
+
+                         CRISIS
+                           ↓
+                   ┌───────────────────┐
+                   │  A&E (You are here)│
+                   └─────────┬─────────┘
+                             ↓
+         ┌───────────────────┼───────────────────┐
+         ↓                   ↓                   ↓
+┌──────────────────┐ ┌──────────────────┐ ┌────────────────────┐
+│ Ward              │ │ Operating Theatre │ │ Network Recovery    │
+│ (System Weather)  │ │ (Scan→Plan→Apply) │ │ Unit (network fix)  │
+└sT
+└─────────┬────────┘ └─────────┬────────┘ └──────────┬─────────┘
+          ↓                    ↓                     ↓
+   ┌──────────────┐     ┌──────────────┐      ┌──────────────┐
+   │ Records       │     │ Systems       │      │ Personal      │
+   │ (Receipts,    │     │ Observatory   │      │ Sysadmin (PSA)│
+   │ share bundles)│     │ (trends)      │      │ workflows     │
+   └──────────────┘     └──────────────┘      └──────────────┘
+
+== Core capabilities (planned)
+
+=== Disk emergency
+* identify space consumers (largest/oldest offenders)
+* clear safe caches (never user data by default)
+* prune containers (opt-in, explicit)
+* generate a “free space now” plan
+
+=== Memory emergency
+* identify memory hogs
+* offer safe targets to reduce pressure (guided; never silent)
+* report swap/oom pressure and recent symptoms
+
+=== Process emergency
+* identify CPU hogs and runaway trees
+* offer a “calm down” plan (nice/ionice suggestions; guided termination options)
+
+=== Network emergency
+* quick connectivity check
+* handoff to Network Recovery Unit for deeper diagnosis/repair
+
+== Safety guarantees
+
+A&E will never:
+
+* delete user data without explicit confirmation
+* silently apply system configuration changes
+* require root for basic evidence capture
+* fake counts, urgency, or “optimiser” theatre
+* upload incident data by default (local-first)
+
+If a change is offered, it must be:
+
+* explicit
+* logged
+* preferably reversible
+* represented as a plan before apply
+
+== Output: incident bundle
+
+A&E produces a local incident bundle structured by AmbientOps contracts:
+
+* evidence envelope (metadata + references)
+* artifacts (logs/summaries/screenshots where appropriate)
+* handoff intents (what to do next)
+* optional redaction profile suggestions for sharing
+
+== Usage
+
+Interactive (default):
+
+----
+system-emergency-room
+----
+
+Headless (for scripts):
+
+----
+system-emergency-room --headless --safe-only
+----
+
+Dry run:
+
+----
+system-emergency-room --dry-run
+----
+
+Maximum safe stabilisation, minimal prompts:
+
+----
+system-emergency-room --panic
+----
+
+== Implementation approach
+
+* Core: V language (verification layer — policy + plan + provenance + schema conformance)
+* Optional: Rust helpers for privileged/safety-critical steps (tight boundaries)
+
+NOTE: V was chosen for A&E because panic-safe intake requires *verification* that actions are safe before taking them.
+This aligns with the AmbientOps layer model where V handles "is this allowed / true / safe?" decisions.
+
+== Ecosystem Analysis
+
+For a comprehensive analysis of integration seams, failure modes, and security considerations across the entire AmbientOps System Tools ecosystem, see:
+
+link:https://github.com/hyperpolymath/system-operating-theatre/blob/main/docs/SEAM-ANALYSIS.adoc[SEAM-ANALYSIS.adoc] in system-operating-theatre
+
+This analysis covers:
+
+* Command injection prevention
+* PII redaction patterns
+* Incident ID collision avoidance
+* Cross-system error handling
+
+== License
+
+PMPL-1.0-or-later.

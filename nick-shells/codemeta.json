@@ -1,0 +1,66 @@
+{
+  "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
+  "@type": "SoftwareSourceCode",
+  "identifier": "nick-shells",
+  "name": "nick-shells",
+  "description": "A modular, secure, POSIX-compatible shell configuration system following the Rhodium Standard Repository (RSR) conventions.",
+  "version": "0.1.0",
+  "dateCreated": "2025-01-01",
+  "dateModified": "2025-01-01",
+  "license": "https://spdx.org/licenses/MIT.html",
+  "codeRepository": "https://github.com/hyperpolymath/nick-shells",
+  "issueTracker": "https://github.com/hyperpolymath/nick-shells/issues",
+  "author": [
+    {
+      "@type": "Person",
+      "givenName": "Jonathan D.A.",
+      "familyName": "Jewell",
+      "alternateName": "hyperpolymath"
+    }
+  ],
+  "maintainer": [
+    {
+      "@type": "Person",
+      "givenName": "Jonathan D.A.",
+      "familyName": "Jewell",
+      "alternateName": "hyperpolymath"
+    }
+  ],
+  "programmingLanguage": [
+    {
+      "@type": "ComputerLanguage",
+      "name": "Shell",
+      "url": "https://www.gnu.org/software/bash/"
+    },
+    {
+      "@type": "ComputerLanguage",
+      "name": "Nickel",
+      "url": "https://nickel-lang.org/"
+    }
+  ],
+  "operatingSystem": [
+    "Linux",
+    "macOS",
+    "BSD",
+    "Windows Subsystem for Linux"
+  ],
+  "softwareRequirements": [
+    "Bash >= 3.0 or Zsh >= 5.0 or POSIX sh",
+    "Nickel >= 1.5.0 (optional, for configuration validation)"
+  ],
+  "keywords": [
+    "shell",
+    "bash",
+    "zsh",
+    "dotfiles",
+    "configuration",
+    "posix",
+    "security",
+    "nickel",
+    "rsr"
+  ],
+  "developmentStatus": "active",
+  "isAccessibleForFree": true,
+  "readme": "https://github.com/hyperpolymath/nick-shells/blob/main/README.adoc",
+  "contIntegration": "https://github.com/hyperpolymath/nick-shells/actions"
+}

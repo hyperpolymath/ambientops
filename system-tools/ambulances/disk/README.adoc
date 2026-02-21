@@ -1,0 +1,883 @@
+= Disk Ambulance
+:toc:
+:toclevels: 3
+:icons: font
+:source-highlighter: rouge
+
+image:https://img.shields.io/badge/License-PMPL--1.0-blue.svg[License: PMPL-1.0,link="https://github.com/hyperpolymath/palimpsest-license"]
+image:https://img.shields.io/badge/Philosophy-Palimpsest-indigo.svg[Palimpsest,link="https://github.com/hyperpolymath/palimpsest-license"]
+image:https://img.shields.io/badge/Version-0.5.0-orange.svg[Version]
+image:https://img.shields.io/badge/Status-Alpha-yellow.svg[Status]
+
+*Your disk is acting weird. Disk Ambulance diagnoses and repairs filesystem issues before you lose data.*
+
+Disk Ambulance is a comprehensive diagnostic and repair tool for Linux disk health, filesystem integrity, and storage performance issues. Unlike random forum advice or dangerous "optimizer" tools, it provides *safe, documented, reversible* disk repairs with *full evidence trails*.
+
+[quote]
+____
+"Your filesystem just went read-only. You have unsaved work. You don't need a sysadmin certification—you need Disk Ambulance."
+____
+
+== The Problem
+
+You've been there:
+
+* "Disk full" error despite deleting gigabytes
+* Filesystem suddenly mounted read-only
+* SMART errors appearing in logs
+* System freezes during disk I/O
+* `fsck` errors on boot that you clicked through
+* "Cannot create file: No space left on device" with plenty of space
+* Slow disk performance for no apparent reason
+* Mysterious "Input/output error" messages
+
+You search forums. You find advice from 2012 about running `dd if=/dev/zero of=/dev/sda` (don't do this). Half the solutions assume you have backups. Some will destroy your data. You don't know which to trust.
+
+**Disk Ambulance solves this.**
+
+== What It Does
+
+Disk Ambulance provides *systematic, expert-level diagnostics and repairs* for common Linux disk and filesystem failures—without requiring you to be a storage expert.
+
+=== 🔍 Comprehensive Diagnostics
+
+Disk Ambulance checks *everything* that can affect disk health and filesystem integrity:
+
+[cols="1,3"]
+|===
+|Area |What It Checks
+
+|**SMART Health**
+|Drive temperature, reallocated sectors, pending sectors, uncorrectable errors, power-on hours, spin-up time, seek errors
+
+|**Filesystem Integrity**
+|Superblock validity, inode table corruption, journal status, filesystem consistency, free space accuracy
+
+|**Mount State**
+|Mount options, read-only remounts, mount point accessibility, fstab consistency, orphaned mount points
+
+|**Disk Space**
+|Actual vs. reported free space, inode exhaustion, reserved blocks, quota limits, hidden space consumers
+
+|**I/O Performance**
+|Read/write latency, queue depth, I/O scheduler, sustained throughput, random vs. sequential performance
+
+|**Physical Health**
+|Bad sector mapping, read error rate, spin retry count, reported uncorrectable errors, wear leveling (SSD)
+
+|**RAID Status**
+|Array health, degraded arrays, rebuild progress, sync status, failed disks, spare activation
+
+|**SSD Health**
+|Wear leveling count, total bytes written, remaining lifetime, TRIM support, over-provisioning
+|===
+
+=== 🔧 Safe, Documented Repairs
+
+When Disk Ambulance finds problems, it can fix them—*safely*:
+
+* **Filesystem repairs**: Safe fsck execution, journal replay, superblock recovery, inode table rebuild
+* **Space recovery**: Find and clean disk space hogs, quota fixes, reserved block adjustment, orphaned file cleanup
+* **Mount repairs**: Fix mount options, recover from read-only state, repair fstab entries, remount with correct options
+* **SMART handling**: Acknowledge SMART warnings, trigger self-tests, handle reallocated sectors, firmware bug workarounds
+* **RAID repairs**: Re-add failed disks, start rebuilds, sync arrays, activate spares, repair metadata
+* **SSD optimization**: Enable TRIM, trigger garbage collection, optimize mount options, check alignment
+
+Every repair:
+
+* ✓ Shows you what it will do *before* doing it (dry-run mode)
+* ✓ Creates automatic backups (filesystem metadata, partition tables, RAID configs)
+* ✓ Generates receipts for audit trails
+* ✓ Can be undone if something goes wrong
+* ✓ **NEVER touches user data without explicit consent**
+
+== Quick Start
+
+=== Installation
+
+[source,bash]
+----
+git clone https://github.com/hyperpolymath/disk-ambulance.git
+cd disk-ambulance
+sudo ./install.sh
+----
+
+Or download and install in one command:
+
+[source,bash]
+----
+curl -fsSL https://raw.githubusercontent.com/hyperpolymath/disk-ambulance/main/install.sh | sudo bash
+----
+
+=== Basic Usage
+
+==== Run Full Diagnostics
+
+[source,bash]
+----
+disk-repair diagnose
+----
+
+This shows you *everything* about your disk health: SMART status, filesystem integrity, mount state, space usage, I/O performance, RAID health.
+
+Sample output:
+
+[source,text]
+----
+[✓] /dev/nvme0n1: SMART OK, 127 days power-on, 0 reallocated sectors
+[✗] /dev/sda: 5 reallocated sectors (WARNING)
+[✓] /dev/sda: Temperature 42°C (normal)
+[✓] /: ext4 mounted rw, 78% used (372G free)
+[✗] /home: XFS mounted ro (READ-ONLY - PROBLEM)
+[!] /home: Filesystem consistency check needed
+[✗] /dev/md0: RAID1 degraded (1/2 disks active)
+[✓] SSD /dev/nvme0n1: TRIM enabled, 94% lifetime remaining
+----
+
+==== Auto-Repair Everything
+
+If you trust Disk Ambulance to fix everything it found:
+
+[source,bash]
+----
+sudo disk-repair auto-repair
+----
+
+==== Guided Repair (Recommended)
+
+For more control, use interactive mode:
+
+[source,bash]
+----
+sudo disk-repair repair --interactive
+----
+
+This walks you through each issue and asks what you want to do:
+
+[source,text]
+----
+Issue: Filesystem /home is mounted read-only (likely due to I/O errors)
+
+Suggested repair: Unmount /home, run fsck.xfs, remount read-write
+
+Impact: Users cannot access /home during repair (estimated 5-15 minutes)
+Risk: Low (read-only check first, then repair)
+
+[Y] Apply this fix
+[S] Skip
+[D] Show details
+[Q] Quit
+
+Your choice:
+----
+
+==== Target Specific Problems
+
+Fix just filesystem issues:
+
+[source,bash]
+----
+sudo disk-repair repair filesystems
+----
+
+Check SMART health only:
+
+[source,bash]
+----
+disk-repair diagnose smart
+----
+
+Other targets: `space`, `mounts`, `raid`, `ssd`, `performance`
+
+==== Dry-Run Mode
+
+See what *would* be changed without actually changing it:
+
+[source,bash]
+----
+sudo disk-repair repair --dry-run
+----
+
+Perfect for understanding what's wrong or verifying before production changes.
+
+== Real-World Scenarios
+
+=== Scenario 1: "Filesystem Suddenly Read-Only"
+
+This happens when the kernel detects I/O errors and protects your data by remounting read-only.
+
+[source,bash]
+----
+$ disk-repair diagnose filesystems
+
+[✗] /home: ext4 mounted ro (filesystem errors detected)
+[!] Kernel log shows: "EXT4-fs error: I/O failure writing to journal"
+[!] SMART: 3 pending sectors on /dev/sdb
+
+$ sudo disk-repair repair filesystems --target /home
+
+Checking SMART status of /dev/sdb... 3 pending sectors
+Recommendation: Trigger SMART self-test first
+
+Running SMART short self-test on /dev/sdb... (2 minutes)
+Self-test complete: 3 sectors reallocated successfully
+No new pending sectors detected
+
+Unmounting /home...
+Running fsck.ext4 (read-only check first)...
+Found: 2 orphaned inodes, 1 corrupted journal entry
+Severity: MEDIUM (repairable without data loss)
+
+Proceed with repair? [y/N]: y
+
+Running fsck.ext4 -p (automatic safe repairs)...
+✓ Orphaned inodes reconnected to lost+found
+✓ Journal replayed successfully
+✓ Filesystem consistency verified
+
+Remounting /home read-write...
+Testing write access... SUCCESS
+
+[✓] /home repaired and remounted read-write
+----
+
+=== Scenario 2: "Disk Full But It Shouldn't Be"
+
+Common culprits: deleted files held open by processes, inode exhaustion, hidden reserved space.
+
+[source,bash]
+----
+$ disk-repair diagnose space
+
+[✓] /: 2.1TB total, 189GB free (91% used)
+[✗] /var: 50GB total, 0B free (100% used - PROBLEM)
+[!] /var: 12GB held by deleted files (still open by processes)
+[!] /var: 8GB in /var/log (log rotation not working)
+
+$ sudo disk-repair repair space --target /var
+
+Found space consumers:
+  1. 12GB: Deleted files held open by processes
+     - 8GB: /var/log/syslog (deleted, held by rsyslogd)
+     - 4GB: /var/lib/docker/... (deleted, held by dockerd)
+  2. 8GB: /var/log/*.log (old log files, rotation failed)
+  3. 4GB: /var/cache/apt/archives (old package files)
+
+Repair plan:
+  1. Restart rsyslogd to release deleted log files (12GB)
+  2. Truncate /var/log/*.log files >1GB (8GB)
+  3. Clean apt cache (4GB)
+  Total recovery: ~24GB
+
+Proceed? [y/N]: y
+
+Restarting rsyslog... done (12GB freed)
+Truncating large log files... done (8GB freed)
+Cleaning apt cache... done (4GB freed)
+
+[✓] /var: 50GB total, 24GB free (52% used)
+----
+
+=== Scenario 3: "SMART Errors in Logs"
+
+SMART warnings mean your disk is failing. Act fast.
+
+[source,bash]
+----
+$ disk-repair diagnose smart
+
+[✗] /dev/sda: 24 reallocated sectors (FAILING)
+[✗] /dev/sda: 8 pending sectors (CRITICAL)
+[!] /dev/sda: Predicted failure within 24 hours
+[!] Drive model: WDC WD20EFRX (known firmware bug WD-201)
+
+$ sudo disk-repair repair smart --target /dev/sda
+
+CRITICAL: This drive is failing and should be replaced IMMEDIATELY.
+
+Disk Ambulance can:
+  1. Run extended SMART test (forces reallocation of pending sectors)
+  2. Mark bad sectors in filesystem (prevent data writes to bad areas)
+  3. Create backup plan (identify critical data for migration)
+
+This is NOT a permanent fix. REPLACE THIS DRIVE ASAP.
+
+Proceed with emergency stabilization? [y/N]: y
+
+Running SMART extended test... (90 minutes)
+Extended test complete: 6/8 pending sectors reallocated
+Remaining 2 pending sectors: UNCORRECTABLE (permanent damage)
+
+Scanning filesystems on /dev/sda for affected files...
+Found: 3 files in bad sectors:
+  /home/user/old-downloads/video.mp4 (corrupted)
+  /var/cache/... (safe to delete)
+  /home/user/documents/report.docx (CRITICAL - backup now!)
+
+Creating recovery bundle: /tmp/disk-sda-recovery.tar.gz
+  ✓ List of affected files
+  ✓ SMART logs
+  ✓ Filesystem metadata
+  ✓ Recommended replacement drives
+
+[!] ACTION REQUIRED:
+  1. Backup /home/user/documents/report.docx NOW
+  2. Order replacement drive (recommendations in recovery bundle)
+  3. Plan data migration (use disk-ambulance migrate when ready)
+
+[✓] Emergency stabilization complete (drive still FAILING)
+----
+
+=== Scenario 4: "RAID Array Degraded"
+
+One disk failed in a RAID array—don't panic.
+
+[source,bash]
+----
+$ disk-repair diagnose raid
+
+[✗] /dev/md0: RAID1 degraded (1/2 disks active)
+[!] /dev/sdb removed from array (too many I/O errors)
+[✓] /dev/sda: active, healthy
+[!] Array is vulnerable (no redundancy until rebuilt)
+
+$ sudo disk-repair repair raid --target md0
+
+RAID /dev/md0 is degraded:
+  Active: /dev/sda (healthy)
+  Failed: /dev/sdb (removed due to errors)
+
+Options:
+  1. Re-add /dev/sdb (if errors were temporary)
+  2. Replace /dev/sdb with new drive
+  3. Run with degraded array (NOT RECOMMENDED)
+
+Checking /dev/sdb health...
+  SMART: 127 reallocated sectors (FAILING DRIVE)
+  Recommendation: REPLACE, do not re-add
+
+You need to:
+  1. Physically install replacement drive
+  2. Partition new drive identically to /dev/sda
+  3. Run: disk-repair raid-add-disk /dev/md0 /dev/sdX
+
+Monitoring mode: Alert when array rebuild needed
+
+[✓] RAID status documented, monitoring enabled
+----
+
+=== Scenario 5: "Slow Disk Performance"
+
+Everything works but it's painfully slow.
+
+[source,bash]
+----
+$ disk-repair diagnose performance
+
+[✗] /dev/sda: Sequential read: 45 MB/s (expected 120 MB/s for SATA)
+[✗] /dev/sda: Random read latency: 180ms (expected 8-12ms)
+[!] I/O scheduler: 'cfq' (not optimal for this drive)
+[!] Mount option: 'relatime' (noatime would improve performance)
+[✓] /dev/nvme0n1: Sequential read: 3200 MB/s (expected 3500 MB/s - OK)
+[✗] /dev/nvme0n1: TRIM not running (degraded SSD performance)
+
+$ sudo disk-repair repair performance
+
+Performance optimizations available:
+  1. Change I/O scheduler: cfq → mq-deadline (better for SATA)
+  2. Enable noatime mount option (reduce write overhead)
+  3. Enable periodic TRIM for SSD (restore write performance)
+  4. Adjust read-ahead buffer (optimize for workload)
+
+Apply optimizations? [y/N]: y
+
+Changing I/O scheduler for /dev/sda... done
+Adding noatime to /etc/fstab for /... done
+Enabling weekly TRIM timer for /dev/nvme0n1... done
+Adjusting read-ahead to 8192KB... done
+
+Running performance test...
+  /dev/sda: Sequential read: 118 MB/s (was 45 MB/s - IMPROVED)
+  /dev/nvme0n1: TRIM completed, 94GB reclaimed
+
+[✓] Performance optimizations applied
+----
+
+== Part of AmbientOps
+
+Disk Ambulance is a *procedure pack* in the link:https://github.com/hyperpolymath/ambientops[AmbientOps ecosystem], which uses a "hospital model" for system tools:
+
+* **Ward** — Daily ambient system health ("System Weather")
+* **Emergency Room** — Panic-safe emergency diagnostics
+* **Operating Room** — Planned procedures (Disk Ambulance lives here)
+* **Records** — Receipts, undo tokens, shareable help bundles
+
+Disk Ambulance integrates with:
+
+* **Operating Theatre** for procedure orchestration
+* **Ward** for surfacing disk health signals (SMART warnings, space alerts)
+* **Emergency Room** for disk emergencies (immediate triage, read-only filesystems)
+* **Records** for generating shareable incident bundles
+
+See `docs/AMBIENTOPS_INTEGRATION.adoc` for details.
+
+== Safety Guarantees
+
+Disk Ambulance follows *AmbientOps safety principles*:
+
+=== ✓ Evidence-First, Not Fearware
+
+No "1,847 CRITICAL DISK ERRORS" scareware. Disk Ambulance shows you *measurements*, not hype.
+
+Instead of: "Your disk is 99% failed!"
+
+You get: "5 reallocated sectors detected (normal wear: <20, failing threshold: >100). Current status: MONITOR. Predicted failure: >6 months. Recommendation: schedule replacement during next maintenance window."
+
+=== ✓ Non-Destructive by Default
+
+Diagnostics are *completely read-only*. No changes without your approval.
+
+Repairs:
+
+* Create automatic timestamped backups (filesystem metadata, partition tables, configs)
+* Prefer read-only checks before repairs (fsck -n, then fsck -p if safe)
+* **NEVER touch user data without explicit consent**
+* Provide undo receipts for all changes
+
+=== ✓ Explicit Approval Required
+
+No silent changes. Every repair shows:
+
+* What it will do (exact commands)
+* Why it's needed (root cause)
+* What can go wrong (risk assessment)
+* How to undo it (rollback procedure)
+* Estimated downtime (if any)
+
+You approve each change (or use `--yes` if you're confident).
+
+=== ✓ Never Destroys Data
+
+Disk Ambulance will **NEVER**:
+
+* Format drives without triple-confirmation
+* Delete user files without explicit consent
+* Run destructive fsck without read-only check first
+* Execute `dd`, `shred`, or data destruction commands
+* Make partition table changes without backup
+* Force-mount corrupted filesystems (leads to data loss)
+
+=== ✓ Works Offline
+
+Disk Ambulance doesn't require internet to diagnose or repair disk problems.
+
+All diagnostics and repairs work *completely offline*.
+
+=== ✓ SMART-Aware Safety
+
+Disk Ambulance checks SMART status *before* any repair:
+
+* If drive is failing → refuse repairs, suggest data migration
+* If pending sectors exist → force reallocation first, then repair filesystem
+* If temperature critical → wait for cooling, don't stress drive further
+
+== Command Reference
+
+[cols="2,3"]
+|===
+|Command |Description
+
+|`disk-repair diagnose`
+|Run all diagnostics
+
+|`disk-repair diagnose <target>`
+|Diagnose specific area (smart\|filesystems\|space\|mounts\|raid\|ssd\|performance)
+
+|`sudo disk-repair repair`
+|Interactive guided repair
+
+|`sudo disk-repair repair <target>`
+|Repair specific area
+
+|`sudo disk-repair auto-repair`
+|Automatically fix all detected issues
+
+|`sudo disk-repair repair --dry-run`
+|Show what would be changed (no actual changes)
+
+|`disk-repair status`
+|Quick disk health check
+
+|`disk-repair smart-test <device>`
+|Run SMART self-test (short or extended)
+
+|`disk-repair check-fs <mountpoint>`
+|Check filesystem integrity (read-only)
+
+|`disk-repair find-space-hogs <path>`
+|Identify large files/directories
+
+|`disk-repair raid-status`
+|Show all RAID array status
+
+|`disk-repair ssd-health`
+|SSD-specific health check
+
+|`disk-repair version`
+|Show version info
+
+|`disk-repair help`
+|Show help message
+|===
+
+=== Options
+
+[cols="1,3"]
+|===
+|Option |Description
+
+|`-v, --verbose`
+|Show detailed output (includes raw command output)
+
+|`-q, --quiet`
+|Minimal output (errors and warnings only)
+
+|`-y, --yes`
+|Auto-approve all changes (dangerous!)
+
+|`--dry-run`
+|Preview changes only (no actual modifications)
+
+|`--no-color`
+|Disable colored output (for logs/scripts)
+
+|`--log <file>`
+|Write log to file
+
+|`--backup-dir <dir>`
+|Custom backup directory (default: `/var/backups/disk-ambulance/`)
+
+|`--interactive`
+|Guided mode (ask before each change)
+
+|`--force`
+|Skip safety checks (DANGEROUS - use only if you know what you're doing)
+|===
+
+== Advanced Features
+
+=== Export Incident Bundles
+
+Generate a shareable diagnostic bundle for forums/support:
+
+[source,bash]
+----
+disk-repair export --bundle /tmp/disk-issue
+----
+
+Creates:
+
+[source,text]
+----
+/tmp/disk-issue/
+├── diagnostics.txt       # Full diagnostic output
+├── system-info.txt       # OS, kernel, hardware
+├── smart-reports/        # SMART data for all drives
+│   ├── nvme0n1.txt
+│   └── sda.txt
+├── filesystem-info/      # Filesystem metadata
+│   ├── fstab
+│   ├── mounts
+│   └── df-output.txt
+├── logs/                 # Relevant logs
+│   ├── dmesg-disk-errors.log
+│   └── kern.log-io-errors
+└── metadata.json         # Machine-readable summary
+----
+
+The bundle *automatically sanitizes* sensitive info (usernames, paths if requested).
+
+=== Backup Management
+
+List all backups:
+
+[source,bash]
+----
+disk-repair list-backups
+----
+
+Restore from backup:
+
+[source,bash]
+----
+sudo disk-repair restore --backup 2026-01-29_14-30-22
+----
+
+=== JSON Output
+
+For scripting/automation:
+
+[source,bash]
+----
+disk-repair diagnose --format json
+----
+
+Returns structured JSON with all diagnostic results.
+
+=== SMART Monitoring
+
+Enable continuous SMART monitoring:
+
+[source,bash]
+----
+sudo disk-repair monitor-smart --enable
+----
+
+This creates a systemd timer that checks SMART status daily and alerts on changes.
+
+=== Logging
+
+Enable file logging:
+
+[source,bash]
+----
+disk-repair diagnose --log /var/log/disk-repair.log
+----
+
+Or set default log location:
+
+[source,bash]
+----
+export DISK_REPAIR_LOG=/var/log/disk-repair.log
+----
+
+== Distribution Support
+
+Disk Ambulance works on:
+
+* ✓ Ubuntu / Debian (fully supported)
+* ✓ Fedora / RHEL / CentOS (fully supported)
+* ✓ Arch Linux (fully supported)
+* ✓ openSUSE (supported)
+* ⚠ Other systemd-based distros (best-effort)
+
+Filesystem support:
+
+* ✓ ext4 (fully supported - `e2fsck`)
+* ✓ XFS (fully supported - `xfs_repair`)
+* ✓ Btrfs (fully supported - `btrfs check`)
+* ✓ F2FS (supported - `fsck.f2fs`)
+* ⚠ NTFS (limited support - `ntfsfix`)
+* ⚠ ZFS (read-only diagnostics - use `zpool` for repairs)
+
+RAID support:
+
+* ✓ Linux MD RAID (mdadm - fully supported)
+* ⚠ LVM (diagnostics only)
+* ⚠ Btrfs RAID (via `btrfs` commands)
+* ⚠ ZFS RAID (read-only diagnostics)
+
+== Technical Details
+
+=== Architecture
+
+[source,text]
+----
+disk-repair
+├── src/
+│   ├── main.d               # CLI entry point (D orchestration)
+│   ├── diagnostics/         # Diagnostic modules
+│   │   ├── smart.d          # SMART health checks
+│   │   ├── filesystem.d     # Filesystem integrity
+│   │   ├── space.d          # Disk space analysis
+│   │   ├── mounts.d         # Mount state checks
+│   │   ├── raid.d           # RAID status
+│   │   ├── ssd.d            # SSD-specific checks
+│   │   └── performance.d    # I/O performance
+│   ├── repairs/             # Repair modules (Rust - safety-critical)
+│   │   ├── filesystem.rs    # Safe fsck orchestration
+│   │   ├── space.rs         # Space recovery
+│   │   ├── mounts.rs        # Mount repairs
+│   │   ├── raid.rs          # RAID repairs
+│   │   └── ssd.rs           # SSD optimization
+│   └── utils/               # Core utilities
+│       ├── backup.d         # Backup/restore
+│       ├── logging.d        # Logging framework
+│       ├── privileges.d     # Root/sudo handling
+│       └── safety.rs        # Safety checks (Rust)
+└── lib/
+    └── libdisk_safety.so    # Rust library for safety-critical operations
+----
+
+=== Requirements
+
+* D compiler (DMD or LDC) for orchestration
+* Rust compiler for safety-critical repairs
+* Standard Linux utilities: `smartctl`, `fsck`, `df`, `lsblk`
+* Optional: `mdadm` (RAID), `btrfs` (Btrfs), `xfs_repair` (XFS)
+* Root/sudo for repairs (diagnostics work without root for some checks)
+
+=== Implementation Language
+
+Disk Ambulance uses a *hybrid implementation*:
+
+* **D** for core orchestration (robust, cross-distro, good error handling)
+* **Rust** for safety-critical filesystem operations (memory safety, no data corruption)
+* **Bash** for simple wrappers and system integration
+
+This follows Rhodium Standard Repository (RSR) guidelines.
+
+=== Safety-Critical Operations (Rust)
+
+The following operations are implemented in Rust for maximum safety:
+
+* Filesystem metadata backup/restore
+* Partition table reading/writing
+* RAID metadata operations
+* Direct device I/O (when needed)
+* Filesystem repair orchestration (calls fsck but validates results)
+
+== Why Disk Ambulance?
+
+=== vs. Manual Forum Fixes
+
+|===
+|Manual Fixes |Disk Ambulance
+
+|Search 20 forum threads
+|One command
+
+|Copy-paste random fsck commands
+|Safe, tested procedures
+
+|Hope you backed up first
+|Automatic backups before changes
+
+|No undo if it breaks
+|Automatic backups + undo
+
+|"Worked for me on Ubuntu 14.04"
+|Works on modern distros + filesystems
+
+|Might destroy all your data
+|Safety-first design
+|===
+
+=== vs. "Disk Optimizer" Tools
+
+Those sketchy "Fix your disk!" tools?
+
+* They lie about problems to scare you
+* They "defragment" your SSD (harmful and pointless)
+* They install adware/spyware
+* They want your credit card
+* They might actually corrupt your filesystem
+
+Disk Ambulance:
+
+* ✓ Open source (review the code)
+* ✓ No telemetry, no tracking
+* ✓ No "premium upsells"
+* ✓ Evidence-based, no fake errors
+* ✓ Safety-first design
+* ✓ Never touches your data without permission
+
+=== vs. Learning Everything Yourself
+
+Learning storage systems is great, but when your filesystem just went read-only and you have unsaved work, you don't have time for a kernel internals course.
+
+Disk Ambulance is *teaching-friendly*:
+
+* Explains what it finds in plain English
+* Shows the commands it runs
+* Documents why each fix works
+* Includes references to man pages and documentation
+* Links to in-depth guides for learning more
+
+You can learn while fixing, not instead of fixing.
+
+== Roadmap to v1.0
+
+=== v0.6 (Q1 2026)
+
+* ✓ Core diagnostics (SMART, filesystems, space, mounts)
+* ✓ Basic repairs (fsck orchestration, space recovery)
+* ✓ Safety framework (backups, dry-run, undo)
+* Interactive mode implementation
+* RAID diagnostics and basic repairs
+
+=== v0.7 (Q2 2026)
+
+* SSD-specific optimizations (TRIM, alignment, wear leveling)
+* Performance diagnostics and tuning
+* Enhanced RAID support (mdadm full integration)
+* Btrfs advanced features (scrub, balance)
+
+=== v0.8 (Q3 2026)
+
+* XFS advanced repair (xfs_repair wrapper)
+* F2FS support
+* LVM diagnostics
+* Quota management
+
+=== v0.9 (Q4 2026)
+
+* ZFS diagnostics (read-only)
+* Bad sector handling workflow
+* Disk migration tools (failing drive → new drive)
+* Comprehensive testing on all supported distros
+
+=== v1.0 (Q1 2027) 🎯 **Target**
+
+* All filesystems supported (ext4, XFS, Btrfs, F2FS)
+* All RAID types supported (mdadm, Btrfs RAID)
+* Production-ready safety guarantees
+* Full AmbientOps integration
+* Documentation complete
+* Test coverage >90%
+
+See link:ROADMAP.adoc[ROADMAP.adoc] for the complete roadmap.
+
+== Contributing
+
+We welcome contributions! See link:CONTRIBUTING.adoc[CONTRIBUTING.adoc].
+
+Priority areas for v1.0:
+
+* Filesystem repair safety checks
+* RAID rebuild automation
+* SSD health monitoring
+* Btrfs scrub/balance automation
+* Test coverage improvements
+* Documentation for additional filesystems
+
+== Support
+
+* Issues: https://github.com/hyperpolymath/disk-ambulance/issues
+* Discussions: https://github.com/hyperpolymath/disk-ambulance/discussions
+* Security issues: See link:SECURITY.md[SECURITY.md]
+
+== License
+
+Disk Ambulance is licensed under PMPL-1.0-or-later (Palimpsest Meta-Permissive License).
+
+See link:LICENSE[LICENSE] for details.
+
+== Philosophy
+
+Disk Ambulance follows the link:https://github.com/hyperpolymath/palimpsest-license[Palimpsest philosophy]:
+
+* **Boring is good** — Reliable, predictable, no surprises
+* **Evidence over hype** — Show measurements, not marketing
+* **Safety-first** — Never break what's working, never destroy data
+* **Respect users** — No dark patterns, no manipulation
+* **Open by default** — Audit anything, trust nothing
+
+[quote]
+____
+"The best disk tool is the one that saves your data when everything goes wrong—and stays silent when everything is fine."
+____
+
+---
+
+Made with care by the link:https://github.com/hyperpolymath[Hyperpolymath Project].

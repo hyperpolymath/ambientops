@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+[package]
+name = "systemd-shim"
+version = "0.1.0"
+edition = "2021"
+license = "AGPL-3.0-or-later"
+description = "Rust shim exposing systemd (sd-bus, sd-journal) via C ABI"
+
+[lib]
+crate-type = ["cdylib", "staticlib"]
+
+[dependencies]
+libsystemd = "0.7"
+libc = "0.2"

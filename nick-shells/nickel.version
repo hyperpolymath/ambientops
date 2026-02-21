@@ -1,0 +1,25 @@
+# SPDX-License-Identifier: MIT OR AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2025 Jonathan D.A. Jewell <hyperpolymath>
+#
+# Nickel Version Expectations
+# ===========================
+# This file pins the expected Nickel version for this project.
+# Nickel is used for complex configuration (per RSR language policy).
+#
+# Install Nickel:
+#   guix install nickel        # Primary (RSR)
+#   nix profile install nickel # Fallback
+#   cargo install nickel-lang-cli
+#
+# Verify version:
+#   nickel --version
+
+# Minimum required version (semver)
+NICKEL_MIN_VERSION="1.5.0"
+
+# Recommended version (tested and known-good)
+NICKEL_RECOMMENDED_VERSION="1.9.0"
+
+# Maximum version (upper bound for compatibility)
+# Comment out if no upper bound
+# NICKEL_MAX_VERSION="2.0.0"

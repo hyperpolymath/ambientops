@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<!-- SPDX-License-Identifier: MIT -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Text X-Ray</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 13px;
+      background: #1a1a1a;
+      color: #e0e0e0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: #252525;
+      padding: 8px 12px;
+      border-bottom: 1px solid #333;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header h1 { font-size: 14px; font-weight: 600; }
+    .main { display: flex; flex: 1; overflow: hidden; }
+    .input-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid #333;
+    }
+    .input-panel textarea {
+      flex: 1;
+      background: #222;
+      color: #e0e0e0;
+      border: none;
+      padding: 12px;
+      font-size: 13px;
+      line-height: 1.6;
+      resize: none;
+      font-family: inherit;
+    }
+    .input-panel textarea:focus { outline: none; background: #252525; }
+    .input-panel textarea::placeholder { color: #666; }
+
+    .results-panel {
+      width: 340px;
+      overflow-y: auto;
+      background: #1e1e1e;
+      padding: 12px;
+    }
+
+    .section {
+      background: #252525;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+    .section-header {
+      padding: 8px 10px;
+      font-weight: 600;
+      font-size: 11px;
+      background: #333;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+    }
+    .section-content { padding: 10px; }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 0;
+      border-bottom: 1px solid #333;
+    }
+    .stat-row:last-child { border-bottom: none; }
+    .stat-label { color: #999; }
+    .stat-value { font-weight: 600; }
+
+    .meter {
+      height: 6px;
+      background: #333;
+      border-radius: 3px;
+      margin-top: 4px;
+      overflow: hidden;
+    }
+    .meter-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.3s;
+    }
+
+    .tag-list { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+    .tag {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 3px;
+      background: #333;
+    }
+    .tag.positive { background: #2d4a2d; color: #8fbc8f; }
+    .tag.warning { background: #4a3d2d; color: #daa520; }
+    .tag.negative { background: #4a2d2d; color: #cd5c5c; }
+
+    .score-big {
+      font-size: 28px;
+      font-weight: 700;
+      text-align: center;
+      padding: 10px;
+    }
+    .score-label {
+      font-size: 10px;
+      color: #888;
+      text-align: center;
+    }
+
+    .highlight-list { font-size: 11px; }
+    .highlight-item {
+      padding: 4px 6px;
+      background: #2a2a2a;
+      border-radius: 4px;
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .highlight-count {
+      background: #444;
+      padding: 1px 5px;
+      border-radius: 8px;
+      font-size: 10px;
+    }
+
+    .empty-state {
+      color: #666;
+      text-align: center;
+      padding: 40px;
+      font-style: italic;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #1a1a1a; }
+    ::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🔬 Text X-Ray</h1>
+    <span id="char-count" style="color:#666;font-size:11px">Paste or type text to analyze</span>
+  </header>
+
+  <div class="main">
+    <div class="input-panel">
+      <textarea id="input" placeholder="Paste or type text here to analyze...&#10;&#10;The analysis is entirely rule-based (no AI) so is safe for live assignments."></textarea>
+    </div>
+
+    <div class="results-panel" id="results">
+      <div class="empty-state">Enter text to see analysis</div>
+    </div>
+  </div>
+
+<script>
+// === SYLLABLE COUNTER ===
+// Rule-based syllable estimation
+function countSyllables(word) {
+  word = word.toLowerCase().replace(/[^a-z]/g, '');
+  if (word.length <= 3) return 1;
+
+  // Exceptions
+  const exceptions = {
+    'simile': 3, 'every': 3, 'nursery': 3, 'area': 3, 'idea': 3,
+    'real': 1, 'being': 2, 'going': 2, 'doing': 2
+  };
+  if (exceptions[word]) return exceptions[word];
+
+  word = word.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '');
+  word = word.replace(/^y/, '');
+  const matches = word.match(/[aeiouy]{1,2}/g);
+  return matches ? matches.length : 1;
+}
+
+// === TEXT PARSING ===
+function parseText(text) {
+  if (!text.trim()) return null;
+
+  // Basic cleaning
+  const cleaned = text.replace(/\s+/g, ' ').trim();
+
+  // Split sentences (handle abbreviations roughly)
+  const sentences = cleaned
+    .replace(/([.!?])\s+/g, '$1\n')
+    .split('\n')
+    .filter(s => s.trim().length > 0);
+
+  // Words
+  const words = cleaned.match(/\b[a-zA-Z']+\b/g) || [];
+
+  // Paragraphs
+  const paragraphs = text.split(/\n\s*\n/).filter(p => p.trim().length > 0);
+
+  // Syllables
+  let totalSyllables = 0;
+  const complexWords = []; // 3+ syllables
+  words.forEach(w => {
+    const syl = countSyllables(w);
+    totalSyllables += syl;
+    if (syl >= 3) complexWords.push(w.toLowerCase());
+  });
+
+  return {
+    text: cleaned,
+    sentences,
+    words,
+    paragraphs,
+    totalSyllables,
+    complexWords,
+    charCount: cleaned.length,
+    charCountNoSpaces: cleaned.replace(/\s/g, '').length
+  };
+}
+
+// === READABILITY SCORES ===
+function calcReadability(parsed) {
+  const { sentences, words, totalSyllables, complexWords } = parsed;
+  const sentenceCount = sentences.length || 1;
+  const wordCount = words.length || 1;
+
+  // Flesch Reading Ease (0-100, higher = easier)
+  // 206.835 - 1.015(words/sentences) - 84.6(syllables/words)
+  const avgWordsPerSentence = wordCount / sentenceCount;
+  const avgSyllablesPerWord = totalSyllables / wordCount;
+  const fleschEase = 206.835 - (1.015 * avgWordsPerSentence) - (84.6 * avgSyllablesPerWord);
+
+  // Flesch-Kincaid Grade Level
+  // 0.39(words/sentences) + 11.8(syllables/words) - 15.59
+  const fleschKincaid = (0.39 * avgWordsPerSentence) + (11.8 * avgSyllablesPerWord) - 15.59;
+
+  // Gunning Fog Index
+  // 0.4 * ((words/sentences) + 100*(complex/words))
+  const complexRatio = complexWords.length / wordCount;
+  const gunningFog = 0.4 * (avgWordsPerSentence + (100 * complexRatio));
+
+  // SMOG Index (needs 30+ sentences for accuracy)
+  // 1.0430 * sqrt(complex * (30/sentences)) + 3.1291
+  const smog = 1.0430 * Math.sqrt(complexWords.length * (30 / sentenceCount)) + 3.1291;
+
+  return {
+    fleschEase: Math.max(0, Math.min(100, fleschEase)),
+    fleschKincaid: Math.max(0, fleschKincaid),
+    gunningFog: Math.max(0, gunningFog),
+    smog: Math.max(0, smog),
+    avgWordsPerSentence,
+    avgSyllablesPerWord
+  };
+}
+
+// === STYLE ANALYSIS ===
+const PATTERNS = {
+  // Passive voice indicators
+  passive: /\b(is|are|was|were|be|been|being)\s+(\w+ed|written|shown|taken|given|made|done|seen|known|found)\b/gi,
+
+  // Hedging words
+  hedging: /\b(might|maybe|perhaps|possibly|probably|somewhat|rather|quite|fairly|relatively|apparently|seemingly|tends to|seems to|appears to|could be|may be|sort of|kind of)\b/gi,
+
+  // Filler words
+  fillers: /\b(very|really|just|actually|basically|literally|definitely|certainly|absolutely|completely|totally|extremely|incredibly)\b/gi,
+
+  // Transition/logic markers
+  transitions: {
+    addition: /\b(also|furthermore|moreover|additionally|besides|in addition|as well as)\b/gi,
+    contrast: /\b(however|but|although|nevertheless|nonetheless|conversely|on the other hand|in contrast|whereas|while|yet)\b/gi,
+    cause: /\b(because|since|therefore|thus|consequently|as a result|hence|so|due to|owing to)\b/gi,
+    sequence: /\b(firstly|secondly|thirdly|finally|next|then|subsequently|initially|ultimately|lastly)\b/gi,
+    example: /\b(for example|for instance|such as|namely|specifically|in particular|to illustrate)\b/gi,
+    conclusion: /\b(in conclusion|to conclude|in summary|to summarize|overall|in brief|finally)\b/gi
+  },
+
+  // Formality indicators
+  contractions: /\b(don't|won't|can't|couldn't|wouldn't|shouldn't|isn't|aren't|wasn't|weren't|hasn't|haven't|hadn't|doesn't|didn't|it's|that's|there's|here's|what's|who's|let's|I'm|you're|we're|they're|I've|you've|we've|they've|I'll|you'll|we'll|they'll|I'd|you'd|we'd|they'd)\b/gi,
+
+  // First person
+  firstPerson: /\b(I|me|my|mine|myself|we|us|our|ours|ourselves)\b/gi,
+
+  // Questions
+  questions: /[?]/g,
+
+  // Exclamations
+  exclamations: /[!]/g,
+
+  // Long sentences (30+ words)
+  longSentenceThreshold: 30,
+
+  // Short sentences (under 10 words)
+  shortSentenceThreshold: 10
+};
+
+function analyzeStyle(parsed) {
+  const { text, sentences, words } = parsed;
+
+  // Count pattern matches
+  const passive = (text.match(PATTERNS.passive) || []).map(m => m.toLowerCase());
+  const hedging = (text.match(PATTERNS.hedging) || []).map(m => m.toLowerCase());
+  const fillers = (text.match(PATTERNS.fillers) || []).map(m => m.toLowerCase());
+  const contractions = (text.match(PATTERNS.contractions) || []).map(m => m.toLowerCase());
+  const firstPerson = (text.match(PATTERNS.firstPerson) || []).map(m => m.toLowerCase());
+  const questions = (text.match(PATTERNS.questions) || []).length;
+  const exclamations = (text.match(PATTERNS.exclamations) || []).length;
+
+  // Transition counts
+  const transitions = {};
+  for (const [type, pattern] of Object.entries(PATTERNS.transitions)) {
+    transitions[type] = (text.match(pattern) || []).map(m => m.toLowerCase());
+  }
+
+  // Sentence length distribution
+  const sentenceLengths = sentences.map(s => (s.match(/\b\w+\b/g) || []).length);
+  const longSentences = sentenceLengths.filter(l => l >= PATTERNS.longSentenceThreshold).length;
+  const shortSentences = sentenceLengths.filter(l => l <= PATTERNS.shortSentenceThreshold).length;
+
+  // Unique word ratio (vocabulary richness)
+  const uniqueWords = new Set(words.map(w => w.toLowerCase()));
+  const vocabularyRichness = uniqueWords.size / words.length;
+
+  return {
+    passive,
+    hedging,
+    fillers,
+    contractions,
+    firstPerson,
+    questions,
+    exclamations,
+    transitions,
+    sentenceLengths,
+    longSentences,
+    shortSentences,
+    vocabularyRichness,
+    uniqueWordCount: uniqueWords.size
+  };
+}
+
+// === FORMALITY SCORE ===
+function calcFormality(style, wordCount) {
+  let score = 50; // Neutral baseline
+
+  // Positive (more formal)
+  score += style.transitions.cause.length * 2;
+  score += style.transitions.conclusion.length * 3;
+  score += style.transitions.sequence.length * 1.5;
+
+  // Negative (less formal)
+  score -= style.contractions.length * 3;
+  score -= style.fillers.length * 2;
+  score -= style.exclamations * 5;
+  score -= style.firstPerson.length * 0.5;
+
+  // Normalize
+  return Math.max(0, Math.min(100, score));
+}
+
+// === RENDER RESULTS ===
+function renderResults(parsed) {
+  if (!parsed) {
+    return '<div class="empty-state">Enter text to see analysis</div>';
+  }
+
+  const readability = calcReadability(parsed);
+  const style = analyzeStyle(parsed);
+  const formality = calcFormality(style, parsed.words.length);
+
+  // Flesch ease interpretation
+  let easeLevel, easeColor;
+  if (readability.fleschEase >= 80) { easeLevel = 'Very Easy'; easeColor = '#4caf50'; }
+  else if (readability.fleschEase >= 60) { easeLevel = 'Standard'; easeColor = '#8bc34a'; }
+  else if (readability.fleschEase >= 40) { easeLevel = 'Fairly Difficult'; easeColor = '#ff9800'; }
+  else if (readability.fleschEase >= 20) { easeLevel = 'Difficult'; easeColor = '#f44336'; }
+  else { easeLevel = 'Very Difficult'; easeColor = '#9c27b0'; }
+
+  // Count unique transitions
+  const allTransitions = Object.values(style.transitions).flat();
+  const transitionCount = allTransitions.length;
+
+  return `
+    <!-- Basic Stats -->
+    <div class="section">
+      <div class="section-header">Basic Statistics</div>
+      <div class="section-content">
+        <div class="stat-row"><span class="stat-label">Words</span><span class="stat-value">${parsed.words.length}</span></div>
+        <div class="stat-row"><span class="stat-label">Sentences</span><span class="stat-value">${parsed.sentences.length}</span></div>
+        <div class="stat-row"><span class="stat-label">Paragraphs</span><span class="stat-value">${parsed.paragraphs.length}</span></div>
+        <div class="stat-row"><span class="stat-label">Characters</span><span class="stat-value">${parsed.charCount}</span></div>
+        <div class="stat-row"><span class="stat-label">Avg words/sentence</span><span class="stat-value">${readability.avgWordsPerSentence.toFixed(1)}</span></div>
+        <div class="stat-row"><span class="stat-label">Avg syllables/word</span><span class="stat-value">${readability.avgSyllablesPerWord.toFixed(2)}</span></div>
+        <div class="stat-row"><span class="stat-label">Unique words</span><span class="stat-value">${style.uniqueWordCount} (${(style.vocabularyRichness * 100).toFixed(0)}%)</span></div>
+      </div>
+    </div>
+
+    <!-- Readability -->
+    <div class="section">
+      <div class="section-header">Readability</div>
+      <div class="section-content">
+        <div class="score-big" style="color:${easeColor}">${readability.fleschEase.toFixed(0)}</div>
+        <div class="score-label">Flesch Reading Ease - ${easeLevel}</div>
+        <div class="meter"><div class="meter-fill" style="width:${readability.fleschEase}%;background:${easeColor}"></div></div>
+
+        <div style="margin-top:12px">
+          <div class="stat-row"><span class="stat-label">Flesch-Kincaid Grade</span><span class="stat-value">${readability.fleschKincaid.toFixed(1)}</span></div>
+          <div class="stat-row"><span class="stat-label">Gunning Fog Index</span><span class="stat-value">${readability.gunningFog.toFixed(1)}</span></div>
+          <div class="stat-row"><span class="stat-label">SMOG Index</span><span class="stat-value">${readability.smog.toFixed(1)}</span></div>
+          <div class="stat-row"><span class="stat-label">Complex words (3+ syl)</span><span class="stat-value">${parsed.complexWords.length}</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Formality -->
+    <div class="section">
+      <div class="section-header">Formality</div>
+      <div class="section-content">
+        <div class="score-big" style="color:${formality > 60 ? '#4caf50' : formality > 40 ? '#ff9800' : '#f44336'}">${formality.toFixed(0)}</div>
+        <div class="score-label">${formality > 70 ? 'Formal' : formality > 50 ? 'Semi-formal' : formality > 30 ? 'Informal' : 'Very Informal'}</div>
+        <div class="meter"><div class="meter-fill" style="width:${formality}%;background:#4a9eff"></div></div>
+
+        <div class="tag-list">
+          ${style.contractions.length > 0 ? `<span class="tag warning">Contractions: ${style.contractions.length}</span>` : ''}
+          ${style.firstPerson.length > 0 ? `<span class="tag">${style.firstPerson.length} first-person</span>` : ''}
+          ${style.questions > 0 ? `<span class="tag">${style.questions} questions</span>` : ''}
+          ${style.exclamations > 0 ? `<span class="tag warning">${style.exclamations} exclamations</span>` : ''}
+        </div>
+      </div>
+    </div>
+
+    <!-- Style Markers -->
+    <div class="section">
+      <div class="section-header">Style Markers</div>
+      <div class="section-content">
+        <div class="stat-row"><span class="stat-label">Passive constructions</span><span class="stat-value ${style.passive.length > 3 ? 'warning' : ''}">${style.passive.length}</span></div>
+        <div class="stat-row"><span class="stat-label">Hedging phrases</span><span class="stat-value">${style.hedging.length}</span></div>
+        <div class="stat-row"><span class="stat-label">Filler/intensifiers</span><span class="stat-value ${style.fillers.length > 5 ? 'warning' : ''}">${style.fillers.length}</span></div>
+        <div class="stat-row"><span class="stat-label">Long sentences (30+ words)</span><span class="stat-value ${style.longSentences > 2 ? 'warning' : ''}">${style.longSentences}</span></div>
+        <div class="stat-row"><span class="stat-label">Short sentences (&lt;10 words)</span><span class="stat-value">${style.shortSentences}</span></div>
+      </div>
+    </div>
+
+    <!-- Transitions/Logic -->
+    <div class="section">
+      <div class="section-header">Logic & Transitions (${transitionCount})</div>
+      <div class="section-content highlight-list">
+        ${Object.entries(style.transitions).map(([type, matches]) =>
+          matches.length > 0 ? `<div class="highlight-item"><span>${type}</span><span class="highlight-count">${matches.length}</span></div>` : ''
+        ).join('')}
+        ${transitionCount === 0 ? '<div style="color:#888;font-style:italic">No transition markers found</div>' : ''}
+      </div>
+    </div>
+
+    <!-- Sentence Length Distribution -->
+    <div class="section">
+      <div class="section-header">Sentence Lengths</div>
+      <div class="section-content">
+        <div style="display:flex;gap:2px;height:40px;align-items:flex-end">
+          ${style.sentenceLengths.map(len => {
+            const height = Math.min(100, (len / 50) * 100);
+            const color = len > 30 ? '#f44336' : len < 10 ? '#ff9800' : '#4caf50';
+            return `<div style="flex:1;background:${color};height:${height}%;min-width:3px;border-radius:2px 2px 0 0" title="${len} words"></div>`;
+          }).join('')}
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:9px;color:#666;margin-top:4px">
+          <span>Short</span><span>Target: 15-25 words</span><span>Long</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// === EVENT HANDLERS ===
+const input = document.getElementById('input');
+const results = document.getElementById('results');
+const charCount = document.getElementById('char-count');
+
+let debounceTimer;
+input.addEventListener('input', () => {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {
+    const text = input.value;
+    const parsed = parseText(text);
+
+    if (parsed) {
+      charCount.textContent = `${parsed.words.length} words, ${parsed.sentences.length} sentences`;
+    } else {
+      charCount.textContent = 'Paste or type text to analyze';
+    }
+
+    results.innerHTML = renderResults(parsed);
+  }, 150);
+});
+
+// Allow dropping text
+input.addEventListener('dragover', e => e.preventDefault());
+input.addEventListener('drop', e => {
+  e.preventDefault();
+  const text = e.dataTransfer.getData('text/plain');
+  if (text) {
+    input.value = text;
+    input.dispatchEvent(new Event('input'));
+  }
+});
+</script>
+</body>
+</html>

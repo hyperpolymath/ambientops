@@ -1,0 +1,58 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-FileCopyrightText: 2025 Jonathan D.A. Jewell <hyperpolymath>
+
+= nick-shells - Citation Guide
+:toc:
+
+This document provides citation formats for academic and professional use.
+
+== BibTeX
+
+[source,bibtex]
+----
+@software{nick-shells_2025,
+  author = {Jewell, Jonathan D.A.},
+  title = {nick-shells},
+  year = {2025},
+  url = {https://github.com/hyperpolymath/nick-shells},
+  version = {0.1.0},
+  license = {MIT OR AGPL-3.0-or-later}
+}
+----
+
+== Harvard Style
+
+Jewell, J.D.A. (2025) _nick-shells_ [Computer software]. Version 0.1.0. Available at: https://github.com/hyperpolymath/nick-shells
+
+== OSCOLA
+
+Jonathan D.A. Jewell, 'nick-shells' (Version 0.1.0, 2025) <https://github.com/hyperpolymath/nick-shells>
+
+== MLA 9th Edition
+
+Jewell, Jonathan D.A. "nick-shells." Version 0.1.0, 2025, github.com/hyperpolymath/nick-shells.
+
+== APA 7th Edition
+
+Jewell, J. D. A. (2025). _nick-shells_ (Version 0.1.0) [Computer software]. GitHub. https://github.com/hyperpolymath/nick-shells
+
+== Chicago 17th Edition
+
+Jewell, Jonathan D.A. _nick-shells_. Version 0.1.0. 2025. https://github.com/hyperpolymath/nick-shells.
+
+== IEEE
+
+J. D. A. Jewell, "nick-shells," version 0.1.0, 2025. [Online]. Available: https://github.com/hyperpolymath/nick-shells
+
+== Machine-Readable Formats
+
+* link:../CITATION.cff[CITATION.cff] — Citation File Format (CFF)
+* link:../codemeta.json[codemeta.json] — CodeMeta software metadata
+
+== DOI
+
+_A DOI will be assigned upon first stable release._
+
+== License Note
+
+This software is dual-licensed under MIT OR AGPL-3.0-or-later. When citing, you may reference either license as appropriate for your context.

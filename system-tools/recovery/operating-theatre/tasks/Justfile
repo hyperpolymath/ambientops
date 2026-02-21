@@ -1,0 +1,173 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Justfile - System Operating Theatre task runner
+# Integration: nickel configs, feedback-o-tron, palimpsest-license
+
+set shell := ["bash", "-euo", "pipefail", "-c"]
+
+# Default recipe shows available commands
+default:
+    @just --list
+
+# === BUILD ===
+
+# Build with dub (release mode)
+build:
+    toolbox run --container fedora-toolbox-43 dub build --build=release
+
+# Build with dub (debug mode)
+build-debug:
+    toolbox run --container fedora-toolbox-43 dub build
+
+# Build container image with nerdctl
+build-container:
+    nerdctl build -t sor:latest .
+
+# === RUN ===
+
+# Run sor with arguments
+run *ARGS:
+    toolbox run --container fedora-toolbox-43 ./sor {{ARGS}}
+
+# Run help
+help:
+    toolbox run --container fedora-toolbox-43 ./sor help
+
+# Quick scan and plan
+quick:
+    toolbox run --container fedora-toolbox-43 ./sor quick
+
+# Check system status
+status:
+    toolbox run --container fedora-toolbox-43 ./sor status
+
+# === SCAN/PLAN/APPLY WORKFLOW ===
+
+# Scan system for issues
+scan:
+    toolbox run --container fedora-toolbox-43 ./sor scan
+
+# Generate optimization plan
+plan:
+    toolbox run --container fedora-toolbox-43 ./sor plan
+
+# Apply plan with confirmation
+apply PLAN_ID:
+    toolbox run --container fedora-toolbox-43 ./sor apply {{PLAN_ID}}
+
+# Undo applied changes
+undo RECEIPT_ID:
+    toolbox run --container fedora-toolbox-43 ./sor undo {{RECEIPT_ID}}
+
+# View receipt
+receipt RECEIPT_ID:
+    toolbox run --container fedora-toolbox-43 ./sor receipt {{RECEIPT_ID}}
+
+# === TESTING ===
+
+# Run tests
+test:
+    toolbox run --container fedora-toolbox-43 dub test
+
+# Run with verbose output
+test-verbose:
+    toolbox run --container fedora-toolbox-43 dub test -- --verbose
+
+# === LINTING & FORMATTING ===
+
+# Lint D code
+lint:
+    @echo "D linting via dub..."
+    toolbox run --container fedora-toolbox-43 dub build -- -w
+
+# Format D code (requires dfmt)
+fmt:
+    toolbox run --container fedora-toolbox-43 find src -name "*.d" -exec dfmt {} \;
+
+# === CLEAN ===
+
+# Clean build artifacts
+clean:
+    rm -rf .dub sor
+    @echo "Cleaned build artifacts"
+
+# Deep clean including container cache
+clean-all: clean
+    nerdctl rmi sor:latest 2>/dev/null || true
+    @echo "Deep cleaned"
+
+# === CHECKS ===
+
+# Run all checks
+check: lint test
+
+# Verify nickel configs
+check-nickel:
+    @if [ -d "config" ]; then \
+        find config -name "*.ncl" -exec nickel typecheck {} \; ; \
+    else \
+        echo "No nickel configs found"; \
+    fi
+
+# === PACKAGING ===
+
+# Build with Guix
+guix-build:
+    guix build -f guix.scm
+
+# Enter Guix shell
+guix-shell:
+    guix shell -D -f guix.scm
+
+# Build with Nix
+nix-build:
+    nix build
+
+# Enter Nix shell
+nix-shell:
+    nix develop
+
+# === RELEASE ===
+
+# Prepare a release
+release VERSION:
+    @echo "Releasing {{VERSION}}..."
+    git tag -a v{{VERSION}} -m "Release {{VERSION}}"
+    @echo "Tagged v{{VERSION}}"
+
+# Push release tag
+release-push VERSION:
+    git push origin v{{VERSION}}
+
+# === ECOSYSTEM INTEGRATION ===
+
+# Export run bundle to Observatory
+export-observatory:
+    @echo "Exporting to system-observatory..."
+    @mkdir -p ~/.local/share/sor/runs
+    toolbox run --container fedora-toolbox-43 ./sor status
+
+# === FEEDBACK-O-TRON INTEGRATION ===
+
+# Submit feedback (requires feedback-o-tron)
+feedback MESSAGE:
+    @if command -v feedback-o-tron >/dev/null 2>&1; then \
+        feedback-o-tron submit --project "system-operating-theatre" --message "{{MESSAGE}}"; \
+    else \
+        echo "feedback-o-tron not installed. See: https://github.com/hyperpolymath/feedback-o-tron"; \
+    fi
+
+# === PALIMPSEST LICENSE COMPLIANCE ===
+
+# Check license compliance
+license-check:
+    @echo "Checking AGPL-3.0-or-later compliance..."
+    @grep -r "SPDX-License-Identifier" src/ || echo "Missing SPDX headers in some files"
+    @test -f LICENSE && echo "LICENSE file present" || echo "Missing LICENSE file"
+
+# Add SPDX headers to D files
+license-headers:
+    @for f in $$(find src -name "*.d" ! -exec grep -q "SPDX-License-Identifier" {} \; -print); do \
+        echo "// SPDX-License-Identifier: AGPL-3.0-or-later" | cat - "$$f" > temp && mv temp "$$f"; \
+    done
+    @echo "SPDX headers added"
+

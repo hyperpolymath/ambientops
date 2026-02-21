@@ -1,0 +1,74 @@
+= ROADMAP: displace - Cross-Platform Verified File Copy Utility
+
+:toc: left
+:toclevels: 3
+
+*This document outlines the development roadmap for `displace`, targeting a comprehensive, high-performance, and fully supply-chain-verified file copying solution up to version 12.*
+
+== Minimum Viable Product (MVP) - Version 0.1.0 (Current)
+
+The current version of `displace` (v0.1.0) serves as the MVP, establishing the foundational capabilities:
+
+*   **Core Functionality**: Fast, recursive file and directory copying.
+*   **Basic CLI**: Command-line interface with source and destination arguments.
+*   **Initial Containerization**: A `Containerfile` for basic image building (without full verification integration).
+*   **Foundational Compliance**: Adherence to the AI Gatekeeper Protocol and initial repository structuring (e.g., `.machine_readable/`, `.bot_directives/`).
+*   **Producer Blueprint**: A `build_verified_container.sh` script outlining the steps to integrate with the Verified Container Specification.
+
+**Goal**: Provide a functional, albeit unverified, high-performance copy utility with a clear path towards full verification.
+
+== Phase 1: Foundational Verification - Version 1.0.0
+
+**Goal**: Achieve full compliance as a "Producer" within the Verified Container Specification.
+
+*   **Verified Container Build Pipeline**: Fully automate the `build_verified_container.sh` script, replacing placeholders with actual tool integrations for:
+    *   **SLSA Provenance Generation**: Integration of a tool (e.g., `Cerro Torre` or similar) to generate SLSA v1 provenance.
+    *   **SPDX SBOM Generation**: Integration of a tool (e.g., Syft, Trivy) to generate SPDX 2.3 SBOMs.
+    *   **JSON Canonicalization**: Ensure all generated JSON artifacts conform to the Verified Container Specification's JCS rules.
+    *   **DSSE Wrapping & Signing**: Integration with a signing tool to wrap attestations in DSSEs and sign them using keys from the configured Trust Store.
+    *   **Transparency Log Interaction**: Integration with clients for submitting attestations to (at least two) transparency logs and retrieving inclusion proofs.
+    *   **OCI Referrers Publishing**: Automated pushing of the attestation bundle as an OCI Referrer.
+*   **Comprehensive Test Suite**: Develop extensive unit and integration tests for the core copying logic and verification pipeline components.
+*   **Cross-Compilation Testing**: Establish CI/CD for building and testing across target platforms (Linux x86_64, aarch64, RISC-V, BSD variants).
+
+== Phase 2: Enhanced Copying & Integrity - Versions 2.0.0 - 3.0.0
+
+**Goal**: Introduce advanced copying features and robust integrity checks.
+
+*   **File Verification**: Implement optional checksum-based verification (SHA256, SHA512, BLAKE3) of copied files.
+*   **Delta Copy/Sync**: Add functionality to intelligently copy only changed or new files, synchronizing source and destination.
+*   **Exclusion/Inclusion Filters**: Support for `gitignore`-like patterns or regex for selective copying.
+*   **Resume Capability**: Ability to resume interrupted copy operations.
+*   **Performance Metrics**: Detailed reporting of transfer speeds, bandwidth utilization, and I/O statistics.
+
+== Phase 3: Advanced Security & Observability - Versions 4.0.0 - 6.0.0
+
+**Goal**: Deepen security features and provide better operational insight.
+
+*   **Integrity Monitoring (Consumer)**: Develop a complementary `displace` mode that acts as a "Consumer" of Verified Containers, verifying images before operation (e.g., running `displace` within a verified container context).
+*   **Encryption at Rest/Transit**: Optional encryption of data during transfer or at the destination.
+*   **Resource Throttling**: Control over bandwidth and I/O usage during copying.
+*   **Audit Logging**: Comprehensive logging of all copy operations and verification events.
+*   **Policy Engine Integration**: Ability to integrate with external policy engines for fine-grained control over copy operations.
+
+== Phase 4: Decentralized Trust & Ecosystem Integration - Versions 7.0.0 - 9.0.0
+
+**Goal**: Leverage decentralized trust models and expand ecosystem integration.
+
+*   **Federated Trust Store Management**: Tools and processes for securely updating and distributing Trust Stores.
+*   **Distributed Attestation Services**: Explore integration with decentralized attestation services.
+*   **Plug-in Architecture**: Allow for extension of `displace` with custom verification steps or data sources.
+*   **ABI/FFI Compliance**: Full implementation of Hyperpolymath Universal ABI/FFI Standards for core components, leveraging Idris2 and Zig for formally verified interfaces.
+
+== Phase 5: Formal Verification & Autonomous Operation - Versions 10.0.0 - 12.0.0
+
+**Goal**: Achieve the highest levels of formal assurance and enable autonomous, verifiable operations.
+
+*   **Formal Verification of Core Logic**: Apply formal methods (e.g., SPARK, Idris2 proofs) to critical sections of the `displace` codebase, particularly verification and integrity checks.
+*   **Adaptive Verification Policies**: Implement AI-driven adaptive verification policies based on threat models and environmental context.
+*   **Autonomous Agent Integration**: Enable `displace` to be an intelligent agent in an autonomous, self-healing system, performing verifiable data movements without human intervention.
+*   **Post-Quantum Cryptography Readiness**: Full transition to and formal verification of post-quantum cryptographic algorithms (e.g., ML-DSA-87 only) as mandated by the Verified Container Specification.
+
+== Contributing to the Roadmap
+
+This roadmap is a living document. Community contributions and feedback are highly encouraged. Please refer to `CONTRIBUTING.md` for details on how to propose changes or new features.

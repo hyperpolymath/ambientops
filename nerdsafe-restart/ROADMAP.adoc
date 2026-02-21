@@ -1,0 +1,423 @@
+// SPDX-License-Identifier: MPL-2.0-or-later
+= nerdsafe-restart Roadmap
+:toc: macro
+:toclevels: 3
+:sectnums:
+
+toc::[]
+
+== Vision Statement
+
+nerdsafe-restart is a pre-reboot validation tool that simulates shell startup to catch configuration errors before they brick your system. It provides 93% fidelity emulation of the boot-to-shell sequence, giving users confidence to reboot after making shell configuration changes.
+
+== Current Status
+
+[cols="1,1,2"]
+|===
+| Component | Status | Notes
+
+| Shell syntax validation | Complete | bash -n on all configs
+| Containerized simulation | Complete | Fedora Kinoite 43 base
+| Resource constraints | Complete | System-matched limits
+| Guix manifest | Complete | Reproducible environment
+| Emulation scope docs | Complete | 93% fidelity documented
+| Ada TUI | Planned | Settings/profiles management
+| CI integration | Planned | GitHub Actions workflow
+|===
+
+== Milestones
+
+=== Milestone 1: Core Validation (Complete)
+
+**Goal:** Validate shell configuration syntax and structure
+
+**Deliverables:**
+
+* [x] Shell syntax checking with `bash -n`
+* [x] ShellCheck static analysis
+* [x] File permission validation
+* [x] PATH construction verification
+* [x] Environment variable capture
+
+=== Milestone 2: Containerized Simulation (Complete)
+
+**Goal:** Full shell startup in isolated container
+
+**Deliverables:**
+
+* [x] Fedora Kinoite 43 container image
+* [x] User home directory mounting (read-only)
+* [x] Module loading order verification
+* [x] Environment capture and export
+* [x] Exit code reporting
+
+=== Milestone 3: Resource Constraints (Complete)
+
+**Goal:** Match container resources to host system
+
+**Deliverables:**
+
+* [x] Memory limit detection and application
+* [x] CPU limit detection and application
+* [x] PID limit enforcement
+* [x] Security hardening (no-new-privileges, cap-drop)
+* [x] Network isolation
+
+=== Milestone 4: Reproducibility (Complete)
+
+**Goal:** Reproducible validation environment
+
+**Deliverables:**
+
+* [x] Guix manifest for dependencies
+* [x] Guix channels for version pinning
+* [x] Bootstrap component analysis
+* [x] Emulation scope documentation (93% fidelity)
+
+=== Milestone 5: Ada TUI (In Progress)
+
+**Goal:** Interactive settings and profile management
+
+**Target:** Q1 2026
+
+**Deliverables:**
+
+* [ ] System resource auto-detection display
+* [ ] Profile management (create, edit, delete)
+* [ ] Validation level selection
+* [ ] Real-time validation output
+* [ ] Configuration export/import
+
+**Ada Components:**
+
+[source,ada]
+----
+package Nerdsafe_TUI is
+   type Profile_Name is new String (1..64);
+   type Resource_Limits is record
+      Memory_MB    : Positive;
+      CPU_Count    : Positive;
+      PID_Limit    : Positive;
+      Timeout_Sec  : Positive;
+   end record;
+
+   type Validation_Level is (Quick, Standard, Thorough, Paranoid);
+
+   procedure Auto_Detect_Resources (Limits : out Resource_Limits);
+   procedure Run_Validation (Level : Validation_Level; Limits : Resource_Limits);
+   procedure Manage_Profiles;
+end Nerdsafe_TUI;
+----
+
+=== Milestone 6: CI Integration (Planned)
+
+**Goal:** Pre-commit and CI pipeline integration
+
+**Target:** Q2 2026
+
+**Deliverables:**
+
+* [ ] GitHub Actions workflow
+* [ ] Pre-commit hook
+* [ ] GitLab CI template
+* [ ] Exit code documentation for CI
+* [ ] Badge generation
+
+**GitHub Actions Example:**
+
+[source,yaml]
+----
+# .github/workflows/shell-validate.yml
+name: Shell Configuration Validation
+on: [push, pull_request]
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/hyperpolymath/nerdsafe-restart:latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: nerdsafe-restart check --level standard
+----
+
+=== Milestone 7: Extended Validation (Planned)
+
+**Goal:** Increase fidelity beyond 93%
+
+**Target:** Q3 2026
+
+**Deliverables:**
+
+* [ ] Tool functionality testing (not just presence)
+* [ ] Network-dependent config simulation
+* [ ] SELinux context validation (best-effort)
+* [ ] Memory pressure testing
+* [ ] Race condition detection
+
+=== Milestone 8: Multi-Shell Support (Future)
+
+**Goal:** Support validation for other shells
+
+**Target:** 2027
+
+**Shells to Support:**
+
+1. **zsh** - Common alternative
+2. **fish** - User-friendly shell
+3. **POSIX sh** - Minimal compliance
+4. **dash** - Debian default
+
+== Architecture
+
+=== Component Diagram
+
+[source]
+----
+┌─────────────────────────────────────────────────────────────────┐
+│                      nerdsafe-restart                            │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐   │
+│  │   Ada TUI    │  │  CLI Scripts │  │   CI Integration     │   │
+│  │  (planned)   │  │  (complete)  │  │     (planned)        │   │
+│  └──────┬───────┘  └──────┬───────┘  └──────────┬───────────┘   │
+│         │                 │                      │               │
+│         └────────────┬────┴──────────────────────┘               │
+│                      ▼                                           │
+│  ┌───────────────────────────────────────────────────────────┐   │
+│  │                  Validation Engine                         │   │
+│  │  ┌─────────────┐ ┌─────────────┐ ┌─────────────────────┐  │   │
+│  │  │ Syntax      │ │ ShellCheck  │ │ Environment         │  │   │
+│  │  │ Validation  │ │ Analysis    │ │ Capture             │  │   │
+│  │  └─────────────┘ └─────────────┘ └─────────────────────┘  │   │
+│  └───────────────────────────────────────────────────────────┘   │
+│                      │                                           │
+│                      ▼                                           │
+│  ┌───────────────────────────────────────────────────────────┐   │
+│  │                Container Layer (nerdctl/podman)            │   │
+│  │                                                            │   │
+│  │  ┌─────────────────────────────────────────────────────┐  │   │
+│  │  │  Fedora Kinoite 43 (Containerfile.kinoite)          │  │   │
+│  │  │  - bash, coreutils, ShellCheck                      │  │   │
+│  │  │  - User config mounted read-only                    │  │   │
+│  │  │  - Resource constraints applied                      │  │   │
+│  │  └─────────────────────────────────────────────────────┘  │   │
+│  └───────────────────────────────────────────────────────────┘   │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+----
+
+=== Validation Levels
+
+[cols="1,1,4"]
+|===
+| Level | Time | What It Does
+
+| `quick` | ~5s | Syntax check only (`bash -n`)
+| `standard` | ~30s | Syntax + ShellCheck + file checks
+| `thorough` | ~2m | Full container simulation
+| `paranoid` | ~5m | All checks + resource pressure testing
+|===
+
+== Putative Extensions (Speculative)
+
+These are potential future directions that extend beyond the core mission. They are documented here for consideration but have significant technical challenges.
+
+=== A. Boot Redirection (Highly Unlikely)
+
+**Concept:** Redirect actual system boot to use the container as the boot target.
+
+**Why It's Problematic:**
+
+* Containers run ON a kernel, not FROM bare metal
+* Would require a bootloader entry pointing to container runtime
+* Container doesn't include kernel, initramfs, systemd
+* Fundamentally architectural mismatch
+
+**Alternative Approaches:**
+
+* **ostree deployments** - Kinoite already does this natively
+* **systemd-nspawn --boot** - Can boot container as init system
+* **QEMU with container exported as disk image** - Full VM boot
+
+**Verdict:** Not in scope. Use ostree/rpm-ostree for actual boot management.
+
+=== B. Chrootable Environment (Feasible)
+
+**Concept:** Export container as chroot-ready filesystem for rescue/recovery.
+
+**Technical Feasibility:** Medium-High
+
+**How It Could Work:**
+
+[source,bash]
+----
+# Export container to tarball
+nerdctl export nerdsafe-container > nerdsafe-root.tar
+
+# Extract to chroot location
+mkdir -p /mnt/rescue
+tar -xf nerdsafe-root.tar -C /mnt/rescue
+
+# Use as rescue environment
+chroot /mnt/rescue /bin/bash
+# Or with systemd-nspawn:
+systemd-nspawn -D /mnt/rescue
+----
+
+**Benefits:**
+
+* Minimal rescue environment with known-good shell config
+* Could be placed on rescue partition
+* Works without container runtime
+
+**Challenges:**
+
+* No kernel or hardware management
+* SELinux contexts may not transfer
+* Would need bootable initramfs to invoke chroot
+
+**Verdict:** Worth exploring for Milestone 9+. Add export-to-chroot option.
+
+=== C. Whole-System Config Staging (Feasible)
+
+**Concept:** Use container as staging area for shell config changes, then apply validated configs back to host.
+
+**Technical Feasibility:** High
+
+**How It Could Work:**
+
+[source,bash]
+----
+# 1. Copy current config INTO container (writable)
+nerdctl cp ~/.bashrc nerdsafe-container:/home/user/.bashrc
+
+# 2. Edit config inside container
+nerdctl exec -it nerdsafe-container nano ~/.bashrc
+
+# 3. Validate in container
+nerdctl exec nerdsafe-container nerdsafe-restart check
+
+# 4. If passed, copy BACK to host
+nerdctl cp nerdsafe-container:/home/user/.bashrc ~/.bashrc
+
+# 5. Now safe to use new config
+----
+
+**Benefits:**
+
+* Edit-in-isolation workflow
+* Validate before applying
+* Rollback is trivial (don't copy back)
+
+**Challenges:**
+
+* Two-way sync complexity
+* File permission handling
+* Need careful diff/merge for partial changes
+
+**Verdict:** Good candidate for Ada TUI feature. Could add `nerdsafe-restart stage` command.
+
+=== Summary Table
+
+[cols="1,2,2,1"]
+|===
+| Extension | Feasibility | Challenges | Priority
+
+| Boot redirection | Very Low | Architectural mismatch | Not planned
+| Chrootable export | Medium | Bootloader integration | Milestone 9+
+| Config staging | High | Sync complexity | Milestone 5 (TUI)
+|===
+
+== Non-Goals
+
+These are explicitly out of scope:
+
+1. **BIOS/UEFI emulation** - Hardware layer, not software
+2. **Bootloader testing** - Pre-shell, different tooling
+3. **Kernel boot** - Use QEMU for this
+4. **systemd unit validation** - Different tool (systemd-analyze)
+5. **Display manager testing** - GUI layer
+6. **Network connectivity** - Shell doesn't need network to start
+7. **Full multi-user** - Single user sufficient for validation
+8. **Hardware driver loading** - Kernel responsibility
+
+== Contributing
+
+=== Development Setup
+
+[source,bash]
+----
+# Clone the repo
+git clone https://github.com/hyperpolymath/nerdsafe-restart
+cd nerdsafe-restart
+
+# Build container image
+nerdctl build -t nerdsafe-restart:dev -f Containerfile.kinoite .
+
+# Run tests
+./nerdsafe-restart.sh check --level standard
+----
+
+=== Code Style
+
+* Shell scripts: ShellCheck compliant
+* Ada: GNAT style guide
+* Documentation: AsciiDoc
+* License: AGPL-3.0-or-later
+* SPDX headers required on all files
+
+=== Pull Request Process
+
+1. Fork the repository
+2. Create feature branch
+3. Ensure all validation passes
+4. Update documentation
+5. Submit PR with clear description
+
+== Appendix A: Exit Codes
+
+[cols="1,2,3"]
+|===
+| Code | Meaning | Action
+
+| 0 | All validations passed | Safe to reboot
+| 1 | Syntax errors found | Fix shell config
+| 2 | Timeout exceeded | Investigate slow startup
+| 3 | ShellCheck warnings | Review static analysis
+| 4 | Missing critical files | Check file paths
+| 5 | Permission errors | Fix file permissions
+| 10 | Container build failed | Check container runtime
+| 11 | Resource detection failed | Check /proc access
+|===
+
+== Appendix B: Environment Variables
+
+[cols="1,3"]
+|===
+| Variable | Purpose
+
+| `NERDSAFE_LEVEL` | Default validation level
+| `NERDSAFE_TIMEOUT` | Override timeout (seconds)
+| `NERDSAFE_MEMORY` | Override memory limit (bytes)
+| `NERDSAFE_CPUS` | Override CPU limit
+| `NERDSAFE_VERBOSE` | Enable verbose output
+| `NERDSAFE_NO_COLOR` | Disable colored output
+|===
+
+== Appendix C: Known Limitations
+
+1. **Tool init emulation is partial** (70% fidelity)
+   - asdf, starship, direnv syntax checked but not executed
+
+2. **Container filesystem differs slightly** (85% fidelity)
+   - Some paths may differ from native system
+
+3. **SELinux cannot be enforced** in container
+   - Context can be checked, policy cannot be enforced
+
+4. **Race conditions not detected**
+   - Sequential validation may miss timing issues
+
+5. **Memory pressure differs**
+   - Container OOM behavior differs from native

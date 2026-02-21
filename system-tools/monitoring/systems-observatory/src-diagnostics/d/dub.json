@@ -1,0 +1,34 @@
+{
+    "name": "juisys-diagnostics",
+    "description": "Technical diagnostics add-on for Juisys (D implementation)",
+    "authors": ["Claude Sonnet 4.5 (Anthropic)"],
+    "license": "MIT",
+    "targetType": "dynamicLibrary",
+    "targetPath": ".",
+    "targetName": "diagnostics",
+
+    "sourceFiles": [
+        "diagnostics.d",
+        "developer_diagnostics.d"
+    ],
+
+    "dflags": ["-fPIC", "-shared"],
+
+    "buildTypes": {
+        "debug": {
+            "buildOptions": ["debugMode", "debugInfo"]
+        },
+        "release": {
+            "buildOptions": ["releaseMode", "optimize", "inline"]
+        }
+    },
+
+    "platforms": ["osx", "linux"],
+
+    "configurations": [
+        {
+            "name": "library",
+            "targetType": "dynamicLibrary"
+        }
+    ]
+}

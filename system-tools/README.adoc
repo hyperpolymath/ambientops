@@ -1,0 +1,88 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+// Copyright (c) 2026 Jonathan D.A. Jewell <jonathan.jewell@open.ac.uk>
+
+= system-tools
+:toc: macro
+:toc-title: Contents
+:toclevels: 2
+
+Unified monorepo for system monitoring, recovery, and ambulance tooling.
+
+toc::[]
+
+== Overview
+
+system-tools consolidates eleven previously separate repositories into a
+single, coherent monorepo organised by function:
+
+* *monitoring/* - Continuous system observation and alerting (observatory, systems-observatory, flare)
+* *recovery/* - Active intervention when systems fail (emergency-room, operating-theatre, freeze-ejector)
+* *ambulances/* - Domain-specific diagnostic and repair agents (disk, network, performance, security)
+* *contracts/* - Shared interfaces and type contracts across all tools
+
+== Directory Structure
+
+....
+system-tools/
+  monitoring/
+    observatory/          - System metrics and health monitoring (Elixir)
+    systems-observatory/  - Multi-system observatory platform (Julia)
+    flare/                - Crash capture and signal analysis
+  recovery/
+    emergency-room/       - Triage and emergency system recovery
+    operating-theatre/    - Deep surgical system repair
+    freeze-ejector/       - Frozen process detection and ejection
+  ambulances/
+    disk/                 - Disk health, SMART, filesystem repair
+    network/              - Network diagnostics and repair (Tauri/Ada/Deno)
+    performance/          - Performance profiling and bottleneck resolution
+    security/             - Security incident response and hardening
+  contracts/              - Shared type contracts and schemas (Deno/JSON Schema)
+  justfile                - Top-level task runner
+  LICENSE                 - PMPL-1.0-or-later
+  README.adoc             - This file
+....
+
+== Component Origins
+
+Each subdirectory was imported from a standalone repository:
+
+|===
+| Original Repository | Monorepo Location
+
+| system-observatory       | monitoring/observatory/
+| systems-observatory      | monitoring/systems-observatory/
+| system-flare             | monitoring/flare/
+| system-emergency-room    | recovery/emergency-room/
+| system-operating-theatre | recovery/operating-theatre/
+| system-freeze-ejector    | recovery/freeze-ejector/
+| disk-ambulance           | ambulances/disk/
+| network-ambulance        | ambulances/network/
+| performance-ambulance    | ambulances/performance/
+| security-ambulance       | ambulances/security/
+| system-tools-contracts   | contracts/
+|===
+
+== Quick Start
+
+[source,bash]
+----
+just --list
+just monitoring-observatory
+just recovery-emergency-room
+just ambulance-disk
+----
+
+== Architecture
+
+The contracts/ directory defines shared interfaces that all components implement.
+This ensures consistent behaviour across monitoring, recovery, and ambulance tools.
+
+Each ambulance can operate independently or be orchestrated through the recovery
+components (emergency-room for triage, operating-theatre for deep repairs).
+
+== License
+
+SPDX-License-Identifier: PMPL-1.0-or-later
+
+Copyright (c) 2026 Jonathan D.A. Jewell <jonathan.jewell@open.ac.uk>

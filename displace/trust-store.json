@@ -1,0 +1,70 @@
+{
+  "$schema": "https://verified-container.org/schema/trust-store-v1.json",
+  "version": 1,
+  "id": "displace-project-trust-store",
+  "updated": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+  "keys": {
+    "builders": [
+      {
+        "id": "sha256:example_builder_key_id_1",
+        "algorithm": "ed25519",
+        "publicKey": "MCowBQYDK2VwAyEAXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+        "validFrom": "2024-01-01T00:00:00Z",
+        "metadata": {
+          "owner": "Displace Build Team",
+          "description": "Key for signing displace build attestations"
+        }
+      }
+    ],
+    "releasers": [
+      {
+        "id": "sha256:example_releaser_key_id_1",
+        "algorithm": "ed25519",
+        "publicKey": "MCowBQYDK2VwAyEAXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+        "validFrom": "2024-01-01T00:00:00Z",
+        "metadata": {
+          "owner": "Displace Release Team",
+          "description": "Key for signing displace release attestations"
+        }
+      }
+    ],
+    "trust-store-updaters": [
+      {
+        "id": "sha256:example_updater_key_id_1",
+        "algorithm": "ed25519",
+        "publicKey": "MCowBQYDK2VwAyEAXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+        "validFrom": "2024-01-01T00:00:00Z"
+      }
+    ]
+  },
+  "thresholds": {
+    "release-signers": {
+      "k": 1,
+      "n": 1,
+      "algorithm": "frost-ed25519",
+      "members": [
+        "sha256:example_releaser_key_id_1"
+      ]
+    }
+  },
+  "logs": {
+    "verified-container-log-1": {
+      "operator": "Verified Container Log Operator 1",
+      "publicKey": "MCowBQYDK2VwAyEAXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+      "url": "https://log1.example.org",
+      "algorithm": "ed25519"
+    },
+    "verified-container-log-2": {
+      "operator": "Verified Container Log Operator 2",
+      "publicKey": "MCowBQYDK2VwAyEAXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+      "url": "https://log2.example.org",
+      "algorithm": "ed25519"
+    },
+    "verified-container-log-3": {
+      "operator": "Verified Container Log Operator 3",
+      "publicKey": "MCowBQYDK2VwAyEAXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+      "url": "https://log3.example.org",
+      "algorithm": "ed25519"
+    }
+  }
+}

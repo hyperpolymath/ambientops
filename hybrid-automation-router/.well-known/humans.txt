@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# humanstxt.org
+
+/* TEAM */
+Creator: Jonathan D.A. Jewell (hyperpolymath)
+Contact: jonathan.jewell@open.ac.uk
+GitHub: https://github.com/hyperpolymath
+Location: United Kingdom
+
+/* SITE */
+Last update: 2026-02-13
+Language: English
+Standards: Elixir/OTP, Phoenix LiveView, IPFS
+Components: Semantic Graph IR, Control/Data Plane, OTP Clustering

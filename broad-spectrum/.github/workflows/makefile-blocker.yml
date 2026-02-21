@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+name: Makefile Blocker
+on: [push, pull_request]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Block Makefiles
+        run: |
+          if [ -f "Makefile" ] || [ -f "makefile" ] || [ -f "GNUmakefile" ]; then
+            echo "Makefile detected. Use justfile instead."
+            exit 1
+          fi
+          echo "No Makefile detected - using justfile as required"

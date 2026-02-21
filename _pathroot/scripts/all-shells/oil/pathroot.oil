@@ -1,0 +1,25 @@
+#!/usr/bin/env oil
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# _pathroot entry point for Oil shell
+
+shopt --set errexit
+shopt --set pipefail
+
+# Detect _pathroot installation
+if test -n "${PATHROOT_HOME:-}" {
+  var PATHROOT_ROOT = $PATHROOT_HOME
+} elif test -f $HOME/.pathroot/env {
+  var PATHROOT_ROOT = $HOME/.pathroot
+} else {
+  var PATHROOT_ROOT = ${XDG_DATA_HOME:-$HOME/.local/share}/pathroot
+}
+
+export PATHROOT_ROOT
+
+# Source environment
+if test -f $PATHROOT_ROOT/env.sh {
+  source $PATHROOT_ROOT/env.sh
+}
+
+# Run validation
+exec deno run --allow-read --allow-env $PATHROOT_ROOT/src/Validate.mjs "$@"

@@ -1,0 +1,79 @@
+= Total Recall — Roadmap
+:toc:
+:toclevels: 2
+:icons: font
+
+== Current State
+
+[IMPORTANT]
+====
+**Project specification pending upload.**
+
+This repository contains RSR infrastructure only. No application code, design documents, or functional specifications exist yet.
+====
+
+== Phase 0: Foundation (Current)
+
+[cols="1,1,3"]
+|===
+| Status | Item | Notes
+
+| ✓ | Repository created | RSR template applied
+| ✓ | CI/CD workflows | CodeQL, quality, security scorecard, etc.
+| ✓ | Community files | CoC, Contributing, Security (templates)
+| ✓ | Justfile | ~50 task recipes ready
+| ○ | Project specification | *Awaiting upload*
+| ○ | STATE.scm | Pending spec
+| ○ | guix.scm / flake.nix | Pending spec
+| ○ | .well-known/* | Pending spec
+|===
+
+Legend: ✓ = Complete | ◐ = In Progress | ○ = Not Started
+
+== Phase 1: Specification
+
+Once the project specification is uploaded:
+
+* [ ] Define project purpose and scope
+* [ ] Identify core modules and components
+* [ ] Select primary implementation language(s) from allowed stack
+* [ ] Create STATE.scm with phase tracking
+* [ ] Define initial API/interface contracts
+* [ ] Set up package definitions (guix.scm and/or flake.nix)
+* [ ] Configure .well-known files (security.txt, ai.txt, humans.txt)
+* [ ] Populate RSR_COMPLIANCE.adoc
+
+== Phase 2: Core Implementation
+
+* [ ] Scaffold project structure
+* [ ] Implement core functionality
+* [ ] Unit test suite
+* [ ] Integration tests
+* [ ] Documentation (API docs, user guide)
+
+== Phase 3: Hardening
+
+* [ ] Security audit
+* [ ] Performance optimization
+* [ ] Accessibility review
+* [ ] SBOM generation
+* [ ] Container builds (Wolfi-based)
+
+== Phase 4: Release
+
+* [ ] Version 1.0.0
+* [ ] Published packages
+* [ ] Deployment documentation
+* [ ] Community announcement
+
+== Future Considerations
+
+_To be determined based on project specification._
+
+---
+
+== Contributing
+
+This roadmap will be updated once the project specification is available. Check back or watch this repository for updates.
+
+See link:CONTRIBUTING.md[CONTRIBUTING.md] for contribution guidelines.
