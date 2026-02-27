@@ -1,0 +1,119 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Workstation Optimization Playbook for Fedora Kinoite
+# Run: ansible-playbook optimize-workstation.yml --ask-become-pass
+---
+- name: Optimize Fedora Kinoite Workstation
+  hosts: localhost
+  connection: local
+  become: true
+
+  vars:
+    syncthing_ports:
+      - 22000/tcp
+      - 22000/udp
+      - 21027/udp
+    kdeconnect_ports:
+      - 1716/tcp
+      - 1716/udp
+    journal_max_size: 500M
+
+  tasks:
+    # 1. NVIDIA Driver Fix
+    - name: Add nouveau blacklist to kernel params
+      ansible.builtin.command:
+        cmd: rpm-ostree kargs --append=modprobe.blacklist=nouveau --append=rd.driver.blacklist=nouveau
+      register: kargs_result
+      changed_when: "'Staging' in kargs_result.stdout"
+      failed_when: false
+
+    # 2. Firewall Hardening
+    - name: Remove wide-open TCP ports
+      ansible.posix.firewalld:
+        port: 1025-65535/tcp
+        permanent: true
+        state: disabled
+      ignore_errors: true
+
+    - name: Remove wide-open UDP ports
+      ansible.posix.firewalld:
+        port: 1025-65535/udp
+        permanent: true
+        state: disabled
+      ignore_errors: true
+
+    - name: Allow Syncthing ports
+      ansible.posix.firewalld:
+        port: "{{ item }}"
+        permanent: true
+        state: enabled
+      loop: "{{ syncthing_ports }}"
+
+    - name: Allow KDE Connect ports
+      ansible.posix.firewalld:
+        port: "{{ item }}"
+        permanent: true
+        state: enabled
+      loop: "{{ kdeconnect_ports }}"
+
+    - name: Reload firewall
+      ansible.builtin.command:
+        cmd: firewall-cmd --reload
+
+    # 3. Journal Vacuum
+    - name: Vacuum journal logs to {{ journal_max_size }}
+      ansible.builtin.command:
+        cmd: journalctl --vacuum-size={{ journal_max_size }}
+      register: journal_result
+      changed_when: "'Vacuuming' in journal_result.stdout"
+
+    # 4. Disable Unnecessary Services
+    - name: Disable ModemManager (no modems detected)
+      ansible.builtin.systemd:
+        name: ModemManager
+        enabled: false
+        state: stopped
+      ignore_errors: true
+
+    - name: Mask qemu-guest-agent (not a VM)
+      ansible.builtin.systemd:
+        name: qemu-guest-agent
+        masked: true
+      ignore_errors: true
+
+    # 5. Network Performance (BBR)
+    - name: Configure BBR congestion control
+      ansible.builtin.copy:
+        dest: /etc/sysctl.d/99-network-performance.conf
+        content: |
+          # BBR congestion control for better throughput
+          net.core.default_qdisc = fq
+          net.ipv4.tcp_congestion_control = bbr
+
+          # Increase buffer sizes for high-speed networks
+          net.core.rmem_max = 16777216
+          net.core.wmem_max = 16777216
+          net.ipv4.tcp_rmem = 4096 87380 16777216
+          net.ipv4.tcp_wmem = 4096 65536 16777216
+
+          # Enable TCP Fast Open
+          net.ipv4.tcp_fastopen = 3
+        mode: '0644'
+      notify: Apply sysctl
+
+  handlers:
+    - name: Apply sysctl
+      ansible.builtin.command:
+        cmd: sysctl -p /etc/sysctl.d/99-network-performance.conf
+
+  post_tasks:
+    - name: Summary
+      ansible.builtin.debug:
+        msg:
+          - "=== Optimization Complete ==="
+          - "NVIDIA: nouveau blacklisted (reboot required)"
+          - "Firewall: Locked down to Syncthing + KDE Connect"
+          - "Journal: Vacuumed to {{ journal_max_size }}"
+          - "Services: ModemManager disabled, qemu-guest-agent masked"
+          - "Network: BBR congestion control enabled"
+          - ""
+          - ">>> REBOOT REQUIRED for NVIDIA driver <<<"
