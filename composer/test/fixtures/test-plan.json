@@ -1,0 +1,73 @@
+{
+  "version": "1.0.0",
+  "plan_id": "plan-test-001",
+  "envelope_ref": "env-hct-scan-20260228",
+  "title": "Clean stale GPU driver cache",
+  "description": "Removes stale NVIDIA cache files and restarts display manager",
+  "overall_risk": "guided",
+  "overall_reversibility": "full",
+  "estimated_duration_seconds": 45,
+  "requires_reboot": false,
+  "requires_privileges": ["root"],
+  "steps": [
+    {
+      "step_id": "s1",
+      "order": 1,
+      "action": "clear_cache",
+      "title": "Remove stale GPU shader cache",
+      "description": "Deletes NVIDIA shader cache that may reference removed GPU",
+      "risk": "safe",
+      "reversibility": "full",
+      "undo_instruction": "Cache regenerates automatically on next GPU use",
+      "target": {
+        "path": "/var/cache/nvidia/GLCache"
+      },
+      "requires_confirmation": false,
+      "estimated_duration_seconds": 5,
+      "finding_refs": ["HCT003"]
+    },
+    {
+      "step_id": "s2",
+      "order": 2,
+      "action": "delete_file",
+      "title": "Remove orphaned Xorg config",
+      "description": "Deletes Xorg config referencing non-existent GPU PCI address",
+      "risk": "guided",
+      "reversibility": "full",
+      "undo_instruction": "Restore from /var/cache/nvidia/xorg.conf.bak",
+      "target": {
+        "path": "/etc/X11/xorg.conf.d/20-nvidia.conf"
+      },
+      "requires_confirmation": true,
+      "estimated_duration_seconds": 2,
+      "finding_refs": ["HCT003", "HCT005"]
+    },
+    {
+      "step_id": "s3",
+      "order": 3,
+      "action": "restart_service",
+      "title": "Restart display manager",
+      "description": "Restart SDDM to pick up the configuration changes",
+      "risk": "guided",
+      "reversibility": "full",
+      "target": {
+        "service": "sddm.service"
+      },
+      "requires_confirmation": true,
+      "estimated_duration_seconds": 10,
+      "finding_refs": []
+    }
+  ],
+  "prerequisites": [
+    {
+      "check": "systemctl is-active sddm",
+      "description": "Display manager must be running",
+      "blocking": true
+    }
+  ],
+  "warnings": [
+    "Display will briefly go black during service restart",
+    "Open applications on affected displays may lose position"
+  ],
+  "approval_required": true
+}
