@@ -7,7 +7,7 @@
     (version "1.0.0-rc1")
     (schema-version "1.0")
     (created "2026-01-03")
-    (updated "2026-02-28T6")
+    (updated "2026-02-28T7")
     (project "hybrid-automation-router")
     (repo "github.com/hyperpolymath/hybrid-automation-router"))
 
@@ -31,7 +31,7 @@
        ("web-ui" . 75)
        ("ipfs" . 10)
        ("security" . 35)
-       ("testing" . 75)))
+       ("testing" . 82)))
     (working-features
       ("semantic-graph-ir"
        "ansible-parser"
@@ -72,7 +72,7 @@
   (blockers-and-issues
     (critical)
     (high
-      ("test-coverage" . "44 test files, 820 tests passing. Security manager fully tested (83 tests). Web layer, mix tasks, control plane, data plane all covered. Remaining: more integration round-trips"))
+      ("test-coverage" . "45 test files, 892 tests passing. Integration round-trip tests added (72 tests). Full matrix: Ansible<->Salt, Ansible<->Terraform, Salt<->Terraform, Chef->Puppet, Puppet->Chef, K8s->DockerCompose, DockerCompose->K8s. Stub smoke tests for CloudFormation, Pulumi. Cross-format matrix (4 parsers x 5 transformers). Remaining: property tests, performance benchmarks"))
     (medium
       ("ipfs-stub" . "IPFS node returns mock CIDs, not real content addressing")
       ("security-stub" . "Security manager auth/authz not implemented"))
@@ -82,7 +82,7 @@
 
   (critical-next-actions
     (immediate
-      ("integration-tests" . "More round-trip conversion tests (Chef→Puppet, K8s→DockerCompose)"))
+      ("property-tests" . "StreamData property-based tests for parsers and transformers"))
     (this-week
       ("implement-ipfs" . "Real ex_ipfs integration"))
     (this-month
@@ -91,7 +91,8 @@
       ("security-impl" . "X.509 auth, policy-based authz")))
 
   (session-history
-    (("2026-02-28-h" . "Security manager test coverage: 1 new test file (83 tests). Authentication across all 4 tiers (development/iot/industrial/critical): valid certs, expired certs, future certs, missing fields, permissive dev tier. Authorization across all 4 tiers: per-tier allow-lists (dev=all, iot=8 ops, industrial=5 ops, critical=3 ops), denied operations, map-based operations, :unknown extraction. Audit logging: manual entries, automatic auth/authz entries, ordering, field structure, timestamps. Edge cases: FunctionClauseError guards, missing device_id defaults, integer operations. Tier transitions: dynamic tier switching via Supervisor.terminate_child/restart_child. GenServer lifecycle: registration, crash resilience. Total: 820 tests, 0 failures.")
+    (("2026-02-28-i" . "Integration round-trip conversion tests: 1 new test file (72 tests). Full round-trips: Ansible<->Salt (package/service/user/file/command), Ansible<->Terraform, Salt<->Terraform. Cross-domain: Chef->Puppet (package/service/user/multi-resource), Puppet->Chef (package/service/file/multi-resource), K8s->DockerCompose (Deployment/Service/ConfigMap/multi-doc), DockerCompose->K8s (single/multi-service). Stub smoke: CloudFormation (parse+transform to Ansible/Salt/CFN identity), Pulumi (parse+transform to Ansible/Terraform/Pulumi identity). Cross-format matrix: 20 tests covering 4 parsers x 5 transformers crash-freedom. Semantic fidelity: empty playbooks, idempotent double round-trips with assert_semantic_equivalence, operation ordering, cross-tool package/service name preservation. Total: 892 tests, 0 failures.")
+     ("2026-02-28-h" . "Security manager test coverage: 1 new test file (83 tests). Authentication across all 4 tiers (development/iot/industrial/critical): valid certs, expired certs, future certs, missing fields, permissive dev tier. Authorization across all 4 tiers: per-tier allow-lists (dev=all, iot=8 ops, industrial=5 ops, critical=3 ops), denied operations, map-based operations, :unknown extraction. Audit logging: manual entries, automatic auth/authz entries, ordering, field structure, timestamps. Edge cases: FunctionClauseError guards, missing device_id defaults, integer operations. Tier transitions: dynamic tier switching via Supervisor.terminate_child/restart_child. GenServer lifecycle: registration, crash resilience. Total: 820 tests, 0 failures.")
      ("2026-02-28-g" . "Web layer + mix task test coverage: 7 new test files (112 tests). Router (20 tests: route definitions, HTTP methods, pipeline separation, completeness). TransformController (16 tests: transform/parse/formats endpoints, status codes, JSON structure, validation errors). DashboardLive (8 tests: mount, render, stats, formats, how-it-works). GraphLive (5 tests: mount with ID param, placeholder). TransformLive (15 tests: mount, format selectors, handle_events, transform action). ErrorJSON (6 tests) + ErrorHTML (4 tests). Mix tasks: har.convert (13 tests), har.parse (14 tests), har.transform (9 tests). Added floki dep for LiveView testing, configured Phoenix endpoint for test env. Total: 737 tests, 0 failures.")
      ("2026-02-28-f" . "Test suite expansion: 8 new test files (2,373 lines). CircuitBreaker FSM (25 tests), K9Contract (33 tests), InputValidator (27 tests), CycleDetector (15 tests), A2ML attestation (17 tests), Parser dispatch (10 tests), Transformer dispatch (12 tests), RoutingDecision struct (4 tests). Total: 625 tests, 0 failures. Fixed timing races in CB tests, parser dispatch fixtures, sigil delimiters.")
      ("2026-02-28-e" . "Completeness audit fix: K9Contract.init() was never called — ETS table :har_k9_contracts was never created, so contracts were silently skipped. Added init call to Application.start/2 before supervision tree. Also added K9-SVC-EXPLAINED.adoc and A2ML-EXPLAINED.adoc narrative docs.")
