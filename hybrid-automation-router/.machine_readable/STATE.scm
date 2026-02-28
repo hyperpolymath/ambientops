@@ -7,7 +7,7 @@
     (version "1.0.0-rc1")
     (schema-version "1.0")
     (created "2026-01-03")
-    (updated "2026-02-28T2")
+    (updated "2026-02-28T3")
     (project "hybrid-automation-router")
     (repo "github.com/hyperpolymath/hybrid-automation-router"))
 
@@ -25,6 +25,7 @@
        ("transformers" . 60)
        ("control-plane" . 95)
        ("circuit-breaker" . 100)
+       ("k9-contracts" . 100)
        ("attestation" . 80)
        ("input-validation" . 70)
        ("web-ui" . 75)
@@ -57,7 +58,8 @@
        "backend-manifests"
        "input-validation"
        "cycle-detection"
-       "circuit-breaker-fsm")))
+       "circuit-breaker-fsm"
+       "k9-svc-contracts")))
 
   (route-to-mvp
     (milestones
@@ -92,7 +94,8 @@
       ("security-impl" . "X.509 auth, policy-based authz")))
 
   (session-history
-    (("2026-02-28-c" . "Circuit breaker FSM: ETS-backed three-state circuit breaker (closed/open/half-open), wired into routing pipeline and health checker, Process.send_after half-open transitions, telemetry events")
+    (("2026-02-28-d" . "K9-SVC service contracts: ETS-backed contract storage with SHA-256 IDs, timed_enforce wrapper for routing pipeline, breach policies (log/alert/circuit_break/degrade), backend degradation markers, glob-style pattern matching, wired into Router.route/2")
+     ("2026-02-28-c" . "Circuit breaker FSM: ETS-backed three-state circuit breaker (closed/open/half-open), wired into routing pipeline and health checker, Process.send_after half-open transitions, telemetry events")
      ("2026-02-28-b" . "Attestation + hardening: a2ml routing attestations, backend manifests, input validation, semantic graph cycle detection")
      ("2026-02-28" . "Performance + reliability: regex cache, real health checks, consistency validation")
      ("2026-02-13" . "Full sweep: compliance fixes, testing foundation, feature completion"))))

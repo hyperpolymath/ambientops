@@ -48,6 +48,8 @@ defmodule HAR.ControlPlane.Router do
 
   alias HAR.Semantic.Graph
 
+  alias HAR.Contracts.K9Contract
+
   alias HAR.ControlPlane.{
     RoutingTable,
     RoutingDecision,
@@ -81,42 +83,50 @@ defmodule HAR.ControlPlane.Router do
   @spec route(Graph.t(), keyword()) :: {:ok, RoutingPlan.t()} | {:error, term()}
   def route(%Graph{} = graph, opts \\ []) do
     target = Keyword.fetch!(opts, :target)
+    target_str = Atom.to_string(target)
 
-    with :ok <- Graph.validate(graph),
-         {:ok, decisions} <- route_operations(graph.vertices, target, opts),
-         :ok <- validate_consistency(decisions) do
-      # Generate a2ml attestations for all routing decisions.
-      # Each decision gets a content-addressable attestation record
-      # (SHA-256 hash of the decision context) that serves as the
-      # immutable audit trail. Attestations are generated AFTER
-      # consistency validation so that only valid routing plans
-      # receive attestations — rejected plans produce no audit records.
-      attestations = A2ML.attest_plan(decisions)
-      Logger.debug("Generated #{length(attestations)} routing attestations")
+    # Wrap the entire routing pipeline with K9-SVC contract timing enforcement.
+    # If a K9 contract exists for this target backend pattern, the decision time
+    # is measured and compared against the contract's max_decision_time_ms.
+    # If breached, the contract's breach_policy fires (log, alert, circuit_break,
+    # or degrade). The routing result is always returned regardless of breach.
+    K9Contract.timed_enforce(target_str, fn ->
+      with :ok <- Graph.validate(graph),
+           {:ok, decisions} <- route_operations(graph.vertices, target, opts),
+           :ok <- validate_consistency(decisions) do
+        # Generate a2ml attestations for all routing decisions.
+        # Each decision gets a content-addressable attestation record
+        # (SHA-256 hash of the decision context) that serves as the
+        # immutable audit trail. Attestations are generated AFTER
+        # consistency validation so that only valid routing plans
+        # receive attestations — rejected plans produce no audit records.
+        attestations = A2ML.attest_plan(decisions)
+        Logger.debug("Generated #{length(attestations)} routing attestations")
 
-      # Build the routing plan with attestations included in metadata.
-      # Downstream consumers (dashboard, IPFS archival, compliance reports)
-      # can access attestations via plan.metadata.attestations without
-      # needing to know about the A2ML module directly.
-      plan = %RoutingPlan{
-        graph: graph,
-        decisions: decisions,
-        target: target,
-        metadata: %{
-          routed_at: DateTime.utc_now(),
-          policies_applied: Keyword.get(opts, :policies, []),
-          attestations: attestations
+        # Build the routing plan with attestations included in metadata.
+        # Downstream consumers (dashboard, IPFS archival, compliance reports)
+        # can access attestations via plan.metadata.attestations without
+        # needing to know about the A2ML module directly.
+        plan = %RoutingPlan{
+          graph: graph,
+          decisions: decisions,
+          target: target,
+          metadata: %{
+            routed_at: DateTime.utc_now(),
+            policies_applied: Keyword.get(opts, :policies, []),
+            attestations: attestations
+          }
         }
-      }
 
-      # Record successful routing for all selected backends in the circuit
-      # breaker. This resets each backend's consecutive failure counter,
-      # and closes circuits that were in half-open (probing) state.
-      record_circuit_breaker_outcomes(decisions, :success)
+        # Record successful routing for all selected backends in the circuit
+        # breaker. This resets each backend's consecutive failure counter,
+        # and closes circuits that were in half-open (probing) state.
+        record_circuit_breaker_outcomes(decisions, :success)
 
-      Logger.debug("Routed #{length(decisions)} operations to #{target}")
-      {:ok, plan}
-    end
+        Logger.debug("Routed #{length(decisions)} operations to #{target}")
+        {:ok, plan}
+      end
+    end, phase: :decision)
   end
 
   defp route_operations(operations, target, opts) do
