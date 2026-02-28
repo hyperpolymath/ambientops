@@ -4,36 +4,86 @@
 
 (state
   (metadata
-    (version "0.0.1")
+    (version "1.2.0")
     (schema-version "1.0")
     (created "2026-01-03")
-    (updated "2026-01-03")
+    (updated "2026-02-28")
     (project "system-observatory")
     (repo "github.com/hyperpolymath/system-observatory"))
 
   (project-context
     (name "system-observatory")
-    (tagline "")
-    (tech-stack ()))
+    (tagline "Ambient metrics, weather, and forecasting for AmbientOps")
+    (tech-stack (elixir otp telemetry jason)))
 
   (current-position
-    (phase "initial")
-    (overall-completion 0)
-    (components ())
-    (working-features ()))
+    (phase "stable")
+    (overall-completion 78)
+    (components
+      (metrics-store 100 "GenServer ring buffer with TTL-based staleness and provenance tracking")
+      (weather 100 "System weather generation — calm/watch/act states with disk/memory/CPU thresholds")
+      (correlator 100 "Event correlation with temporal windowing and confidence scoring")
+      (forecasting 100 "Linear regression, resource exhaustion prediction, threshold breach forecasting")
+      (recommendation 100 "Preventive/corrective/investigative recommendations with priority scoring")
+      (bundle-ingestion 100 "Operating Theatre run bundle ingestion — JSON file and directory formats")
+      (cli 100 "8 commands: status, ingest, ingest-envelope, weather, ambient, recommend, query, version")
+      (ambient 100 "Ambient UI payload generation with mood states")
+      (themes 100 "Built-in themes: default, minimal, tech")
+      (application 100 "OTP supervisor tree — Metrics.Store and Correlator under one_for_one")
+      (abi-ffi 0 "Idris2/Zig ABI-FFI templates not instantiated for observatory"))
+    (working-features
+      ("Continuous metrics ingestion with TTL-based staleness (1hr default)")
+      ("Provenance tracking on all metrics (derived_at, source, ttl_seconds)")
+      ("Real-time weather state generation (3-level: calm/watch/act)")
+      ("Configurable thresholds — disk 80/90%, memory 75/90%, CPU 80/95%")
+      ("Event correlation with temporal windowing (3600s default)")
+      ("Confidence scoring with proximity bonus")
+      ("Linear regression forecasting with exhaustion prediction")
+      ("Threshold breach forecasting (85% warning)")
+      ("Intelligent recommendation generation (3 types, 4 priorities)")
+      ("JSON serialization for Operating Theatre integration")
+      ("Operating Theatre bundle ingestion (file + directory)")
+      ("CLI with 8 commands and option parsing")
+      ("Ambient UI payload with mood states")
+      ("Built-in UI themes")))
 
   (route-to-mvp
-    (milestones ()))
+    (milestones
+      (v0.1 "Core metrics store" 100)
+      (v0.5 "Weather + correlation + forecasting" 100)
+      (v1.0 "Full observatory with CLI and bundle ingestion" 100)
+      (v1.2 "Themes, ambient UI, comprehensive tests" 100)
+      (v2.0 "ABI-FFI integration, persistence, distributed" 0)))
 
   (blockers-and-issues
     (critical)
     (high)
-    (medium)
-    (low))
+    (medium
+      ("ABI-FFI templates (Types.idr, Layout.idr, Foreign.idr, main.zig) still have {{PROJECT}} placeholders"))
+    (low
+      ("In-memory only — no persistence layer")
+      ("Consider distributed metrics aggregation")))
 
   (critical-next-actions
-    (immediate)
-    (this-week)
-    (this-month))
+    (immediate
+      ("Instantiate ABI-FFI templates with observatory-specific types"))
+    (this-week
+      ("Add persistence layer for metrics history"))
+    (this-month
+      ("Composer integration for orchestrated metric collection")
+      ("Distributed metrics aggregation exploration")))
 
-  (session-history ()))
+  (session-history
+    (session
+      (date "2026-02-28")
+      (focus "STATE.scm audit — update from empty stub to reflect actual implementation")
+      (completed
+        ("Audited all 12 Elixir source modules (2,146 LOC)")
+        ("Audited 8 test files (1,204 LOC)")
+        ("Updated STATE.scm from 0% stub to 78% actual completion")
+        ("Documented all 11 components with accurate status"))
+      (notes
+        ("All core Elixir modules are fully implemented and tested")
+        ("Philosophy correctly maintained: observes/correlates/forecasts/recommends, never acts")
+        ("ABI-FFI layer is RSR template boilerplate — not instantiated")
+        ("Mix version 1.2.0, deps: telemetry, telemetry_metrics, jason, ex_doc")))))
