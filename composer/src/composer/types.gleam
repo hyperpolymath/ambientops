@@ -1,0 +1,216 @@
+//// SPDX-License-Identifier: MPL-2.0
+//// types.gleam — Core types for AmbientOps Composer
+////
+//// These types mirror the JSON Schema contracts in contracts/schemas/:
+////   - procedure-plan.schema.json → ProcedurePlan, Step, StepAction
+////   - receipt.schema.json → Receipt, StepResult, StepStatus
+////   - run-bundle.schema.json → RunBundle, BundleType
+////
+//// All types are pure data — no side effects, no IO. Encoding/decoding
+//// is handled separately in the codec modules.
+
+import gleam/option.{type Option}
+
+// ---------------------------------------------------------------------------
+// Risk and reversibility levels (shared across plan + receipt)
+// ---------------------------------------------------------------------------
+
+/// Risk level for a step or overall plan.
+/// safe: no data loss possible.
+/// guided: some risk, needs user confirmation.
+/// expert: significant risk, only for experienced operators.
+pub type RiskLevel {
+  Safe
+  Guided
+  Expert
+}
+
+/// Reversibility of a step or overall plan.
+/// Full: completely undoable via undo bundle.
+/// Partial: some changes permanent, some reversible.
+/// None: irreversible operation.
+pub type Reversibility {
+  Full
+  Partial
+  NoReversibility
+}
+
+/// Privilege level required for execution.
+pub type Privilege {
+  User
+  Admin
+  Root
+  System
+}
+
+// ---------------------------------------------------------------------------
+// Step actions (from procedure-plan schema enum)
+// ---------------------------------------------------------------------------
+
+/// Actions a step can perform. Maps 1:1 to the procedure-plan schema enum.
+pub type StepAction {
+  DeleteFile
+  DeleteDirectory
+  MoveFile
+  CopyFile
+  ModifyRegistry
+  StopService
+  StartService
+  RestartService
+  DisableService
+  EnableService
+  UninstallProgram
+  RunCommand
+  ClearCache
+  ClearTemp
+  Defragment
+  UpdateDriver
+  RepairPermissions
+  Custom
+}
+
+// ---------------------------------------------------------------------------
+// Procedure Plan (consumer contract)
+// ---------------------------------------------------------------------------
+
+/// A single step within a procedure plan.
+/// Each step has an action, risk level, target, and optional undo instruction.
+pub type Step {
+  Step(
+    step_id: String,
+    order: Int,
+    action: StepAction,
+    title: String,
+    description: Option(String),
+    preview: Option(String),
+    risk: RiskLevel,
+    reversibility: Reversibility,
+    undo_instruction: Option(String),
+    target: StepTarget,
+    requires_confirmation: Bool,
+    estimated_duration_seconds: Int,
+    finding_refs: List(String),
+  )
+}
+
+/// What a step operates on — a file path, service name, registry key, or program.
+pub type StepTarget {
+  StepTarget(
+    path: Option(String),
+    service: Option(String),
+    registry_key: Option(String),
+    program: Option(String),
+  )
+}
+
+/// Prerequisite condition that must be true before plan execution.
+pub type Prerequisite {
+  Prerequisite(check: String, description: String, blocking: Bool)
+}
+
+/// A procedure plan received from HCT or clinician.
+/// Composer consumes these, validates prerequisites, and orchestrates execution.
+pub type ProcedurePlan {
+  ProcedurePlan(
+    version: String,
+    plan_id: String,
+    envelope_ref: String,
+    title: Option(String),
+    description: Option(String),
+    overall_risk: RiskLevel,
+    overall_reversibility: Reversibility,
+    estimated_duration_seconds: Int,
+    requires_reboot: Bool,
+    requires_privileges: List(Privilege),
+    steps: List(Step),
+    prerequisites: List(Prerequisite),
+    warnings: List(String),
+    approval_required: Bool,
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Execution state (internal to Composer)
+// ---------------------------------------------------------------------------
+
+/// Overall execution status.
+pub type ExecutionStatus {
+  Pending
+  InProgress
+  Completed
+  Failed
+  Cancelled
+  RolledBack
+}
+
+/// Tracks the state of an in-progress procedure execution.
+/// Immutable — each advance creates a new Execution value.
+pub type Execution {
+  Execution(
+    plan: ProcedurePlan,
+    completed_steps: List(StepResult),
+    current_step: Int,
+    status: ExecutionStatus,
+    dry_run: Bool,
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Receipt types (producer contract)
+// ---------------------------------------------------------------------------
+
+/// Result status for an individual step.
+pub type StepStatus {
+  StepSuccess
+  StepSkipped
+  StepFailed
+  StepRolledBack
+}
+
+/// Result of executing a single step. Collected into the receipt.
+pub type StepResult {
+  StepResult(
+    step_id: String,
+    status: StepStatus,
+    what_changed: Option(String),
+    why_changed: Option(String),
+    error_message: Option(String),
+    skip_reason: Option(String),
+  )
+}
+
+/// Execution receipt — the trust anchor documenting what happened.
+/// Generated by Composer after orchestration completes (or fails).
+pub type Receipt {
+  Receipt(
+    plan_id: String,
+    envelope_ref: String,
+    status: String,
+    items_checked: Int,
+    items_changed: Int,
+    items_failed: Int,
+    items_skipped: Int,
+    step_results: List(StepResult),
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Run Bundle types (producer contract)
+// ---------------------------------------------------------------------------
+
+/// Type of run bundle being produced.
+pub type BundleType {
+  ScanBundle
+  PlanBundle
+  ExecutionBundle
+  ExportBundle
+  ArchiveBundle
+}
+
+/// Retention policy for a run bundle.
+pub type RetentionPolicy {
+  Permanent
+  Timed
+  UntilUndoExpires
+  Manual
+}

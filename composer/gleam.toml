@@ -1,0 +1,20 @@
+# SPDX-License-Identifier: MPL-2.0
+# (PMPL-1.0-or-later preferred; MPL-2.0 required for Gleam ecosystem SPDX)
+
+name = "composer"
+version = "0.1.0"
+target = "erlang"
+description = "Orchestration engine for AmbientOps multi-step procedures"
+
+licences = ["MPL-2.0"]
+
+repository = { type = "github", user = "hyperpolymath", repo = "ambientops" }
+
+[dependencies]
+gleam_stdlib = ">= 0.53.0 and < 0.60.0"
+gleam_json = ">= 2.0.0 and < 3.0.0"
+gleam_erlang = ">= 0.34.0 and < 1.0.0"
+gleam_otp = ">= 0.14.0 and < 1.0.0"
+
+[dev-dependencies]
+gleeunit = ">= 1.0.0 and < 2.0.0"
