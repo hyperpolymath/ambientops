@@ -7,7 +7,7 @@
     (version "1.0.0-rc1")
     (schema-version "1.0")
     (created "2026-01-03")
-    (updated "2026-02-13")
+    (updated "2026-02-28")
     (project "hybrid-automation-router")
     (repo "github.com/hyperpolymath/hybrid-automation-router"))
 
@@ -68,7 +68,7 @@
       ("security-stub" . "Security manager auth/authz not implemented"))
     (low
       ("ansible-notify" . "Ansible parser doesn't extract notify/handler dependencies")
-      ("router-consistency" . "validate_consistency/1 is a TODO")))
+      ("regex-cache-benchmark" . "Benchmark wildcard regex caching vs compilation")))
 
   (critical-next-actions
     (immediate
@@ -84,4 +84,5 @@
       ("security-impl" . "X.509 auth, policy-based authz")))
 
   (session-history
-    (("2026-02-13" . "Full sweep: compliance fixes, testing foundation, feature completion"))))
+    (("2026-02-28" . "Performance + reliability: regex cache, real health checks, consistency validation")
+     ("2026-02-13" . "Full sweep: compliance fixes, testing foundation, feature completion"))))

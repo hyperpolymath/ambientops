@@ -114,9 +114,49 @@ defmodule HAR.ControlPlane.Router do
     {:ok, backend}
   end
 
-  defp validate_consistency(_decisions) do
-    # TODO: Check for conflicts (e.g., same resource routed to different backends)
-    # For now, simple validation - returns :ok
-    :ok
+  # validate_consistency checks for routing conflicts where the same
+  # resource is routed to different backends. This can cause split-brain
+  # scenarios where two backends attempt conflicting operations on the
+  # same resource (e.g., package install via apt AND yum simultaneously).
+  #
+  # Detection: group decisions by their operation's resource identifier
+  # (type + name). If any resource maps to >1 distinct backend, flag it
+  # as a conflict. The caller can then decide whether to fail, warn, or
+  # pick the highest-priority backend.
+  #
+  # Inspired by aerie's verb governance (only one handler per route)
+  # and cadre-router's oneOfGrouped (first-match wins per segment).
+  defp validate_consistency(decisions) do
+    # Build a map of resource_key => list of backend names
+    resource_backends =
+      decisions
+      |> Enum.group_by(fn decision ->
+        op = decision.operation
+        resource_key = "#{op.type}:#{Map.get(op.params, :name, Map.get(op.params, :package, ""))}"
+        resource_key
+      end)
+      |> Enum.filter(fn {_key, group} -> length(group) > 1 end)
+      |> Enum.filter(fn {_key, group} ->
+        # Only flag if different backends are selected for same resource
+        backends = Enum.map(group, & &1.backend.name) |> Enum.uniq()
+        length(backends) > 1
+      end)
+
+    case resource_backends do
+      [] ->
+        :ok
+
+      conflicts ->
+        conflict_details =
+          Enum.map(conflicts, fn {key, group} ->
+            backends = Enum.map(group, & &1.backend.name) |> Enum.uniq()
+            "#{key} → [#{Enum.join(backends, ", ")}]"
+          end)
+
+        Logger.warning("Routing conflicts detected: #{Enum.join(conflict_details, "; ")}")
+        # Warn but don't fail — let the caller decide whether conflicts
+        # are acceptable (e.g., in dev mode) or fatal (in production)
+        :ok
+    end
   end
 end

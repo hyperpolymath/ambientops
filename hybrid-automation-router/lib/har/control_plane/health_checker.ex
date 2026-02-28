@@ -22,6 +22,7 @@ defmodule HAR.ControlPlane.HealthChecker do
     :check_interval,
     :timeout,
     backend_health: %{},
+    registered_backends: %{},
     last_check: nil
   ]
 
@@ -150,12 +151,17 @@ defmodule HAR.ControlPlane.HealthChecker do
   def handle_cast({:register, backend}, state) do
     backend_id = backend_identifier(backend)
 
+    # Store the full backend config so periodic health checks can use
+    # the configured health_check strategy (HTTP/TCP/function).
+    registered = Map.get(state, :registered_backends, %{})
+    new_registered = Map.put(registered, backend_id, backend)
+
     if not Map.has_key?(state.backend_health, backend_id) do
       # Initial status is unknown, will be updated on next check
       new_health = Map.put(state.backend_health, backend_id, :unknown)
-      {:noreply, %{state | backend_health: new_health}}
+      {:noreply, %{state | backend_health: new_health, registered_backends: new_registered}}
     else
-      {:noreply, state}
+      {:noreply, Map.put(state, :registered_backends, new_registered)}
     end
   end
 
@@ -167,12 +173,36 @@ defmodule HAR.ControlPlane.HealthChecker do
 
   @impl true
   def handle_info(:health_check, state) do
-    # Perform health checks on all registered backends
+    # Perform actual health checks on all registered backends.
+    #
+    # Each backend is checked using its configured health_check strategy
+    # (HTTP, TCP, or custom function). Checks run sequentially to avoid
+    # overwhelming backends with concurrent probes. For large backend
+    # pools (100+), consider Task.async_stream with max_concurrency.
+    #
+    # Previous status is preserved as fallback if the check raises an
+    # unexpected error, preventing a single flaky backend from crashing
+    # the entire health check cycle.
     new_health =
-      Enum.reduce(state.backend_health, %{}, fn {backend_id, _old_status}, acc ->
-        # For now, assume all backends are healthy (mock check)
-        # In production, this would perform actual health checks
-        Map.put(acc, backend_id, :healthy)
+      Enum.reduce(state.backend_health, %{}, fn {backend_id, old_status}, acc ->
+        status =
+          case Map.get(state, :registered_backends, %{}) |> Map.get(backend_id) do
+            nil ->
+              # Backend registered by ID only (no config) — preserve old status
+              # or mark as unknown if never checked
+              if old_status == :unknown, do: :unknown, else: old_status
+
+            backend ->
+              try do
+                perform_health_check(backend, state.timeout)
+              rescue
+                _ ->
+                  Logger.warning("Health check failed for #{backend_id}, preserving old status")
+                  old_status
+              end
+          end
+
+        Map.put(acc, backend_id, status)
       end)
 
     new_state = %{state | backend_health: new_health, last_check: DateTime.utc_now()}
