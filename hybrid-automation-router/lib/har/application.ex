@@ -17,6 +17,11 @@ defmodule HAR.Application do
   def start(_type, _args) do
     Logger.info("Starting HAR (Hybrid Automation Router) v#{HAR.version()}")
 
+    # Initialise K9 contract ETS table before supervision tree starts.
+    # Must happen before ControlPlane.Supervisor so that Router.route/2
+    # can look up contracts via K9Contract.lookup/1 from the first call.
+    HAR.Contracts.K9Contract.init()
+
     children = [
       # Telemetry setup
       HAR.Telemetry,
