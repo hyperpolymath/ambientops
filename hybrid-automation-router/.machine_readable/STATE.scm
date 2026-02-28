@@ -7,7 +7,7 @@
     (version "1.0.0-rc1")
     (schema-version "1.0")
     (created "2026-01-03")
-    (updated "2026-02-28T3")
+    (updated "2026-02-28T4")
     (project "hybrid-automation-router")
     (repo "github.com/hyperpolymath/hybrid-automation-router"))
 
@@ -94,7 +94,8 @@
       ("security-impl" . "X.509 auth, policy-based authz")))
 
   (session-history
-    (("2026-02-28-d" . "K9-SVC service contracts: ETS-backed contract storage with SHA-256 IDs, timed_enforce wrapper for routing pipeline, breach policies (log/alert/circuit_break/degrade), backend degradation markers, glob-style pattern matching, wired into Router.route/2")
+    (("2026-02-28-e" . "Completeness audit fix: K9Contract.init() was never called — ETS table :har_k9_contracts was never created, so contracts were silently skipped. Added init call to Application.start/2 before supervision tree. Also added K9-SVC-EXPLAINED.adoc and A2ML-EXPLAINED.adoc narrative docs.")
+     ("2026-02-28-d" . "K9-SVC service contracts: ETS-backed contract storage with SHA-256 IDs, timed_enforce wrapper for routing pipeline, breach policies (log/alert/circuit_break/degrade), backend degradation markers, glob-style pattern matching, wired into Router.route/2")
      ("2026-02-28-c" . "Circuit breaker FSM: ETS-backed three-state circuit breaker (closed/open/half-open), wired into routing pipeline and health checker, Process.send_after half-open transitions, telemetry events")
      ("2026-02-28-b" . "Attestation + hardening: a2ml routing attestations, backend manifests, input validation, semantic graph cycle detection")
      ("2026-02-28" . "Performance + reliability: regex cache, real health checks, consistency validation")
