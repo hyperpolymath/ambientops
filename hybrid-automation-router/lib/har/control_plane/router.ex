@@ -47,7 +47,16 @@ defmodule HAR.ControlPlane.Router do
   """
 
   alias HAR.Semantic.Graph
-  alias HAR.ControlPlane.{RoutingTable, RoutingDecision, RoutingPlan, HealthChecker, PolicyEngine}
+
+  alias HAR.ControlPlane.{
+    RoutingTable,
+    RoutingDecision,
+    RoutingPlan,
+    HealthChecker,
+    PolicyEngine,
+    CircuitBreaker
+  }
+
   alias HAR.Attestation.A2ML
 
   require Logger
@@ -100,6 +109,11 @@ defmodule HAR.ControlPlane.Router do
         }
       }
 
+      # Record successful routing for all selected backends in the circuit
+      # breaker. This resets each backend's consecutive failure counter,
+      # and closes circuits that were in half-open (probing) state.
+      record_circuit_breaker_outcomes(decisions, :success)
+
       Logger.debug("Routed #{length(decisions)} operations to #{target}")
       {:ok, plan}
     end
@@ -125,13 +139,20 @@ defmodule HAR.ControlPlane.Router do
     # 1. Pattern match against routing table
     backends = RoutingTable.match(operation, target)
 
-    # 2. Filter by health status
-    healthy_backends = filter_healthy(backends)
+    # 2. Circuit breaker filter — remove backends with open circuits.
+    #    This runs BEFORE health checks because the circuit breaker gives
+    #    an O(1) ETS lookup answer, whereas health checks may involve
+    #    network probes. Filtering tripped backends first avoids wasting
+    #    time health-checking a backend we already know is down.
+    circuit_ok_backends = filter_circuit_closed(backends)
 
-    # 3. Apply policies
+    # 3. Filter by health status
+    healthy_backends = filter_healthy(circuit_ok_backends)
+
+    # 4. Apply policies
     allowed_backends = apply_policies(healthy_backends, operation, opts)
 
-    # 4. Select best backend
+    # 5. Select best backend
     case select_backend(allowed_backends, opts) do
       {:ok, backend} ->
         decision = %RoutingDecision{
@@ -147,6 +168,21 @@ defmodule HAR.ControlPlane.Router do
       {:error, :no_backend_available} = error ->
         error
     end
+  end
+
+  defp filter_circuit_closed(backends) do
+    # Use CircuitBreaker.allow?/1 to remove backends whose circuit is open.
+    # This is an O(1) ETS lookup per backend — negligible overhead on the
+    # routing hot path. Backends not registered with the circuit breaker
+    # are treated as closed (allowed through).
+    Enum.filter(backends, fn backend ->
+      backend_name = Map.get(backend, :name) || Map.get(backend, "name") || ""
+
+      case CircuitBreaker.allow?(backend_name) do
+        :ok -> true
+        {:circuit_open, _} -> false
+      end
+    end)
   end
 
   defp filter_healthy(backends) do
@@ -166,6 +202,30 @@ defmodule HAR.ControlPlane.Router do
   defp select_backend([backend | _rest], _opts) do
     # Select highest priority backend
     {:ok, backend}
+  end
+
+  # Record circuit breaker outcomes for all backends in a set of routing
+  # decisions. Called after routing completes (success or failure) to update
+  # the circuit breaker's failure counters and potentially trigger state
+  # transitions (closed->open on accumulated failures, half_open->closed on
+  # probe success).
+  #
+  # The `outcome` parameter is either `:success` or `:failure`.
+  defp record_circuit_breaker_outcomes(decisions, outcome) when is_list(decisions) do
+    # Deduplicate backends — if the same backend was selected for multiple
+    # operations, we only record one outcome (not N outcomes, which would
+    # over-count and cause premature circuit trips).
+    decisions
+    |> Enum.map(fn decision ->
+      Map.get(decision.backend, :name) || Map.get(decision.backend, "name") || ""
+    end)
+    |> Enum.uniq()
+    |> Enum.each(fn backend_name ->
+      case outcome do
+        :success -> CircuitBreaker.record_success(backend_name)
+        :failure -> CircuitBreaker.record_failure(backend_name)
+      end
+    end)
   end
 
   # validate_consistency checks for routing conflicts where the same

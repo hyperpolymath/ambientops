@@ -12,6 +12,8 @@ defmodule HAR.ControlPlane.HealthChecker do
   use GenServer
   require Logger
 
+  alias HAR.ControlPlane.CircuitBreaker
+
   @type backend :: map()
   @type health_status :: :healthy | :unhealthy | :degraded | :unknown
 
@@ -183,6 +185,11 @@ defmodule HAR.ControlPlane.HealthChecker do
     # Previous status is preserved as fallback if the check raises an
     # unexpected error, preventing a single flaky backend from crashing
     # the entire health check cycle.
+    #
+    # Health check results are also fed into the CircuitBreaker so that
+    # backend failures detected during periodic probes contribute to the
+    # circuit breaker's consecutive failure counter, and successes allow
+    # half-open circuits to close.
     new_health =
       Enum.reduce(state.backend_health, %{}, fn {backend_id, old_status}, acc ->
         status =
@@ -201,6 +208,12 @@ defmodule HAR.ControlPlane.HealthChecker do
                   old_status
               end
           end
+
+        # Feed health check result into the circuit breaker so that periodic
+        # probe outcomes (not just routing outcomes) drive circuit state
+        # transitions. A backend that fails health checks will eventually
+        # trip its circuit open even if no routing requests are flowing.
+        notify_circuit_breaker(backend_id, status)
 
         Map.put(acc, backend_id, status)
       end)
@@ -295,5 +308,48 @@ defmodule HAR.ControlPlane.HealthChecker do
     rescue
       _ -> :unhealthy
     end
+  end
+
+  # Notify the circuit breaker of a health check outcome for a backend.
+  #
+  # - :healthy and :degraded are treated as successes (the backend is
+  #   responsive, even if degraded — degraded backends should still receive
+  #   traffic so they can recover, and circuit breakers are for total failures).
+  # - :unhealthy is treated as a failure (the backend is down or returning
+  #   errors, contributing to the consecutive failure count).
+  # - :unknown is ignored (no data to act on — the backend may not have been
+  #   probed yet, so we avoid false positives).
+  #
+  # The backend_id here uses the HealthChecker's "type:name" format. We extract
+  # just the name portion for the circuit breaker, which keys by name only.
+  @spec notify_circuit_breaker(String.t(), health_status()) :: :ok
+  defp notify_circuit_breaker(backend_id, status) do
+    # Extract the backend name from the "type:name" identifier format.
+    # If the backend_id doesn't contain a colon, use it as-is.
+    backend_name =
+      case String.split(backend_id, ":", parts: 2) do
+        [_type, name] when name != "" -> name
+        _ -> backend_id
+      end
+
+    case status do
+      :healthy ->
+        CircuitBreaker.record_success(backend_name)
+
+      :degraded ->
+        # Degraded is still "alive" — treat as success for circuit breaker
+        # purposes. The routing pipeline's health filter will still deprioritize
+        # degraded backends, but the circuit won't trip.
+        CircuitBreaker.record_success(backend_name)
+
+      :unhealthy ->
+        CircuitBreaker.record_failure(backend_name)
+
+      :unknown ->
+        # No data to act on — don't influence the circuit breaker.
+        :ok
+    end
+
+    :ok
   end
 end

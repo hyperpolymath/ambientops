@@ -14,6 +14,11 @@ defmodule HAR.ControlPlane.Supervisor do
   @impl true
   def init(_opts) do
     children = [
+      # Circuit breaker (ETS-backed FSM) — started BEFORE health checker and
+      # routing table so that other components can register backends on init.
+      # Must be first because HealthChecker.handle_info(:health_check, ...)
+      # calls CircuitBreaker.record_success/1 and record_failure/1.
+      {HAR.ControlPlane.CircuitBreaker, []},
       # Routing table (loads patterns from YAML)
       {HAR.ControlPlane.RoutingTable, []},
       # Health checker for backend monitoring
