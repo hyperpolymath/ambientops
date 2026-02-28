@@ -1,14 +1,54 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+#
+# HAR.ControlPlane.Router — core routing engine for the control plane.
+#
+# Part of the Hybrid Automation Router (HAR) project.
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath)
+
 defmodule HAR.ControlPlane.Router do
   @moduledoc """
   Routes operations to appropriate backends based on pattern matching.
 
-  The router is the core of HAR's control plane - it decides which backend
+  The router is the core of HAR's control plane — it decides which backend
   should handle each operation based on operation type, target characteristics,
-  and routing policies.
+  and routing policies. This is analogous to a BGP router's path selection
+  algorithm, but for infrastructure operations instead of network packets.
+
+  ## Pipeline
+
+  For each operation in the semantic graph, the router executes a four-step
+  pipeline:
+
+  1. **Pattern Match** — Query the `RoutingTable` for backends matching the
+     operation type and target characteristics.
+  2. **Health Filter** — Remove backends currently marked unhealthy by the
+     `HealthChecker` (circuit breaker in open state).
+  3. **Policy Filter** — Apply routing policies via the `PolicyEngine`
+     (e.g., security policies that restrict which backends can handle
+     sensitive operations).
+  4. **Selection** — Choose the highest-priority backend from the survivors.
+
+  ## Attestation
+
+  After all operations are routed, the router generates a2ml attestations
+  for every routing decision via `HAR.Attestation.A2ML.attest_plan/1`. These
+  attestations are content-addressable (SHA-256 hashed) audit records that
+  capture what was routed, where, why, and when. They are stored in the
+  `RoutingPlan.metadata.attestations` field for downstream consumption by
+  the audit trail, dashboard, and optional IPFS archival.
+
+  ## Consistency Validation
+
+  The router also checks for routing conflicts — situations where the same
+  infrastructure resource is routed to different backends. This can cause
+  split-brain scenarios (e.g., apt AND yum both trying to install the same
+  package on the same host). Conflicts are logged as warnings but don't
+  fail the routing — the caller decides whether conflicts are acceptable.
   """
 
   alias HAR.Semantic.Graph
   alias HAR.ControlPlane.{RoutingTable, RoutingDecision, RoutingPlan, HealthChecker, PolicyEngine}
+  alias HAR.Attestation.A2ML
 
   require Logger
 
@@ -36,13 +76,27 @@ defmodule HAR.ControlPlane.Router do
     with :ok <- Graph.validate(graph),
          {:ok, decisions} <- route_operations(graph.vertices, target, opts),
          :ok <- validate_consistency(decisions) do
+      # Generate a2ml attestations for all routing decisions.
+      # Each decision gets a content-addressable attestation record
+      # (SHA-256 hash of the decision context) that serves as the
+      # immutable audit trail. Attestations are generated AFTER
+      # consistency validation so that only valid routing plans
+      # receive attestations — rejected plans produce no audit records.
+      attestations = A2ML.attest_plan(decisions)
+      Logger.debug("Generated #{length(attestations)} routing attestations")
+
+      # Build the routing plan with attestations included in metadata.
+      # Downstream consumers (dashboard, IPFS archival, compliance reports)
+      # can access attestations via plan.metadata.attestations without
+      # needing to know about the A2ML module directly.
       plan = %RoutingPlan{
         graph: graph,
         decisions: decisions,
         target: target,
         metadata: %{
           routed_at: DateTime.utc_now(),
-          policies_applied: Keyword.get(opts, :policies, [])
+          policies_applied: Keyword.get(opts, :policies, []),
+          attestations: attestations
         }
       }
 

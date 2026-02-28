@@ -18,15 +18,17 @@
 
   (current-position
     (phase "poc")
-    (overall-completion 45)
+    (overall-completion 50)
     (components
       (("semantic-graph" . 95)
        ("parsers" . 60)
        ("transformers" . 60)
-       ("control-plane" . 85)
+       ("control-plane" . 90)
+       ("attestation" . 80)
+       ("input-validation" . 70)
        ("web-ui" . 75)
        ("ipfs" . 10)
-       ("security" . 15)
+       ("security" . 20)
        ("testing" . 15)))
     (working-features
       ("semantic-graph-ir"
@@ -49,7 +51,11 @@
        "phoenix-liveview-dashboard"
        "otp-clustering"
        "telemetry-metrics"
-       "convert-pipeline")))
+       "convert-pipeline"
+       "a2ml-routing-attestation"
+       "backend-manifests"
+       "input-validation"
+       "cycle-detection")))
 
   (route-to-mvp
     (milestones
@@ -84,5 +90,6 @@
       ("security-impl" . "X.509 auth, policy-based authz")))
 
   (session-history
-    (("2026-02-28" . "Performance + reliability: regex cache, real health checks, consistency validation")
+    (("2026-02-28-b" . "Attestation + hardening: a2ml routing attestations, backend manifests, input validation, semantic graph cycle detection")
+     ("2026-02-28" . "Performance + reliability: regex cache, real health checks, consistency validation")
      ("2026-02-13" . "Full sweep: compliance fixes, testing foundation, feature completion"))))
