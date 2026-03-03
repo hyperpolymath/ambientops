@@ -634,7 +634,7 @@
     (comment
       (id "imp-0152")
       (date "2025-06-14T23:10:02")
-      (text "AIzaSyBLy5zY8Yy1fAXQU19JDW8ewAOFa-S9O3I"))
+      (text "REDACTED_GOOGLE_API_KEY"))
     (comment
       (id "imp-0153")
       (date "2025-06-14T22:19:47")
@@ -1061,7 +1061,7 @@
     (comment
       (id "imp-0251")
       (date "2025-06-12T03:18:19")
-      (text "AIzaSyAk9EWg41lkyKm_Uuv38htBHDxeUp6aWp4"))
+      (text "REDACTED_GOOGLE_API_KEY"))
     (comment
       (id "imp-0252")
       (date "2025-06-12T02:21:19")
