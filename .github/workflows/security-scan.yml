@@ -9,11 +9,11 @@ on:
     - cron: '0 0 * * 0'  # Weekly on Sunday at midnight
   workflow_dispatch:
 
-permissions:
-  contents: read
+permissions: read-all
 
 jobs:
   scan:
-    uses: hyperpolymath/panic-attacker/.github/workflows/scan-and-report.yml@main
+    uses: hyperpolymath/panic-attacker/.github/workflows/scan-and-report.yml@20321d0d4c61dd410c29c3e66202c10392294692
+
     secrets:
       VERISIMDB_PAT: ${{ secrets.VERISIMDB_PAT }}
