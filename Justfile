@@ -75,3 +75,18 @@ sync-metadata:
         sed -i "s/(overall-completion [0-9]\+)/(overall-completion $COMPLETION)/" .machine_readable/STATE.scm
         echo "✓ Metadata synchronized"
     fi
+
+# --- SECURITY ---
+
+# Run security audit suite
+security:
+    @echo "=== Security Audit ==="
+    @command -v gitleaks >/dev/null && gitleaks detect --source . --verbose || echo "gitleaks not found"
+    @command -v trivy >/dev/null && trivy fs --severity HIGH,CRITICAL . || echo "trivy not found"
+    @echo "Security audit complete"
+
+# Scan for vulnerabilities in dependencies
+audit:
+    @echo "=== Dependency Audit ==="
+    @if [ -f Cargo.toml ]; then cargo audit; fi
+    @echo "Dependency audit complete"
