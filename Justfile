@@ -90,3 +90,8 @@ audit:
     @echo "=== Dependency Audit ==="
     @if [ -f Cargo.toml ]; then cargo audit; fi
     @echo "Dependency audit complete"
+
+# [AUTO-GENERATED] Multi-arch / RISC-V target
+build-riscv:
+	@echo "Building for RISC-V..."
+	cross build --target riscv64gc-unknown-linux-gnu
