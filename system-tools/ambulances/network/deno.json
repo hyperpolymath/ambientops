@@ -7,12 +7,12 @@
     "build": "deno run --allow-read --allow-write --allow-run npm:rescript build && deno run --allow-read --allow-write --allow-run npm:vite build",
     "tauri:dev": "deno task dev & cargo tauri dev",
     "tauri:build": "deno task build && cargo tauri build",
-    "rescript": "deno run --allow-read --allow-write --allow-run npm:rescript",
+    "rescript": "^12.0.0",
     "format": "deno fmt src/rescript"
   },
   "imports": {
     "vite": "npm:vite@^5.0.0",
-    "rescript": "npm:rescript@^11.0.0",
+    "rescript": "^12.0.0",
     "@rescript/core": "npm:@rescript/core@^1.0.0"
   },
   "compilerOptions": {
