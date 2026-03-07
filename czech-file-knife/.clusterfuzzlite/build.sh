@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 # Build script for ClusterFuzzLite
 
-cd $SRC/czech-file-knife
+cd "$SRC"/czech-file-knife
 
 # Build fuzz targets using cargo-fuzz
 cargo +nightly fuzz build
