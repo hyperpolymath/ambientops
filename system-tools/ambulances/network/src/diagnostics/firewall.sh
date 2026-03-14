@@ -161,17 +161,13 @@ diagnose_firewall() {
 
     local total_issues=0
 
-    check_ufw
-    total_issues=$((total_issues + $?))
+    check_ufw || total_issues=$((total_issues + $?))
 
-    check_firewalld
-    total_issues=$((total_issues + $?))
+    check_firewalld || total_issues=$((total_issues + $?))
 
-    check_iptables
-    total_issues=$((total_issues + $?))
+    check_iptables || total_issues=$((total_issues + $?))
 
-    check_nftables
-    total_issues=$((total_issues + $?))
+    check_nftables || total_issues=$((total_issues + $?))
 
     if [[ ${total_issues} -eq 0 ]]; then
         log_success "Firewall diagnostics completed with no issues"

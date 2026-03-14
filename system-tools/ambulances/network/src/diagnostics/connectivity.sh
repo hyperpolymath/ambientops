@@ -140,7 +140,7 @@ test_port_connectivity() {
     return ${issues}
 }
 
-# Test MTU
+# Test MTU — binary search for path MTU discovery
 test_mtu() {
     log_section "MTU Test"
 
@@ -152,61 +152,127 @@ test_mtu() {
         return 0
     fi
 
-    # Get current MTU
-    local mtu
-    mtu=$(cat /sys/class/net/"${primary}"/mtu 2>/dev/null)
+    # Get current interface MTU
+    local iface_mtu
+    iface_mtu=$(cat /sys/class/net/"${primary}"/mtu 2>/dev/null || echo "0")
 
-    log_info "Current MTU on ${primary}: ${mtu}"
+    log_info "Interface MTU on ${primary}: ${iface_mtu}"
 
-    # Test with ping
-    log_step "Testing MTU with ping"
+    # Binary search for actual path MTU
+    log_step "Discovering path MTU (binary search)"
 
-    local test_sizes=(1500 1472 1400 1200)
+    local low=68    # IPv4 minimum
+    local high=1500 # Standard ethernet
+    local path_mtu=0
 
-    for size in "${test_sizes[@]}"; do
-        # Subtract 28 bytes for IP + ICMP header
-        local packet_size=$((size - 28))
+    while [[ $((high - low)) -gt 1 ]]; do
+        local mid=$(( (low + high) / 2 ))
+        local payload=$((mid - 28))  # Subtract IP + ICMP headers
 
-        if ping -c 1 -W 2 -M do -s ${packet_size} 8.8.8.8 >/dev/null 2>&1; then
-            log_success "  Packet size ${size} bytes: OK"
-            break
+        if ping -c 1 -W 2 -M do -s ${payload} 8.8.8.8 >/dev/null 2>&1; then
+            low=${mid}
+            path_mtu=${mid}
         else
-            log_warn "  Packet size ${size} bytes: Failed (may need lower MTU)"
+            high=${mid}
         fi
     done
+
+    # Final check on high value
+    local payload=$((high - 28))
+    if ping -c 1 -W 2 -M do -s ${payload} 8.8.8.8 >/dev/null 2>&1; then
+        path_mtu=${high}
+    fi
+
+    if [[ ${path_mtu} -eq 0 ]]; then
+        log_error "  Could not determine path MTU"
+        return 1
+    fi
+
+    log_info "  Path MTU: ${path_mtu} bytes"
+
+    if [[ ${path_mtu} -lt ${iface_mtu} ]]; then
+        local diff=$((iface_mtu - path_mtu))
+        log_warn "  Interface MTU (${iface_mtu}) exceeds path MTU (${path_mtu}) by ${diff} bytes"
+        log_warn "  Packets larger than ${path_mtu} bytes will be dropped or fragmented"
+        log_info "  Recommended fix:"
+        log_info "    Temporary:  sudo ip link set ${primary} mtu ${path_mtu}"
+
+        # Detect connection name for permanent fix advice
+        local conn_name
+        conn_name=$(nmcli -t -f NAME,DEVICE connection show --active 2>/dev/null | grep ":${primary}$" | cut -d: -f1 || true)
+        if [[ -n "${conn_name}" ]]; then
+            log_info "    Permanent:  nmcli connection modify \"${conn_name}\" 802-11-wireless.mtu ${path_mtu}"
+            log_info "                nmcli connection up \"${conn_name}\""
+        fi
+        return 1
+    else
+        log_success "  Interface MTU (${iface_mtu}) matches path MTU (${path_mtu})"
+    fi
 
     return 0
 }
 
-# Test latency
+# Test latency with jitter and quality classification
 test_latency() {
     log_section "Latency Test"
 
     local test_hosts=(
         "8.8.8.8:Google DNS"
         "1.1.1.1:Cloudflare DNS"
+        "9.9.9.9:Quad9 DNS"
     )
 
     for test in "${test_hosts[@]}"; do
         IFS=: read -r host name <<< "${test}"
         log_step "Testing latency to ${name} (${host})"
 
-        if ping -c 5 -W 3 "${host}" >/dev/null 2>&1; then
-            local avg_latency
-            avg_latency=$(ping -c 5 -W 3 "${host}" 2>/dev/null | tail -1 | cut -d'/' -f5)
+        local ping_output
+        ping_output=$(ping -c 5 -W 3 "${host}" 2>/dev/null)
 
-            if [[ -n "${avg_latency}" ]]; then
-                log_info "  Average latency: ${avg_latency} ms"
-
-                # Check if latency is high
-                local latency_int
-                latency_int=$(echo "${avg_latency}" | cut -d'.' -f1)
-                if [[ ${latency_int} -gt 200 ]]; then
-                    log_warn "  High latency detected!"
-                fi
-            fi
-        else
+        if [[ $? -ne 0 ]] && [[ -z "${ping_output}" ]]; then
             log_error "  Cannot reach ${host}"
+            continue
+        fi
+
+        # Parse rtt min/avg/max/mdev from the summary line
+        local stats_line
+        stats_line=$(echo "${ping_output}" | grep "rtt min/avg/max/mdev" || true)
+
+        if [[ -n "${stats_line}" ]]; then
+            local min_ms avg_ms max_ms jitter_ms
+            min_ms=$(echo "${stats_line}" | cut -d'=' -f2 | cut -d'/' -f1 | tr -d ' ')
+            avg_ms=$(echo "${stats_line}" | cut -d'=' -f2 | cut -d'/' -f2)
+            max_ms=$(echo "${stats_line}" | cut -d'=' -f2 | cut -d'/' -f3)
+            jitter_ms=$(echo "${stats_line}" | cut -d'=' -f2 | cut -d'/' -f4 | cut -d' ' -f1)
+
+            # Parse packet loss
+            local loss_line
+            loss_line=$(echo "${ping_output}" | grep "packet loss" || true)
+            local loss_pct="0"
+            if [[ -n "${loss_line}" ]]; then
+                loss_pct=$(echo "${loss_line}" | grep -oP '\d+(?=% packet loss)' || echo "0")
+            fi
+
+            log_info "  RTT min/avg/max: ${min_ms}/${avg_ms}/${max_ms} ms"
+            log_info "  Jitter (mdev): ${jitter_ms} ms"
+            if [[ "${loss_pct}" != "0" ]]; then
+                log_warn "  Packet loss: ${loss_pct}%"
+            fi
+
+            # Quality classification (matches Aerie engine thresholds)
+            local avg_int
+            avg_int=$(echo "${avg_ms}" | cut -d'.' -f1)
+            if [[ ${avg_int} -lt 20 ]]; then
+                log_success "  Quality: Excellent"
+            elif [[ ${avg_int} -lt 50 ]]; then
+                log_success "  Quality: Good"
+            elif [[ ${avg_int} -lt 100 ]]; then
+                log_info "  Quality: Fair"
+            elif [[ ${avg_int} -lt 300 ]]; then
+                log_warn "  Quality: Poor"
+            else
+                log_warn "  Quality: Very poor (mobile/satellite connection?)"
+            fi
         fi
     done
 
@@ -219,19 +285,15 @@ diagnose_connectivity() {
 
     local total_issues=0
 
-    test_basic_connectivity
-    total_issues=$((total_issues + $?))
+    test_basic_connectivity || total_issues=$((total_issues + $?))
 
-    test_dns_connectivity
-    total_issues=$((total_issues + $?))
+    test_dns_connectivity || total_issues=$((total_issues + $?))
 
-    test_http_connectivity
-    total_issues=$((total_issues + $?))
+    test_http_connectivity || total_issues=$((total_issues + $?))
 
-    test_port_connectivity
-    total_issues=$((total_issues + $?))
+    test_port_connectivity || total_issues=$((total_issues + $?))
 
-    test_mtu
+    test_mtu || total_issues=$((total_issues + $?))
 
     test_latency
 

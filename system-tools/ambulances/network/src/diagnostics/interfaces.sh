@@ -61,7 +61,7 @@ check_interfaces() {
         # Check link status
         if [[ -f "/sys/class/net/${iface}/carrier" ]]; then
             local carrier
-            carrier=$(cat /sys/class/net/"${iface}"/carrier 2>/dev/null)
+            carrier=$(cat /sys/class/net/"${iface}"/carrier 2>/dev/null || echo "0")
             if [[ "${carrier}" == "1" ]]; then
                 log_success "    Link: Connected"
             else
@@ -187,7 +187,7 @@ check_interface_conflicts() {
         ip=$(get_interface_ip "${iface}")
 
         if [[ -n "${ip}" ]]; then
-            if [[ -n "${ip_map[${ip}]}" ]]; then
+            if [[ -n "${ip_map[${ip}]+x}" && -n "${ip_map[${ip}]}" ]]; then
                 log_error "  Duplicate IP ${ip} on ${iface} and ${ip_map[${ip}]}"
                 issues=$((issues + 1))
             else
@@ -209,17 +209,13 @@ diagnose_interfaces() {
 
     local total_issues=0
 
-    check_interfaces
-    total_issues=$((total_issues + $?))
+    check_interfaces || total_issues=$((total_issues + $?))
 
-    check_primary_interface
-    total_issues=$((total_issues + $?))
+    check_primary_interface || total_issues=$((total_issues + $?))
 
-    check_interface_stats
-    total_issues=$((total_issues + $?))
+    check_interface_stats || total_issues=$((total_issues + $?))
 
-    check_interface_conflicts
-    total_issues=$((total_issues + $?))
+    check_interface_conflicts || total_issues=$((total_issues + $?))
 
     if [[ ${total_issues} -eq 0 ]]; then
         log_success "Interface diagnostics completed with no issues"

@@ -190,21 +190,17 @@ diagnose_networkmanager() {
 
     local total_issues=0
 
-    check_nm_status
-    total_issues=$((total_issues + $?))
+    check_nm_status || total_issues=$((total_issues + $?))
 
-    check_nm_connections
-    total_issues=$((total_issues + $?))
+    check_nm_connections || total_issues=$((total_issues + $?))
 
     check_nm_devices
 
-    check_nm_general
-    total_issues=$((total_issues + $?))
+    check_nm_general || total_issues=$((total_issues + $?))
 
     check_nm_config
 
-    check_nm_conflicts
-    total_issues=$((total_issues + $?))
+    check_nm_conflicts || total_issues=$((total_issues + $?))
 
     if [[ ${total_issues} -eq 0 ]]; then
         log_success "NetworkManager diagnostics completed with no issues"

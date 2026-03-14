@@ -256,8 +256,7 @@ repair_dns() {
     # First, try simple fixes
     flush_dns_cache
 
-    repair_dns_config
-    total_issues=$((total_issues + $?))
+    repair_dns_config || total_issues=$((total_issues + $?))
 
     # If still broken, try more aggressive fixes
     if [[ ${total_issues} -gt 0 ]]; then
