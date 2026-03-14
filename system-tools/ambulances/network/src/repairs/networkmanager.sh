@@ -277,8 +277,7 @@ repair_networkmanager() {
             log_warn "Limited or no connectivity: ${connectivity}"
 
             # Try reconnecting
-            reconnect_nm_connection
-            total_issues=$((total_issues + $?))
+            reconnect_nm_connection || total_issues=$((total_issues + $?))
 
             # If still broken, restart NetworkManager
             if [[ ${total_issues} -gt 0 ]]; then

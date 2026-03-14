@@ -189,19 +189,15 @@ diagnose_routing() {
 
     local total_issues=0
 
-    check_routing_table
-    total_issues=$((total_issues + $?))
+    check_routing_table || total_issues=$((total_issues + $?))
 
-    check_ipv6_routing
-    total_issues=$((total_issues + $?))
+    check_ipv6_routing || total_issues=$((total_issues + $?))
 
     check_routing_policy
 
-    check_route_metrics
-    total_issues=$((total_issues + $?))
+    check_route_metrics || total_issues=$((total_issues + $?))
 
-    test_internet_route
-    total_issues=$((total_issues + $?))
+    test_internet_route || total_issues=$((total_issues + $?))
 
     check_arp_table
 

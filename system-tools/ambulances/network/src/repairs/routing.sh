@@ -197,8 +197,7 @@ repair_routing() {
     local total_issues=0
 
     # First try gentle repairs
-    repair_default_route
-    total_issues=$((total_issues + $?))
+    repair_default_route || total_issues=$((total_issues + $?))
 
     # If still broken, try more aggressive fix
     if [[ ${total_issues} -gt 0 ]]; then

@@ -201,8 +201,7 @@ repair_interfaces() {
     local total_issues=0
 
     # Repair down interfaces
-    repair_down_interfaces
-    total_issues=$((total_issues + $?))
+    repair_down_interfaces || total_issues=$((total_issues + $?))
 
     # Check primary interface
     local primary
@@ -234,8 +233,7 @@ repair_interfaces() {
             log_warn "Primary interface ${primary} has no IP address"
 
             # Try to renew DHCP
-            renew_dhcp "${primary}"
-            total_issues=$((total_issues + $?))
+            renew_dhcp "${primary}" || total_issues=$((total_issues + $?))
         fi
     fi
 

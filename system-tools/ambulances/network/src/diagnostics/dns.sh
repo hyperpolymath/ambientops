@@ -178,14 +178,11 @@ diagnose_dns() {
 
     local total_issues=0
 
-    check_dns_config
-    total_issues=$((total_issues + $?))
+    check_dns_config || total_issues=$((total_issues + $?))
 
-    test_dns_resolution
-    total_issues=$((total_issues + $?))
+    test_dns_resolution || total_issues=$((total_issues + $?))
 
-    test_dns_servers
-    total_issues=$((total_issues + $?))
+    test_dns_servers || total_issues=$((total_issues + $?))
 
     check_dns_cache
 

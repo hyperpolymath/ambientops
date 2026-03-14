@@ -5,33 +5,33 @@
 
 set -euo pipefail
 
-# Script directory
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Script directory (use MAIN_DIR to avoid clobbering by sourced scripts)
+MAIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Version
 VERSION="1.0.0"
 
 # Source utilities
-source "${SCRIPT_DIR}/utils/colors.sh"
-source "${SCRIPT_DIR}/utils/logging.sh"
-source "${SCRIPT_DIR}/utils/privileges.sh"
-source "${SCRIPT_DIR}/utils/system.sh"
-source "${SCRIPT_DIR}/utils/backup.sh"
-source "${SCRIPT_DIR}/utils/safemode.sh"
+source "${MAIN_DIR}/utils/colors.sh"
+source "${MAIN_DIR}/utils/logging.sh"
+source "${MAIN_DIR}/utils/privileges.sh"
+source "${MAIN_DIR}/utils/system.sh"
+source "${MAIN_DIR}/utils/backup.sh"
+source "${MAIN_DIR}/utils/safemode.sh"
 
 # Source diagnostics
-source "${SCRIPT_DIR}/diagnostics/dns.sh"
-source "${SCRIPT_DIR}/diagnostics/interfaces.sh"
-source "${SCRIPT_DIR}/diagnostics/routing.sh"
-source "${SCRIPT_DIR}/diagnostics/connectivity.sh"
-source "${SCRIPT_DIR}/diagnostics/firewall.sh"
-source "${SCRIPT_DIR}/diagnostics/networkmanager.sh"
+source "${MAIN_DIR}/diagnostics/dns.sh"
+source "${MAIN_DIR}/diagnostics/interfaces.sh"
+source "${MAIN_DIR}/diagnostics/routing.sh"
+source "${MAIN_DIR}/diagnostics/connectivity.sh"
+source "${MAIN_DIR}/diagnostics/firewall.sh"
+source "${MAIN_DIR}/diagnostics/networkmanager.sh"
 
 # Source repairs
-source "${SCRIPT_DIR}/repairs/dns.sh"
-source "${SCRIPT_DIR}/repairs/interfaces.sh"
-source "${SCRIPT_DIR}/repairs/routing.sh"
-source "${SCRIPT_DIR}/repairs/networkmanager.sh"
+source "${MAIN_DIR}/repairs/dns.sh"
+source "${MAIN_DIR}/repairs/interfaces.sh"
+source "${MAIN_DIR}/repairs/routing.sh"
+source "${MAIN_DIR}/repairs/networkmanager.sh"
 
 # Configuration
 DRY_RUN="${DRY_RUN:-false}"
@@ -123,29 +123,23 @@ run_all_diagnostics() {
     log_info "Network Manager: $(detect_network_manager)"
     echo ""
 
-    # Run diagnostics
-    diagnose_interfaces
-    total_issues=$((total_issues + $?))
+    # Run diagnostics (|| guards prevent set -e from aborting on detected issues)
+    diagnose_interfaces || total_issues=$((total_issues + $?))
     echo ""
 
-    diagnose_routing
-    total_issues=$((total_issues + $?))
+    diagnose_routing || total_issues=$((total_issues + $?))
     echo ""
 
-    diagnose_dns
-    total_issues=$((total_issues + $?))
+    diagnose_dns || total_issues=$((total_issues + $?))
     echo ""
 
-    diagnose_connectivity
-    total_issues=$((total_issues + $?))
+    diagnose_connectivity || total_issues=$((total_issues + $?))
     echo ""
 
-    diagnose_firewall
-    total_issues=$((total_issues + $?))
+    diagnose_firewall || total_issues=$((total_issues + $?))
     echo ""
 
-    diagnose_networkmanager
-    total_issues=$((total_issues + $?))
+    diagnose_networkmanager || total_issues=$((total_issues + $?))
     echo ""
 
     # Summary
@@ -199,21 +193,17 @@ run_all_repairs() {
 
     local total_issues=0
 
-    # Run repairs in order
-    repair_interfaces
-    total_issues=$((total_issues + $?))
+    # Run repairs in order (|| guards prevent set -e from aborting on partial failures)
+    repair_interfaces || total_issues=$((total_issues + $?))
     echo ""
 
-    repair_routing
-    total_issues=$((total_issues + $?))
+    repair_routing || total_issues=$((total_issues + $?))
     echo ""
 
-    repair_dns
-    total_issues=$((total_issues + $?))
+    repair_dns || total_issues=$((total_issues + $?))
     echo ""
 
-    repair_networkmanager
-    total_issues=$((total_issues + $?))
+    repair_networkmanager || total_issues=$((total_issues + $?))
     echo ""
 
     # Final connectivity test

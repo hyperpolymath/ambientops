@@ -115,7 +115,7 @@ interface_is_up() {
 # Get interface IP address
 get_interface_ip() {
     local interface="$1"
-    ip -4 addr show "${interface}" 2>/dev/null | grep -oP 'inet \K[\d.]+'
+    ip -4 addr show "${interface}" 2>/dev/null | grep -oP 'inet \K[\d.]+' || true
 }
 
 # Sanitize input (prevent command injection)
