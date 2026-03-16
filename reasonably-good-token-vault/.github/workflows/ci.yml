@@ -42,7 +42,7 @@ jobs:
     name: Lint ATS Code
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Install ATS2
         run: |
@@ -65,7 +65,7 @@ jobs:
     name: Lint Zig Code
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Install Zig
         uses: goto-bus-stop/setup-zig@v2
@@ -84,7 +84,7 @@ jobs:
     name: Lint Scheme Code
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Install Guile
         run: sudo apt-get install -y guile-3.0
@@ -102,7 +102,7 @@ jobs:
     name: Lint Nickel Configs
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Install Nickel
         run: |
@@ -120,7 +120,7 @@ jobs:
     name: Lint Shell Scripts
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: ShellCheck
         uses: ludeeus/action-shellcheck@master
@@ -131,7 +131,7 @@ jobs:
     name: Lint YAML Files
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: YAML Lint
         uses: ibiqlik/action-yamllint@v3
@@ -143,7 +143,7 @@ jobs:
     name: SPDX License Compliance
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Check SPDX Headers
         run: |
@@ -170,7 +170,7 @@ jobs:
           - x86_64-windows-gnu
           - aarch64-linux-android
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Install Zig
         uses: goto-bus-stop/setup-zig@v2
@@ -182,7 +182,7 @@ jobs:
         run: zig build -Dtarget=${{ matrix.target }} -Doptimize=ReleaseSafe
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6db9a8b71b5c2d1a090c0daf9c8bb # v4
         with:
           name: zig-${{ matrix.target }}
           path: vault-core-ats/zig-out/
@@ -192,7 +192,7 @@ jobs:
     needs: [lint-ats, build-zig]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Install Dependencies
         run: |
@@ -200,7 +200,7 @@ jobs:
           sudo apt-get install -y ats2-lang libssl-dev
 
       - name: Download Zig Library
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: zig-x86_64-linux-gnu
           path: vault-core-ats/zig-out/
@@ -210,7 +210,7 @@ jobs:
         run: make build
 
       - name: Upload Binary
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6db9a8b71b5c2d1a090c0daf9c8bb # v4
         with:
           name: svalinn-vault-linux-x64
           path: vault-core-ats/svalinn-vault-core
@@ -220,10 +220,10 @@ jobs:
     needs: [build-ats]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Download Binary
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: svalinn-vault-linux-x64
           path: vault-core-ats/
@@ -250,7 +250,7 @@ jobs:
     needs: [build-zig]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Install Zig
         uses: goto-bus-stop/setup-zig@v2
@@ -266,7 +266,7 @@ jobs:
     needs: [build-ats]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Install Dependencies
         run: sudo apt-get install -y ats2-lang
@@ -280,7 +280,7 @@ jobs:
     needs: [build-container]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Build Test Container
         run: |
@@ -307,7 +307,7 @@ jobs:
     needs: [build-ats]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Install Dependencies
         run: sudo apt-get install -y ats2-lang
@@ -327,7 +327,7 @@ jobs:
     permissions:
       security-events: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
@@ -350,7 +350,7 @@ jobs:
     name: Semgrep SAST
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Semgrep Scan
         uses: returntocorp/semgrep-action@v1
@@ -364,7 +364,7 @@ jobs:
     name: Snyk Security Scan
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Snyk Test
         uses: snyk/actions/zig@master
@@ -379,7 +379,7 @@ jobs:
     needs: [build-container]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Build Container
         run: docker build -f container/svalinn.containerfile -t svalinn-vault:scan .
@@ -393,7 +393,7 @@ jobs:
           severity: CRITICAL,HIGH,MEDIUM
 
       - name: Upload Trivy Results
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@6624720a57d4c312633c7b953db2f2da5bcb4c3a # v3
         with:
           sarif_file: trivy-results.sarif
 
@@ -401,7 +401,7 @@ jobs:
     name: Secret Scanning
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           fetch-depth: 0
 
@@ -422,7 +422,7 @@ jobs:
     name: Supply Chain Security
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: SLSA Provenance
         uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.9.0
@@ -440,7 +440,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event.inputs.full_verification == 'true' || github.ref == 'refs/heads/main'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Install Echidna
         run: |
@@ -463,7 +463,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event.inputs.full_verification == 'true' || github.ref == 'refs/heads/main'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Install Z3
         run: |
@@ -483,7 +483,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event.inputs.full_verification == 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Install Coq
         run: |
@@ -506,7 +506,7 @@ jobs:
     name: Build Documentation
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Install AsciiDoctor
         run: |
@@ -526,7 +526,7 @@ jobs:
           asciidoctor-pdf -D docs/pdf README.adoc
 
       - name: Upload Docs
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6db9a8b71b5c2d1a090c0daf9c8bb # v4
         with:
           name: documentation
           path: docs/
@@ -535,7 +535,7 @@ jobs:
     name: Build Whitepaper
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Install LaTeX
         run: |
@@ -549,7 +549,7 @@ jobs:
           pdflatex svalinn-vault.tex  # Run twice for references
 
       - name: Upload Whitepaper
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6db9a8b71b5c2d1a090c0daf9c8bb # v4
         with:
           name: whitepaper
           path: docs/whitepaper/svalinn-vault.pdf
@@ -564,7 +564,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Log in to GHCR
         uses: docker/login-action@v3
@@ -594,10 +594,10 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Download Artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
 
       - name: Generate Checksums
         run: |
@@ -620,7 +620,7 @@ jobs:
     needs: [build-ats]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Generate SBOM
         uses: anchore/sbom-action@v0
@@ -629,7 +629,7 @@ jobs:
           output-file: sbom.json
 
       - name: Upload SBOM
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6db9a8b71b5c2d1a090c0daf9c8bb # v4
         with:
           name: sbom
           path: sbom.json

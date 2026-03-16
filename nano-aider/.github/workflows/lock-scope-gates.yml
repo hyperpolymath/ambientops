@@ -17,7 +17,7 @@ jobs:
     name: User Safety Gates
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: No shell execution in config files
         run: |
@@ -89,7 +89,7 @@ jobs:
     name: Language Lock Gates
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Ada source verification
         run: |
@@ -136,7 +136,7 @@ jobs:
     name: Architectural Invariant Gates
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: No unbounded heap allocation
         run: |
@@ -193,7 +193,7 @@ jobs:
     name: Security Boundary Gates
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: No weak cryptography
         run: |
@@ -243,7 +243,7 @@ jobs:
     name: Compatibility Lock Gates
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: nano 5.x+ compatibility maintained
         run: |
