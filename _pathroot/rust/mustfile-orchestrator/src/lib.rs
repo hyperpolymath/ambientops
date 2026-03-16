@@ -4,6 +4,7 @@
 //! Bridges nicaug (platform detection/command generation) with must (deployment execution).
 //! Parses Mustfiles, validates requirements, and orchestrates multi-platform deployments.
 
+#![forbid(unsafe_code)]
 pub mod parser;
 pub mod platform;
 pub mod executor;

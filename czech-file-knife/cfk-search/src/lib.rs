@@ -4,6 +4,7 @@
 //! This module provides full-text search capabilities using Tantivy.
 //! Currently a stub - full implementation coming in a future release.
 
+#![forbid(unsafe_code)]
 use async_trait::async_trait;
 use cfk_core::{CfkResult, Entry, VirtualPath};
 use serde::{Deserialize, Serialize};

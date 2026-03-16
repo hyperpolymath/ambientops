@@ -3,6 +3,7 @@
 //!
 //! A cloud-native, universal file management tool.
 
+#![forbid(unsafe_code)]
 mod commands;
 
 use clap::{Parser, Subcommand};

@@ -2,6 +2,7 @@
 //!
 //! Core traits, types, and abstractions for the unified filesystem interface.
 
+#![forbid(unsafe_code)]
 pub mod backend;
 pub mod entry;
 pub mod error;

@@ -3,6 +3,7 @@
 //!
 //! Core components for the PSA system administration toolkit.
 
+#![forbid(unsafe_code)]
 pub mod reasoning;
 pub mod storage;
 pub mod cache;

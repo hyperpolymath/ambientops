@@ -15,6 +15,7 @@
 
 #![allow(dead_code)] // Placeholder structs for future implementation
 
+#![forbid(unsafe_code)]
 use async_trait::async_trait;
 use cfk_core::{CfkResult, VirtualPath, Entry};
 use bytes::Bytes;

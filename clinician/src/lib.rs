@@ -14,6 +14,7 @@
 //! - `rules`: Authoritative declarative policy management.
 //! - `validation`: Security boundary for all external inputs.
 
+#![forbid(unsafe_code)]
 pub mod reasoning;
 pub mod storage;
 pub mod cache;

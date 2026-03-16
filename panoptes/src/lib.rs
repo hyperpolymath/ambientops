@@ -6,6 +6,7 @@
 //! A comprehensive file analysis and organization system using local AI models.
 //! Version 3.0 - Full plugin architecture with web UI and database support.
 
+#![forbid(unsafe_code)]
 pub mod analyzers;
 pub mod config;
 pub mod db;

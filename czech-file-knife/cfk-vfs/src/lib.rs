@@ -5,6 +5,7 @@
 //! any CFK backend as a local filesystem.
 //! Currently a stub - full implementation coming in a future release.
 
+#![forbid(unsafe_code)]
 use cfk_core::{CfkError, CfkResult};
 use std::path::PathBuf;
 use thiserror::Error;

@@ -2,6 +2,7 @@
 //!
 //! Integrates: aria2, agrep, pandoc, tesseract OCR, eza
 
+#![forbid(unsafe_code)]
 #[cfg(feature = "aria2")]
 pub mod aria2;
 

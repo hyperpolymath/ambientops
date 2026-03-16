@@ -20,6 +20,7 @@
 //! - **Contracts**: Full integration with AmbientOps Evidence Envelopes 
 //!   for verifiable reporting.
 
+#![forbid(unsafe_code)]
 use clap::{Parser, Subcommand};
 use anyhow::Result;
 use serde_json;

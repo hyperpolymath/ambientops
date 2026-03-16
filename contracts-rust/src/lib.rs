@@ -18,6 +18,7 @@
 //! - `PackManifest`: Specification for verified artifact containers.
 //! - `RunBundle`: Self-contained execution packages for nomadic deployment.
 
+#![forbid(unsafe_code)]
 pub mod envelope;
 pub mod plan;
 pub mod receipt;
