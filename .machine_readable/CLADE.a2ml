@@ -1,0 +1,26 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Clade declaration — part of the gv-clade-index registry
+# See: https://github.com/hyperpolymath/gv-clade-index
+
+[identity]
+uuid = "86361920-1939-5421-aefd-02c93da249ed"
+primary-forge = "github"
+primary-owner = "hyperpolymath"
+canonical-name = "ambientops"
+prefixed-name = "ix-ambientops"
+
+[clade]
+primary = "ix"
+secondary = []
+assigned = "2026-03-16"
+rationale = ""
+
+[forges]
+github = "hyperpolymath/ambientops"
+gitlab = "hyperpolymath/ambientops"
+bitbucket = "hyperpolymath/ambientops"
+
+[lineage]
+type = "monorepo"
+parent = "Monorepo — volumod, personal-sysadmin, displace, etc."
+born = "2026-03-16"
