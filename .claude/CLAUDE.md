@@ -89,7 +89,7 @@ cargo build -p ambientops-clinician --all-features     # Everything (slow)
 | **Bash/POSIX Shell** | Scripts, automation | Keep minimal |
 | **JavaScript** | Only where ReScript cannot | MCP protocol glue, Deno APIs |
 | **Nickel** | Configuration language | For complex configs |
-| **Guile Scheme** | State/meta files | STATE.scm, META.scm, ECOSYSTEM.scm |
+| **Guile Scheme** | State/meta files | .machine_readable/6a2/STATE.a2ml, .machine_readable/6a2/META.a2ml, .machine_readable/6a2/ECOSYSTEM.a2ml |
 | **Julia** | Batch scripts, data processing | Per RSR |
 | **OCaml** | AffineScript compiler | Language-specific |
 | **V** | Emergency Room, system tools | Vlang.io, fast compilation |
@@ -150,8 +150,8 @@ Elixir is allowed **only for observability/event hubs**:
 ### SCM Checkpoint Files
 
 Every repo should have at root:
-- `STATE.scm` — current project state (update every session)
-- `META.scm` — architecture decisions
-- `ECOSYSTEM.scm` — project relationships
+- `.machine_readable/6a2/STATE.a2ml` — current project state (update every session)
+- `.machine_readable/6a2/META.a2ml` — architecture decisions
+- `.machine_readable/6a2/ECOSYSTEM.a2ml` — project relationships
 
 See `docs/SCM-FILES-GUIDE.adoc` for format and maintenance rules.

@@ -83,7 +83,7 @@ ambientops/
 ├── scripts/              — Demo and utility scripts
 ├── docs/                 — Documentation
 ├── Cargo.toml            — Rust workspace root
-└── .machine_readable/    — STATE.scm, ECOSYSTEM.scm, META.scm
+└── .machine_readable/    — .machine_readable/6a2/STATE.a2ml, .machine_readable/6a2/ECOSYSTEM.a2ml, .machine_readable/6a2/META.a2ml
 ----
 
 == Contract Schemas
