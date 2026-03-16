@@ -21,7 +21,7 @@ FROM cgr.dev/chainguard/wolfi-base:latest
 
 LABEL org.opencontainers.image.source="https://github.com/hyperpolymath/czech-file-knife"
 LABEL org.opencontainers.image.description="Czech File Knife - Universal file management tool"
-LABEL org.opencontainers.image.licenses="AGPL-3.0-or-later"
+LABEL org.opencontainers.image.licenses="PMPL-1.0-or-later"
 
 # Install runtime dependencies
 RUN apk add --no-cache fuse3 fuse3-libs ca-certificates

@@ -1,4 +1,4 @@
-% SPDX-License-Identifier: AGPL-3.0-or-later
+% SPDX-License-Identifier: PMPL-1.0-or-later
 % Rule distillation - converting neural patterns to symbolic rules
 
 :- object(rule_distiller).

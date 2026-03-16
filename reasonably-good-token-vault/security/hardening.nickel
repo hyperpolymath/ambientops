@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: AGPL-3.0-or-later OR MIT
+# SPDX-License-Identifier: PMPL-1.0-or-later OR MIT
 # SPDX-FileCopyrightText: 2025 Hyperpolymath
 #
 # Maximum Security Hardening Configuration
@@ -238,8 +238,8 @@ let MaxHardening = {
 
   # User can choose license
   licensing = {
-    available_licenses = ["AGPL-3.0-or-later", "MIT"],
-    default = "AGPL-3.0-or-later",
+    available_licenses = ["PMPL-1.0-or-later", "MIT"],
+    default = "PMPL-1.0-or-later",
     overlay = "Palimpsest",
   },
 }

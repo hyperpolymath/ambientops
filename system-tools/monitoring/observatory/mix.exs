@@ -38,7 +38,7 @@ defmodule SystemObservatory.MixProject do
   defp package do
     [
       name: "system_observatory",
-      licenses: ["AGPL-3.0-or-later"],
+      licenses: ["PMPL-1.0-or-later"],
       links: %{"GitHub" => @source_url}
     ]
   end

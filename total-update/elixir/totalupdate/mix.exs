@@ -68,7 +68,7 @@ defmodule TotalUpdate.MixProject do
   defp package do
     [
       name: "totalupdate",
-      licenses: ["AGPL-3.0-or-later"],
+      licenses: ["PMPL-1.0-or-later"],
       links: %{"GitLab" => @source_url}
     ]
   end

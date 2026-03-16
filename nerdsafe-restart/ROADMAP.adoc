@@ -364,7 +364,7 @@ nerdctl build -t nerdsafe-restart:dev -f Containerfile.kinoite .
 * Shell scripts: ShellCheck compliant
 * Ada: GNAT style guide
 * Documentation: AsciiDoc
-* License: AGPL-3.0-or-later
+* License: PMPL-1.0-or-later
 * SPDX headers required on all files
 
 === Pull Request Process

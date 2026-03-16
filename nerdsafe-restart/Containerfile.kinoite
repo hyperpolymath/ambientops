@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-License-Identifier: PMPL-1.0-or-later
 # nerdsafe-restart: Kinoite Environment Simulation Container
 #
 # This container replicates a Fedora Kinoite 43 environment with the user's

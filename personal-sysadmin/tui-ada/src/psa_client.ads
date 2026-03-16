@@ -1,4 +1,4 @@
--- SPDX-License-Identifier: AGPL-3.0-or-later
+-- SPDX-License-Identifier: PMPL-1.0-or-later
 -- PSA Client - Unix socket communication with PSA daemon
 
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;

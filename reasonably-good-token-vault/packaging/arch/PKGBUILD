@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-License-Identifier: PMPL-1.0-or-later
 # SPDX-FileCopyrightText: 2025 Hyperpolymath
 # Maintainer: Hyperpolymath <security@hyperpolymath.example>
 
@@ -8,7 +8,7 @@ pkgrel=1
 pkgdesc="Post-quantum secure identity vault with Kyber-1024 and Dilithium5"
 arch=('x86_64' 'aarch64')
 url="https://github.com/hyperpolymath/reasonable-good-token-vault"
-license=('AGPL-3.0-or-later')
+license=('PMPL-1.0-or-later')
 depends=('openssl' 'blake3')
 makedepends=('ats2' 'zig' 'git')
 optdepends=(
@@ -42,5 +42,5 @@ package() {
     install -Dm644 vault-core-ats/zig-out/lib/libsvalinn_crypto.a "$pkgdir/usr/lib/libsvalinn_crypto.a"
     install -Dm644 container/config/selinux/svalinn.te "$pkgdir/usr/share/selinux/packages/svalinn.te"
     install -Dm644 README.adoc "$pkgdir/usr/share/doc/$pkgname/README.adoc"
-    install -Dm644 LICENSES/AGPL-3.0-or-later.txt "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+    install -Dm644 LICENSES/PMPL-1.0-or-later.txt "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
 }

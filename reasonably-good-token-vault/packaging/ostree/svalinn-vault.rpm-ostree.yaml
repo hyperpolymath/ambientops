@@ -13,7 +13,7 @@ ref: svalinn/vault/${basearch}
 rojig:
   name: svalinn-vault
   summary: "Post-quantum secure identity vault"
-  license: AGPL-3.0-or-later
+  license: PMPL-1.0-or-later
 
 packages:
   - svalinn-vault
@@ -78,5 +78,5 @@ container:
     io.opencontainers.image.title: "Svalinn Vault"
     io.opencontainers.image.description: "Post-quantum secure identity vault"
     io.opencontainers.image.source: "https://github.com/hyperpolymath/reasonable-good-token-vault"
-    io.opencontainers.image.licenses: "AGPL-3.0-or-later"
+    io.opencontainers.image.licenses: "PMPL-1.0-or-later"
     io.opencontainers.image.documentation: "https://github.com/hyperpolymath/reasonable-good-token-vault#readme"

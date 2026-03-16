@@ -313,7 +313,7 @@ Show platform information
 .SH AUTHOR
 Jonathan D.A. Jewell <jonathan@hyperpolymath.io>
 .SH LICENSE
-AGPL-3.0-or-later
+PMPL-1.0-or-later
 EOF
 
     cat > docs/man/totalupdate.1 << 'EOF'
@@ -340,7 +340,7 @@ Automatic snapshots before updates
 .SH AUTHOR
 Jonathan D.A. Jewell <jonathan@hyperpolymath.io>
 .SH LICENSE
-AGPL-3.0-or-later
+PMPL-1.0-or-later
 EOF
     echo "Generated: docs/man/dnfinition.1"
     echo "Generated: docs/man/totalupdate.1"

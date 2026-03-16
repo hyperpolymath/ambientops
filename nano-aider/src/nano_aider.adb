@@ -1,7 +1,7 @@
 -------------------------------------------------------------------------------
 --  nano-aider - Ada TUI for nano/micro Editor Configuration
 --  Copyright (C) 2024-2025 Jonathan D.A. Jewell
---  SPDX-License-Identifier: MIT OR AGPL-3.0-or-later
+--  SPDX-License-Identifier: MIT OR PMPL-1.0-or-later
 -------------------------------------------------------------------------------
 
 with Ada.Text_IO;

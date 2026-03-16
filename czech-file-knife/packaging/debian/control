@@ -24,4 +24,4 @@ Description: Universal file management toolkit with cloud provider integration
   - Multi-provider support (local, S3, GCS, Azure, etc.)
   - Streaming copy with progress indication
  .
- License: AGPL-3.0-or-later
+ License: PMPL-1.0-or-later

@@ -1,7 +1,7 @@
 -------------------------------------------------------------------------------
 --  nano-aider - Ada TUI for nano/micro Editor Configuration
 --  Copyright (C) 2024-2025 Jonathan D.A. Jewell
---  SPDX-License-Identifier: MIT OR AGPL-3.0-or-later
+--  SPDX-License-Identifier: MIT OR PMPL-1.0-or-later
 -------------------------------------------------------------------------------
 --
 --  nano-aider is a sophisticated Terminal User Interface (TUI) application
@@ -25,7 +25,7 @@ package Nano_Aider is
    App_Name    : constant String := "nano-aider";
    App_Version : constant String := "0.1.0";
    App_Author  : constant String := "Jonathan D.A. Jewell";
-   App_License : constant String := "MIT OR AGPL-3.0-or-later";
+   App_License : constant String := "MIT OR PMPL-1.0-or-later";
 
    --  Supported editors
    type Editor_Type is (Nano, Micro);

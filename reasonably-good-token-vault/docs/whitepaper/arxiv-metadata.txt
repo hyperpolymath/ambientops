@@ -28,7 +28,7 @@ DOI: (Pending)
 
 Submission Notes:
 - This paper describes open-source software available at https://github.com/hyperpolymath/reasonable-good-token-vault
-- The software is licensed under AGPL-3.0-or-later
+- The software is licensed under PMPL-1.0-or-later
 - This paper is licensed under CC BY 4.0
 - For arXiv submission, use the cs.CR category as primary
 - Keywords: post-quantum cryptography, identity management, Kyber, Dilithium, secure storage, container isolation, dependent types

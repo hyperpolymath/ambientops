@@ -1,4 +1,4 @@
---  SPDX-License-Identifier: AGPL-3.0-or-later
+--  SPDX-License-Identifier: PMPL-1.0-or-later
 --  main.adb - Entry point for nerdsafe-restart TUI
 --
 --  Usage:
@@ -53,7 +53,7 @@ begin
 
          elsif Arg = "--version" or Arg = "-v" then
             Put_Line ("nerdsafe-restart version 0.1.0");
-            Put_Line ("License: AGPL-3.0-or-later");
+            Put_Line ("License: PMPL-1.0-or-later");
 
          elsif Arg = "--detect" then
             Put_Line ("System Resources Detected:");

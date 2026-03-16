@@ -10,7 +10,7 @@ PublisherSupportUrl: https://github.com/hyperpolymath/reasonable-good-token-vaul
 Author: Hyperpolymath
 PackageName: Svalinn Vault
 PackageUrl: https://github.com/hyperpolymath/reasonable-good-token-vault
-License: AGPL-3.0-or-later
+License: PMPL-1.0-or-later
 LicenseUrl: https://www.gnu.org/licenses/agpl-3.0.html
 Copyright: 2025 Hyperpolymath
 ShortDescription: Post-quantum secure identity vault

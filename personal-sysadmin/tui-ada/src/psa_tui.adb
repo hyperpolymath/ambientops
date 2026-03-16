@@ -1,4 +1,4 @@
--- SPDX-License-Identifier: AGPL-3.0-or-later
+-- SPDX-License-Identifier: PMPL-1.0-or-later
 -- Personal Sysadmin TUI - Main entry point
 --
 -- Provides an interactive terminal interface for:

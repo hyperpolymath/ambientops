@@ -233,7 +233,7 @@ fn write_receipt(incident Incident, config Config) ! {
 	content << ''
 	content << '== License'
 	content << ''
-	content << 'AGPL-3.0-or-later'
+	content << 'PMPL-1.0-or-later'
 	content << ''
 
 	if config.dry_run {

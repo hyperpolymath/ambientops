@@ -64,7 +64,7 @@ defmodule DNFinition.MixProject do
   defp package do
     [
       name: "dnfinition",
-      licenses: ["AGPL-3.0-or-later"],
+      licenses: ["PMPL-1.0-or-later"],
       links: %{
         "GitLab" => @source_url
       }

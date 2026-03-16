@@ -14,7 +14,7 @@ ref: rgt-vault/${basearch}
 rojig:
   name: rgt-vault
   summary: "RGT Vault - Reasonably Good Token Vault (post-quantum secure)"
-  license: AGPL-3.0-or-later
+  license: PMPL-1.0-or-later
 
 packages:
   - rgt-vault
@@ -79,5 +79,5 @@ container:
     io.opencontainers.image.title: "RGT Vault (Reasonably Good Token Vault)"
     io.opencontainers.image.description: "Post-quantum secure identity vault - a parody of PGP"
     io.opencontainers.image.source: "https://github.com/hyperpolymath/reasonable-good-token-vault"
-    io.opencontainers.image.licenses: "AGPL-3.0-or-later"
+    io.opencontainers.image.licenses: "PMPL-1.0-or-later"
     io.opencontainers.image.documentation: "https://github.com/hyperpolymath/reasonable-good-token-vault#readme"

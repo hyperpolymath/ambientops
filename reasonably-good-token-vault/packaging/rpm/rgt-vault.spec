@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-License-Identifier: PMPL-1.0-or-later
 # SPDX-FileCopyrightText: 2025 Hyperpolymath
 
 Name:           rgt-vault
@@ -6,7 +6,7 @@ Version:        0.1.0
 Release:        0.1.alpha%{?dist}
 Summary:        RGT Vault - Reasonably Good Token Vault (post-quantum secure)
 
-License:        AGPL-3.0-or-later
+License:        PMPL-1.0-or-later
 URL:            https://github.com/hyperpolymath/reasonable-good-token-vault
 Source0:        %{name}-%{version}.tar.gz
 
@@ -58,7 +58,7 @@ cd vault-core-ats
 zig build test
 
 %files
-%license LICENSES/AGPL-3.0-or-later.txt
+%license LICENSES/PMPL-1.0-or-later.txt
 %doc README.adoc ROADMAP.adoc
 %{_bindir}/rgt-vault
 %{_libdir}/librgt_crypto.a

@@ -29,7 +29,7 @@ See link:CONTRIBUTING.adoc[Contributing Guide]
 
 == License
 
-This project is licensed under AGPL-3.0-or-later. See link:LICENSE[LICENSE] for details.
+This project is licensed under PMPL-1.0-or-later. See link:LICENSE[LICENSE] for details.
 EOF
 }
 

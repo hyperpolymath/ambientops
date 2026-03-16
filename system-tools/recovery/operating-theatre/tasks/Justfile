@@ -160,7 +160,7 @@ feedback MESSAGE:
 
 # Check license compliance
 license-check:
-    @echo "Checking AGPL-3.0-or-later compliance..."
+    @echo "Checking PMPL-1.0-or-later compliance..."
     @grep -r "SPDX-License-Identifier" src/ || echo "Missing SPDX headers in some files"
     @test -f LICENSE && echo "LICENSE file present" || echo "Missing LICENSE file"
 
