@@ -5,7 +5,7 @@
 name = "svalinn-vault-core"
 version = "0.1.0"
 edition = "2021"
-license = "AGPL-3.0-or-later"
+license = "PMPL-1.0-or-later"
 description = "Secure identity vault with post-quantum cryptography"
 repository = "https://github.com/hyperpolymath/reasonable-good-token-vault"
 keywords = ["cryptography", "vault", "post-quantum", "security", "identity"]

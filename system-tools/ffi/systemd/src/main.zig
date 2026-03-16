@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-License-Identifier: PMPL-1.0-or-later
 //! Zig FFI bindings for systemd (sd-bus, sd-journal)
 //!
 //! Provides direct D-Bus communication with systemd and journal access,

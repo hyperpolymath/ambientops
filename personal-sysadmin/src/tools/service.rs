@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-License-Identifier: PMPL-1.0-or-later
 //! Service management tools (like Autoruns)
 //!
 //! Security: All user-supplied service names are validated before use

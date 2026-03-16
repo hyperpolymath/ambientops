@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-License-Identifier: PMPL-1.0-or-later
 //! System administration tools - Sysinternals-like functionality for Linux
 
 pub mod process;

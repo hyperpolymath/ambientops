@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-License-Identifier: PMPL-1.0-or-later
 //! Rust shim for systemd - exposes sd-bus and sd-journal via C ABI
 //!
 //! This allows Zig to use systemd without @cImport by providing

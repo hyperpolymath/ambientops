@@ -1,5 +1,5 @@
 = Network Ambulance Roadmap
-:author: Jonathan D.A. Jewell <jonathan.jewell@open.ac.uk>
+:author: Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 :toc:
 :toclevels: 3
 :icons: font

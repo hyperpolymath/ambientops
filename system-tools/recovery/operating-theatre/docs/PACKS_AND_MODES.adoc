@@ -131,7 +131,7 @@ windows-tech-support/
     "name": "AmbientOps",
     "email": "packs@ambientops.dev"
   },
-  "license": "AGPL-3.0-or-later",
+  "license": "PMPL-1.0-or-later",
   "categories": ["disk", "startup", "cleanup", "performance"],
   "checks": [...],
   "actions": [...],

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-License-Identifier: PMPL-1.0-or-later
 //! Background daemon with security isolation
 //!
 //! The daemon runs continuously, monitoring system health and applying rules.

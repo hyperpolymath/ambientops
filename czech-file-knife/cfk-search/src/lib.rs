@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-License-Identifier: PMPL-1.0-or-later
 //! Full-text search for Czech File Knife
 //!
 //! This module provides full-text search capabilities using Tantivy.

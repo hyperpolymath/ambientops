@@ -7,7 +7,7 @@
     (type standalone)
     (languages (rust))
     (license "PMPL-1.0-or-later")
-    (author "Jonathan D.A. Jewell <jonathan.jewell@open.ac.uk>"))
+    (author "Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>"))
   (architecture-decisions
     (adr "sysfs-only-scanning"
       (status accepted)

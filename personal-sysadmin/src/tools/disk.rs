@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-License-Identifier: PMPL-1.0-or-later
 //! Disk and storage management tools
 //!
 //! Security: All user-supplied paths are validated before use in commands

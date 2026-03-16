@@ -1,5 +1,5 @@
 = Network Ambulance D Core Architecture
-Jonathan D.A. Jewell <jonathan.jewell@open.ac.uk>
+Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 v1.0, 2026-01-29
 :toc: left
 :toclevels: 3
@@ -1481,8 +1481,8 @@ void runStatus(INetworkInterface netif, IDNSResolver dns, IRoutingTable routing,
 {
   "name": "network-ambulance",
   "description": "Network diagnostics and repair tool",
-  "authors": ["Jonathan D.A. Jewell <jonathan.jewell@open.ac.uk>"],
-  "license": "AGPL-3.0-or-later",
+  "authors": ["Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>"],
+  "license": "PMPL-1.0-or-later",
   "targetType": "executable",
   "targetPath": "bin",
   "sourcePaths": ["src/core"],

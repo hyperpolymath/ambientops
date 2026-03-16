@@ -2,7 +2,7 @@
     "version": "0.1.0-alpha",
     "description": "RGT Vault - Reasonably Good Token Vault. Post-quantum secure identity vault.",
     "homepage": "https://github.com/hyperpolymath/reasonable-good-token-vault",
-    "license": "AGPL-3.0-or-later",
+    "license": "PMPL-1.0-or-later",
     "notes": [
         "RGT Vault - A parody of Pretty Good Privacy, for tokens.",
         "Built on Svalinn container technology.",

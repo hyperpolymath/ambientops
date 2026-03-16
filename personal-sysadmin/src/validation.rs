@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-License-Identifier: PMPL-1.0-or-later
 //! Input validation for security
 //!
 //! Provides validation functions to prevent command injection and path traversal attacks.

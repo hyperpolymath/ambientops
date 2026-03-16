@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-License-Identifier: PMPL-1.0-or-later
 # Justfile - System Operating Theatre task runner
 # Integration: nickel configs, feedback-o-tron, palimpsest-license
 
@@ -167,7 +167,7 @@ license-check:
 # Add SPDX headers to D files
 license-headers:
     @for f in $$(find src -name "*.d" ! -exec grep -q "SPDX-License-Identifier" {} \; -print); do \
-        echo "// SPDX-License-Identifier: AGPL-3.0-or-later" | cat - "$$f" > temp && mv temp "$$f"; \
+        echo "// SPDX-License-Identifier: PMPL-1.0-or-later" | cat - "$$f" > temp && mv temp "$$f"; \
     done
     @echo "SPDX headers added"
 

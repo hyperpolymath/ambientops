@@ -7,7 +7,7 @@ create_readme() {
     local repo=$1
     local name=$(echo "$repo" | sed 's/-/ /g' | sed 's/\b\(.\)/\u\1/g')
     cat << EOF
-// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-License-Identifier: PMPL-1.0-or-later
 = $name
 
 image:https://img.shields.io/badge/license-AGPL--3.0-blue.svg[License]
@@ -37,7 +37,7 @@ create_roadmap() {
     local repo=$1
     local name=$(echo "$repo" | sed 's/-/ /g' | sed 's/\b\(.\)/\u\1/g')
     cat << EOF
-// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-License-Identifier: PMPL-1.0-or-later
 = $name Roadmap
 
 == Current Status

@@ -4,7 +4,7 @@
 OWNER="hyperpolymath"
 
 # Standard dependabot.yml content
-DEPENDABOT_CONTENT='# SPDX-License-Identifier: AGPL-3.0-or-later
+DEPENDABOT_CONTENT='# SPDX-License-Identifier: PMPL-1.0-or-later
 version: 2
 updates:
   - package-ecosystem: "github-actions"
@@ -19,7 +19,7 @@ FUNDING_CONTENT='github: [hyperpolymath]
 '
 
 # Standard CodeQL workflow
-CODEQL_CONTENT='# SPDX-License-Identifier: AGPL-3.0-or-later
+CODEQL_CONTENT='# SPDX-License-Identifier: PMPL-1.0-or-later
 name: CodeQL
 on:
   push:

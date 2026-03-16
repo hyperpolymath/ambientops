@@ -3,7 +3,7 @@
 name = "systemd-shim"
 version = "0.1.0"
 edition = "2021"
-license = "AGPL-3.0-or-later"
+license = "PMPL-1.0-or-later"
 description = "Rust shim exposing systemd (sd-bus, sd-journal) via C ABI"
 
 [lib]

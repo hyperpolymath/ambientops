@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-License-Identifier: PMPL-1.0-or-later
 //! miniKanren-style logic programming for solution learning and inference
 //!
 //! This module implements a simple relational programming engine inspired by

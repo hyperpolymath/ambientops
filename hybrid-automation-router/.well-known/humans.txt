@@ -3,7 +3,7 @@
 
 /* TEAM */
 Creator: Jonathan D.A. Jewell (hyperpolymath)
-Contact: jonathan.jewell@open.ac.uk
+Contact: j.d.a.jewell@open.ac.uk
 GitHub: https://github.com/hyperpolymath
 Location: United Kingdom
 

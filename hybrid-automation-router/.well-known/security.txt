@@ -2,7 +2,7 @@
 # Security contact for hybrid-automation-router
 # See https://securitytxt.org/
 
-Contact: mailto:jonathan.jewell@open.ac.uk
+Contact: mailto:j.d.a.jewell@open.ac.uk
 Expires: 2027-02-13T00:00:00.000Z
 Preferred-Languages: en
 Canonical: https://github.com/hyperpolymath/hybrid-automation-router/.well-known/security.txt

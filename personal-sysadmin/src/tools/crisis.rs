@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-License-Identifier: PMPL-1.0-or-later
 //! Crisis mode - analyze incident bundles from system-emergency-room
 //!
 //! Integration with system-emergency-room for escalated diagnostics.

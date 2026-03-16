@@ -2,7 +2,7 @@
     "version": "0.1.0",
     "description": "Post-quantum secure identity vault with Kyber-1024 and Dilithium5",
     "homepage": "https://github.com/hyperpolymath/reasonable-good-token-vault",
-    "license": "AGPL-3.0-or-later",
+    "license": "PMPL-1.0-or-later",
     "notes": [
         "WARNING: This is dual-use technology.",
         "Users are responsible for compliance with applicable export control regulations.",

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-License-Identifier: PMPL-1.0-or-later
 //! Personal Sysadmin library
 //!
 //! Core components for the PSA system administration toolkit.

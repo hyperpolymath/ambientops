@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-License-Identifier: PMPL-1.0-or-later
 //! Personal Sysadmin (PSA) - AI-assisted Linux system administration toolkit
 //!
 //! A learning system administration tool that:

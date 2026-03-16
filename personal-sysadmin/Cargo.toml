@@ -3,9 +3,9 @@
 name = "personal-sysadmin"
 version = "1.2.0"
 edition = "2021"
-authors = ["hyperpolymath"]
+authors = ["Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>"]
 description = "AI-assisted Linux system administration toolkit with learning capabilities"
-license = "AGPL-3.0-or-later"
+license = "PMPL-1.0-or-later"
 repository = "https://github.com/hyperpolymath/personal-sysadmin"
 keywords = ["sysadmin", "ai", "linux", "automation", "monitoring"]
 categories = ["command-line-utilities", "development-tools"]
