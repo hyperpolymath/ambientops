@@ -106,7 +106,7 @@ defmodule HAR.MixProject do
     [
       name: "har",
       licenses: ["PMPL-1.0-or-later"],
-      maintainers: ["Jonathan D.A. Jewell <jonathan.jewell@open.ac.uk>"],
+      maintainers: ["Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>"],
       links: %{
         "GitHub" => @source_url,
         "Documentation" => "https://hexdocs.pm/har"
