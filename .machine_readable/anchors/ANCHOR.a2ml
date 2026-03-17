@@ -1,0 +1,18 @@
+# ⚓ ANCHOR: ambientops
+# This is the canonical authority for the ambientops repository.
+
+id: "org.hyperpolymath.ambientops"
+version: "1.0.0"
+clade: "unknown"
+status: "active"
+
+# SSG Configuration (Unified boj-server build)
+ssg:
+  engine: "casket"
+  output_dir: "public"
+  boj_trigger: true
+  cartridge: "ssg-mcp"
+
+# Relationships
+parents:
+  - "org.hyperpolymath.boj-server"
