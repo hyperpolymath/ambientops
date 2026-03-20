@@ -17,7 +17,7 @@ permissions:
 jobs:
   scan:
     name: Hypatia Neurosymbolic Analysis
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04  # Pinned: erlef/setup-beam does not support ubuntu-24 (ImageOS mapping)
 
     steps:
       - name: Checkout repository
