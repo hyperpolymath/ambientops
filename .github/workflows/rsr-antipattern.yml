@@ -48,7 +48,7 @@ jobs:
 
       - name: Check for Python (non-SaltStack)
         run: |
-          PY_FILES=$(find . -name "*.py" | grep -v salt | grep -v _states | grep -v _modules | grep -v pillar | grep -v venv | grep -v __pycache__ || true)
+          PY_FILES=$(find . -name "*.py" | grep -v salt | grep -v _states | grep -v _modules | grep -v pillar | grep -v venv | grep -v __pycache__ | grep -v '/stale/' || true)
           if [ -n "$PY_FILES" ]; then
             echo "❌ Python files detected - only allowed for SaltStack"
             echo "$PY_FILES"

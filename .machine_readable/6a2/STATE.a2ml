@@ -1,14 +1,337 @@
 # SPDX-License-Identifier: PMPL-1.0-or-later
 # STATE.a2ml — Project state checkpoint
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath)
 # Converted from STATE.scm on 2026-03-15
+# Updated: 2026-03-20 (system log analysis session)
 
 [metadata]
 project = "ambientops"
-version = "0.1.0"
-last-updated = "2026-03-15"
+version = "0.2.0"
+last-updated = "2026-03-20"
 status = "active"
 
 [project-context]
 name = "ambientops"
-completion-percentage = 0
-phase = "In development"
+completion-percentage = 42
+phase = "Post-analysis expansion — new components identified from live system logs"
+
+# ============================================================================
+# SESSION: 2026-03-20 — System Log Analysis Findings
+# ============================================================================
+#
+# Performed deep analysis of journalctl, dmesg, SMART data, and systemd
+# service logs on the primary workstation (Fedora 43 Atomic, dual NVMe).
+# Identified 5 chronic conditions requiring new ambientops components.
+#
+# This session shifts ambientops from "general framework" to "battle-tested
+# against real hardware degradation and service instability."
+
+# ============================================================================
+# CHRONIC CONDITIONS (discovered 2026-03-20)
+# ============================================================================
+
+[chronic-conditions]
+
+[chronic-conditions.samsung-960-evo-aging]
+id = "CC-001"
+severity = "high"
+summary = "Samsung 960 EVO NVMe (nvme1n1) showing 52% life remaining with 15,965 media/data integrity errors"
+details = """
+The Fedora OS drive (Samsung 960 EVO, 232GB) has consumed 48% of its rated
+write endurance. SMART attribute Media_and_Data_Integrity_Errors reads 15,965.
+This drive holds /boot, /, and /home. Failure would be catastrophic without
+the Eclipse drive backup. Temperature throttling has also been observed.
+"""
+affected-drive = "nvme1n1 (Samsung 960 EVO 250GB)"
+mount-points = ["/ (root)", "/boot", "/home"]
+smart-life-remaining = "52%"
+error-count = 15965
+action = "Monitor via nvme-sentinel; plan migration to Eclipse drive"
+
+[chronic-conditions.unsafe-shutdown-epidemic]
+id = "CC-002"
+severity = "high"
+summary = "2,677 cumulative unsafe shutdowns across both NVMe drives"
+details = """
+Both NVMe drives show elevated unsafe shutdown counts, indicating frequent
+hard power-offs, kernel panics, or forced reboots. Each unsafe shutdown risks
+filesystem corruption and accelerates drive wear. The count is abnormally high
+for drives of this age.
+"""
+total-unsafe-shutdowns = 2677
+action = "Track via boot-guardian; correlate with crash events; implement graceful shutdown hooks"
+
+[chronic-conditions.boot-storm-nvme-probe-failure]
+id = "CC-003"
+severity = "critical"
+summary = "NVMe PCIe link failures during boot cause probe failures and boot loops"
+details = """
+Kernel logs show repeated NVMe PCIe link training failures during early boot.
+The NVMe controller fails to establish a stable PCIe link, causing the kernel
+to retry probe multiple times before either succeeding or giving up. When the
+probe fails entirely, the system enters a boot loop as the root filesystem
+is unreachable. This has caused dozens of forced reboots.
+"""
+affected-component = "PCIe link negotiation (NVMe controller)"
+kernel-messages = ["nvme nvme0: PCIe link not ready", "nvme nvme0: Removing after probe failure"]
+action = "boot-guardian detection + HCT010 SARIF rule + shutdown-marshal graceful handling"
+
+[chronic-conditions.session-sentinel-dbus-crash-loop]
+id = "CC-004"
+severity = "medium"
+summary = "session-sentinel (custom service) enters D-Bus crash loop on session start"
+details = """
+The session-sentinel systemd user service crashes repeatedly when attempting
+to connect to the D-Bus session bus during early login. It enters a
+restart-crash-restart loop that consumes CPU and floods the journal with
+error messages. The service eventually stabilises after the desktop session
+is fully established, but the crash loop delays session readiness.
+"""
+affected-service = "session-sentinel.service (user unit)"
+trigger = "D-Bus session bus not yet available at service start"
+action = "service-autopsy crash analysis + watchdog integration + startup ordering fix"
+
+[chronic-conditions.bluetooth-a2dp-contention]
+id = "CC-005"
+severity = "low"
+summary = "Bluetooth A2DP audio profile contention causes intermittent audio drops"
+details = """
+When multiple Bluetooth audio devices are paired, PipeWire/WirePlumber
+encounters A2DP profile negotiation conflicts. The audio codec negotiation
+fails intermittently, causing brief audio drops or fallback to lower-quality
+SCO profile. This is a usability annoyance rather than a stability issue.
+"""
+affected-subsystem = "PipeWire + WirePlumber + BlueZ"
+action = "Observatory alerting threshold for audio profile switches; low priority"
+
+# ============================================================================
+# NEW COMPONENTS TO BUILD
+# ============================================================================
+
+[new-components]
+
+[new-components.nvme-sentinel]
+department = "observatory (ward)"
+language = "Elixir"
+purpose = "Continuous NVMe health monitoring via SMART data polling"
+status = "not-started"
+priority = 1
+description = """
+Polls NVMe SMART attributes at configurable intervals. Tracks wear leveling,
+temperature, media errors, unsafe shutdown count. Emits system-weather updates
+and fires alerts when thresholds are crossed. Feeds data to NVMe Health Panel.
+"""
+contracts = ["system-weather.schema.json", "evidence-envelope.schema.json"]
+sarif-rules = ["HCT010"]
+
+[new-components.boot-guardian]
+department = "emergency-room"
+language = "V"
+purpose = "Boot health monitoring, loop detection, and safe-mode triggering"
+status = "not-started"
+priority = 1
+description = """
+Runs very early in boot (systemd generator or early service). Records boot
+timestamps, detects repeated failed boots (loop detection), captures dmesg
+for boot failure forensics, and can trigger safe-mode or fallback boot entries.
+Addresses CC-002 and CC-003.
+"""
+contracts = ["evidence-envelope.schema.json", "run-bundle.schema.json"]
+sarif-rules = ["HCT011"]
+
+[new-components.service-autopsy]
+department = "records"
+language = "Elixir"
+purpose = "Post-mortem analysis of crashed/restarting systemd services"
+status = "not-started"
+priority = 2
+description = """
+Watches for service failures (systemd OnFailure= hooks or journal monitoring).
+Collects crash context: journal entries, coredumps, D-Bus state, dependency
+graph. Produces structured autopsy reports. Addresses CC-004.
+"""
+contracts = ["evidence-envelope.schema.json", "receipt.schema.json"]
+
+[new-components.shutdown-marshal]
+department = "emergency-room"
+language = "V"
+purpose = "Graceful shutdown orchestration to reduce unsafe shutdowns"
+status = "not-started"
+priority = 2
+description = """
+Intercepts shutdown/reboot signals. Ensures filesystems are synced, services
+are stopped cleanly, and NVMe flush commands are issued before power-off.
+Logs shutdown quality metrics. Addresses CC-002.
+"""
+contracts = ["receipt.schema.json", "run-bundle.schema.json"]
+
+# ============================================================================
+# NEW SARIF RULES (hardware-crash-team)
+# ============================================================================
+
+[sarif-rules]
+
+[sarif-rules.HCT010]
+id = "HCT010"
+name = "nvme-pcie-link-failure"
+severity = "error"
+description = "NVMe PCIe link training failure detected during boot or runtime"
+help-text = "The NVMe controller failed to negotiate a stable PCIe link. This can cause probe failures, boot loops, or data loss."
+addresses = "CC-003"
+
+[sarif-rules.HCT011]
+id = "HCT011"
+name = "boot-loop-detection"
+severity = "warning"
+description = "Multiple failed boot attempts detected within a short window"
+help-text = "The system has failed to boot successfully N times in a row. Consider booting into safe mode or an older kernel."
+addresses = "CC-003"
+
+# ============================================================================
+# CLINICIAN AUTO-REMEDIATION RULES
+# ============================================================================
+
+[clinician-rules]
+
+[clinician-rules.nvme-temp-throttle]
+trigger = "nvme_temperature > 70C for > 60s"
+action = "Reduce IO scheduler priority; alert user"
+contract = "procedure-plan"
+consent-required = false
+severity = "warning"
+
+[clinician-rules.nvme-wear-critical]
+trigger = "nvme_life_remaining < 20%"
+action = "Generate migration plan to Eclipse drive; escalate to Operating Room"
+contract = "procedure-plan"
+consent-required = true
+severity = "critical"
+
+[clinician-rules.unsafe-shutdown-spike]
+trigger = "unsafe_shutdown_delta > 5 in 24h"
+action = "Enable shutdown-marshal aggressive mode; investigate power supply"
+contract = "procedure-plan"
+consent-required = false
+severity = "warning"
+
+[clinician-rules.service-crash-loop]
+trigger = "service restart_count > 3 in 5min"
+action = "Collect service-autopsy bundle; disable service if non-critical"
+contract = "procedure-plan"
+consent-required = true
+severity = "warning"
+
+[clinician-rules.boot-loop-detected]
+trigger = "failed_boot_count > 2 consecutive"
+action = "Trigger safe-mode boot; preserve dmesg evidence; alert user"
+contract = "procedure-plan"
+consent-required = false
+severity = "critical"
+
+# ============================================================================
+# OBSERVATORY ALERTING THRESHOLDS
+# ============================================================================
+
+[observatory-thresholds]
+
+[observatory-thresholds.nvme-temperature]
+metric = "nvme_composite_temperature_celsius"
+warning = 65
+critical = 75
+unit = "celsius"
+poll-interval-seconds = 30
+
+[observatory-thresholds.nvme-life-remaining]
+metric = "nvme_available_spare_percent"
+warning = 30
+critical = 15
+unit = "percent"
+poll-interval-seconds = 3600
+
+[observatory-thresholds.nvme-media-errors]
+metric = "nvme_media_and_data_integrity_errors"
+warning-delta-per-day = 100
+critical-delta-per-day = 1000
+unit = "count"
+poll-interval-seconds = 3600
+
+[observatory-thresholds.unsafe-shutdown-rate]
+metric = "nvme_unsafe_shutdowns_delta"
+warning = 3
+critical = 5
+unit = "count-per-24h"
+poll-interval-seconds = 3600
+
+[observatory-thresholds.boot-duration]
+metric = "systemd_boot_duration_seconds"
+warning = 120
+critical = 300
+unit = "seconds"
+poll-interval-seconds = 0
+
+[observatory-thresholds.service-restart-rate]
+metric = "systemd_service_restart_count"
+warning = 3
+critical = 5
+unit = "count-per-5min"
+poll-interval-seconds = 60
+
+[observatory-thresholds.bluetooth-profile-switches]
+metric = "wireplumber_bt_profile_switch_count"
+warning = 5
+critical = 10
+unit = "count-per-hour"
+poll-interval-seconds = 300
+
+# ============================================================================
+# EXISTING COMPONENTS (status update)
+# ============================================================================
+
+[existing-components]
+
+[existing-components.observatory]
+status = "operational"
+completion = "85%"
+update = "Needs nvme-sentinel integration and new alerting thresholds"
+
+[existing-components.emergency-room]
+status = "operational"
+completion = "75%"
+update = "Needs boot-guardian and shutdown-marshal additions"
+
+[existing-components.clinician]
+status = "operational"
+completion = "55%"
+update = "Needs new auto-remediation rules for chronic conditions"
+
+[existing-components.hardware-crash-team]
+status = "operational"
+completion = "75%"
+update = "Needs HCT010 and HCT011 SARIF rules"
+
+[existing-components.records]
+status = "operational"
+completion = "65%"
+update = "Needs service-autopsy integration"
+
+# ============================================================================
+# NEXT ACTIONS
+# ============================================================================
+
+[next-actions]
+priority-1 = [
+  "Build nvme-sentinel (Elixir, observatory) — CC-001 is highest risk",
+  "Build boot-guardian (V, emergency-room) — CC-003 causes boot loops",
+  "Add HCT010 SARIF rule to hardware-crash-team",
+]
+priority-2 = [
+  "Build service-autopsy (Elixir, records) — CC-004 degrades login",
+  "Build shutdown-marshal (V, emergency-room) — CC-002 prevention",
+  "Add HCT011 SARIF rule to hardware-crash-team",
+  "Add clinician auto-remediation rules",
+]
+priority-3 = [
+  "Add observatory alerting thresholds for all metrics",
+  "Bluetooth A2DP monitoring (CC-005, low severity)",
+  "PanLL panels for all new data sources",
+]
