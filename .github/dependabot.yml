@@ -14,14 +14,32 @@ updates:
         patterns:
           - "*"
 
-  # Rust/Cargo
+  # Rust/Cargo - root workspace
   - package-ecosystem: "cargo"
     directory: "/"
     schedule:
       interval: "daily"
-    ignore:
-      - dependency-name: "*"
-        update-types: ["version-update:semver-patch"]
+
+  # Rust/Cargo - standalone crates
+  - package-ecosystem: "cargo"
+    directory: "/czech-file-knife"
+    schedule:
+      interval: "daily"
+
+  - package-ecosystem: "cargo"
+    directory: "/panoptes"
+    schedule:
+      interval: "daily"
+
+  - package-ecosystem: "cargo"
+    directory: "/personal-sysadmin"
+    schedule:
+      interval: "daily"
+
+  - package-ecosystem: "cargo"
+    directory: "/displace"
+    schedule:
+      interval: "daily"
 
   # Elixir/Mix
   - package-ecosystem: "mix"
