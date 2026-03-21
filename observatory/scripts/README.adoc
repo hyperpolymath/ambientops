@@ -1,0 +1,40 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+= Observatory Scripts
+:toc:
+
+== nvme-health-check.sh
+
+Interim NVMe health monitoring script, deployed as a systemd timer
+(`nvme-health-check.timer`, 5-minute interval). This is the **stopgap**
+until `nvme-sentinel` (the Elixir GenServer) is built.
+
+=== What it monitors
+
+* Eclipse NVMe (nvme0n1) presence on PCIe bus
+* SMART health status for both drives
+* Samsung 960 EVO life percentage (alert at 70%)
+* Temperature (alert at 70C)
+* dmesg NVMe errors
+* Unsafe shutdown delta tracking (baseline in `/var/lib/nvme-health/`)
+
+=== Deployment
+
+Installed at `/usr/local/bin/nvme-health-check.sh` with systemd units:
+
+* `/etc/systemd/system/nvme-health-check.service`
+* `/etc/systemd/system/nvme-health-check.timer`
+
+Logs to `/var/log/nvme-health-check.log`.
+Alerts via desktop notification and `~/Desktop/system-stability/NVME-ALERT.txt`.
+
+=== Relationship to nvme-sentinel
+
+This script will be superseded by the `nvme-sentinel` Elixir GenServer
+(see `AMBIENTOPS-ENHANCEMENT-PLAN.md`, component #1). The GenServer will:
+
+* Use the same SMART data sources
+* Add trend computation and forecasting
+* Emit `system-weather` contract updates
+* Feed PanLL dashboard panels
+* Integrate with the clinician auto-remediation rules
