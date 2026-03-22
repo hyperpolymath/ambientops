@@ -1,54 +1,71 @@
 // SPDX-License-Identifier: PMPL-1.0-or-later
-// Tauri IPC bindings
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+//
+// TauriBindings.res — Tauri IPC bindings for Network Ambulance.
+//
+// Now delegates to RuntimeBridge for runtime-agnostic command dispatch.
+// Commands work transparently on both Gossamer and Tauri runtimes.
+// The original @tauri-apps/api imports are preserved as fallback paths
+// inside RuntimeBridge.
 
-// External Tauri invoke function
-@module("@tauri-apps/api/core")
-external invoke: (string, 'a) => promise<'b> = "invoke"
+// ---------------------------------------------------------------------------
+// Command wrappers — use RuntimeBridge.invoke for runtime detection
+// ---------------------------------------------------------------------------
 
-@module("@tauri-apps/api/core")
-external invokeSimple: string => promise<'a> = "invoke"
-
-// Run diagnostics command
+/// Run network diagnostics. Dispatches to the backend via Gossamer or Tauri.
 let runDiagnostics = (): promise<Types.diagnosticResult> => {
-  invokeSimple("run_diagnostics")
+  RuntimeBridge.invokeSimple("run_diagnostics")
 }
 
-// Run repair command
+/// Run a targeted repair. Dispatches to the backend via Gossamer or Tauri.
 let runRepair = (target: string): promise<Types.repairResult> => {
-  invoke("run_repair", {"target": target})
+  RuntimeBridge.invoke("run_repair", {"target": target})
 }
 
-// Check if running with elevated privileges
+/// Check if running with elevated privileges.
 let checkPrivileges = (): promise<bool> => {
-  invokeSimple("check_privileges")
+  RuntimeBridge.invokeSimple("check_privileges")
 }
 
-// Get platform information
+/// Get platform information string.
 let getPlatformInfo = (): promise<string> => {
-  invokeSimple("get_platform_info")
+  RuntimeBridge.invokeSimple("get_platform_info")
 }
 
-// Event listeners for Tauri events
-@module("@tauri-apps/api/event")
-external listen: (string, 'payload => unit) => promise<unit> = "listen"
+// ---------------------------------------------------------------------------
+// Event wrappers — delegate to RuntimeBridge.Event
+// ---------------------------------------------------------------------------
 
-@module("@tauri-apps/api/event")
-external emit: (string, 'payload) => promise<unit> = "emit"
+/// Listen to a backend event (works on both Gossamer and Tauri).
+let listen = (event: string, callback: 'payload => unit): promise<unit> => {
+  RuntimeBridge.Event.listen(event, callback)
+}
 
-// Window management
-@module("@tauri-apps/api/window")
-external getCurrentWindow: unit => 'window = "getCurrent"
+/// Emit an event to the backend (works on both Gossamer and Tauri).
+let emit = (event: string, payload: 'payload): promise<unit> => {
+  RuntimeBridge.Event.emit(event, payload)
+}
 
-type window
+// ---------------------------------------------------------------------------
+// Window wrappers — delegate to RuntimeBridge.Window
+// ---------------------------------------------------------------------------
 
-@send
-external setTitle: (window, string) => promise<unit> = "setTitle"
+/// Set the window title (works on both Gossamer and Tauri).
+let setWindowTitle = (title: string): promise<unit> => {
+  RuntimeBridge.Window.setTitle(title)
+}
 
-@send
-external minimize: window => promise<unit> = "minimize"
+/// Minimize the current window.
+let minimizeWindow = (): promise<unit> => {
+  RuntimeBridge.Window.minimize()
+}
 
-@send
-external maximize: window => promise<unit> = "maximize"
+/// Maximize the current window.
+let maximizeWindow = (): promise<unit> => {
+  RuntimeBridge.Window.maximize()
+}
 
-@send
-external close: window => promise<unit> = "close"
+/// Close the current window.
+let closeWindow = (): promise<unit> => {
+  RuntimeBridge.Window.close()
+}
