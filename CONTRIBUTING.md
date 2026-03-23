@@ -1,5 +1,18 @@
 <!-- SPDX-License-Identifier: PMPL-1.0-or-later -->
 <!-- Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) -->
+
+# Contributing to AmbientOps
+
+Thank you for your interest in contributing to AmbientOps. This document covers
+the development setup, contribution workflow, and coding standards for the
+project. AmbientOps uses a hospital-model architecture; please familiarise
+yourself with the component layout in `README.adoc` before diving in.
+
+---
+
+## Getting Started
+
+```bash
 # Clone the repository
 git clone https://github.com/hyperpolymath/ambientops.git
 cd ambientops

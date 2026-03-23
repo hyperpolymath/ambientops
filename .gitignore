@@ -32,6 +32,9 @@ deps/
 *.ez
 erl_crash.dump
 
+# V (vlang)
+*.v.pdb
+
 # Julia
 *.jl.cov
 *.jl.mem

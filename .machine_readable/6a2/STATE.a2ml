@@ -7,13 +7,13 @@
 [metadata]
 project = "ambientops"
 version = "0.2.0"
-last-updated = "2026-03-20"
+last-updated = "2026-03-23"
 status = "active"
 
 [project-context]
 name = "ambientops"
-completion-percentage = 42
-phase = "Post-analysis expansion — new components identified from live system logs"
+completion-percentage = 55
+phase = "Post-meander: 4 new components built, integration phase next"
 
 # ============================================================================
 # SESSION: 2026-03-20 — System Log Analysis Findings
@@ -114,8 +114,9 @@ action = "Observatory alerting threshold for audio profile switches; low priorit
 department = "observatory (ward)"
 language = "Elixir"
 purpose = "Continuous NVMe health monitoring via SMART data polling"
-status = "not-started"
+status = "built"
 priority = 1
+built-date = "2026-03-23"
 description = """
 Polls NVMe SMART attributes at configurable intervals. Tracks wear leveling,
 temperature, media errors, unsafe shutdown count. Emits system-weather updates
@@ -128,7 +129,8 @@ sarif-rules = ["HCT010"]
 department = "emergency-room"
 language = "V"
 purpose = "Boot health monitoring, loop detection, and safe-mode triggering"
-status = "not-started"
+status = "built"
+built-date = "2026-03-23"
 priority = 1
 description = """
 Runs very early in boot (systemd generator or early service). Records boot
@@ -143,7 +145,8 @@ sarif-rules = ["HCT011"]
 department = "records"
 language = "Elixir"
 purpose = "Post-mortem analysis of crashed/restarting systemd services"
-status = "not-started"
+status = "built"
+built-date = "2026-03-23"
 priority = 2
 description = """
 Watches for service failures (systemd OnFailure= hooks or journal monitoring).
@@ -156,7 +159,8 @@ contracts = ["evidence-envelope.schema.json", "receipt.schema.json"]
 department = "emergency-room"
 language = "V"
 purpose = "Graceful shutdown orchestration to reduce unsafe shutdowns"
-status = "not-started"
+status = "built"
+built-date = "2026-03-23"
 priority = 2
 description = """
 Intercepts shutdown/reboot signals. Ensures filesystems are synced, services
@@ -291,8 +295,8 @@ poll-interval-seconds = 300
 
 [existing-components.observatory]
 status = "operational"
-completion = "85%"
-update = "Needs nvme-sentinel integration and new alerting thresholds"
+completion = "90%"
+update = "NvmeSentinel added (2026-03-23); BT sentinel stub added; alerting thresholds wired"
 
 [existing-components.emergency-room]
 status = "operational"
@@ -307,7 +311,7 @@ update = "Needs new auto-remediation rules for chronic conditions"
 [existing-components.hardware-crash-team]
 status = "operational"
 completion = "75%"
-update = "Needs HCT010 and HCT011 SARIF rules"
+update = "HCT010 and HCT011 SARIF rules added (2026-03-23)"
 
 [existing-components.records]
 status = "operational"
@@ -318,20 +322,25 @@ update = "Needs service-autopsy integration"
 # NEXT ACTIONS
 # ============================================================================
 
+# Wave 1 meander (2026-03-23) COMPLETED:
+#   - nvme-sentinel BUILT (Elixir, observatory)
+#   - boot-guardian BUILT (V, emergency-room)
+#   - service-autopsy BUILT (Elixir, records)
+#   - shutdown-marshal BUILT (V, emergency-room)
+#   - HCT010 + HCT011 SARIF rules ADDED
+#   - Clinician auto-remediation rules ADDED
+#   - Observatory alerting thresholds ADDED
+
 [next-actions]
 priority-1 = [
-  "Build nvme-sentinel (Elixir, observatory) — CC-001 is highest risk",
-  "Build boot-guardian (V, emergency-room) — CC-003 causes boot loops",
-  "Add HCT010 SARIF rule to hardware-crash-team",
+  "Fix HCT main.rs to compile (in progress — other bot)",
+  "Wire cross-component Evidence Envelope flow end-to-end",
 ]
 priority-2 = [
-  "Build service-autopsy (Elixir, records) — CC-004 degrades login",
-  "Build shutdown-marshal (V, emergency-room) — CC-002 prevention",
-  "Add HCT011 SARIF rule to hardware-crash-team",
-  "Add clinician auto-remediation rules",
+  "WirePlumber BT sentinel — implement D-Bus monitoring (stub exists)",
+  "PanLL panels for new data sources (NVMe health, boot history, service autopsy)",
 ]
 priority-3 = [
-  "Add observatory alerting thresholds for all metrics",
-  "Bluetooth A2DP monitoring (CC-005, low severity)",
-  "PanLL panels for all new data sources",
+  "ServiceAutopsy → BundleIngestion integration",
+  "Add clinician auto-remediation rules to live supervision tree",
 ]

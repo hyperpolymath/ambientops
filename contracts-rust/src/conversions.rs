@@ -112,7 +112,7 @@ pub fn remediation_plan_to_procedure(
                 .and_then(|c| c.as_str())
                 .unwrap_or("")
                 .to_string();
-            let needs_sudo = step
+            let _needs_sudo = step
                 .get("needs_sudo")
                 .and_then(|n| n.as_bool())
                 .unwrap_or(false);

@@ -2,88 +2,200 @@
 
 //! Hardware Crash Team — Low-Level Hardware Diagnostics & Remediation (CLI).
 //!
-//! This binary implements the "Emergency Room" logic for physical systems 
-//! within the AmbientOps ecosystem. It is designed to identify and mitigate 
-//! hardware-induced crashes by analyzing PCI buses, driver conflicts, 
+//! This binary implements the "Emergency Room" logic for physical systems
+//! within the AmbientOps ecosystem. It is designed to identify and mitigate
+//! hardware-induced crashes by analyzing PCI buses, driver conflicts,
 //! and kernel-level trace logs.
 //!
 //! CORE CAPABILITIES:
 //! 1. **Scanner**: Deep inspection of PCI devices, IOMMU groups, and ACPI tables.
 //! 2. **Diagnose**: Temporal correlation between hardware events and system crashes.
-//! 3. **Remediation**: Generates declarative plans to isolate "Zombie Hardware" 
+//! 3. **Remediation**: Generates declarative plans to isolate "Zombie Hardware"
 //!    (e.g., using `pci-stub` or `vfio-pci`).
-//! 4. **Safety**: All destructive actions (Apply) require human oversight 
+//! 4. **Safety**: All destructive actions (Apply) require human oversight
 //!    and produce reversible receipts.
 //!
 //! ARCHITECTURE:
 //! - **Clap**: CLI argument parsing with domain-specific subcommands.
-//! - **Contracts**: Full integration with AmbientOps Evidence Envelopes 
+//! - **Contracts**: Full integration with AmbientOps Evidence Envelopes
 //!   for verifiable reporting.
 
 #![forbid(unsafe_code)]
 use clap::{Parser, Subcommand};
 use anyhow::Result;
-use serde_json;
 
 mod scanner;
 mod analyzer;
 mod remediation;
 mod types;
 mod tui;
-mod sarif; // SARIF serialization for high-assurance audit trails.
+mod sarif;
 
+/// Hardware Crash Team — hardware diagnostic and remediation CLI.
+///
+/// Identifies zombie PCI devices, driver conflicts, and hardware-induced
+/// crashes. Generates reversible remediation plans.
 #[derive(Parser)]
-#[command(name = "hardware-crash-team")]
+#[command(name = "hardware-crash-team", version, about)]
 struct Cli {
+    /// Subcommand to execute.
     #[command(subcommand)]
     command: Commands,
+
+    /// Enable verbose output for debugging.
+    #[arg(short, long, global = true)]
+    verbose: bool,
 }
 
+/// Available subcommands for the Hardware Crash Team CLI.
 #[derive(Subcommand)]
 enum Commands {
-    /// SCAN: Audits the host hardware state. 
-    /// Supports exporting to `sarif` or `EvidenceEnvelope` formats.
+    /// Audit the host hardware state (PCI devices, BARs, drivers).
+    ///
+    /// Reads sysfs, enriches with lspci, and detects zombie devices,
+    /// partial bindings, unmanaged memory, and other anomalies.
     Scan {
-        #[arg(short, long, default_value = "text")] format: String,
-        #[arg(long)] envelope: bool, // Wrap in contract-conformant envelope.
-        // ... [other flags]
+        /// Output format: text, json, or sarif.
+        #[arg(short, long, default_value = "text")]
+        format: String,
+
+        /// Wrap output in a contract-conformant EvidenceEnvelope.
+        #[arg(long)]
+        envelope: bool,
+
+        /// Write output to a file instead of stdout.
+        #[arg(short, long)]
+        output: Option<std::path::PathBuf>,
     },
 
-    /// DIAGNOSE: Analyzes historical boot logs (`journalctl`) to isolate 
-    /// the specific PCI device responsible for a kernel panic.
+    /// Analyse historical boot logs to isolate crash-causing hardware.
+    ///
+    /// Parses journalctl across multiple boots to find temporal
+    /// correlations between hardware events and kernel panics.
     Diagnose {
-        #[arg(short, long, default_value = "10")] boots: usize,
-        #[arg(short, long)] device: Option<String>, // BDF address (e.g. 01:00.0)
+        /// Number of previous boots to analyse.
+        #[arg(short, long, default_value = "10")]
+        boots: usize,
+
+        /// Filter to a specific PCI device by BDF address (e.g. 01:00.0).
+        #[arg(short, long)]
+        device: Option<String>,
     },
 
-    /// PLAN: Generates a declarative procedure to disable or isolate 
-    /// faulty hardware without physical removal.
+    /// Generate a declarative remediation plan to isolate faulty hardware.
+    ///
+    /// Supports strategies: pci-stub, vfio-pci, dual, power-off,
+    /// disable, unbind. Multi-device plans combine kernel args.
     Plan {
-        #[arg(required = true)] devices: Vec<String>,
-        #[arg(short, long)] strategy: Option<String>, // e.g. "pci-stub", "power-off"
+        /// PCI BDF addresses of devices to remediate (e.g. 01:00.0).
+        #[arg(required = true)]
+        devices: Vec<String>,
+
+        /// Remediation strategy (pci-stub, vfio-pci, dual, power-off, disable, unbind).
+        #[arg(short, long)]
+        strategy: Option<String>,
     },
 
-    /// APPLY: Physically executes a remediation plan (e.g. modifying kernel cmdline).
-    Apply { plan: std::path::PathBuf, #[arg(long)] yes: bool },
+    /// Execute a remediation plan (dry-run by default).
+    ///
+    /// Reads a plan JSON file and prints the commands that would be
+    /// executed. Pass --yes to actually apply changes. Generates a
+    /// receipt for rollback via `undo`.
+    Apply {
+        /// Path to the plan JSON file.
+        plan: std::path::PathBuf,
 
-    /// UNDO: Uses a receipt to restore the system to its pre-remediation state.
-    Undo { receipt: std::path::PathBuf },
+        /// Skip confirmation and execute for real.
+        #[arg(long)]
+        yes: bool,
+    },
 
-    /// STATUS: Quick health overview of the physical PCI topology.
+    /// Reverse a previously applied plan using its receipt.
+    ///
+    /// Reads a receipt JSON generated by `apply` and restores the
+    /// system to its pre-remediation state.
+    Undo {
+        /// Path to the receipt JSON file.
+        receipt: std::path::PathBuf,
+    },
+
+    /// Quick health overview of the physical PCI topology.
+    ///
+    /// Shows device counts, issue summary, and class breakdown
+    /// without the full scan detail.
     Status,
+
+    /// Interactive TUI for hardware diagnostics (requires --features tui).
+    Tui,
 }
 
-/// MAIN ENTRY: Initializes the async runtime and dispatches to 
-/// specialized module runners.
+/// Main entry point: parses CLI arguments and dispatches to the
+/// appropriate module handler.
 fn main() -> Result<()> {
-    // ... [Tracing and CLI parsing logic]
+    // Initialise tracing subscriber for structured logging.
+    tracing_subscriber::fmt()
+        .with_env_filter(
+            tracing_subscriber::EnvFilter::from_default_env()
+        )
+        .init();
+
+    let cli = Cli::parse();
+
     match cli.command {
-        Commands::Scan { .. } => {
-            // EXECUTION: Triggers the physical bus probe.
-            let report = scanner::scan_system(verbose)?;
-            // ... [Reporting and conversion logic]
+        Commands::Scan { format, envelope: _, output } => {
+            let report = scanner::scan_system(cli.verbose)?;
+            let rendered = match format.as_str() {
+                "json" => serde_json::to_string_pretty(&report)?,
+                "sarif" => sarif::format_sarif(&report)?,
+                _ => scanner::format_report(&report, "text")?,
+            };
+
+            if let Some(path) = output {
+                std::fs::write(&path, &rendered)?;
+                println!("Report written to {}", path.display());
+            } else {
+                println!("{rendered}");
+            }
         }
-        // ... [Remaining handlers]
+
+        Commands::Diagnose { boots, device } => {
+            let diagnosis = analyzer::diagnose(boots, device.as_deref())?;
+            analyzer::print_diagnosis(&diagnosis);
+        }
+
+        Commands::Plan { devices, strategy } => {
+            if devices.len() == 1 {
+                let plan = remediation::create_plan(
+                    &devices[0],
+                    strategy.as_deref(),
+                )?;
+                remediation::print_plan(&plan);
+            } else {
+                let multi = remediation::create_multi_plan(
+                    &devices,
+                    strategy.as_deref(),
+                )?;
+                remediation::print_multi_plan(&multi);
+            }
+        }
+
+        Commands::Apply { plan, yes: _ } => {
+            remediation::apply_plan(&plan)?;
+        }
+
+        Commands::Undo { receipt } => {
+            remediation::undo(&receipt)?;
+        }
+
+        Commands::Status => {
+            let report = scanner::scan_system(false)?;
+            scanner::print_status(&report);
+        }
+
+        Commands::Tui => {
+            tui::run()?;
+        }
     }
+
     Ok(())
 }
