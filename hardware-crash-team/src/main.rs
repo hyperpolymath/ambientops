@@ -142,12 +142,26 @@ fn main() -> Result<()> {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::Scan { format, envelope: _, output } => {
+        Commands::Scan { format, envelope, output } => {
             let report = scanner::scan_system(cli.verbose)?;
-            let rendered = match format.as_str() {
-                "json" => serde_json::to_string_pretty(&report)?,
-                "sarif" => sarif::format_sarif(&report)?,
-                _ => scanner::format_report(&report, "text")?,
+
+            let rendered = if envelope {
+                // Wrap scan output in a contract-conformant EvidenceEnvelope.
+                let report_json = serde_json::to_value(&report)?;
+                let hostname = gethostname::gethostname()
+                    .to_string_lossy()
+                    .to_string();
+                let env = ambientops_contracts::conversions::system_report_to_envelope(
+                    &report_json,
+                    &hostname,
+                );
+                serde_json::to_string_pretty(&env)?
+            } else {
+                match format.as_str() {
+                    "json" => serde_json::to_string_pretty(&report)?,
+                    "sarif" => sarif::format_sarif(&report)?,
+                    _ => scanner::format_report(&report, "text")?,
+                }
             };
 
             if let Some(path) = output {

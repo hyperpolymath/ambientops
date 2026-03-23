@@ -22,7 +22,7 @@ defmodule ServiceAutopsy.Collector do
 
   require Logger
 
-  @source "service-autopsy"
+  @source "psa"
   @journal_lines 50
   @envelope_version "1.0.0"
 
@@ -200,7 +200,8 @@ defmodule ServiceAutopsy.Collector do
       if results[:journal] != [] do
         [%{
           "artifact_id" => generate_artifact_id(),
-          "type" => "journal_excerpt",
+          "type" => "log",
+          "path" => "journal/#{unit_name}.log",
           "label" => "Journal entries for #{unit_name}",
           "line_count" => length(results[:journal] || [])
         } | artifacts]
@@ -212,7 +213,8 @@ defmodule ServiceAutopsy.Collector do
       if results[:coredump] != [] do
         [%{
           "artifact_id" => generate_artifact_id(),
-          "type" => "coredump_listing",
+          "type" => "report",
+          "path" => "coredumps/#{unit_name}.report",
           "label" => "Coredumps for #{unit_name}",
           "entry_count" => length(results[:coredump] || [])
         } | artifacts]
@@ -224,7 +226,8 @@ defmodule ServiceAutopsy.Collector do
       if results[:unit_file] != nil do
         [%{
           "artifact_id" => generate_artifact_id(),
-          "type" => "unit_file",
+          "type" => "config",
+          "path" => "units/#{unit_name}",
           "label" => "Unit file for #{unit_name}"
         } | artifacts]
       else
@@ -321,10 +324,22 @@ defmodule ServiceAutopsy.Collector do
   end
 
   defp generate_envelope_id do
-    "autopsy-" <> (:crypto.strong_rand_bytes(8) |> Base.url_encode64(padding: false))
+    generate_uuid()
   end
 
   defp generate_artifact_id do
-    "art-" <> (:crypto.strong_rand_bytes(6) |> Base.url_encode64(padding: false))
+    generate_uuid()
+  end
+
+  # Generate a RFC 4122 v4 UUID from random bytes.
+  defp generate_uuid do
+    <<a::48, _::4, b::12, _::2, c::62>> = :crypto.strong_rand_bytes(16)
+    <<a::48, 4::4, b::12, 2::2, c::62>>
+    |> Base.encode16(case: :lower)
+    |> format_uuid_hex()
+  end
+
+  defp format_uuid_hex(<<a::binary-8, b::binary-4, c::binary-4, d::binary-4, e::binary-12>>) do
+    "#{a}-#{b}-#{c}-#{d}-#{e}"
   end
 end

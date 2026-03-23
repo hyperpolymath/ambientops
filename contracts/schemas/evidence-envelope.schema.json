@@ -28,7 +28,7 @@
       "properties": {
         "tool": {
           "type": "string",
-          "enum": ["big-up", "ambient", "a-and-e", "sysobs", "psa"],
+          "enum": ["big-up", "ambient", "a-and-e", "sysobs", "psa", "hardware-crash-team"],
           "description": "Which tool produced this envelope"
         },
         "tool_version": {
