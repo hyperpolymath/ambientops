@@ -9,8 +9,9 @@
 [Unit]
 Description=Session Sentinel — Multi-AI session health monitor
 Documentation=https://github.com/hyperpolymath/session-sentinel
-After=graphical-session.target dbus.service
+After=graphical-session.target dbus.service dbus.socket
 Wants=dbus.service
+Requires=dbus.socket
 PartOf=graphical-session.target
 
 # Crash rate limiting: allow at most 10 restarts per hour before systemd
@@ -27,6 +28,8 @@ ConditionEnvironment=|WAYLAND_DISPLAY
 
 [Service]
 Type=notify
+# Wait for D-Bus session bus to be fully ready (prevents SIGABRT race — CC-004)
+ExecStartPre=/bin/sleep 3
 ExecStart=%h/.local/bin/session-sentinel-tray --daemon
 ExecReload=/bin/kill -HUP $MAINPID
 
