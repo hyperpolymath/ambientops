@@ -39,7 +39,8 @@ defmodule SystemObservatory.Weather do
     categories = %{
       "disk" => evaluate_disk(metrics),
       "memory" => evaluate_memory(metrics),
-      "cpu" => evaluate_cpu(metrics)
+      "cpu" => evaluate_cpu(metrics),
+      "nvme" => evaluate_nvme()
     }
 
     overall_state = determine_overall_state(categories)
@@ -98,6 +99,21 @@ defmodule SystemObservatory.Weather do
   end
 
   # Category evaluations
+
+  defp evaluate_nvme do
+    # Delegate to NvmeSentinel if it's running, otherwise return calm
+    try do
+      SystemObservatory.NvmeSentinel.weather_category()
+    catch
+      :exit, _ ->
+        %{
+          "state" => "calm",
+          "summary" => "NVMe sentinel not running",
+          "metric_value" => 0,
+          "metric_unit" => "devices"
+        }
+    end
+  end
 
   defp evaluate_disk(metrics) do
     disk_metrics = Enum.filter(metrics, fn m -> String.starts_with?(m.name, "disk_") end)

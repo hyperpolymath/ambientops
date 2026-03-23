@@ -40,6 +40,12 @@ fn main() {
 		'trigger' {
 			run_trigger(remaining[1..])
 		}
+		'boot-guardian' {
+			run_boot_guardian(remaining[1..])
+		}
+		'shutdown-marshal' {
+			run_shutdown_marshal(remaining[1..])
+		}
 		'help', '--help', '-h' {
 			show_help()
 		}
@@ -141,9 +147,11 @@ fn show_help() {
 	println('    ${app_name} trigger [OPTIONS]')
 	println('')
 	println('${c_bold}COMMANDS:${c_reset}')
-	println('    trigger     Create incident bundle and capture diagnostics')
-	println('    help        Show this help message')
-	println('    version     Show version information')
+	println('    trigger          Create incident bundle and capture diagnostics')
+	println('    boot-guardian    Boot health monitoring and loop detection (CC-002, CC-003)')
+	println('    shutdown-marshal Graceful shutdown orchestration (CC-002)')
+	println('    help             Show this help message')
+	println('    version          Show version information')
 	println('')
 	println('${c_bold}OPTIONS (for trigger):${c_reset}')
 	println('    -b, --quick-backup <path>   Run quick backup to destination (opt-in)')

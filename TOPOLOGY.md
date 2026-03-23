@@ -1,6 +1,6 @@
 <!-- SPDX-License-Identifier: PMPL-1.0-or-later -->
 <!-- TOPOLOGY.md — Project architecture map and completion dashboard -->
-<!-- Last updated: 2026-02-19 -->
+<!-- Last updated: 2026-03-23 -->
 
 # AmbientOps — Project Topology
 
@@ -62,23 +62,57 @@ COMPONENT                          STATUS              NOTES
 ─────────────────────────────────  ──────────────────  ─────────────────────────────────
 HOSPITAL DEPARTMENTS
   Ward (observatory)                ████████░░  85%    Metrics and weather stable
-  Emergency Room                    ███████░░░  75%    Panic-safe intake functional
+  Emergency Room (V)                ███████░░░  75%    Panic-safe intake functional
   Operating Room (clinician)        █████░░░░░  55%    Procedure logic refining
-  Hardware Crash Team               ███████░░░  75%    PCI zombie detection active
-  Records (referrals)               ██████░░░░  65%    Bug reporting MCP functional
+  Hardware Crash Team (Rust)        ███████░░░  75%    PCI zombie detection active
+  Records (referrals, Elixir)       ██████░░░░  65%    Bug reporting MCP functional
 
 DATA & CONTRACTS
-  contracts (JSON/Deno)             ████████░░  80%    8 core schemas defined
+  contracts (JSON/Deno)             ████████░░  80%    9 schemas (incl. ambient-payload)
   contracts-rust                    ████████░░  80%    Serde types matching schemas
   composer (Gleam)                  █░░░░░░░░░  10%    Orchestration stubs
 
+SYSTEM TOOLS (ambientops monorepo members)
+  broad-spectrum (ReScript)         ██████░░░░  60%    Link/SEO/accessibility checker
+  cicada                            ██░░░░░░░░  20%    Stub
+  czech-file-knife                  ██░░░░░░░░  20%    File utilities
+  displace                          ██░░░░░░░░  20%    Displacement tool
+  emergency-button                  ██░░░░░░░░  20%    Emergency stop
+  hybrid-automation-router          ██░░░░░░░░  20%    HAR integration
+  nano-aider                        ██░░░░░░░░  20%    Lightweight aider
+  nerdsafe-restart                  ██░░░░░░░░  20%    Safe restart orchestration
+  network-dashboard                 ██░░░░░░░░  20%    Network monitoring
+  network-orchestrator              ██░░░░░░░░  20%    Network automation
+  nick-shells                       ██░░░░░░░░  20%    Shell utilities
+  panoptes                          ██░░░░░░░░  20%    All-seeing monitoring
+  personal-sysadmin                 ██░░░░░░░░  20%    Personal sysadmin scripts
+  reasonably-good-token-vault       ██░░░░░░░░  20%    Token/secret storage
+  session-sentinel (Ephapax WIP)    ███░░░░░░░  30%    Session health — disabled locally
+  slopctl                           ██░░░░░░░░  20%    Slop control
+  system-tools                      ██░░░░░░░░  20%    System utilities
+  total-recall                      ██░░░░░░░░  20%    History/audit
+  total-update                      ██░░░░░░░░  20%    Update orchestration
+  traffic-conditioner               ██░░░░░░░░  20%    Network traffic shaping
+  volumod                           ██░░░░░░░░  20%    Volume management
+
+PLANNED (not yet built)
+  nvme-sentinel                     ░░░░░░░░░░   0%    NVMe SMART monitoring
+  boot-guardian                     ░░░░░░░░░░   0%    Boot health analysis
+  service-autopsy                   ░░░░░░░░░░   0%    Service failure analysis
+  shutdown-marshal                  ░░░░░░░░░░   0%    Shutdown sequencing
+
+PANLL INTEGRATION
+  panll/panels-needed.md            ████████░░  80%    6 panel specs defined
+
 REPO INFRASTRUCTURE
-  Justfile                          ██████████ 100%    Full build/test automation
+  Justfile                          ██████████ 100%    Build/test + planned stubs
   .machine_readable/                ██████████ 100%    STATE.scm, ECOSYSTEM.scm
   Cargo Workspace                   ██████████ 100%    Monorepo management
+  CI Workflows (18)                 ██████████ 100%    All SHA-pinned, SPDX headers
 
 ─────────────────────────────────────────────────────────────────────────────
-OVERALL:                            ███████░░░  ~75%   Core departments operational
+OVERALL:                            ███████░░░  ~70%   Core departments operational
+                                                        Many system-tools at stub stage
 ```
 
 ## Key Dependencies

@@ -96,6 +96,35 @@ build-riscv:
 	@echo "Building for RISC-V..."
 	cross build --target riscv64gc-unknown-linux-gnu
 
+# --- PLANNED COMPONENTS (stubs for future use) ---
+
+# Run nvme-sentinel health check
+nvme-sentinel *ARGS:
+    @echo "nvme-sentinel: NVMe SMART monitoring"
+    @echo "Component not yet built — see panll/panels-needed.md for spec"
+
+# Run boot-guardian boot health analysis
+boot-guardian *ARGS:
+    @echo "boot-guardian: Boot health monitoring"
+    @echo "Component not yet built — see panll/panels-needed.md for spec"
+
+# Run service-autopsy on failed services
+service-autopsy *ARGS:
+    @echo "service-autopsy: Service failure analysis"
+    @echo "Component not yet built — see panll/panels-needed.md for spec"
+
+# Run shutdown-marshal for clean shutdown orchestration
+shutdown-marshal *ARGS:
+    @echo "shutdown-marshal: Shutdown sequencing"
+    @echo "Component not yet built"
+
+# Run session-sentinel session health monitor
+session-sentinel *ARGS:
+    @echo "session-sentinel: Session health monitoring (Ephapax WIP)"
+    @echo "Currently disabled locally — see session-sentinel/ for code"
+
+# --- PRE-COMMIT ---
+
 # Run panic-attacker pre-commit scan
 assail:
     @command -v panic-attack >/dev/null 2>&1 && panic-attack assail . || echo "panic-attack not found — install from https://github.com/hyperpolymath/panic-attacker"

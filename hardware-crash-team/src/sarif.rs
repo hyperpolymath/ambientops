@@ -219,6 +219,8 @@ fn build_rules() -> Vec<ReportingDescriptor> {
         make_rule("HCT007", "BlacklistedButActive", "Blacklisted driver still active", "Kernel driver is blacklisted via modprobe.d but the device remains powered and active.", "error"),
         make_rule("HCT008", "UnmanagedMemory", "Unmanaged BAR memory regions", "PCI BAR memory regions are mapped into the system address space with no driver managing access.", "error"),
         make_rule("HCT009", "PowerStateConflict", "Power state conflict", "Device power state does not match expected state for its driver binding status.", "warning"),
+        make_rule("HCT010", "NvmePcieLinkFailure", "NVMe PCIe link failure", "NVMe device experiencing PCIe link training failures or Advanced Error Reporting (AER) faults. Can cause data loss, I/O hangs, or boot loops if the root port cannot maintain a stable link.", "error"),
+        make_rule("HCT011", "BootLoopDetected", "Boot loop detected", "System has rebooted multiple times within a short window, indicating a hardware or firmware fault preventing stable boot. Often correlated with PCIe link failures (HCT010) or GPU zombie states (HCT001).", "error"),
     ]
 }
 
@@ -251,6 +253,8 @@ fn issue_type_to_rule_id(issue_type: &IssueType) -> &'static str {
         IssueType::BlacklistedButActive => "HCT007",
         IssueType::UnmanagedMemory => "HCT008",
         IssueType::PowerStateConflict => "HCT009",
+        IssueType::NvmePcieLinkFailure => "HCT010",
+        IssueType::BootLoopDetected => "HCT011",
     }
 }
 
@@ -266,6 +270,8 @@ fn issue_type_to_rule_index(issue_type: &IssueType) -> usize {
         IssueType::BlacklistedButActive => 6,
         IssueType::UnmanagedMemory => 7,
         IssueType::PowerStateConflict => 8,
+        IssueType::NvmePcieLinkFailure => 9,
+        IssueType::BootLoopDetected => 10,
     }
 }
 
@@ -414,6 +420,14 @@ mod tests {
             issue_type_to_rule_id(&IssueType::PowerStateConflict),
             "HCT009"
         );
+        assert_eq!(
+            issue_type_to_rule_id(&IssueType::NvmePcieLinkFailure),
+            "HCT010"
+        );
+        assert_eq!(
+            issue_type_to_rule_id(&IssueType::BootLoopDetected),
+            "HCT011"
+        );
     }
 
     #[test]
@@ -424,7 +438,7 @@ mod tests {
             let expected_id = format!("HCT{:03}", i + 1);
             assert_eq!(rule.id, expected_id, "Rule at index {} has wrong ID", i);
         }
-        assert_eq!(rules.len(), 9);
+        assert_eq!(rules.len(), 11);
     }
 
     #[test]
@@ -536,5 +550,45 @@ mod tests {
             val["runs"][0]["invocations"][0]["properties"]["kernelVersion"],
             "6.18.8"
         );
+    }
+
+    #[test]
+    fn test_nvme_pcie_link_failure_rule() {
+        let mut report = empty_report();
+        report.devices.push(device_with_issue(
+            "02:00.0",
+            "144d:a808",
+            IssueType::NvmePcieLinkFailure,
+            IssueSeverity::High,
+        ));
+
+        let log = system_report_to_sarif(&report);
+        assert_eq!(log.runs[0].results.len(), 1);
+
+        let result = &log.runs[0].results[0];
+        assert_eq!(result.rule_id, "HCT010");
+        assert_eq!(result.rule_index, 9);
+        assert_eq!(result.level, "error");
+        assert_eq!(result.properties.pci_slot, "02:00.0");
+        assert_eq!(result.properties.pci_id, "144d:a808");
+    }
+
+    #[test]
+    fn test_boot_loop_detected_rule() {
+        let mut report = empty_report();
+        report.devices.push(device_with_issue(
+            "00:00.0",
+            "8086:0000",
+            IssueType::BootLoopDetected,
+            IssueSeverity::Critical,
+        ));
+
+        let log = system_report_to_sarif(&report);
+        assert_eq!(log.runs[0].results.len(), 1);
+
+        let result = &log.runs[0].results[0];
+        assert_eq!(result.rule_id, "HCT011");
+        assert_eq!(result.rule_index, 10);
+        assert_eq!(result.level, "error");
     }
 }

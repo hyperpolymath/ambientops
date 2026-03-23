@@ -118,6 +118,10 @@ pub enum IssueType {
     UnmanagedMemory,
     /// Power state conflict
     PowerStateConflict,
+    /// NVMe PCIe link failure (CC-003)
+    NvmePcieLinkFailure,
+    /// Boot loop detected (CC-002)
+    BootLoopDetected,
 }
 
 /// Overall system risk assessment
