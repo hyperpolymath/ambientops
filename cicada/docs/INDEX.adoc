@@ -144,7 +144,7 @@ This is the central documentation hub for *CIcaDA* (Palimpsest Crypto Identity),
 | `MAINTAINERS.md`
 
 | link:../LICENSE[License]
-| Palimpsest License v0.4 (PMPL-1.0-or-later)
+| PMPL-1.0-or-later
 | `LICENSE`
 
 | link:../PALIMPSEST.adoc[Palimpsest Philosophy]

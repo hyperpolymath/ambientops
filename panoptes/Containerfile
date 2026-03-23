@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: PMPL-1.0-or-later
 # SPDX-FileCopyrightText: 2025 Jonathan D. A. Jewell <hyperpolymath>
 
 # Panoptes Container Build
@@ -66,5 +66,5 @@ LABEL org.opencontainers.image.title="Panoptes"
 LABEL org.opencontainers.image.description="Local AI-powered file scanner and renamer"
 LABEL org.opencontainers.image.version="1.0.0"
 LABEL org.opencontainers.image.vendor="Jonathan D. A. Jewell"
-LABEL org.opencontainers.image.licenses="MIT"
+LABEL org.opencontainers.image.licenses="PMPL-1.0-or-later"
 LABEL org.opencontainers.image.source="https://gitlab.com/hyperpolymath/panoptes"

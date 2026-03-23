@@ -1,5 +1,5 @@
 = nano-aider Roadmap
-Jonathan D.A. Jewell <jonathan.jewell@gmail.com>
+Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 :toc: macro
 :toc-title: Version Roadmap
 :toclevels: 2

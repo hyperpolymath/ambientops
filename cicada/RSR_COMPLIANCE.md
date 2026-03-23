@@ -309,14 +309,14 @@ Comprehensive security implementation and documentation.
 Proper licensing with dual-license model.
 
 **Evidence**:
-- ✓ LICENSE file: Palimpsest License v0.4 (full text)
+- ✓ LICENSE file: PMPL-1.0-or-later (full text)
 - ✓ Project.toml: License field present
 - ✓ README.md: License badge and reference
 - ✓ CLAUDE.md: License documentation
 - ✓ Code files: Can add SPDX headers (optional)
 
 **License Details**:
-- Primary: Palimpsest License v0.4
+- Primary: PMPL-1.0-or-later
 - Documentation: CC BY 4.0 (mentioned in ai.txt)
 - Dual-licensing: Available for commercial use
 

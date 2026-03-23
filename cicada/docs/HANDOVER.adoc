@@ -96,7 +96,7 @@ ambientops/cicada/
 +-- install.sh                    # Installation script
 +-- justfile                      # Build recipes
 +-- README.adoc                   # User-facing documentation
-+-- LICENSE                       # Palimpsest License v0.4
++-- LICENSE                       # PMPL-1.0-or-later
 ----
 
 == Technical Architecture

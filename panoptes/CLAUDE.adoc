@@ -24,7 +24,7 @@ This document provides context for AI assistants (Claude, GPT, etc.) working wit
 |Rust (primary), Nickel (config), Nix (reproducibility)
 
 |License
-|MIT (SPDX: MIT)
+|PMPL-1.0-or-later
 
 |Compliance
 |RSR Gold
@@ -188,7 +188,7 @@ This project maintains RSR Gold compliance:
 
 === Category 2: Documentation
 * [x] `README.adoc`
-* [x] `LICENSE.txt` (SPDX: MIT)
+* [x] `LICENSE.txt` (SPDX: PMPL-1.0-or-later)
 * [x] `SECURITY.md`
 * [x] `CODE_OF_CONDUCT.adoc`
 * [x] `CONTRIBUTING.adoc`

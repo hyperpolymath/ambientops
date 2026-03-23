@@ -3,7 +3,7 @@ description = "Ada TUI for nano/micro Editor Configuration - Discover and manage
 version = "0.1.0"
 
 authors = ["Jonathan D.A. Jewell"]
-maintainers = ["Jonathan D.A. Jewell <jonathan.jewell@gmail.com>"]
+maintainers = ["Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>"]
 maintainers-logins = ["hyperpolymath"]
 
 licenses = "MIT OR PMPL-1.0-or-later"

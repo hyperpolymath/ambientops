@@ -114,6 +114,6 @@ julia --project=. test/runtests.jl
 
 == License
 
-Palimpsest License v0.4 - see [LICENSE](LICENSE)
+PMPL-1.0-or-later - see [LICENSE](LICENSE)
 
 *Built with Julia | Securing the post-quantum future*
