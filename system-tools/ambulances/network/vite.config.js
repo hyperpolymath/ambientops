@@ -18,5 +18,5 @@ export default defineConfig({
     strictPort: true,
   },
   clearScreen: false,
-  envPrefix: ["VITE_", "TAURI_"],
+  envPrefix: ["VITE_", "GOSSAMER_"],
 })

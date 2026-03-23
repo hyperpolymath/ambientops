@@ -22,7 +22,7 @@ The following files in `.machine_readable/` contain structured project metadata:
 | **ReScript** | Primary application code | Compiles to JS, type-safe |
 | **Deno** | Runtime & package management | Replaces Node/npm/bun |
 | **Rust** | Performance-critical, systems, WASM | Preferred for CLI tools |
-| **Tauri 2.0+** | Mobile apps (iOS/Android) | Rust backend + web UI |
+| **Gossamer** | Desktop webview shell | Replaced Tauri — gossamer-rs bindings |
 | **Dioxus** | Mobile apps (native UI) | Pure Rust, React-like |
 | **Gleam** | Backend services | Runs on BEAM or compiles to JS |
 | **Bash/POSIX Shell** | Scripts, automation | Keep minimal |
@@ -49,14 +49,11 @@ The following files in `.machine_readable/` contain structured project metadata:
 | React Native | Tauri/Dioxus |
 | Flutter/Dart | Tauri/Dioxus |
 
-### Mobile Development
+### Desktop Runtime
 
-**No exceptions for Kotlin/Swift** - use Rust-first approach:
-
-1. **Tauri 2.0+** - Web UI (ReScript) + Rust backend, MIT/Apache-2.0
-2. **Dioxus** - Pure Rust native UI, MIT/Apache-2.0
-
-Both are FOSS with independent governance (no Big Tech).
+**Gossamer** is the desktop webview shell for this project.  The Tauri backend
+was removed in 2026-03.  The Rust backend lives at `src/main.rs` using the
+`gossamer-rs` crate.  ReScript frontend dispatches through `RuntimeBridge.res`.
 
 ### Enforcement Rules
 

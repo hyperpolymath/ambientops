@@ -48,7 +48,7 @@ defmodule SystemObservatory.Weather do
     actions = generate_actions(overall_state, categories)
     trends = calculate_trends(metrics)
 
-    %{
+    weather = %{
       "version" => @version,
       "timestamp" => DateTime.utc_now() |> DateTime.to_iso8601(),
       "state" => Atom.to_string(overall_state),
@@ -63,6 +63,33 @@ defmodule SystemObservatory.Weather do
         "scan_profile" => "continuous"
       }
     }
+
+    # Groove integration: send voice alerts on Watch/Act transitions
+    # and integrity-verified weather reports via Vext.
+    # Advisory only — if no groove targets are available, this is a no-op.
+    notify_groove(overall_state, summary, weather)
+
+    weather
+  end
+
+  # Send groove notifications when weather state warrants it.
+  # Ward principle: voice NEVER executes actions, only informs and gathers input.
+  defp notify_groove(:calm, _summary, weather) do
+    # Calm state: no voice alert, but still send verified report if Vext available.
+    SystemObservatory.Groove.verified_weather(weather)
+    :ok
+  end
+
+  defp notify_groove(:watch, summary, weather) do
+    SystemObservatory.Groove.weather_transition(:calm, :watch, summary)
+    SystemObservatory.Groove.verified_weather(weather)
+    :ok
+  end
+
+  defp notify_groove(:act, summary, weather) do
+    SystemObservatory.Groove.weather_transition(:watch, :act, summary)
+    SystemObservatory.Groove.verified_weather(weather)
+    :ok
   end
 
   @doc """

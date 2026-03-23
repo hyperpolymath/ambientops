@@ -106,7 +106,7 @@ let update = (model: model, msg: msg): (model, cmd) => {
 let executeCmd = (cmd: cmd, dispatch: msg => unit): unit => {
   switch cmd {
   | RunDiagnosticsCmd =>
-    TauriBindings.runDiagnostics()
+    RuntimeBridge.invokeSimple("run_diagnostics")
     ->Promise.then(result => {
       dispatch(DiagnosticsComplete(Ok(result)))
       Promise.resolve()
@@ -122,7 +122,7 @@ let executeCmd = (cmd: cmd, dispatch: msg => unit): unit => {
     ->ignore
 
   | RunRepairCmd(target) =>
-    TauriBindings.runRepair(target)
+    RuntimeBridge.invoke("run_repair", {"target": target})
     ->Promise.then(result => {
       dispatch(RepairComplete(Ok(result)))
       Promise.resolve()
@@ -138,7 +138,7 @@ let executeCmd = (cmd: cmd, dispatch: msg => unit): unit => {
     ->ignore
 
   | CheckPrivilegesCmd =>
-    TauriBindings.checkPrivileges()
+    RuntimeBridge.invokeSimple("check_privileges")
     ->Promise.then(hasPriv => {
       dispatch(PrivilegesChecked(hasPriv))
       Promise.resolve()
@@ -150,7 +150,7 @@ let executeCmd = (cmd: cmd, dispatch: msg => unit): unit => {
     ->ignore
 
   | LoadPlatformInfoCmd =>
-    TauriBindings.getPlatformInfo()
+    RuntimeBridge.invokeSimple("get_platform_info")
     ->Promise.then(platform => {
       dispatch(PlatformInfoLoaded(platform))
       Promise.resolve()

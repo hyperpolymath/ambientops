@@ -3,4 +3,3 @@
 # See: https://asdf-vm.com/
 
 rust nightly
-just 1.36.0

@@ -5,9 +5,6 @@
 # Primary runtime
 deno 2.6.6
 
-# Build tools
-just 1.30.0
-
 # Rust (managed via asdf-rust, nightly channel)
 rust nightly
 

@@ -5,10 +5,8 @@
   "tasks": {
     "dev": "deno run --allow-read --allow-write --allow-net --allow-run npm:vite",
     "build": "deno run --allow-read --allow-write --allow-run npm:rescript build && deno run --allow-read --allow-write --allow-run npm:vite build",
-    "tauri:dev": "deno task dev & cargo tauri dev",
-    "tauri:build": "deno task build && cargo tauri build",
-    "gossamer:dev": "deno task dev & gossamer dev --config gossamer.conf.json",
-    "gossamer:build": "deno task build && gossamer build --config gossamer.conf.json",
+    "gossamer:dev": "deno task dev & cargo run",
+    "gossamer:build": "deno task build && cargo build --release",
     "rescript": "^12.0.0",
     "format": "deno fmt src/rescript"
   },
