@@ -213,21 +213,128 @@ defmodule HAR.IPFS.Node do
     end
   end
 
-  # Daemon interaction stubs - these will connect to the real IPFS HTTP API
-  # when the daemon is available. For now they return errors to trigger fallback.
+  # --- IPFS Daemon HTTP API Integration ---
+  #
+  # Uses Erlang's built-in :httpc client (from :inets) to avoid adding
+  # external HTTP dependencies. The IPFS HTTP API uses POST for all
+  # endpoints and multipart/form-data for file uploads.
 
-  defp store_to_daemon(_content, _endpoint) do
-    # TODO: POST to /api/v0/add on the IPFS daemon
-    {:error, :daemon_not_connected}
+  @doc false
+  @spec store_to_daemon(binary(), String.t()) :: {:ok, String.t()} | {:error, term()}
+  defp store_to_daemon(content, endpoint) do
+    ensure_inets_started()
+
+    # IPFS /api/v0/add expects multipart/form-data with the file content.
+    # Build a minimal multipart body with a single "file" part.
+    boundary = "----ElixirIPFS#{System.unique_integer([:positive])}"
+
+    body =
+      "--#{boundary}\r\n" <>
+        "Content-Disposition: form-data; name=\"file\"; filename=\"config\"\r\n" <>
+        "Content-Type: application/octet-stream\r\n" <>
+        "\r\n" <>
+        content <>
+        "\r\n" <>
+        "--#{boundary}--\r\n"
+
+    url = String.to_charlist("#{endpoint}/api/v0/add")
+    content_type = String.to_charlist("multipart/form-data; boundary=#{boundary}")
+
+    request = {url, [], content_type, body}
+
+    case :httpc.request(:post, request, [{:timeout, 10_000}], []) do
+      {:ok, {{_http_ver, 200, _reason}, _headers, response_body}} ->
+        # IPFS returns JSON: {"Name":"config","Hash":"Qm...","Size":"..."}
+        parse_add_response(to_string(response_body))
+
+      {:ok, {{_http_ver, status, _reason}, _headers, response_body}} ->
+        Logger.warning(
+          "IPFS store failed (HTTP #{status}): #{String.slice(to_string(response_body), 0..200)}"
+        )
+
+        {:error, {:ipfs_http_error, status}}
+
+      {:error, reason} ->
+        Logger.debug("IPFS store connection failed: #{inspect(reason)}")
+        {:error, {:connection_failed, reason}}
+    end
   end
 
-  defp retrieve_from_daemon(_cid, _endpoint) do
-    # TODO: POST to /api/v0/cat on the IPFS daemon
-    {:error, :daemon_not_connected}
+  @doc false
+  @spec retrieve_from_daemon(String.t(), String.t()) :: {:ok, binary()} | {:error, term()}
+  defp retrieve_from_daemon(cid, endpoint) do
+    ensure_inets_started()
+
+    # IPFS /api/v0/cat takes the CID as a query parameter "arg".
+    url = String.to_charlist("#{endpoint}/api/v0/cat?arg=#{cid}")
+
+    request = {url, [], ~c"application/octet-stream", []}
+
+    case :httpc.request(:post, request, [{:timeout, 30_000}], []) do
+      {:ok, {{_http_ver, 200, _reason}, _headers, response_body}} ->
+        {:ok, to_string(response_body)}
+
+      {:ok, {{_http_ver, status, _reason}, _headers, response_body}} ->
+        Logger.warning(
+          "IPFS retrieve failed (HTTP #{status}): #{String.slice(to_string(response_body), 0..200)}"
+        )
+
+        {:error, {:ipfs_http_error, status}}
+
+      {:error, reason} ->
+        Logger.debug("IPFS retrieve connection failed: #{inspect(reason)}")
+        {:error, {:connection_failed, reason}}
+    end
   end
 
-  defp pin_on_daemon(_cid, _endpoint) do
-    # TODO: POST to /api/v0/pin/add on the IPFS daemon
-    {:error, :daemon_not_connected}
+  @doc false
+  @spec pin_on_daemon(String.t(), String.t()) :: :ok | {:error, term()}
+  defp pin_on_daemon(cid, endpoint) do
+    ensure_inets_started()
+
+    # IPFS /api/v0/pin/add takes the CID as a query parameter "arg".
+    url = String.to_charlist("#{endpoint}/api/v0/pin/add?arg=#{cid}")
+
+    request = {url, [], ~c"application/octet-stream", []}
+
+    case :httpc.request(:post, request, [{:timeout, 30_000}], []) do
+      {:ok, {{_http_ver, 200, _reason}, _headers, _response_body}} ->
+        :ok
+
+      {:ok, {{_http_ver, status, _reason}, _headers, response_body}} ->
+        Logger.warning(
+          "IPFS pin failed (HTTP #{status}): #{String.slice(to_string(response_body), 0..200)}"
+        )
+
+        {:error, {:ipfs_http_error, status}}
+
+      {:error, reason} ->
+        Logger.debug("IPFS pin connection failed: #{inspect(reason)}")
+        {:error, {:connection_failed, reason}}
+    end
+  end
+
+  # Ensures the :inets and :ssl applications are started, which are
+  # required by :httpc. Safe to call multiple times (idempotent).
+  @spec ensure_inets_started() :: :ok
+  defp ensure_inets_started do
+    :inets.start()
+    :ssl.start()
+    :ok
+  end
+
+  # Parses the JSON response from IPFS /api/v0/add.
+  # Extracts the "Hash" field which is the CID of the stored content.
+  # Uses a simple regex to avoid requiring a JSON library dependency.
+  @spec parse_add_response(String.t()) :: {:ok, String.t()} | {:error, term()}
+  defp parse_add_response(body) do
+    case Regex.run(~r/"Hash"\s*:\s*"([^"]+)"/, body) do
+      [_, cid] ->
+        {:ok, cid}
+
+      nil ->
+        Logger.warning("IPFS add response missing Hash field: #{String.slice(body, 0..200)}")
+        {:error, :invalid_response}
+    end
   end
 end
