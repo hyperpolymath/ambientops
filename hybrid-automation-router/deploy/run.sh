@@ -105,7 +105,7 @@ cmd_up() {
     cd "$PROJECT_ROOT"
     $COMPOSE -f deploy/compose.yaml up -d
     log_ok "HAR cluster started"
-    log_info "Web interface: http://localhost:4000"
+    log_info "Web interface: http://localhost:4050"
 }
 
 cmd_down() {

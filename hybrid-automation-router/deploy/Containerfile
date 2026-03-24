@@ -73,21 +73,21 @@ COPY --chown=har:har examples ./examples/
 USER har
 
 # Expose ports
-# - 4000: Phoenix web interface (future)
+# - 4050: Phoenix web interface (future)
 # - 4369: EPMD (Erlang Port Mapper Daemon)
 # - 9100-9155: Distributed Erlang
-EXPOSE 4000 4369 9100-9155
+EXPOSE 4050 4369 9100-9155
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:4000/health || exit 1
+    CMD curl -f http://localhost:4050/health || exit 1
 
 # Environment
 ENV RELEASE_COOKIE=har_cluster_cookie \
     RELEASE_NODE=har@127.0.0.1 \
     PHX_HOST=localhost \
     PHX_SERVER=true \
-    PORT=4000
+    PORT=4050
 
 # Entrypoint
 ENTRYPOINT ["bin/har"]

@@ -104,7 +104,7 @@ end
 ```elixir
 # Device advertises via multicast DNS
 # _har._tcp.local. PTR smart-light-5e._har._tcp.local.
-# smart-light-5e._har._tcp.local. SRV 0 0 4000 2001:db8:2:0001::5e
+# smart-light-5e._har._tcp.local. SRV 0 0 4050 2001:db8:2:0001::5e
 # smart-light-5e._har._tcp.local. TXT "type=smart_light" "fw=1.2.3"
 ```
 
@@ -216,7 +216,7 @@ end
 #include "har_agent.h"
 
 void setup() {
-  har_connect("2001:db8:4:0001::1", 4000, cert, key);
+  har_connect("2001:db8:4:0001::1", 4050, cert, key);
 }
 
 void loop() {

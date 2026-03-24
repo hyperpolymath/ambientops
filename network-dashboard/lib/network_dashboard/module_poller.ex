@@ -38,7 +38,7 @@ defmodule NetworkDashboard.ModulePoller do
   end
 
   defp fetch_modules do
-    orchestrator_url = System.get_env("ORCHESTRATOR_URL", "http://localhost:4000")
+    orchestrator_url = System.get_env("ORCHESTRATOR_URL", "http://localhost:4050")
 
     case Req.get("#{orchestrator_url}/api/modules") do
       {:ok, %{status: 200, body: body}} when is_list(body) ->

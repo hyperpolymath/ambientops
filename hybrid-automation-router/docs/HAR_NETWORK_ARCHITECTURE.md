@@ -379,7 +379,7 @@ metadata:
     app: har
 spec:
   ports:
-  - port: 4000
+  - port: 4050
     name: http
   - port: 9100
     name: epmd
@@ -415,7 +415,7 @@ spec:
         - name: RELEASE_NODE
           value: "har@$(POD_IP)"
         ports:
-        - containerPort: 4000
+        - containerPort: 4050
           name: http
         - containerPort: 9100
           name: epmd

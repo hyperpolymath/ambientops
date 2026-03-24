@@ -27,7 +27,7 @@ if config_env() == :prod do
 
   # Web endpoint
   config :har, HAR.Web.Endpoint,
-    http: [port: String.to_integer(System.get_env("PORT", "4000"))],
+    http: [port: String.to_integer(System.get_env("PORT", "4050"))],
     url: [host: System.get_env("HOST", "localhost")],
     secret_key_base: System.fetch_env!("SECRET_KEY_BASE")
 end

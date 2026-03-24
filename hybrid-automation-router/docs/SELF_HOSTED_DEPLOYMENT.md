@@ -173,7 +173,7 @@ har_podman_container:
     - name: har-node
     - image: har:latest
     - ports:
-      - "4000:4000"
+      - "4000:4050"
       - "9100-9199:9100-9199"
     - environment:
       - RELEASE_NODE: "har@{{ grains['fqdn'] }}"
@@ -256,7 +256,7 @@ COPY --from=builder --chown=har:har /app/_build/prod/rel/har ./
 
 USER har
 
-EXPOSE 4000 9100-9199
+EXPOSE 4050 9100-9199
 
 CMD ["/app/bin/har", "start"]
 ```
@@ -325,9 +325,9 @@ backend har_nodes
     option httpchk GET /health
     http-check expect status 200
 
-    server har1 10.0.1.10:4000 check ssl verify required ca-file /etc/haproxy/certs/ca.crt
-    server har2 10.0.1.11:4000 check ssl verify required ca-file /etc/haproxy/certs/ca.crt
-    server har3 10.0.1.12:4000 check ssl verify required ca-file /etc/haproxy/certs/ca.crt
+    server har1 10.0.1.10:4050 check ssl verify required ca-file /etc/haproxy/certs/ca.crt
+    server har2 10.0.1.11:4050 check ssl verify required ca-file /etc/haproxy/certs/ca.crt
+    server har3 10.0.1.12:4050 check ssl verify required ca-file /etc/haproxy/certs/ca.crt
 ```
 
 **Deploy HAProxy with Salt:**
@@ -484,9 +484,9 @@ scrape_configs:
   - job_name: 'har'
     static_configs:
       - targets:
-        - '10.0.1.10:4000'
-        - '10.0.1.11:4000'
-        - '10.0.1.12:4000'
+        - '10.0.1.10:4050'
+        - '10.0.1.11:4050'
+        - '10.0.1.12:4050'
 
   - job_name: 'ipfs'
     static_configs:
@@ -586,7 +586,7 @@ salt 'haproxy*' cmd.run "echo 'disable server har_nodes/har3' | socat stdio /var
 salt 'har3.local' cmd.run 'podman stop har-node'
 
 # Remove from cluster
-salt 'har1.local' cmd.run 'curl -X POST http://localhost:4000/cluster/leave/har3@node3.local'
+salt 'har1.local' cmd.run 'curl -X POST http://localhost:4050/cluster/leave/har3@node3.local'
 
 # Remove from Salt
 salt-key -d har3.local
@@ -636,7 +636,7 @@ salt-key -d har3.local
 
 ```bash
 # Allow HAR API (TLS only)
-firewall-cmd --permanent --add-port=4000/tcp
+firewall-cmd --permanent --add-port=4050/tcp
 
 # Allow Erlang distribution (cluster only)
 firewall-cmd --permanent --add-rich-rule='rule family="ipv4" source address="10.0.1.0/24" port port="9100-9199" protocol="tcp" accept'

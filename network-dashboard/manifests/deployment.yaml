@@ -22,14 +22,14 @@ spec:
         - name: phoenix
           image: ghcr.io/hyperpolymath/network-dashboard:latest
           ports:
-            - containerPort: 4000
+            - containerPort: 4050
               name: http
               protocol: TCP
           env:
             - name: PHX_HOST
               value: "network-dashboard.flatracoon-dashboard.svc.cluster.local"
             - name: PORT
-              value: "4000"
+              value: "4050"
             - name: SECRET_KEY_BASE
               valueFrom:
                 secretKeyRef:

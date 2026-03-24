@@ -11,7 +11,7 @@ config :har,
 
 # Phoenix endpoint configuration for development
 config :har, HARWeb.Endpoint,
-  http: [ip: {127, 0, 0, 1}, port: 4000],
+  http: [ip: {127, 0, 0, 1}, port: 4050],
   check_origin: false,
   code_reloader: true,
   debug_errors: true,

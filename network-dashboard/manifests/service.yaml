@@ -13,6 +13,6 @@ spec:
     app.kubernetes.io/name: network-dashboard
   ports:
     - name: http
-      port: 4000
+      port: 4050
       targetPort: http
       protocol: TCP

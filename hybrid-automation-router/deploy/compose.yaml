@@ -26,10 +26,10 @@ services:
       - HAR_CLUSTER_NODES=har@har-node2,har@har-node3
       - PHX_HOST=${PHX_HOST:-localhost}
       - PHX_SERVER=true
-      - PORT=4000
+      - PORT=4050
       - SECRET_KEY_BASE=${SECRET_KEY_BASE:-generate_with_mix_phx_gen_secret}
     ports:
-      - "4000:4000"    # Web interface
+      - "4050:4050"    # Web interface
       - "4369:4369"    # EPMD
     networks:
       - har-network
@@ -37,7 +37,7 @@ services:
       - har-data:/app/data
       - ./routing_table.yaml:/app/priv/routing_table.yaml:ro
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:4050/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -67,7 +67,7 @@ services:
       - RELEASE_COOKIE=${HAR_COOKIE:-har_secure_cookie_change_me}
       - HAR_CLUSTER_NODES=har@har-node1,har@har-node3
       - PHX_SERVER=true
-      - PORT=4000
+      - PORT=4050
     networks:
       - har-network
     volumes:
@@ -97,7 +97,7 @@ services:
       - RELEASE_COOKIE=${HAR_COOKIE:-har_secure_cookie_change_me}
       - HAR_CLUSTER_NODES=har@har-node1,har@har-node2
       - PHX_SERVER=true
-      - PORT=4000
+      - PORT=4050
     networks:
       - har-network
     volumes:

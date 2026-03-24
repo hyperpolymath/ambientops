@@ -101,10 +101,10 @@
             Env = [
               "RELEASE_COOKIE=har_cluster_cookie"
               "PHX_SERVER=true"
-              "PORT=4000"
+              "PORT=4050"
             ];
             ExposedPorts = {
-              "4000/tcp" = {};
+              "4050/tcp" = {};
               "4369/tcp" = {};
             };
             User = "1000:1000";
