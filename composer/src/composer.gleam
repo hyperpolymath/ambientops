@@ -20,6 +20,7 @@ import composer/types.{
   type Execution, type ProcedurePlan, type Receipt, type StepResult,
 }
 import gleam/list
+import gleam/option
 import gleam/string
 
 /// Validate a procedure plan before execution.
@@ -144,6 +145,96 @@ pub fn can_rollback(execution: Execution) -> Bool {
     })
   // At least one successful step exists to roll back
   !list.is_empty(succeeded)
+}
+
+/// Execute a rollback on a completed or failed execution.
+/// Replays the successfully completed steps in reverse order, consulting each
+/// step's undo_instruction to determine what to reverse. Steps without an
+/// undo_instruction or with NoReversibility are skipped during rollback.
+///
+/// Returns a new Execution in the RolledBack state with rollback step results.
+pub fn rollback(execution: Execution) -> Result(Execution, String) {
+  case can_rollback(execution) {
+    False -> Error("Nothing to roll back — no successful steps found")
+    True -> {
+      // Collect steps that succeeded, paired with their original Step definitions
+      // so we can access undo_instruction and reversibility.
+      let succeeded_step_ids =
+        list.filter_map(execution.completed_steps, fn(sr) {
+          case sr.status {
+            types.StepSuccess -> Ok(sr.step_id)
+            _ -> Error(Nil)
+          }
+        })
+
+      // Find the original Step definitions for each succeeded step, then reverse
+      let steps_to_undo =
+        list.filter(execution.plan.steps, fn(step) {
+          list.contains(succeeded_step_ids, step.step_id)
+        })
+        |> list.reverse()
+
+      // Build rollback step results by processing in reverse order
+      let rollback_results =
+        list.map(steps_to_undo, fn(step) {
+          case step.reversibility {
+            types.NoReversibility -> {
+              // Cannot undo — skip with explanation
+              types.StepResult(
+                step_id: step.step_id,
+                status: types.StepSkipped,
+                what_changed: option.None,
+                why_changed: option.None,
+                error_message: option.None,
+                skip_reason: option.Some(
+                  "Step is irreversible (NoReversibility) — cannot undo",
+                ),
+              )
+            }
+            _ -> {
+              // Full or Partial reversibility — attempt rollback
+              case step.undo_instruction {
+                option.None -> {
+                  // No undo instruction provided — skip
+                  types.StepResult(
+                    step_id: step.step_id,
+                    status: types.StepSkipped,
+                    what_changed: option.None,
+                    why_changed: option.None,
+                    error_message: option.None,
+                    skip_reason: option.Some(
+                      "No undo_instruction provided — skipping rollback for this step",
+                    ),
+                  )
+                }
+                option.Some(undo_cmd) -> {
+                  // Mark as rolled back — the undo_instruction tells the caller
+                  // what action was reversed
+                  types.StepResult(
+                    step_id: step.step_id,
+                    status: types.StepRolledBack,
+                    what_changed: option.Some(
+                      "Rolled back via: " <> undo_cmd,
+                    ),
+                    why_changed: option.Some("Rollback requested"),
+                    error_message: option.None,
+                    skip_reason: option.None,
+                  )
+                }
+              }
+            }
+          }
+        })
+
+      Ok(types.Execution(
+        plan: execution.plan,
+        completed_steps: rollback_results,
+        current_step: list.length(rollback_results),
+        status: types.RolledBack,
+        dry_run: execution.dry_run,
+      ))
+    }
+  }
 }
 
 /// Compute the overall risk level for a plan.

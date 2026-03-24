@@ -37,6 +37,7 @@ pub fn run() -> Int {
     ["orchestrate", plan_path] -> cmd_orchestrate(plan_path, False)
     ["dry-run", plan_path] -> cmd_orchestrate(plan_path, True)
     ["validate", plan_path] -> cmd_validate(plan_path)
+    ["rollback", plan_path] -> cmd_rollback(plan_path)
     ["version"] -> cmd_version()
     ["help"] -> cmd_help()
     ["--help"] -> cmd_help()
@@ -67,6 +68,7 @@ fn cmd_help() -> Int {
         "  composer orchestrate <plan.json>   Execute a procedure plan",
         "  composer dry-run <plan.json>       Preview without mutations",
         "  composer validate <plan.json>      Validate plan structure",
+        "  composer rollback <plan.json>      Roll back a previously executed plan",
         "  composer version                   Show version",
         "  composer help                      Show this help",
         "",
@@ -224,6 +226,122 @@ fn cmd_orchestrate(plan_path: String, dry_run: Bool) -> Int {
             types.Completed -> exit_success
             types.Failed -> exit_failure
             _ -> exit_success
+          }
+        }
+      }
+    }
+  }
+}
+
+/// Roll back a previously executed plan.
+/// Reads the plan, reconstructs the execution as if all steps succeeded
+/// (since the original execution completed), then reverses each step using
+/// its undo_instruction in reverse order.
+///
+/// Steps with NoReversibility or missing undo_instruction are skipped.
+/// Outputs a rollback receipt to stdout.
+fn cmd_rollback(plan_path: String) -> Int {
+  io.println_error("Composer: rollback — reading " <> plan_path)
+
+  case read_plan(plan_path) {
+    Error(msg) -> {
+      io.println_error("Error: " <> msg)
+      exit_failure
+    }
+    Ok(plan) -> {
+      case composer.validate_plan(plan) {
+        Error(msg) -> {
+          io.println_error("Validation failed: " <> msg)
+          exit_failure
+        }
+        Ok(validated_plan) -> {
+          // Check plan-level reversibility
+          case validated_plan.overall_reversibility {
+            types.NoReversibility -> {
+              io.println_error(
+                "Error: Plan is marked as irreversible (NoReversibility) — cannot roll back",
+              )
+              exit_failure
+            }
+            _ -> {
+              // Reconstruct the execution as if all steps succeeded
+              // (simulating the state after a completed orchestrate run)
+              let exec =
+                list.fold(
+                  validated_plan.steps,
+                  composer.begin_execution(validated_plan),
+                  fn(acc, step) {
+                    let result =
+                      types.StepResult(
+                        step_id: step.step_id,
+                        status: types.StepSuccess,
+                        what_changed: option.Some(
+                          "Executed " <> codec.encode_step_action(step.action),
+                        ),
+                        why_changed: option.Some("Per procedure plan"),
+                        error_message: option.None,
+                        skip_reason: option.None,
+                      )
+                    composer.advance(acc, result)
+                  },
+                )
+
+              // Perform the rollback
+              case composer.rollback(exec) {
+                Error(msg) -> {
+                  io.println_error("Rollback failed: " <> msg)
+                  exit_failure
+                }
+                Ok(rolled_back_exec) -> {
+                  // Report each rollback step to stderr
+                  let reversed_steps =
+                    list.filter(validated_plan.steps, fn(step) {
+                      list.any(rolled_back_exec.completed_steps, fn(sr) {
+                        sr.step_id == step.step_id
+                      })
+                    })
+                    |> list.reverse()
+
+                  list.each(reversed_steps, fn(step) {
+                    let matching_result =
+                      list.find(rolled_back_exec.completed_steps, fn(sr) {
+                        sr.step_id == step.step_id
+                      })
+                    case matching_result {
+                      Ok(sr) -> {
+                        let status_label = codec.encode_step_status(sr.status)
+                        io.println_error(
+                          "  [rollback] "
+                          <> step.step_id
+                          <> " — "
+                          <> step.title
+                          <> " → "
+                          <> status_label,
+                        )
+                        case sr.what_changed {
+                          option.Some(desc) ->
+                            io.println_error("      " <> desc)
+                          option.None -> Nil
+                        }
+                        case sr.skip_reason {
+                          option.Some(reason) ->
+                            io.println_error("      Reason: " <> reason)
+                          option.None -> Nil
+                        }
+                      }
+                      Error(_) -> Nil
+                    }
+                  })
+
+                  // Generate and output receipt
+                  let receipt = composer.generate_receipt(rolled_back_exec)
+                  let receipt_json = codec.receipt_to_json(receipt)
+                  io.println(receipt_json)
+                  io.println_error(composer.receipt_summary(receipt))
+                  exit_success
+                }
+              }
+            }
           }
         }
       }

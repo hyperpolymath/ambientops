@@ -12,9 +12,9 @@
 import composer
 import composer/types.{
   Completed, Custom, DeleteFile, Expert, Full, Guided,
-  InProgress, Pending, ProcedurePlan,
-  Safe, StartService, Step, StepFailed, StepResult, StepSkipped,
-  StepSuccess, StepTarget,
+  InProgress, NoReversibility, Pending, ProcedurePlan,
+  RolledBack, Safe, StartService, Step, StepFailed, StepRolledBack,
+  StepResult, StepSkipped, StepSuccess, StepTarget,
 }
 import gleam/list
 import gleam/option.{None, Some}
@@ -344,6 +344,189 @@ pub fn cannot_rollback_pending_test() {
   let plan = make_plan([make_step("s1", 1, Custom)])
   let exec = composer.begin_execution(plan)
   composer.can_rollback(exec) |> should.equal(False)
+}
+
+// ---------------------------------------------------------------------------
+// Rollback execution tests
+// ---------------------------------------------------------------------------
+
+pub fn rollback_reverses_successful_steps_test() {
+  let step1 =
+    Step(
+      ..make_step("s1", 1, DeleteFile),
+      undo_instruction: Some("restore /tmp/s1.bak"),
+      reversibility: Full,
+    )
+  let step2 =
+    Step(
+      ..make_step("s2", 2, Custom),
+      undo_instruction: Some("undo custom action"),
+      reversibility: Full,
+    )
+  let plan = make_plan([step1, step2])
+  let exec =
+    composer.begin_execution(plan)
+    |> composer.advance(success_result("s1"))
+    |> composer.advance(success_result("s2"))
+
+  let result = composer.rollback(exec)
+  result |> should.be_ok()
+  let rolled_back = case result {
+    Ok(e) -> e
+    Error(_) -> panic as "unexpected error"
+  }
+  rolled_back.status |> should.equal(RolledBack)
+  // Both steps should have rollback results
+  rolled_back.completed_steps |> list.length() |> should.equal(2)
+  // Steps are processed in reverse order: s2 first, then s1
+  case rolled_back.completed_steps {
+    [first, second] -> {
+      first.step_id |> should.equal("s2")
+      first.status |> should.equal(StepRolledBack)
+      second.step_id |> should.equal("s1")
+      second.status |> should.equal(StepRolledBack)
+    }
+    _ -> panic as "expected exactly 2 rollback results"
+  }
+}
+
+pub fn rollback_skips_irreversible_steps_test() {
+  let step1 =
+    Step(
+      ..make_step("s1", 1, DeleteFile),
+      undo_instruction: Some("restore file"),
+      reversibility: Full,
+    )
+  let step2 =
+    Step(
+      ..make_step("s2", 2, Custom),
+      reversibility: NoReversibility,
+    )
+  let plan = make_plan([step1, step2])
+  let exec =
+    composer.begin_execution(plan)
+    |> composer.advance(success_result("s1"))
+    |> composer.advance(success_result("s2"))
+
+  let result = composer.rollback(exec)
+  result |> should.be_ok()
+  let rolled_back = case result {
+    Ok(e) -> e
+    Error(_) -> panic as "unexpected error"
+  }
+  // s2 should be skipped (irreversible), s1 should be rolled back
+  case rolled_back.completed_steps {
+    [first, second] -> {
+      // Reverse order: s2 first (skipped), then s1 (rolled back)
+      first.step_id |> should.equal("s2")
+      first.status |> should.equal(StepSkipped)
+      second.step_id |> should.equal("s1")
+      second.status |> should.equal(StepRolledBack)
+    }
+    _ -> panic as "expected exactly 2 rollback results"
+  }
+}
+
+pub fn rollback_skips_steps_without_undo_instruction_test() {
+  let step1 =
+    Step(
+      ..make_step("s1", 1, DeleteFile),
+      undo_instruction: None,
+      reversibility: Full,
+    )
+  let plan = make_plan([step1])
+  let exec =
+    composer.begin_execution(plan)
+    |> composer.advance(success_result("s1"))
+
+  let result = composer.rollback(exec)
+  result |> should.be_ok()
+  let rolled_back = case result {
+    Ok(e) -> e
+    Error(_) -> panic as "unexpected error"
+  }
+  case rolled_back.completed_steps {
+    [sr] -> {
+      sr.step_id |> should.equal("s1")
+      sr.status |> should.equal(StepSkipped)
+    }
+    _ -> panic as "expected exactly 1 rollback result"
+  }
+}
+
+pub fn rollback_fails_when_no_successes_test() {
+  let plan = make_plan([make_step("s1", 1, Custom)])
+  let exec =
+    composer.begin_execution(plan)
+    |> composer.advance(failure_result("s1", "Crash"))
+  composer.rollback(exec)
+  |> should.be_error()
+  |> should.equal("Nothing to roll back — no successful steps found")
+}
+
+pub fn rollback_fails_on_pending_execution_test() {
+  let plan = make_plan([make_step("s1", 1, Custom)])
+  let exec = composer.begin_execution(plan)
+  composer.rollback(exec)
+  |> should.be_error()
+}
+
+pub fn rollback_partial_execution_only_reverses_successes_test() {
+  let step1 =
+    Step(
+      ..make_step("s1", 1, DeleteFile),
+      undo_instruction: Some("restore s1"),
+      reversibility: Full,
+    )
+  let step2 =
+    Step(
+      ..make_step("s2", 2, StartService),
+      undo_instruction: Some("stop service"),
+      reversibility: Full,
+    )
+  let plan = make_plan([step1, step2])
+  // Only s1 succeeded, s2 failed
+  let exec =
+    composer.begin_execution(plan)
+    |> composer.advance(success_result("s1"))
+    |> composer.advance(failure_result("s2", "Permission denied"))
+
+  let result = composer.rollback(exec)
+  result |> should.be_ok()
+  let rolled_back = case result {
+    Ok(e) -> e
+    Error(_) -> panic as "unexpected error"
+  }
+  // Only s1 should appear in rollback results (s2 failed, not rolled back)
+  rolled_back.completed_steps |> list.length() |> should.equal(1)
+  case rolled_back.completed_steps {
+    [sr] -> {
+      sr.step_id |> should.equal("s1")
+      sr.status |> should.equal(StepRolledBack)
+    }
+    _ -> panic as "expected exactly 1 rollback result"
+  }
+}
+
+pub fn rollback_receipt_has_rolled_back_status_test() {
+  let step1 =
+    Step(
+      ..make_step("s1", 1, DeleteFile),
+      undo_instruction: Some("restore file"),
+      reversibility: Full,
+    )
+  let plan = make_plan([step1])
+  let exec =
+    composer.begin_execution(plan)
+    |> composer.advance(success_result("s1"))
+  let result = composer.rollback(exec)
+  let rolled_back = case result {
+    Ok(e) -> e
+    Error(_) -> panic as "unexpected error"
+  }
+  let receipt = composer.generate_receipt(rolled_back)
+  receipt.status |> should.equal("rolled_back")
+  receipt.plan_id |> should.equal("plan-001")
 }
 
 // ---------------------------------------------------------------------------
