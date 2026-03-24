@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: MPL-2.0
+# SPDX-License-Identifier: PMPL-1.0-or-later
 defmodule HARWeb.Router do
   @moduledoc """
   Phoenix router for HAR web interface.
@@ -20,6 +20,8 @@ defmodule HARWeb.Router do
 
   pipeline :api do
     plug(:accepts, ["json"])
+    plug(HAR.Security.RateLimitPlug)
+    plug(HAR.Security.ApiKeyPlug)
   end
 
   scope "/", HARWeb do
