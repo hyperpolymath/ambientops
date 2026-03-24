@@ -1,15 +1,101 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-FileCopyrightText: 2026 Jonathan D.A. Jewell (hyperpolymath)
+#
+# 0-AI-MANIFEST.a2ml — Universal AI Agent Entry Point
+# AmbientOps — Hospital-model operations framework (hybrid monorepo)
+#
+# READ THIS FILE FIRST. This is the canonical entry point for all AI agents.
 
-# AI Assistant Instructions
+[manifest]
+version = "1.1"
+project = "ambientops"
+type = "operations-framework"
+license = "PMPL-1.0-or-later"
+author = "Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>"
+repo = "https://github.com/hyperpolymath/ambientops"
 
-## Repository Focus
-- `rsr-template-repo` is treated as a Rhodium Standard Repository; obey the Rhodium policies, maintain `.bot_directives`, and keep `.machines_readable/6scm/` authoritative.
-- Prefer to keep generated files out of source control, and regenerate them with the documented commands before committing.
+[context-tiers]
+# Tier 0 (always load): This file + .claude/CLAUDE.md — orientation only
+# Tier 1 (load if working on code): README.adoc, EXPLAINME.adoc, Justfile, Cargo.toml
+# Tier 2 (load on demand): .machine_readable/6a2/*.a2ml, docs/, contracts/
+# Tier 3 (never load unless asked): tests/, generated/, CI configs
+#
+# DO NOT READ unless specifically asked:
+#   target/          — Rust build output
+#   _build/          — Elixir build output
+#   deps/            — Elixir dependencies
+#   *.lock           — lock files
+#   generated/       — auto-generated code
 
-## Workflow
-1. Inspect `.machines_readable/6scm/STATE.scm` for blockers and next actions.
-2. Respect any constraints listed inside `.machines_readable/6scm/AGENTIC.scm` when tooling changes are requested.
-3. After finishing edits, update STATE with your outcomes and commit with a concise, imperative message.
+[canonical-locations]
+state = ".machine_readable/6a2/STATE.a2ml"
+meta = ".machine_readable/6a2/META.a2ml"
+ecosystem = ".machine_readable/6a2/ECOSYSTEM.a2ml"
+ai-instructions = ".claude/CLAUDE.md"
 
-## Delivery Promises
-- Mention in summaries whether STATE, `contractiles/`, or `.bot_directives/` changed.
-- Keep this file in sync with the repository’s status; update it if the governance changes.
+[purpose]
+description = """Hospital-model operations framework. Components map to hospital
+departments: Emergency Room (intake), Operating Room (AI-assisted sysadmin,
+hardware diagnostics), Ward (monitoring), Records (bug reporting), Data Backbone
+(schemas). Data flows: ER intake -> Evidence Envelope -> Procedure Plan -> Receipt -> System Weather."""
+
+[tech-stack]
+primary = "Rust (clinician, hardware-crash-team — workspace crates)"
+secondary = "V (emergency-room), Elixir (observatory, records/referrals)"
+schemas = "JSON + Deno (contracts/)"
+build = "Justfile (primary), Cargo workspace"
+container = "Podman + Containerfile"
+
+[architecture]
+# Hospital department mapping
+clinician = "clinician/"              # Rust ~4400 LOC — AI-assisted sysadmin (Operating Room)
+emergency-room = "emergency-room/"    # V ~1800 LOC — panic-safe intake (Emergency Room)
+hardware-crash-team = "hardware-crash-team/"  # Rust ~700 LOC — hardware diagnostics (Operating Room)
+observatory = "observatory/"          # Elixir ~600 LOC — metrics, weather, monitoring (Ward)
+contracts = "contracts/"              # JSON+Deno — 8 JSON schemas (Data Backbone)
+contracts-rust = "contracts-rust/"    # Rust serde types + conversions (Data Backbone)
+records-referrals = "records/referrals/"  # Elixir ~400 LOC — multi-platform bug reporting (Records)
+composer = "composer/"                # Stubs — orchestration (Operating Room)
+
+[clinician-feature-gates]
+# Heavy deps behind optional cargo features — default build is fast
+default = "No features enabled (fast compile)"
+ai = "ollama-rs (AI inference)"
+storage = "arangors (ArangoDB graph traversal)"
+p2p = "libp2p (gossipsub mesh, mDNS, Ed25519 identity)"
+all = "cargo build -p ambientops-clinician --all-features"
+
+[hardware-crash-team]
+# Origin: NVIDIA Quadro M2000M zombie GPU caused 43+ reboots in 3 days
+commands = "scan, diagnose, plan, apply, undo, status, tui"
+strategies = "pci-stub, vfio-pci, dual, power-off, disable, unbind"
+output-formats = "text, json, sarif (SARIF 2.1.0, rules HCT001-HCT009)"
+tests = "60 tests"
+
+[satellites]
+# Separate repos that integrate with AmbientOps
+panic-attacker = "Static analysis scanner"
+verisimdb = "8-modality database"
+hypatia = "Neurosymbolic CI/CD"
+gitbot-fleet = "Bot orchestration"
+echidna = "Theorem prover dispatch"
+
+[critical-invariants]
+invariant-1 = "State files in .machine_readable/ ONLY — never in root"
+invariant-2 = "PMPL-1.0-or-later throughout"
+invariant-3 = "Author: Jonathan D.A. Jewell (hyperpolymath)"
+invariant-4 = "Container: Containerfile not Dockerfile, Podman not Docker"
+invariant-5 = "Rust is a scalpel — only in agent/verify components"
+invariant-6 = "Elixir only for observability/event hubs — NOT policy engine or config truth"
+invariant-7 = "No Python anywhere — completely banned"
+invariant-8 = "Data flow: ER -> Evidence Envelope -> Procedure Plan -> Receipt -> Weather"
+
+[session-protocol]
+on-enter = [
+  "Read this manifest",
+  "Read .claude/CLAUDE.md for build commands and language policy",
+  "Read .machine_readable/6a2/STATE.a2ml for current status",
+]
+on-exit = [
+  "Update .machine_readable/6a2/STATE.a2ml with progress",
+]

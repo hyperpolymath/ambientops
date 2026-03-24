@@ -1,0 +1,84 @@
+; SPDX-License-Identifier: PMPL-1.0-or-later
+; MUST.contractile — Baseline invariants for ambientops
+; These constraints MUST NOT be violated. K9 validators enforce them.
+
+(must-contractile
+  (version "1.0.0")
+  (repo "ambientops")
+
+  ; === Universal Invariants (apply to ALL repos) ===
+
+  (invariants
+    ; Paths
+    (must "no hardcoded absolute paths (/home/*, /mnt/*, /var/mnt/*)")
+    (must "all paths use env vars, XDG dirs, or relative references")
+
+    ; Language policy
+    (must "no new TypeScript files")
+    (must "no new Python files")
+    (must "no new Go files")
+    (must "no npm/bun/yarn/pnpm dependencies — Deno only")
+
+    ; Dangerous patterns
+    (must "no believe_me (Idris2)")
+    (must "no assert_total (Idris2)")
+    (must "no Admitted (Coq)")
+    (must "no sorry (Lean)")
+    (must "no unsafeCoerce (Haskell)")
+    (must "no Obj.magic (OCaml)")
+    (must "no unsafe {} blocks without safety comment (Rust)")
+
+    ; License
+    (must "SPDX-License-Identifier header on every source file")
+    (must "no removal or modification of LICENSE file")
+
+    ; Structure
+    (must ".machine_readable/ directory preserved")
+    (must "0-AI-MANIFEST.a2ml preserved")
+    (must "no SCM files in repo root — only in .machine_readable/")
+
+    ; CI
+    (must "no removal of CI workflows without explicit approval")
+    (must "all GitHub Actions SHA-pinned")
+
+    ; Code quality
+    (must "tests must not be deleted or weakened")
+    (must "generated code in generated/ directory only")
+    (must "no introduction of OWASP top 10 vulnerabilities")
+
+    ; ABI/FFI (if applicable)
+    (must "no modification of ABI contracts without proof update")
+    (must "no removal of formal verification proofs")
+  )
+
+  ; === Project-Specific Invariants (ambientops) ===
+
+  (invariants
+    ; Hospital-model architecture
+    (must "hospital department metaphor must be preserved (clinician, emergency-room, observatory, records)")
+    (must "data flow: ER intake -> Evidence Envelope -> Procedure Plan -> Receipt -> System Weather")
+    (must "Cargo workspace structure must be maintained — no flattening into single crate")
+
+    ; Clinician feature gates
+    (must "heavy dependencies (arangors, redis, ollama-rs, libp2p, ndarray) must remain behind feature gates")
+    (must "default build must compile fast with no features enabled")
+    (must "p2p gossipsub mesh must use persistent Ed25519 peer identity")
+
+    ; Hardware crash team
+    (must "6 remediation strategies (pci-stub, vfio-pci, dual, power-off, disable, unbind) must be preserved")
+    (must "SARIF 2.1.0 output format (9 rules HCT001-HCT009) must remain valid")
+    (must "undo capability for all hardware remediation must not be removed")
+
+    ; Emergency room
+    (must "emergency-room panic-safe intake (V language) must not introduce panics")
+    (must "contracts/ JSON schemas (8 schemas) must remain valid for all components")
+
+    ; Observatory
+    (must "Elixir observatory metrics and system weather monitoring must remain operational")
+  )
+
+  (enforcement
+    (k9-validator "contractiles/k9/must-check.k9.ncl")
+    (ci "quality.yml runs must-check on every PR")
+  )
+)

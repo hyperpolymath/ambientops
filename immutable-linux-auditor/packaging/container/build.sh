@@ -50,12 +50,13 @@ fi
 if command -v vordr >/dev/null 2>&1; then
   echo "Vordr detected. Verifying container image..."
   vordr verify --static --image "$image_name"
-elif [ -d "/var/mnt/eclipse/repos/vordr" ]; then
+elif [ -d "${VORDR_DIR:-../vordr}" ]; then
   echo "Vordr repo detected. Attempting to build..."
+  VORDR_DIR="${VORDR_DIR:-../vordr}"
   if command -v cargo >/dev/null 2>&1; then
-    (cd /var/mnt/eclipse/repos/vordr && cargo build --release)
-    if [ -x "/var/mnt/eclipse/repos/vordr/target/release/vordr" ]; then
-      /var/mnt/eclipse/repos/vordr/target/release/vordr verify --static --image "$image_name"
+    (cd "$VORDR_DIR" && cargo build --release)
+    if [ -x "$VORDR_DIR/target/release/vordr" ]; then
+      "$VORDR_DIR/target/release/vordr" verify --static --image "$image_name"
     else
       echo "Vordr build completed but binary not found."
       exit 1

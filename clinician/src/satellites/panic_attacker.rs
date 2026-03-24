@@ -155,7 +155,7 @@ mod tests {
     #[test]
     fn test_command_construction() {
         // Verify the command args are correctly structured
-        let target = "/var/mnt/eclipse/repos/test";
+        let target = "/tmp/ambientops-test-repo";
         let output = "/tmp/test-scan.json";
         let args = vec!["assail", target, "--output", output];
         assert_eq!(args[0], "assail");

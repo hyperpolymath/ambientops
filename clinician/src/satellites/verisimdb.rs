@@ -79,12 +79,11 @@ pub async fn query(vql: &str) -> Result<()> {
 }
 
 async fn find_ingest_script() -> Option<String> {
+    let repos_dir = std::env::var("AMBIENTOPS_REPOS_DIR")
+        .or_else(|_| std::env::var("HOME").map(|h| format!("{h}/Documents/hyperpolymath-repos")))
+        .unwrap_or_default();
     let paths = [
-        format!(
-            "{}/Documents/hyperpolymath-repos/verisimdb-data/scripts/ingest-scan.sh",
-            std::env::var("HOME").unwrap_or_default()
-        ),
-        "/var/mnt/eclipse/repos/verisimdb-data/scripts/ingest-scan.sh".to_string(),
+        format!("{repos_dir}/verisimdb-data/scripts/ingest-scan.sh"),
     ];
 
     for path in &paths {

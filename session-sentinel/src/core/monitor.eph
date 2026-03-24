@@ -298,7 +298,7 @@ fn dbus_close(conn: i64): () = {
 /// Initialises state and hands off to run_monitor.
 fn main(): () = {
     region r {
-        let home = String.new@r("/home/hyper") in  // TODO: from env
+        let home = String.from_env@r("HOME") in  // reads $HOME at runtime
         let now: i64 = 0 in  // TODO: clock_now() via FFI
 
         let mut state = initialise(&home, now) in

@@ -128,3 +128,206 @@ session-sentinel *ARGS:
 # Run panic-attacker pre-commit scan
 assail:
     @command -v panic-attack >/dev/null 2>&1 && panic-attack assail . || echo "panic-attack not found — install from https://github.com/hyperpolymath/panic-attacker"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ONBOARDING & DIAGNOSTICS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Check all required toolchain dependencies and report health
+doctor:
+    #!/usr/bin/env bash
+    echo "═══════════════════════════════════════════════════"
+    echo "  AmbientOps Doctor — Toolchain Health Check"
+    echo "═══════════════════════════════════════════════════"
+    echo ""
+    PASS=0; FAIL=0; WARN=0
+    check() {
+        local name="$1" cmd="$2" min="$3"
+        if command -v "$cmd" >/dev/null 2>&1; then
+            VER=$("$cmd" --version 2>&1 | head -1)
+            echo "  [OK]   $name — $VER"
+            PASS=$((PASS + 1))
+        else
+            echo "  [FAIL] $name — not found (need $min+)"
+            FAIL=$((FAIL + 1))
+        fi
+    }
+    check "Rust (cargo)"      cargo     "1.80"
+    check "Elixir"            elixir    "1.16"
+    check "Erlang (erl)"      erl       "26"
+    check "Mix"               mix       "1.16"
+    check "V (vlang)"         v         "0.4.4"
+    check "Deno"              deno      "2.0"
+    check "just"              just      "1.25"
+    # Optional tools
+    if command -v cross >/dev/null 2>&1; then
+        echo "  [OK]   cross (optional) — available for RISC-V builds"
+        PASS=$((PASS + 1))
+    else
+        echo "  [WARN] cross (optional) — not found (needed for RISC-V builds)"
+        WARN=$((WARN + 1))
+    fi
+    if command -v panic-attack >/dev/null 2>&1; then
+        echo "  [OK]   panic-attack — available"
+        PASS=$((PASS + 1))
+    else
+        echo "  [WARN] panic-attack — not found (pre-commit scanner)"
+        WARN=$((WARN + 1))
+    fi
+    if command -v gitleaks >/dev/null 2>&1; then
+        echo "  [OK]   gitleaks (optional) — available"
+        PASS=$((PASS + 1))
+    else
+        echo "  [WARN] gitleaks (optional) — not found (secret scanning)"
+        WARN=$((WARN + 1))
+    fi
+    if command -v trivy >/dev/null 2>&1; then
+        echo "  [OK]   trivy (optional) — available"
+        PASS=$((PASS + 1))
+    else
+        echo "  [WARN] trivy (optional) — not found (vulnerability scanning)"
+        WARN=$((WARN + 1))
+    fi
+    echo ""
+    echo "  Result: $PASS passed, $FAIL failed, $WARN warnings"
+    if [ "$FAIL" -gt 0 ]; then
+        echo "  Run 'just heal' to attempt automatic repair."
+        exit 1
+    fi
+    echo "  All required tools present."
+
+# Attempt to automatically install missing tools
+heal:
+    #!/usr/bin/env bash
+    echo "═══════════════════════════════════════════════════"
+    echo "  AmbientOps Heal — Automatic Tool Installation"
+    echo "═══════════════════════════════════════════════════"
+    echo ""
+    if ! command -v cargo >/dev/null 2>&1; then
+        echo "Installing Rust via rustup..."
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+        source "$HOME/.cargo/env"
+    fi
+    if ! command -v elixir >/dev/null 2>&1; then
+        echo "Elixir not found."
+        if command -v asdf >/dev/null 2>&1; then
+            echo "  Installing via asdf..."
+            asdf install erlang latest
+            asdf install elixir latest
+        else
+            echo "  Install manually: https://elixir-lang.org/install.html"
+            echo "  Or via asdf: asdf plugin add elixir && asdf install elixir latest"
+        fi
+    fi
+    if ! command -v v >/dev/null 2>&1; then
+        echo "V (vlang) not found."
+        if command -v asdf >/dev/null 2>&1; then
+            echo "  Installing via asdf..."
+            asdf install vlang latest
+        else
+            echo "  Install manually: https://vlang.io"
+        fi
+    fi
+    if ! command -v deno >/dev/null 2>&1; then
+        echo "Installing Deno..."
+        curl -fsSL https://deno.land/install.sh | sh
+    fi
+    if ! command -v just >/dev/null 2>&1; then
+        echo "Installing just..."
+        cargo install just
+    fi
+    echo ""
+    echo "Heal complete. Run 'just doctor' to verify."
+
+# Guided tour of the project structure and key concepts
+tour:
+    #!/usr/bin/env bash
+    echo "═══════════════════════════════════════════════════"
+    echo "  AmbientOps — Guided Tour"
+    echo "═══════════════════════════════════════════════════"
+    echo ""
+    echo "AmbientOps is a hospital-model operations framework."
+    echo "Components are organized by hospital department:"
+    echo ""
+    echo "  clinician/           (Rust ~4400 LOC)"
+    echo "    AI-assisted sysadmin with feature gates:"
+    echo "    --features ai       Ollama integration"
+    echo "    --features storage  ArangoDB graph traversal"
+    echo "    --features p2p      libp2p gossipsub mesh"
+    echo ""
+    echo "  emergency-room/      (V ~1800 LOC)"
+    echo "    Panic-safe intake, evidence envelopes"
+    echo ""
+    echo "  hardware-crash-team/ (Rust ~700 LOC)"
+    echo "    Hardware diagnostics (PCI BAR, lspci, SARIF output)"
+    echo "    Origin: Zombie NVIDIA GPU causing 43+ reboots"
+    echo ""
+    echo "  observatory/         (Elixir ~600 LOC)"
+    echo "    Metrics, system weather, monitoring"
+    echo ""
+    echo "  contracts/           (JSON + Deno)"
+    echo "    8 JSON schemas for data backbone"
+    echo ""
+    echo "  records/referrals/   (Elixir ~400 LOC)"
+    echo "    Multi-platform bug reporting"
+    echo ""
+    echo "Data flow:"
+    echo "  ER intake → Evidence Envelope → Procedure Plan → Receipt → System Weather"
+    echo ""
+    echo "Quick commands:"
+    echo "  just build-all     Build everything"
+    echo "  just test-all      Run all tests"
+    echo "  just scan          Hardware scan"
+    echo "  just demo          End-to-end demo"
+    echo "  just security      Security audit"
+    echo ""
+    RUST_LOC=$(find . -name '*.rs' -not -path './target/*' 2>/dev/null | xargs wc -l 2>/dev/null | tail -1 | awk '{print $1}')
+    echo "Approximate Rust LOC: ${RUST_LOC:-unknown}"
+    echo ""
+    echo "Read more: QUICKSTART-USER.adoc"
+
+# Show help for common workflows
+help-me:
+    #!/usr/bin/env bash
+    echo "═══════════════════════════════════════════════════"
+    echo "  AmbientOps — Common Workflows"
+    echo "═══════════════════════════════════════════════════"
+    echo ""
+    echo "FIRST TIME SETUP:"
+    echo "  just doctor           Check toolchain"
+    echo "  just heal             Fix missing tools"
+    echo ""
+    echo "BUILD:"
+    echo "  just build-all        Build Rust + Elixir"
+    echo "  just build-rust       Build Rust workspace only"
+    echo "  just build-elixir     Build Elixir components only"
+    echo ""
+    echo "TEST:"
+    echo "  just test-all         Run all tests"
+    echo "  just test-rust        Rust workspace tests"
+    echo "  just test-elixir      Elixir component tests"
+    echo "  just test-contracts   Contract schema tests (Deno)"
+    echo ""
+    echo "HARDWARE DIAGNOSTICS:"
+    echo "  just scan             Run hardware scan"
+    echo "  just scan-envelope    Scan with contract envelope"
+    echo ""
+    echo "SECURITY:"
+    echo "  just security         Run gitleaks + trivy audit"
+    echo "  just audit            Dependency vulnerability audit"
+    echo ""
+    echo "DEMO:"
+    echo "  just demo             End-to-end demo flow"
+    echo "  just integration-test Integration test suite"
+    echo ""
+    echo "PRE-COMMIT:"
+    echo "  just assail           Run panic-attacker scan"
+    echo ""
+    echo "OTHER:"
+    echo "  just clean            Clean all build artifacts"
+    echo "  just check            Validate without building"
+    echo "  just build-riscv      Cross-compile for RISC-V"
+    echo ""
+    echo "LEARN:"
+    echo "  just tour             Guided project tour"
+    echo "  just default          List all recipes"

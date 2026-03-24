@@ -184,16 +184,42 @@ pub async fn learn(
     tracing::info!("Learning solution in category: {}", category);
     tracing::debug!("Solution: {}", solution_text);
 
-    // Parse solution and extract problem→solution relationship
-    // TODO: Use SLM to extract structured data from solution text
+    // Parse solution text for problem description and commands.
+    // Heuristic: first line or "Problem:" section = problem statement.
+    // Lines starting with $ or # (in code blocks) = commands.
+    let problem = solution_text
+        .lines()
+        .find(|l| {
+            let t = l.trim().to_lowercase();
+            t.starts_with("problem:") || t.starts_with("issue:") || t.starts_with("error:")
+        })
+        .map(|l| l.trim().to_string())
+        .unwrap_or_else(|| {
+            // Fall back to first non-empty line as the problem summary
+            solution_text.lines()
+                .find(|l| !l.trim().is_empty())
+                .unwrap_or("(no problem description)")
+                .trim()
+                .to_string()
+        });
+
+    let commands: Vec<String> = solution_text
+        .lines()
+        .filter(|l| {
+            let t = l.trim();
+            t.starts_with("$ ") || t.starts_with("# ") || t.starts_with("sudo ")
+                || t.starts_with("cargo ") || t.starts_with("mix ") || t.starts_with("just ")
+        })
+        .map(|l| l.trim().trim_start_matches("$ ").to_string())
+        .collect();
 
     // Store in ArangoDB
     let solution = crate::storage::Solution {
         id: uuid::Uuid::new_v4().to_string(),
         category: category.to_string(),
-        problem: String::new(), // TODO: Extract from text
+        problem,
         solution: solution_text,
-        commands: vec![], // TODO: Extract commands
+        commands,
         tags: vec![category.to_string()],
         success_count: 0,
         failure_count: 0,

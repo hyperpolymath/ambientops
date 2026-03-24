@@ -4,7 +4,7 @@
 # Logs warnings and captures SMART data if issues detected
 
 LOG="/var/log/nvme-health-check.log"
-ALERT_FILE="/home/hyper/Desktop/system-stability/NVME-ALERT.txt"
+ALERT_FILE="${NVME_ALERT_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/ambientops}/NVME-ALERT.txt"
 
 timestamp() { date '+%Y-%m-%d %H:%M:%S'; }
 

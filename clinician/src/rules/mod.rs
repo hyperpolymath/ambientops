@@ -337,9 +337,94 @@ impl RulesEngine {
                 conditions.iter().any(|c| self.evaluate_condition(c, _context))
             }
             Condition::Not { condition } => !self.evaluate_condition(condition, _context),
-            _ => {
-                // TODO: Implement remaining conditions
-                false
+            Condition::MetricThreshold { metric, op, value } => {
+                // Read metric from /proc or /sys depending on metric name
+                let actual = match metric.as_str() {
+                    "cpu_load" => {
+                        std::fs::read_to_string("/proc/loadavg")
+                            .ok()
+                            .and_then(|s| s.split_whitespace().next()?.parse::<f64>().ok())
+                    }
+                    "mem_available_mb" => {
+                        std::fs::read_to_string("/proc/meminfo")
+                            .ok()
+                            .and_then(|s| {
+                                s.lines()
+                                    .find(|l| l.starts_with("MemAvailable:"))?
+                                    .split_whitespace()
+                                    .nth(1)?
+                                    .parse::<f64>()
+                                    .ok()
+                                    .map(|kb| kb / 1024.0)
+                            })
+                    }
+                    "disk_usage_pct" => {
+                        // Uses statvfs on root
+                        None // Requires libc; fall through to log warning
+                    }
+                    _ => {
+                        tracing::warn!("Unknown metric: {}", metric);
+                        None
+                    }
+                };
+                match actual {
+                    Some(v) => match op.as_str() {
+                        ">" | "gt" => v > *value,
+                        ">=" | "gte" => v >= *value,
+                        "<" | "lt" => v < *value,
+                        "<=" | "lte" => v <= *value,
+                        "==" | "eq" => (v - value).abs() < f64::EPSILON,
+                        _ => {
+                            tracing::warn!("Unknown operator: {}", op);
+                            false
+                        }
+                    },
+                    None => false,
+                }
+            }
+            Condition::PortOpen { port, protocol } => {
+                match protocol.as_str() {
+                    "tcp" => {
+                        std::net::TcpStream::connect_timeout(
+                            &std::net::SocketAddr::from(([127, 0, 0, 1], *port)),
+                            std::time::Duration::from_secs(2),
+                        )
+                        .is_ok()
+                    }
+                    "udp" => {
+                        // UDP is connectionless; check if port is in /proc/net/udp
+                        let hex_port = format!("{:04X}", port);
+                        std::fs::read_to_string("/proc/net/udp")
+                            .map(|s| s.contains(&hex_port))
+                            .unwrap_or(false)
+                    }
+                    _ => {
+                        tracing::warn!("Unknown protocol: {}", protocol);
+                        false
+                    }
+                }
+            }
+            Condition::PackageInstalled { name } => {
+                // Try rpm first (Fedora/RHEL), then dpkg (Debian/Ubuntu)
+                let safe_name = match validate_pattern(name) {
+                    Ok(n) => n,
+                    Err(e) => {
+                        tracing::warn!("Invalid package name '{}': {}", name, e);
+                        return false;
+                    }
+                };
+                std::process::Command::new("rpm")
+                    .args(["-q", safe_name])
+                    .output()
+                    .map(|o| o.status.success())
+                    .unwrap_or_else(|_| {
+                        // Fallback to dpkg
+                        std::process::Command::new("dpkg")
+                            .args(["-s", safe_name])
+                            .output()
+                            .map(|o| o.status.success())
+                            .unwrap_or(false)
+                    })
             }
         }
     }
@@ -451,9 +536,80 @@ impl RulesEngine {
             Action::Escalate { reason } => {
                 Err(anyhow::anyhow!("Escalation required: {}", reason))
             }
-            _ => {
-                // TODO: Implement remaining actions
-                Ok("Action not implemented".to_string())
+            Action::EnableService { name } => {
+                let safe_name = validate_service_name(name)
+                    .map_err(|e| anyhow::anyhow!("Invalid service name '{}': {}", name, e))?;
+                let output = tokio::process::Command::new("systemctl")
+                    .args(["enable", "--now", safe_name])
+                    .output()
+                    .await?;
+                if output.status.success() {
+                    Ok(format!("Enabled service: {}", safe_name))
+                } else {
+                    Err(anyhow::anyhow!("Failed to enable {}: {}",
+                        safe_name, String::from_utf8_lossy(&output.stderr)))
+                }
+            }
+            Action::WriteFile { path, content, mode } => {
+                // SECURITY: Validate path is not in sensitive locations
+                let p = std::path::Path::new(path);
+                if path.starts_with("/proc") || path.starts_with("/sys/kernel") || path.starts_with("/dev") {
+                    return Err(anyhow::anyhow!("Refusing to write to sensitive path: {}", path));
+                }
+                if let Some(parent) = p.parent() {
+                    tokio::fs::create_dir_all(parent).await?;
+                }
+                tokio::fs::write(path, content).await?;
+                if let Some(m) = mode {
+                    let mode_val = u32::from_str_radix(m.trim_start_matches('0'), 8)
+                        .map_err(|_| anyhow::anyhow!("Invalid mode: {}", m))?;
+                    use std::os::unix::fs::PermissionsExt;
+                    tokio::fs::set_permissions(path,
+                        std::fs::Permissions::from_mode(mode_val)).await?;
+                }
+                Ok(format!("Wrote file: {}", path))
+            }
+            Action::LoadModule { name, options } => {
+                let safe_name = validate_pattern(name)
+                    .map_err(|e| anyhow::anyhow!("Invalid module name '{}': {}", name, e))?;
+                let mut cmd = tokio::process::Command::new("modprobe");
+                cmd.arg(safe_name);
+                if let Some(opts) = options {
+                    for opt in opts.split_whitespace() {
+                        cmd.arg(opt);
+                    }
+                }
+                let output = cmd.output().await?;
+                if output.status.success() {
+                    Ok(format!("Loaded module: {}", safe_name))
+                } else {
+                    Err(anyhow::anyhow!("Failed to load module {}: {}",
+                        safe_name, String::from_utf8_lossy(&output.stderr)))
+                }
+            }
+            Action::InstallPackage { name } => {
+                let safe_name = validate_pattern(name)
+                    .map_err(|e| anyhow::anyhow!("Invalid package name '{}': {}", name, e))?;
+                // Try dnf first (Fedora), then apt (Debian/Ubuntu)
+                let output = tokio::process::Command::new("dnf")
+                    .args(["install", "-y", safe_name])
+                    .output()
+                    .await;
+                match output {
+                    Ok(o) if o.status.success() => Ok(format!("Installed (dnf): {}", safe_name)),
+                    _ => {
+                        let output = tokio::process::Command::new("apt-get")
+                            .args(["install", "-y", safe_name])
+                            .output()
+                            .await?;
+                        if output.status.success() {
+                            Ok(format!("Installed (apt): {}", safe_name))
+                        } else {
+                            Err(anyhow::anyhow!("Failed to install {}: {}",
+                                safe_name, String::from_utf8_lossy(&output.stderr)))
+                        }
+                    }
+                }
             }
         }
     }

@@ -1,0 +1,167 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath)
+= AmbientOps Quickstart
+:author: Jonathan D.A. Jewell
+:toc: macro
+:icons: font
+:source-highlighter: rouge
+
+toc::[]
+
+== What is AmbientOps?
+
+AmbientOps is a hospital-model operations framework (hybrid monorepo). Components are organized by hospital department: clinician (AI-assisted sysadmin), emergency-room (panic-safe intake), hardware-crash-team (hardware diagnostics), observatory (metrics/monitoring), and more.
+
+Data flows: ER intake -> Evidence Envelope -> Procedure Plan -> Receipt -> System Weather.
+
+== Prerequisites
+
+[cols="1,2,2"]
+|===
+| Tool | Minimum Version | Install
+
+| Rust / Cargo
+| >= 1.80 (nightly recommended)
+| `asdf install rust nightly` or https://rustup.rs
+
+| Elixir / Mix
+| >= 1.16
+| `asdf install elixir latest`
+
+| Erlang/OTP
+| >= 26
+| `asdf install erlang latest`
+
+| V (vlang)
+| >= 0.4.4
+| `asdf install vlang latest` (for emergency-room)
+
+| Deno
+| >= 2.0
+| `curl -fsSL https://deno.land/install.sh \| sh` (for contract tests)
+
+| just
+| >= 1.25
+| `cargo install just`
+|===
+
+Verify all tools:
+
+[source,bash]
+----
+just doctor
+----
+
+== Clone and First Build
+
+[source,bash]
+----
+cd ~/Documents/hyperpolymath-repos
+git clone https://github.com/hyperpolymath/ambientops.git
+cd ambientops
+----
+
+Build everything (Rust workspace + Elixir components):
+
+[source,bash]
+----
+just build-all
+----
+
+== First Run: Hardware Scan
+
+The hardware-crash-team scanner is the most immediately useful tool:
+
+[source,bash]
+----
+just scan
+----
+
+With JSON output:
+
+[source,bash]
+----
+cargo run -p hardware-crash-team -- scan --format json
+----
+
+With SARIF output (for CI integration):
+
+[source,bash]
+----
+cargo run -p hardware-crash-team -- scan --format sarif
+----
+
+== Run Tests
+
+All components (Rust + Elixir + contracts):
+
+[source,bash]
+----
+just test-all
+----
+
+Individual component tests:
+
+[source,bash]
+----
+just test-rust          # Rust workspace (clinician, hardware-crash-team, contracts-rust)
+just test-elixir        # Observatory + referrals
+just test-contracts     # JSON schema validation (Deno)
+----
+
+== Clinician Feature Gates
+
+The clinician crate uses optional features to keep default builds fast:
+
+[source,bash]
+----
+cargo build -p ambientops-clinician                     # Default (no features, fast)
+cargo build -p ambientops-clinician --features ai       # Enable ollama-rs
+cargo build -p ambientops-clinician --features storage  # Enable ArangoDB
+cargo build -p ambientops-clinician --features p2p      # Enable libp2p gossipsub
+cargo build -p ambientops-clinician --all-features      # Everything
+----
+
+== End-to-End Demo
+
+[source,bash]
+----
+just demo
+----
+
+Runs the scripted demo flow with build step.
+
+== Guided Tour
+
+[source,bash]
+----
+just tour
+----
+
+== Troubleshooting
+
+[source,bash]
+----
+just doctor   # Diagnose missing tools
+just heal     # Attempt automatic repair
+----
+
+== Project Structure (Key Paths)
+
+----
+clinician/             Rust AI-assisted sysadmin (~4400 LOC)
+emergency-room/        V-lang panic-safe intake (~1800 LOC)
+hardware-crash-team/   Rust hardware diagnostics (~700 LOC)
+observatory/           Elixir metrics and monitoring (~600 LOC)
+contracts/             JSON schemas + Deno tests
+contracts-rust/        Rust serde types for contracts
+records/referrals/     Elixir multi-platform bug reporting
+composer/              Orchestration (stubs)
+Cargo.toml             Rust workspace root
+----
+
+== Further Reading
+
+- `hardware-crash-team/.claude/CLAUDE.md` -- Hardware diagnostic tool details
+- `0-AI-MANIFEST.a2ml` -- Machine-readable project manifest
+- `docs/SCM-FILES-GUIDE.adoc` -- Checkpoint file format

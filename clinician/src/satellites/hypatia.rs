@@ -125,12 +125,11 @@ async fn check_bot_via_gh(bot_name: &str) -> String {
 }
 
 async fn find_hypatia() -> Option<String> {
+    let repos_dir = std::env::var("AMBIENTOPS_REPOS_DIR")
+        .or_else(|_| std::env::var("HOME").map(|h| format!("{h}/Documents/hyperpolymath-repos")))
+        .unwrap_or_default();
     let paths = [
-        format!(
-            "{}/Documents/hyperpolymath-repos/hypatia",
-            std::env::var("HOME").unwrap_or_default()
-        ),
-        "/var/mnt/eclipse/repos/hypatia".to_string(),
+        format!("{repos_dir}/hypatia"),
     ];
 
     for path in &paths {

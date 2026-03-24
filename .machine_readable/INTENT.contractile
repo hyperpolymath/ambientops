@@ -1,0 +1,57 @@
+; SPDX-License-Identifier: PMPL-1.0-or-later
+; INTENT.contractile — Purpose and scope for ambientops
+; Helps LLM/SLM agents understand what this repo IS and IS NOT.
+
+(intent-contractile
+  (version "1.0.0")
+  (repo "ambientops")
+
+  ; === Purpose (what this repo IS) ===
+  (purpose
+    "AmbientOps is a hospital-model operations framework implemented as a hybrid
+     monorepo. Components are organized by hospital department: clinician (Rust,
+     AI-assisted sysadmin), emergency-room (V, panic-safe intake), hardware-crash-team
+     (Rust, hardware diagnostics with 6 remediation strategies), observatory (Elixir,
+     metrics and system weather), records/referrals (Elixir, multi-platform bug
+     reporting), and composer (orchestration). Data flows through Evidence Envelopes
+     and Procedure Plans to produce system weather reports."
+  )
+
+  ; === Anti-Purpose (what this repo is NOT — prevents scope creep) ===
+  (anti-purpose
+    "AmbientOps is NOT a monitoring dashboard (observatory provides data, not a UI).
+     It is NOT a replacement for systemd or other init systems. It does NOT handle
+     application deployment (that is CI/CD territory). It is NOT a cloud orchestrator
+     (it manages the local machine and its immediate satellite services). The
+     hardware-crash-team specifically handles hardware faults, not software bugs."
+  )
+
+  ; === Key Architectural Decisions That Must Not Be Reversed ===
+  (architectural-invariants
+    "Hospital department metaphor — each component maps to a department role"
+    "Cargo workspace — components are separate crates, not a monolith"
+    "Feature gates for heavy dependencies — default build compiles fast"
+    "Evidence Envelope data flow: ER intake -> Procedure Plan -> Receipt -> Weather"
+    "8 JSON schemas in contracts/ define all inter-component communication"
+    "V language for emergency-room — panic-safe by design"
+    "Elixir for observatory and referrals — OTP fault tolerance"
+    "SARIF 2.1.0 output from hardware-crash-team for CI integration"
+    "Undo capability for all hardware remediation strategies"
+  )
+
+  ; === Sensitive Areas (if in doubt, ask) ===
+  (ask-before-touching
+    "hardware-crash-team/ — applies real hardware changes; undo must always work"
+    "contracts/ — JSON schemas; changes break inter-component communication"
+    "clinician/ — feature gates; enabling features changes build dependencies"
+    "emergency-room/ — V language; panic-safe intake must not introduce panics"
+    ".machine_readable/ — checkpoint files, format is specified"
+  )
+
+  ; === Ecosystem Position ===
+  (ecosystem
+    (belongs-to "standalone (hybrid monorepo)")
+    (depends-on ("verisimdb" "hypatia" "panic-attacker"))
+    (depended-on-by ("boj-server" "panll"))
+  )
+)

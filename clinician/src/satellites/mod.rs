@@ -118,12 +118,12 @@ mod tests {
     #[test]
     fn test_scan_result_deserialize() {
         let json = r#"{
-            "target": "/var/mnt/eclipse/repos/echidna",
+            "target": "/tmp/test-repo",
             "weak_points": [],
             "scan_time_ms": 1234
         }"#;
         let result: ScanResult = serde_json::from_str(json).unwrap();
-        assert_eq!(result.target, "/var/mnt/eclipse/repos/echidna");
+        assert_eq!(result.target, "/tmp/test-repo");
         assert!(result.weak_points.is_empty());
     }
 

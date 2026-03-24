@@ -130,7 +130,7 @@ pub fn build(b: *std.Build) void {
     // Install to ~/.local/bin/ (user-local install)
     // -------------------------------------------------------------------------
 
-    const home = std.posix.getenv("HOME") orelse "/home/hyper";
+    const home = std.posix.getenv("HOME") orelse "/tmp";
     const local_bin = std.fmt.allocPrint(b.allocator, "{s}/.local/bin", .{home}) catch @panic("OOM");
 
     const install_step = b.step("install-local", "Install session-sentinel-tray to ~/.local/bin/");

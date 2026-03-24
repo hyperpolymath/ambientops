@@ -348,7 +348,7 @@ fn watchdog_check(
 /// Mount points to check for disk space.
 ///
 /// We check the home filesystem and any mount holding AI storage.
-let CRITICAL_MOUNTS: Vec[String] = vec!["/", "/home", "/mnt/eclipse"]
+let CRITICAL_MOUNTS: Vec[String] = vec!["/", "/home"]  // add data drives via AMBIENTOPS_EXTRA_MOUNTS env
 
 /// Memory pressure threshold: warn when available memory is below 10%
 /// of total.
