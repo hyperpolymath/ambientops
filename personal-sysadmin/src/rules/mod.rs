@@ -451,9 +451,64 @@ impl RulesEngine {
             Action::Escalate { reason } => {
                 Err(anyhow::anyhow!("Escalation required: {}", reason))
             }
-            _ => {
-                // TODO: Implement remaining actions
-                Ok("Action not implemented".to_string())
+            Action::EnableService { name } => {
+                let safe_name = validate_service_name(name)
+                    .map_err(|e| anyhow::anyhow!("Invalid service name '{}': {}", name, e))?;
+                let output = tokio::process::Command::new("systemctl")
+                    .args(["enable", "--now", safe_name])
+                    .output()
+                    .await?;
+                if output.status.success() {
+                    Ok(format!("Enabled service: {}", safe_name))
+                } else {
+                    Err(anyhow::anyhow!("Failed to enable {}", safe_name))
+                }
+            }
+            Action::WriteFile { path, content, mode } => {
+                tokio::fs::write(&path, content).await?;
+                if let Some(m) = mode {
+                    tokio::process::Command::new("chmod")
+                        .args([m.as_str(), path.as_str()])
+                        .output()
+                        .await?;
+                }
+                Ok(format!("Wrote file: {}", path))
+            }
+            Action::LoadModule { name, options } => {
+                let mut args = vec!["modprobe", name.as_str()];
+                if let Some(ref opts) = options {
+                    args.push(opts.as_str());
+                }
+                let output = tokio::process::Command::new("sudo")
+                    .args(&args)
+                    .output()
+                    .await?;
+                if output.status.success() {
+                    Ok(format!("Loaded module: {}", name))
+                } else {
+                    Err(anyhow::anyhow!("Failed to load module {}", name))
+                }
+            }
+            Action::InstallPackage { name } => {
+                // Detect package manager
+                let (cmd, install_args) = if std::path::Path::new("/usr/bin/rpm-ostree").exists() {
+                    ("rpm-ostree", vec!["install", "--apply-live", name.as_str()])
+                } else if std::path::Path::new("/usr/bin/dnf").exists() {
+                    ("dnf", vec!["install", "-y", name.as_str()])
+                } else if std::path::Path::new("/usr/bin/apt-get").exists() {
+                    ("apt-get", vec!["install", "-y", name.as_str()])
+                } else {
+                    return Err(anyhow::anyhow!("No supported package manager found"));
+                };
+                let output = tokio::process::Command::new("sudo")
+                    .args(std::iter::once(cmd).chain(install_args.into_iter()))
+                    .output()
+                    .await?;
+                if output.status.success() {
+                    Ok(format!("Installed package: {}", name))
+                } else {
+                    Err(anyhow::anyhow!("Failed to install {}", name))
+                }
             }
         }
     }
