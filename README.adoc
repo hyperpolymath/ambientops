@@ -3,6 +3,7 @@
 = AmbientOps
 
 image:https://img.shields.io/badge/License-PMPL--1.0-blue.svg[License: PMPL-1.0,link="https://github.com/hyperpolymath/palimpsest-license"]
+image:https://api.thegreenwebfoundation.org/greencheckimage/jewell.nexus[Green Hosting,link="https://www.thegreenwebfoundation.org/green-web-check/?url=jewell.nexus"]
 
 :toc:
 :toclevels: 3
