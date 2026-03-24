@@ -164,11 +164,263 @@ fn scan_iommu() -> Result<IommuStatus> {
     })
 }
 
-/// Scan for ACPI errors in kernel log
+/// Scan for ACPI errors and boot failure patterns in kernel logs.
+///
+/// Parses two sources:
+/// 1. `journalctl -b -1 --no-pager` for the previous boot's failure patterns
+///    (kernel panics, mount failures, service timeouts, ACPI errors).
+/// 2. `dmesg --level=err,crit,alert,emerg` for current-boot hardware errors
+///    (disk, memory, GPU, ACPI).
+///
+/// Returns structured findings with severity classification.
 fn scan_acpi_errors() -> Result<Vec<AcpiError>> {
-    // In real implementation, parse journalctl -k for ACPI errors
-    // For now, return empty
-    Ok(Vec::new())
+    let mut errors = Vec::new();
+
+    // --- Source 1: Previous boot journal (catches why last boot failed) ---
+    if let Ok(output) = Command::new("journalctl")
+        .args(["-b", "-1", "--no-pager", "-k"])
+        .output()
+    {
+        let journal = String::from_utf8_lossy(&output.stdout);
+        parse_boot_log_errors(&journal, &mut errors);
+    }
+
+    // --- Source 2: Current boot dmesg (hardware errors right now) ---
+    if let Ok(output) = Command::new("dmesg")
+        .args(["--level=err,crit,alert,emerg"])
+        .output()
+    {
+        let dmesg = String::from_utf8_lossy(&output.stdout);
+        parse_dmesg_errors(&dmesg, &mut errors);
+    }
+
+    // Deduplicate by (method, error_code) pair
+    errors.dedup_by(|a, b| a.method == b.method && a.error_code == b.error_code);
+
+    Ok(errors)
+}
+
+/// ACPI-specific error patterns matched in kernel logs
+const ACPI_SCAN_PATTERNS: &[(&str, &str)] = &[
+    ("ACPI Error", "AE_ERROR"),
+    ("ACPI BIOS Error", "AE_BIOS_ERROR"),
+    ("ACPI Exception", "AE_EXCEPTION"),
+    ("AE_AML_BUFFER_LIMIT", "AE_AML_BUFFER_LIMIT"),
+    ("AE_NOT_FOUND", "AE_NOT_FOUND"),
+    ("AE_ALREADY_EXISTS", "AE_ALREADY_EXISTS"),
+    ("AE_AML_OPERAND_TYPE", "AE_AML_OPERAND_TYPE"),
+];
+
+/// Boot failure patterns that indicate system-level problems
+const BOOT_FAILURE_PATTERNS: &[(&str, &str, &str)] = &[
+    ("Kernel panic", "KERNEL_PANIC", "Kernel panic detected in previous boot"),
+    ("kernel BUG at", "KERNEL_BUG", "Kernel BUG assertion triggered"),
+    ("Oops:", "KERNEL_OOPS", "Kernel oops (recoverable crash)"),
+    ("RIP:", "KERNEL_RIP", "Instruction pointer dump (crash context)"),
+    ("mount:", "MOUNT_FAILURE", "Filesystem mount failure"),
+    ("Failed to mount", "MOUNT_FAILURE", "Filesystem mount failure"),
+    ("Timed out waiting", "SERVICE_TIMEOUT", "Service or device wait timed out"),
+    ("timeout", "SERVICE_TIMEOUT", "Service or device operation timed out"),
+    ("watchdog: BUG", "WATCHDOG_TIMEOUT", "Hardware watchdog triggered"),
+    ("Hardware Error", "HW_ERROR", "Machine check or hardware error event"),
+    ("MCE:", "MCE", "Machine Check Exception"),
+    ("Machine check events", "MCE", "Machine check events logged"),
+];
+
+/// Hardware error patterns matched in dmesg output
+const HW_ERROR_PATTERNS: &[(&str, &str, &str)] = &[
+    // Disk/storage errors
+    ("I/O error", "DISK_IO_ERROR", "Disk I/O error — possible drive failure"),
+    ("Buffer I/O error", "DISK_IO_ERROR", "Buffered I/O error on block device"),
+    ("ata", "DISK_ATA_ERROR", "ATA/SATA controller or link error"),
+    ("DRDY ERR", "DISK_DRDY", "Drive not ready — mechanical or firmware fault"),
+    ("UNC", "DISK_UNC", "Uncorrectable disk sector error"),
+    ("medium error", "DISK_MEDIUM", "Storage medium error (bad sectors)"),
+    // Memory errors
+    ("EDAC", "MEM_EDAC", "ECC memory error detected by EDAC"),
+    ("CE memory read error", "MEM_CE", "Correctable ECC memory error"),
+    ("UE memory read error", "MEM_UE", "Uncorrectable ECC memory error"),
+    ("page allocation failure", "MEM_ALLOC", "Kernel page allocation failure (OOM)"),
+    // GPU errors
+    ("gpu fault", "GPU_FAULT", "GPU page fault or hang"),
+    ("i915", "GPU_I915", "Intel GPU (i915) error"),
+    ("amdgpu", "GPU_AMDGPU", "AMD GPU error"),
+    ("nouveau", "GPU_NOUVEAU", "Nouveau (NVIDIA open) GPU error"),
+    ("nvidia", "GPU_NVIDIA", "NVIDIA proprietary GPU error"),
+    ("drm:", "GPU_DRM", "DRM subsystem error"),
+    ("GPU HANG", "GPU_HANG", "GPU hang detected by driver"),
+    // PCI errors (supplement scanner's per-device checks)
+    ("PCIe Bus Error", "PCIE_BUS", "PCIe bus error (AER)"),
+    ("AER:", "PCIE_AER", "PCIe Advanced Error Reporting event"),
+    ("DPC:", "PCIE_DPC", "PCIe Downstream Port Containment triggered"),
+];
+
+/// Parse kernel log lines from journalctl for ACPI and boot failure patterns.
+///
+/// Extracts ACPI method paths from log lines where possible (e.g.,
+/// "ACPI BIOS Error ... Method _SB._OSC"). Falls back to the full
+/// log line as the method field when no structured path is found.
+fn parse_boot_log_errors(log: &str, errors: &mut Vec<AcpiError>) {
+    for line in log.lines() {
+        // --- ACPI-specific errors ---
+        for &(pattern, code) in ACPI_SCAN_PATTERNS {
+            if line.contains(pattern) {
+                let method = extract_acpi_method(line)
+                    .unwrap_or_else(|| "unknown".to_string());
+                let related = extract_pci_slot(line);
+                errors.push(AcpiError {
+                    method,
+                    error_code: code.to_string(),
+                    description: line.trim().to_string(),
+                    related_device: related,
+                });
+                break; // Only match first ACPI pattern per line
+            }
+        }
+
+        // --- General boot failure patterns ---
+        for &(pattern, code, desc) in BOOT_FAILURE_PATTERNS {
+            // Case-insensitive match for "timeout" patterns, exact for others
+            let matches = if pattern == "timeout" {
+                line.to_lowercase().contains(pattern)
+            } else {
+                line.contains(pattern)
+            };
+            if matches {
+                let related = extract_pci_slot(line);
+                errors.push(AcpiError {
+                    method: "boot-log".to_string(),
+                    error_code: code.to_string(),
+                    description: format!("{}: {}", desc, line.trim()),
+                    related_device: related,
+                });
+                break; // Only match first boot pattern per line
+            }
+        }
+    }
+}
+
+/// Parse dmesg output for hardware error patterns (disk, memory, GPU, PCI).
+///
+/// Uses case-insensitive matching for hardware identifiers since
+/// kernel messages vary in capitalisation across subsystems and versions.
+fn parse_dmesg_errors(dmesg: &str, errors: &mut Vec<AcpiError>) {
+    for line in dmesg.lines() {
+        let lower = line.to_lowercase();
+        for &(pattern, code, desc) in HW_ERROR_PATTERNS {
+            if lower.contains(&pattern.to_lowercase()) {
+                let related = extract_pci_slot(line);
+                errors.push(AcpiError {
+                    method: "dmesg".to_string(),
+                    error_code: code.to_string(),
+                    description: format!("{}: {}", desc, line.trim()),
+                    related_device: related,
+                });
+                break; // Only match first pattern per line
+            }
+        }
+    }
+}
+
+/// Extract an ACPI method path from a log line.
+///
+/// Looks for common ACPI naming patterns like `_SB.PCI0._OSC` or
+/// `\_SB.PCI0.GFX0._DSM`. ACPI names use backslash-prefixed
+/// absolute paths and dot-separated segments of 1-4 uppercase chars
+/// (often starting with underscore).
+fn extract_acpi_method(line: &str) -> Option<String> {
+    // Match patterns like \_SB.PCI0._OSC or _SB._OSC
+    // Look for sequences of dot-separated ACPI name segments
+    let chars: Vec<char> = line.chars().collect();
+    let len = chars.len();
+    let mut best: Option<String> = None;
+
+    let mut i = 0;
+    while i < len {
+        // ACPI paths start with _ or backslash
+        if chars[i] == '_' || chars[i] == '\\' {
+            let start = i;
+            // Skip optional leading backslash
+            if chars[i] == '\\' {
+                i += 1;
+            }
+            // Consume segments: [A-Z0-9_]{1,4} separated by dots
+            let mut valid = true;
+            let mut seg_len = 0;
+            let mut has_dot = false;
+            while i < len {
+                match chars[i] {
+                    'A'..='Z' | '0'..='9' | '_' => {
+                        seg_len += 1;
+                        if seg_len > 4 {
+                            valid = false;
+                            break;
+                        }
+                        i += 1;
+                    }
+                    '.' => {
+                        if seg_len == 0 {
+                            valid = false;
+                            break;
+                        }
+                        has_dot = true;
+                        seg_len = 0;
+                        i += 1;
+                    }
+                    _ => break,
+                }
+            }
+            // Must have at least one dot (multi-segment path) and end with
+            // a non-empty segment to be a plausible ACPI method path
+            if valid && has_dot && seg_len > 0 {
+                let candidate: String = chars[start..i].iter().collect();
+                // Prefer longer matches
+                if best.as_ref().map_or(true, |b| candidate.len() > b.len()) {
+                    best = Some(candidate);
+                }
+            }
+            // Don't increment i — outer loop handles it
+            continue;
+        }
+        i += 1;
+    }
+
+    best
+}
+
+/// Extract a PCI slot address (e.g., "01:00.0") from a log line.
+///
+/// Matches the standard PCI BDF (Bus:Device.Function) notation
+/// used by the Linux kernel in log messages.
+fn extract_pci_slot(line: &str) -> Option<String> {
+    // PCI BDF format: XX:XX.X (hex bus : hex device . function)
+    let bytes = line.as_bytes();
+    let len = bytes.len();
+
+    // Need at least 7 chars for "XX:XX.X"
+    if len < 7 {
+        return None;
+    }
+
+    for i in 0..=(len - 7) {
+        // Check pattern: [0-9a-f]{2}:[0-9a-f]{2}.[0-9a-f]
+        if is_hex(bytes[i])
+            && is_hex(bytes[i + 1])
+            && bytes[i + 2] == b':'
+            && is_hex(bytes[i + 3])
+            && is_hex(bytes[i + 4])
+            && bytes[i + 5] == b'.'
+            && is_hex(bytes[i + 6])
+        {
+            return Some(String::from_utf8_lossy(&bytes[i..i + 7]).to_string());
+        }
+    }
+    None
+}
+
+/// Check if a byte is a hexadecimal digit
+fn is_hex(b: u8) -> bool {
+    b.is_ascii_hexdigit()
 }
 
 /// Assess overall system risk
@@ -696,5 +948,159 @@ mod tests {
         // the logic directly: no driver + memory regions = UnmanagedMemory
         assert!(device.driver.is_none());
         assert!(!device.memory_regions.is_empty());
+    }
+
+    // =========================================================================
+    // Tests for boot failure / ACPI / dmesg scanning (scan_acpi_errors impl)
+    // =========================================================================
+
+    #[test]
+    fn test_extract_acpi_method_standard() {
+        let line = "ACPI BIOS Error (bug): Method parse/execution failed \\_SB.PCI0._OSC (20210930/nswrap-227)";
+        let method = extract_acpi_method(line);
+        assert_eq!(method, Some("\\_SB.PCI0._OSC".to_string()));
+    }
+
+    #[test]
+    fn test_extract_acpi_method_no_backslash() {
+        let line = "ACPI Error: Method _SB._OSC failed";
+        let method = extract_acpi_method(line);
+        assert_eq!(method, Some("_SB._OSC".to_string()));
+    }
+
+    #[test]
+    fn test_extract_acpi_method_none() {
+        let line = "Just a normal log line with no ACPI paths";
+        let method = extract_acpi_method(line);
+        assert!(method.is_none());
+    }
+
+    #[test]
+    fn test_extract_pci_slot() {
+        let line = "pcieport 0000:00:1c.0: AER: Correctable error received";
+        let slot = extract_pci_slot(line);
+        assert_eq!(slot, Some("00:1c.0".to_string()));
+    }
+
+    #[test]
+    fn test_extract_pci_slot_gpu() {
+        let line = "nouveau 0000:01:00.0: fifo: SCHED_ERROR 0a [CTXSW_TIMEOUT]";
+        let slot = extract_pci_slot(line);
+        assert_eq!(slot, Some("01:00.0".to_string()));
+    }
+
+    #[test]
+    fn test_extract_pci_slot_none() {
+        let line = "Normal log line without any PCI addresses";
+        let slot = extract_pci_slot(line);
+        assert!(slot.is_none());
+    }
+
+    #[test]
+    fn test_parse_boot_log_acpi_errors() {
+        let log = "\
+Feb 10 12:00:01 host kernel: ACPI BIOS Error (bug): Method \\_SB.PCI0._OSC failed (20210930)
+Feb 10 12:00:02 host kernel: Normal boot message
+Feb 10 12:00:03 host kernel: ACPI Error: AE_NOT_FOUND evaluating _SB.PCI0.GFX0._DSM";
+
+        let mut errors = Vec::new();
+        parse_boot_log_errors(log, &mut errors);
+
+        // Should find at least two ACPI errors
+        let acpi_count = errors.iter()
+            .filter(|e| e.error_code.starts_with("AE_"))
+            .count();
+        assert!(acpi_count >= 2, "Expected at least 2 ACPI errors, got {}", acpi_count);
+    }
+
+    #[test]
+    fn test_parse_boot_log_kernel_panic() {
+        let log = "Jan 05 08:30:00 host kernel: Kernel panic - not syncing: Fatal exception in interrupt";
+
+        let mut errors = Vec::new();
+        parse_boot_log_errors(log, &mut errors);
+
+        let panic = errors.iter().find(|e| e.error_code == "KERNEL_PANIC");
+        assert!(panic.is_some(), "Should detect kernel panic");
+    }
+
+    #[test]
+    fn test_parse_boot_log_mount_failure() {
+        let log = "Mar 01 09:00:00 host systemd: Failed to mount /boot/efi";
+
+        let mut errors = Vec::new();
+        parse_boot_log_errors(log, &mut errors);
+
+        let mount = errors.iter().find(|e| e.error_code == "MOUNT_FAILURE");
+        assert!(mount.is_some(), "Should detect mount failure");
+    }
+
+    #[test]
+    fn test_parse_dmesg_disk_error() {
+        let dmesg = "\
+[   12.345678] sd 0:0:0:0: [sda] I/O error, dev sda, sector 12345
+[   13.000000] Normal operational message";
+
+        let mut errors = Vec::new();
+        parse_dmesg_errors(dmesg, &mut errors);
+
+        let disk = errors.iter().find(|e| e.error_code == "DISK_IO_ERROR");
+        assert!(disk.is_some(), "Should detect disk I/O error");
+    }
+
+    #[test]
+    fn test_parse_dmesg_gpu_error() {
+        let dmesg = "[    5.678901] i915 0000:00:02.0: [drm] GPU HANG: ecode 9:1:85dffffd";
+
+        let mut errors = Vec::new();
+        parse_dmesg_errors(dmesg, &mut errors);
+
+        // Should match i915 pattern (first match wins per line)
+        assert!(!errors.is_empty(), "Should detect GPU error");
+        let gpu = errors.iter().find(|e| e.error_code.starts_with("GPU_"));
+        assert!(gpu.is_some(), "Should classify as GPU error");
+    }
+
+    #[test]
+    fn test_parse_dmesg_memory_error() {
+        let dmesg = "[    2.000000] EDAC MC0: 1 CE memory read error on CPU_SrcID#0_Ha#0_Chan#1_DIMM#0";
+
+        let mut errors = Vec::new();
+        parse_dmesg_errors(dmesg, &mut errors);
+
+        assert!(!errors.is_empty(), "Should detect memory error");
+    }
+
+    #[test]
+    fn test_parse_dmesg_pcie_aer() {
+        let dmesg = "[    3.000000] pcieport 0000:00:1c.0: AER: Correctable error received";
+
+        let mut errors = Vec::new();
+        parse_dmesg_errors(dmesg, &mut errors);
+
+        let aer = errors.iter().find(|e| e.error_code == "PCIE_AER");
+        assert!(aer.is_some(), "Should detect PCIe AER event");
+        assert_eq!(aer.unwrap().related_device, Some("00:1c.0".to_string()));
+    }
+
+    #[test]
+    fn test_parse_empty_logs() {
+        let mut errors = Vec::new();
+        parse_boot_log_errors("", &mut errors);
+        parse_dmesg_errors("", &mut errors);
+        assert!(errors.is_empty(), "Empty logs should produce no errors");
+    }
+
+    #[test]
+    fn test_is_hex() {
+        assert!(is_hex(b'0'));
+        assert!(is_hex(b'9'));
+        assert!(is_hex(b'a'));
+        assert!(is_hex(b'f'));
+        assert!(is_hex(b'A'));
+        assert!(is_hex(b'F'));
+        assert!(!is_hex(b'g'));
+        assert!(!is_hex(b'.'));
+        assert!(!is_hex(b' '));
     }
 }

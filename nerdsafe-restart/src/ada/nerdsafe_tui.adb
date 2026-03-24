@@ -197,9 +197,115 @@ package body Nerdsafe_TUI is
    end Load_Profiles;
 
    procedure Save_Profiles (Profiles : Profile_List) is
+      --  Serialise the profile list to a JSON file under
+      --  $HOME/.config/nerdsafe-restart/profiles.json.
+      --  Uses hand-written JSON output (no third-party JSON library)
+      --  so that we keep the Ada dependency set minimal.
+      Config_Dir  : constant String :=
+        Get_Home_Directory & "/.config/nerdsafe-restart";
+      Config_Path : constant String := Config_Dir & "/profiles.json";
+      File        : File_Type;
+      First       : Boolean := True;
+
+      --  Emit a single JSON string value, escaping double-quotes and
+      --  backslashes (the only characters likely to appear in profile
+      --  names / descriptions that break JSON).
+      procedure Write_JSON_String (S : String) is
+      begin
+         Put (File, '"');
+         for I in S'Range loop
+            case S (I) is
+               when '"'  => Put (File, "\""");
+               when '\'  => Put (File, "\\");
+               when others => Put (File, S (I));
+            end case;
+         end loop;
+         Put (File, '"');
+      end Write_JSON_String;
+
    begin
-      --  TODO: Implement JSON saving
-      Put_Line ("Profile saving not yet implemented");
+      --  Ensure the config directory exists
+      if not Ada.Directories.Exists (Config_Dir) then
+         Ada.Directories.Create_Path (Config_Dir);
+      end if;
+
+      --  Open (or create) the file
+      Create (File, Out_File, Config_Path);
+
+      Put_Line (File, "[");
+
+      for I in Profiles.First_Index .. Profiles.Last_Index loop
+         if not First then
+            Put_Line (File, ",");
+         end if;
+         First := False;
+
+         Put_Line (File, "  {");
+
+         --  "name": "..."
+         Put (File, "    ""name"": ");
+         Write_JSON_String (To_String (Profiles (I).Name));
+         Put_Line (File, ",");
+
+         --  "description": "..."
+         Put (File, "    ""description"": ");
+         Write_JSON_String (To_String (Profiles (I).Description));
+         Put_Line (File, ",");
+
+         --  "level": "..."
+         Put (File, "    ""level"": ");
+         Write_JSON_String (Validation_Level'Image (Profiles (I).Level));
+         Put_Line (File, ",");
+
+         --  "is_default": true/false
+         Put (File, "    ""is_default"": ");
+         if Profiles (I).Is_Default then
+            Put (File, "true");
+         else
+            Put (File, "false");
+         end if;
+         Put_Line (File, ",");
+
+         --  "limits": { ... }
+         Put_Line (File, "    ""limits"": {");
+         Put (File, "      ""memory_mb"": ");
+         Put (File, Positive'Image (Profiles (I).Limits.Memory_MB));
+         Put_Line (File, ",");
+         Put (File, "      ""memory_swap"": ");
+         Put (File, Natural'Image (Profiles (I).Limits.Memory_Swap));
+         Put_Line (File, ",");
+         Put (File, "      ""cpu_count"": ");
+         Put (File, Positive'Image (Profiles (I).Limits.CPU_Count));
+         Put_Line (File, ",");
+         Put (File, "      ""pid_limit"": ");
+         Put (File, Positive'Image (Profiles (I).Limits.PID_Limit));
+         Put_Line (File, ",");
+         Put (File, "      ""timeout_sec"": ");
+         Put (File, Positive'Image (Profiles (I).Limits.Timeout_Sec));
+         Put_Line (File, ",");
+         Put (File, "      ""network"": ");
+         if Profiles (I).Limits.Network then
+            Put (File, "true");
+         else
+            Put (File, "false");
+         end if;
+         New_Line (File);
+         Put_Line (File, "    }");
+
+         Put (File, "  }");
+      end loop;
+
+      New_Line (File);
+      Put_Line (File, "]");
+
+      Close (File);
+      Put_Line ("Profiles saved to " & Config_Path);
+   exception
+      when others =>
+         if Is_Open (File) then
+            Close (File);
+         end if;
+         Put_Line ("Error: failed to save profiles to " & Config_Path);
    end Save_Profiles;
 
    function Get_Default_Profile return Profile is
@@ -257,15 +363,77 @@ package body Nerdsafe_TUI is
      (Level  : Validation_Level;
       Limits : Resource_Limits) return Exit_Code
    is
-      Command : constant String := Build_Command (Level, Limits);
-      Args    : GNAT.OS_Lib.Argument_List_Access;
-      Status  : Integer;
-      Success : Boolean;
+      --  Build the full container command string, then split it into
+      --  program name and arguments for GNAT.OS_Lib.Spawn.
+      Full_Command : constant String := Build_Command (Level, Limits);
+
+      --  The first whitespace-delimited token is the executable;
+      --  everything after is the argument string.
+      Space_Pos  : Natural := 0;
+      Prog_Name  : GNAT.OS_Lib.String_Access;
+      Status     : Integer;
    begin
-      Put_Line ("Running: " & Command);
-      --  TODO: Use GNAT.OS_Lib.Spawn for actual execution
-      --  For now, return success as placeholder
-      return Exit_Code'Val (0);
+      Put_Line ("Running: " & Full_Command);
+
+      --  Locate the first space to split executable from arguments
+      for I in Full_Command'Range loop
+         if Full_Command (I) = ' ' then
+            Space_Pos := I;
+            exit;
+         end if;
+      end loop;
+
+      if Space_Pos = 0 then
+         --  No arguments — just the bare command
+         Prog_Name := new String'(Full_Command);
+         declare
+            Args : GNAT.OS_Lib.Argument_List (1 .. 0);
+         begin
+            Status := GNAT.OS_Lib.Spawn
+              (Program_Name => Prog_Name.all,
+               Args         => Args);
+         end;
+      else
+         --  Split into program and an argument list.  GNAT.OS_Lib.Spawn
+         --  expects each argument as a separate String_Access element.
+         --  We shell out via /bin/sh -c to avoid having to tokenise the
+         --  complex container command ourselves (it may contain = signs,
+         --  colons, and other characters that are painful to split).
+         Prog_Name := new String'("/bin/sh");
+         declare
+            Arg_C   : aliased String := "-c";
+            Arg_Cmd : aliased String := Full_Command;
+            Args    : GNAT.OS_Lib.Argument_List (1 .. 2);
+         begin
+            Args (1) := Arg_C'Unchecked_Access;
+            Args (2) := Arg_Cmd'Unchecked_Access;
+            Status := GNAT.OS_Lib.Spawn
+              (Program_Name => Prog_Name.all,
+               Args         => Args);
+         end;
+      end if;
+
+      --  Map the process exit status back to our Exit_Code enum.
+      --  Exit codes 0-5 and 10-11 map directly to our representation.
+      case Status is
+         when 0  => return Success;
+         when 1  => return Syntax_Error;
+         when 2  => return Timeout_Exceeded;
+         when 3  => return ShellCheck_Warning;
+         when 4  => return Missing_File;
+         when 5  => return Permission_Error;
+         when 10 => return Container_Error;
+         when 11 => return Resource_Detection_Error;
+         when others =>
+            --  Unexpected exit code — treat as container error
+            Put_Line ("Warning: unexpected exit code" & Integer'Image (Status));
+            return Container_Error;
+      end case;
+
+   exception
+      when others =>
+         Put_Line ("Error: failed to execute container command");
+         return Container_Error;
    end Run_Validation;
 
    function Run_Validation (P : Profile) return Exit_Code is
@@ -432,7 +600,88 @@ package body Nerdsafe_TUI is
             when '6' =>
                Display_Profiles (Profiles);
             when '7' =>
-               Put_Line ("Settings not yet implemented");
+               --  Interactive settings editor: display current limits
+               --  and allow the user to adjust each value.
+               declare
+                  Input_Line : String (1 .. 80);
+                  Input_Last : Natural;
+                  New_Val    : Integer;
+
+                  --  Helper: prompt for one integer setting.  If the
+                  --  user presses Enter (empty input), keep the current
+                  --  value unchanged.
+                  procedure Edit_Positive
+                    (Label : String; Current : in out Positive)
+                  is
+                  begin
+                     Put ("  " & Label & " [" &
+                          Positive'Image (Current) & " ]: ");
+                     Get_Line (Input_Line, Input_Last);
+                     if Input_Last > 0 then
+                        New_Val := Integer'Value
+                          (Input_Line (1 .. Input_Last));
+                        if New_Val > 0 then
+                           Current := New_Val;
+                        else
+                           Put_Line ("  (must be positive — keeping current)");
+                        end if;
+                     end if;
+                  exception
+                     when others =>
+                        Put_Line ("  (invalid number — keeping current)");
+                  end Edit_Positive;
+
+                  procedure Edit_Natural
+                    (Label : String; Current : in out Natural)
+                  is
+                  begin
+                     Put ("  " & Label & " [" &
+                          Natural'Image (Current) & " ]: ");
+                     Get_Line (Input_Line, Input_Last);
+                     if Input_Last > 0 then
+                        New_Val := Integer'Value
+                          (Input_Line (1 .. Input_Last));
+                        if New_Val >= 0 then
+                           Current := New_Val;
+                        else
+                           Put_Line ("  (must be >= 0 — keeping current)");
+                        end if;
+                     end if;
+                  exception
+                     when others =>
+                        Put_Line ("  (invalid number — keeping current)");
+                  end Edit_Natural;
+
+               begin
+                  Put_Line ("");
+                  Put_Line ("╔════════════════════════════════════════╗");
+                  Put_Line ("║       Settings (edit or Enter to keep) ║");
+                  Put_Line ("╠════════════════════════════════════════╣");
+
+                  Edit_Positive ("Memory limit (MB) ", Limits.Memory_MB);
+                  Edit_Natural  ("Memory swap  (MB) ", Limits.Memory_Swap);
+                  Edit_Positive ("CPU count         ", Limits.CPU_Count);
+                  Edit_Positive ("PID limit         ", Limits.PID_Limit);
+                  Edit_Positive ("Timeout (seconds) ", Limits.Timeout_Sec);
+
+                  --  Network toggle
+                  Put ("  Network [" &
+                       (if Limits.Network then "on" else "off") &
+                       "] (y/n/Enter): ");
+                  Get_Line (Input_Line, Input_Last);
+                  if Input_Last > 0 then
+                     case Input_Line (1) is
+                        when 'y' | 'Y' => Limits.Network := True;
+                        when 'n' | 'N' => Limits.Network := False;
+                        when others     => null;  -- keep current
+                     end case;
+                  end if;
+
+                  Put_Line ("╠════════════════════════════════════════╣");
+                  Put_Line ("║  Settings updated for this session.    ║");
+                  Put_Line ("║  Use Profile Manager to save.         ║");
+                  Put_Line ("╚════════════════════════════════════════╝");
+               end;
             when 'q' | 'Q' =>
                Put_Line ("Goodbye!");
                exit;
