@@ -25,7 +25,7 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 
 # HTTP client (AI module uses curl via tokio::process, reqwest for future)
-reqwest = { version = "0.12.12", features = ["json"] }
+reqwest = { version = "0.12.12", features = ["json", "multipart"] }
 
 # Logging and errors
 tracing = "0.1"
@@ -47,6 +47,7 @@ uuid = { version = "1", features = ["v4"] }
 toml = "0.8"
 
 futures = "0.3"
+walkdir = "2"
 ambientops-contracts = { path = "../contracts-rust" }
 
 # === Feature-gated dependencies (roadmap items, not yet used in code) ===
@@ -57,10 +58,12 @@ libp2p = { version = "0.56.0", features = ["tokio", "mdns", "gossipsub", "kad", 
 ndarray = { version = "0.16", optional = true }
 scraper = { version = "0.21", optional = true }
 tantivy = { version = "0.22", optional = true }
+bluer = { version = "0.17", features = ["bluetoothd"], optional = true }
 
 [dev-dependencies]
 tokio-test = "0.4"
 tempfile = "3"
+filetime = "0.2"
 
 [[bin]]
 name = "ambientops-clinician"
@@ -76,7 +79,8 @@ p2p = ["libp2p"]          # P2P mesh communication
 search = ["tantivy"]      # Local full-text search index
 forum = ["scraper"]       # Forum HTML scraping
 anomaly = ["ndarray"]     # ESN/LSM anomaly detection
-all = ["storage", "cache", "ai", "p2p", "search", "forum", "anomaly"]
+bluetooth = ["bluer"]     # Bluetooth device monitoring (BT Sentinel)
+all = ["storage", "cache", "ai", "p2p", "search", "forum", "anomaly", "bluetooth"]
 
 [profile.release]
 lto = true
