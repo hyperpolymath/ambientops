@@ -84,3 +84,8 @@ htmlcov/
 # Sync reports
 sync_report*.txt
 sync_repos_report*.txt
+
+# ReScript/OCaml compiler artifacts
+*.cmt
+*.cmti
+*.cmi
