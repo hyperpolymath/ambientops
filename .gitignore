@@ -89,3 +89,6 @@ sync_repos_report*.txt
 *.cmt
 *.cmti
 *.cmi
+
+# asdf version manager
+.tool-versions
