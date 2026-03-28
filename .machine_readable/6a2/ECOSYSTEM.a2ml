@@ -1,10 +1,36 @@
 # SPDX-License-Identifier: PMPL-1.0-or-later
-# ECOSYSTEM.a2ml — Ecosystem position
-# Converted from ECOSYSTEM.scm on 2026-03-15
+# ECOSYSTEM.a2ml — Ecosystem position for ambientops
 
 [metadata]
 project = "ambientops"
 ecosystem = "hyperpolymath"
+version = "0.1.0"
+purpose = "Personal systems administration, monitoring, and automated recovery"
 
 [position]
-type = "component"
+type = "monorepo"
+role = "infrastructure-layer"
+
+[related-projects]
+gossamer = { relation = "consumer", note = "Desktop shell for admin panels" }
+panll = { relation = "consumer", note = "Panel layout for monitoring dashboards" }
+proven = { relation = "dependency", note = "Formally verified operations" }
+hypatia = { relation = "integration", note = "Security scanning for system configs" }
+verisimdb = { relation = "storage", note = "Audit trail and state persistence" }
+stapeln = { relation = "sibling", note = "Container management overlaps" }
+session-sentinel = { relation = "component", note = "Session lifecycle management (Ephapax WIP)" }
+volumod = { relation = "component", note = "Volume and audio management" }
+displace = { relation = "component", note = "Disk and partition management" }
+
+[components]
+ambulances = "Emergency system repair (disk, network, performance, security)"
+clinician = "System health diagnostics"
+composer = "Service orchestration"
+emergency-button = "One-click emergency actions"
+monitoring = "System observatory and alerting"
+recovery = "Emergency room, freeze ejector, operating theatre"
+volumod = "PipeWire/PulseAudio volume management"
+displace = "Disk/partition tooling"
+personal-sysadmin = "Daily sysadmin automation"
+total-recall = "Full system state snapshots"
+total-update = "Coordinated system updates"

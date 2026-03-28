@@ -1,9 +1,29 @@
 # SPDX-License-Identifier: PMPL-1.0-or-later
-# META.a2ml — Project meta-information
-# Converted from META.scm on 2026-03-15
+# META.a2ml — Project meta-information for ambientops
 
 [metadata]
 project = "ambientops"
 author = "Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>"
 license = "PMPL-1.0-or-later"
 standard = "RSR 2026"
+
+[architecture]
+type = "monorepo"
+languages = ["bash", "rust", "elixir", "zig", "idris2"]
+containers = "chainguard-base"
+container-tool = "podman"
+
+[architecture-decisions]
+adr-001 = { status = "accepted", title = "Monorepo for all sysadmin tools", reason = "Shared contracts and unified testing" }
+adr-002 = { status = "accepted", title = "Ambulance pattern for emergency repair", reason = "Categorised by failure domain (disk/network/perf/security)" }
+adr-003 = { status = "accepted", title = "Groove protocol for inter-service comms", reason = "Standard service discovery and health mesh" }
+adr-004 = { status = "accepted", title = "VeriSimDB for audit trails", reason = "All system actions must be auditable and queryable" }
+
+[development-practices]
+testing = "Integration tests against real system state where safe"
+builds = "just doctor for self-diagnostics, just heal for auto-repair"
+ci = "GitHub Actions with hypatia-scan and quality checks"
+
+[design-rationale]
+philosophy = "Personal sysadmin should be automated, auditable, and recoverable"
+inspiration = "Hospital triage model — clinician diagnoses, ambulance responds, recovery heals"
