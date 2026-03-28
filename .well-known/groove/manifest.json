@@ -1,0 +1,22 @@
+{
+  "groove_version": "1",
+  "service_id": "ambientops",
+  "service_version": "0.1.0",
+  "capabilities": {
+    "workflow": {
+      "type": "workflow",
+      "description": "Ambient system operations and automation workflows",
+      "protocol": "http",
+      "endpoint": "/api/workflows",
+      "requires_auth": false,
+      "panel_compatible": true
+    }
+  },
+  "consumes": ["octad-storage", "scanning", "static-analysis"],
+  "endpoints": {
+    "health": "/health",
+    "groove": "/.well-known/groove"
+  },
+  "health": "/health",
+  "applicability": ["individual"]
+}
