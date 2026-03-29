@@ -1,0 +1,537 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# stapeln.toml — Layer-based container build for ambientops
+#
+# stapeln builds containers as composable layers (German: "to stack").
+# Each layer is independently cacheable, verifiable, and signable.
+#
+# AmbientOps is a hospital-model operations framework (hybrid monorepo).
+# Components span Rust workspace crates, Elixir services, shell tools,
+# D-lang recovery, Julia auditing, and an Elixir automation router.
+#
+# This file defines every containerised component as a Stapeln service
+# with shared base layers, per-service build/runtime layers, and
+# unified security + verification policy.
+
+[metadata]
+name = "ambientops"
+version = "1.2.0"
+description = "Hospital-model ambient operations framework — container stack"
+author = "Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>"
+license = "PMPL-1.0-or-later"
+registry = "ghcr.io/hyperpolymath"
+
+[build]
+containerfile = "Containerfile"
+context = "."
+runtime = "podman"
+
+# ══════════════════════════════════════════════════════════════════
+# Shared Base Layers
+# ══════════════════════════════════════════════════════════════════
+
+[layers.wolfi-base]
+description = "Chainguard Wolfi minimal base — shared by all services"
+from = "cgr.dev/chainguard/wolfi-base:latest"
+cache = true
+verify = true
+
+[layers.wolfi-static]
+description = "Chainguard static base — distroless for Go-free Rust binaries"
+from = "cgr.dev/chainguard/static:latest"
+cache = true
+verify = true
+
+[layers.rust-toolchain]
+description = "Rust build toolchain on Wolfi"
+extends = "wolfi-base"
+packages = ["rust", "cargo", "build-base", "openssl-dev", "pkgconf"]
+cache = true
+
+[layers.elixir-toolchain]
+description = "Elixir/OTP build toolchain on Wolfi"
+extends = "wolfi-base"
+packages = ["elixir", "erlang", "git", "build-base"]
+cache = true
+
+[layers.d-toolchain]
+description = "D (LDC) build toolchain on Wolfi"
+extends = "wolfi-base"
+packages = ["ldc", "dub", "gcc", "glibc-dev"]
+cache = true
+
+[layers.julia-runtime]
+description = "Julia runtime for batch/audit tools"
+from = "docker.io/library/julia:1.11-bookworm"
+cache = true
+verify = true
+
+# ══════════════════════════════════════════════════════════════════
+# Service: clinician (Rust — AI-assisted sysadmin CLI)
+# Binary: ambientops-clinician
+# Deps: ambientops-contracts (workspace), /proc + /sys read access
+# ══════════════════════════════════════════════════════════════════
+
+[layers.clinician-build]
+description = "Build clinician from Rust workspace root"
+extends = "rust-toolchain"
+commands = [
+    "mkdir -p /build",
+    "cp -r . /build/",
+    "cd /build && cargo build --release -p ambientops-clinician --locked",
+]
+
+[layers.clinician-runtime]
+description = "Clinician minimal runtime"
+extends = "wolfi-base"
+packages = ["libgcc", "ca-certificates"]
+copy-from = [
+    { layer = "clinician-build", src = "/build/target/release/ambientops-clinician", dst = "/usr/local/bin/psa" },
+]
+entrypoint = ["/usr/local/bin/psa"]
+cmd = ["daemon"]
+user = "psa"
+healthcheck = { cmd = ["/usr/local/bin/psa", "health"], interval = "30s", timeout = "5s", start-period = "5s", retries = 3 }
+env = { PSA_DATA_DIR = "/home/psa/.local/share/psa", PSA_CACHE_DIR = "/home/psa/.cache/psa", PSA_CONFIG_DIR = "/home/psa/.config/psa", RUST_LOG = "info" }
+labels = { "org.opencontainers.image.title" = "AmbientOps Clinician", "org.opencontainers.image.description" = "AI-assisted Linux system administration toolkit", "org.opencontainers.image.source" = "https://github.com/hyperpolymath/ambientops", "org.opencontainers.image.licenses" = "PMPL-1.0-or-later", "org.opencontainers.image.vendor" = "hyperpolymath" }
+
+# ══════════════════════════════════════════════════════════════════
+# Service: hardware-crash-team (Rust — hardware diagnostics)
+# Binary: hardware-crash-team
+# Deps: ambientops-contracts (workspace), /proc + /sys read access
+# ══════════════════════════════════════════════════════════════════
+
+[layers.hct-build]
+description = "Build hardware-crash-team from Rust workspace root"
+extends = "rust-toolchain"
+commands = [
+    "mkdir -p /build",
+    "cp -r . /build/",
+    "cd /build && cargo build --release -p hardware-crash-team --locked",
+]
+
+[layers.hct-runtime]
+description = "Hardware Crash Team minimal runtime"
+extends = "wolfi-base"
+packages = ["libgcc", "ca-certificates", "pciutils", "usbutils"]
+copy-from = [
+    { layer = "hct-build", src = "/build/target/release/hardware-crash-team", dst = "/usr/local/bin/hardware-crash-team" },
+]
+entrypoint = ["/usr/local/bin/hardware-crash-team"]
+cmd = ["scan"]
+user = "nonroot"
+labels = { "org.opencontainers.image.title" = "Hardware Crash Team", "org.opencontainers.image.description" = "Hardware diagnostic and remediation for zombie devices, driver conflicts, PCI bus issues", "org.opencontainers.image.source" = "https://github.com/hyperpolymath/ambientops", "org.opencontainers.image.licenses" = "PMPL-1.0-or-later" }
+
+# ══════════════════════════════════════════════════════════════════
+# Service: czech-file-knife (Rust workspace — universal file tool)
+# Binary: cfk
+# Deps: own workspace (cfk-core, cfk-providers, cfk-cli, etc.)
+# ══════════════════════════════════════════════════════════════════
+
+[layers.cfk-build]
+description = "Build czech-file-knife cfk-cli binary"
+extends = "rust-toolchain"
+packages = ["fuse3-dev"]
+commands = [
+    "mkdir -p /build",
+    "cp -r czech-file-knife/ /build/cfk/",
+    "cd /build/cfk && cargo build --release -p cfk-cli --locked",
+]
+
+[layers.cfk-runtime]
+description = "Czech File Knife minimal runtime"
+extends = "wolfi-base"
+packages = ["fuse3", "fuse3-libs", "ca-certificates"]
+copy-from = [
+    { layer = "cfk-build", src = "/build/cfk/target/release/cfk", dst = "/usr/local/bin/cfk" },
+]
+entrypoint = ["/usr/local/bin/cfk"]
+user = "cfk"
+labels = { "org.opencontainers.image.title" = "Czech File Knife", "org.opencontainers.image.description" = "Universal file management tool with cloud providers, VFS, and search", "org.opencontainers.image.source" = "https://github.com/hyperpolymath/czech-file-knife", "org.opencontainers.image.licenses" = "PMPL-1.0-or-later" }
+
+# ══════════════════════════════════════════════════════════════════
+# Service: panoptes (Rust — AI file scanner/renamer)
+# Binary: panoptes
+# Deps: Nickel config, /watch volume
+# ══════════════════════════════════════════════════════════════════
+
+[layers.panoptes-build]
+description = "Build panoptes binary"
+extends = "rust-toolchain"
+commands = [
+    "mkdir -p /build",
+    "cp -r panoptes/ /build/panoptes/",
+    "cd /build/panoptes && cargo build --release --locked",
+]
+
+[layers.panoptes-runtime]
+description = "Panoptes minimal runtime"
+extends = "wolfi-base"
+packages = ["openssl", "ca-certificates"]
+copy-from = [
+    { layer = "panoptes-build", src = "/build/panoptes/target/release/panoptes", dst = "/usr/local/bin/panoptes" },
+]
+entrypoint = ["/usr/local/bin/panoptes"]
+cmd = ["--config", "/etc/panoptes/config.ncl", "--watch", "/watch"]
+user = "panoptes"
+volumes = ["/watch"]
+healthcheck = { cmd = ["pgrep", "panoptes"], interval = "30s", timeout = "10s", start-period = "5s", retries = 3 }
+labels = { "org.opencontainers.image.title" = "Panoptes", "org.opencontainers.image.description" = "Local AI-powered file scanner and renamer", "org.opencontainers.image.source" = "https://github.com/hyperpolymath/ambientops", "org.opencontainers.image.licenses" = "PMPL-1.0-or-later" }
+
+# ══════════════════════════════════════════════════════════════════
+# Service: displace (Rust — verified file copy)
+# Binary: displace
+# Deps: none (zero dependencies)
+# ══════════════════════════════════════════════════════════════════
+
+[layers.displace-build]
+description = "Build displace binary"
+extends = "rust-toolchain"
+commands = [
+    "mkdir -p /build",
+    "cp -r displace/ /build/displace/",
+    "cd /build/displace && cargo build --release --locked",
+]
+
+[layers.displace-runtime]
+description = "Displace distroless runtime"
+extends = "wolfi-static"
+copy-from = [
+    { layer = "displace-build", src = "/build/displace/target/release/displace", dst = "/usr/local/bin/displace" },
+]
+entrypoint = ["/usr/local/bin/displace"]
+user = "nonroot"
+labels = { "org.opencontainers.image.title" = "Displace", "org.opencontainers.image.description" = "High-performance verified file and directory copying", "org.opencontainers.image.source" = "https://github.com/hyperpolymath/ambientops", "org.opencontainers.image.licenses" = "PMPL-1.0-or-later" }
+
+# ══════════════════════════════════════════════════════════════════
+# Service: observatory (Elixir/OTP — metrics, weather, monitoring)
+# App: system_observatory
+# Deps: Elixir, Erlang/OTP
+# ══════════════════════════════════════════════════════════════════
+
+[layers.observatory-build]
+description = "Build observatory Elixir release"
+extends = "elixir-toolchain"
+commands = [
+    "mkdir -p /build",
+    "cp -r observatory/ /build/observatory/",
+    "cd /build/observatory && mix local.hex --force && mix local.rebar --force",
+    "cd /build/observatory && MIX_ENV=prod mix deps.get --only prod",
+    "cd /build/observatory && MIX_ENV=prod mix deps.compile",
+    "cd /build/observatory && MIX_ENV=prod mix compile",
+    "cd /build/observatory && MIX_ENV=prod mix release",
+]
+
+[layers.observatory-runtime]
+description = "Observatory minimal runtime"
+extends = "wolfi-base"
+packages = ["libstdc++", "openssl", "ncurses-libs", "ca-certificates"]
+copy-from = [
+    { layer = "observatory-build", src = "/build/observatory/_build/prod/rel/system_observatory/", dst = "/app/" },
+]
+entrypoint = ["/app/bin/system_observatory"]
+cmd = ["start"]
+user = "observatory"
+healthcheck = { cmd = ["/app/bin/system_observatory", "pid"], interval = "30s", timeout = "10s", start-period = "10s", retries = 3 }
+labels = { "org.opencontainers.image.title" = "System Observatory", "org.opencontainers.image.description" = "Metrics, system weather, and monitoring hub", "org.opencontainers.image.source" = "https://github.com/hyperpolymath/ambientops", "org.opencontainers.image.licenses" = "PMPL-1.0-or-later" }
+
+# ══════════════════════════════════════════════════════════════════
+# Service: hybrid-automation-router (Elixir — IaC routing engine)
+# App: har
+# Deps: Elixir, Erlang/OTP, Phoenix (future)
+# Ports: 4050 (web), 4369 (EPMD), 9100-9155 (distributed Erlang)
+# ══════════════════════════════════════════════════════════════════
+
+[layers.har-build]
+description = "Build HAR Elixir release"
+extends = "elixir-toolchain"
+commands = [
+    "mkdir -p /build",
+    "cp -r hybrid-automation-router/ /build/har/",
+    "cd /build/har && mix local.hex --force && mix local.rebar --force",
+    "cd /build/har && MIX_ENV=prod mix deps.get --only prod",
+    "cd /build/har && MIX_ENV=prod mix deps.compile",
+    "cd /build/har && MIX_ENV=prod mix compile",
+    "cd /build/har && MIX_ENV=prod mix release",
+]
+
+[layers.har-runtime]
+description = "HAR minimal runtime"
+extends = "wolfi-base"
+packages = ["libstdc++", "openssl", "ncurses-libs", "ca-certificates", "curl"]
+copy-from = [
+    { layer = "har-build", src = "/build/har/_build/prod/rel/har/", dst = "/app/" },
+]
+entrypoint = ["/app/bin/har"]
+cmd = ["start"]
+user = "har"
+expose = [4050, 4369]
+healthcheck = { cmd = ["curl", "-sf", "http://localhost:4050/health"], interval = "30s", timeout = "10s", start-period = "5s", retries = 3 }
+env = { RELEASE_COOKIE = "har_cluster_cookie", RELEASE_NODE = "har@127.0.0.1", PHX_HOST = "localhost", PHX_SERVER = "true", PORT = "4050" }
+labels = { "org.opencontainers.image.title" = "Hybrid Automation Router", "org.opencontainers.image.description" = "BGP-like routing engine for infrastructure-as-code", "org.opencontainers.image.source" = "https://github.com/hyperpolymath/ambientops", "org.opencontainers.image.licenses" = "PMPL-1.0-or-later" }
+
+# ══════════════════════════════════════════════════════════════════
+# Service: operating-theatre (D-lang — system recovery)
+# Binary: sor
+# Deps: LDC runtime
+# ══════════════════════════════════════════════════════════════════
+
+[layers.sor-build]
+description = "Build operating-theatre (System Operating Room) D-lang binary"
+extends = "d-toolchain"
+commands = [
+    "mkdir -p /build",
+    "cp -r system-tools/recovery/operating-theatre/ /build/sor/",
+    "cd /build/sor && dub build --build=release",
+]
+
+[layers.sor-runtime]
+description = "Operating Theatre minimal runtime"
+extends = "wolfi-base"
+packages = ["ldc-runtime"]
+copy-from = [
+    { layer = "sor-build", src = "/build/sor/sor", dst = "/app/sor" },
+]
+entrypoint = ["/app/sor"]
+cmd = ["help"]
+user = "nonroot"
+labels = { "org.opencontainers.image.title" = "Operating Theatre", "org.opencontainers.image.description" = "System recovery tool — D-lang operating room", "org.opencontainers.image.source" = "https://github.com/hyperpolymath/ambientops", "org.opencontainers.image.licenses" = "PMPL-1.0-or-later" }
+
+# ══════════════════════════════════════════════════════════════════
+# Service: systems-observatory (Julia — GDPR-compliant auditing)
+# App: Juisys
+# Deps: Julia packages (JSON3, XLSX, DataFrames)
+# ══════════════════════════════════════════════════════════════════
+
+[layers.juisys-build]
+description = "Build Juisys Julia audit tool"
+extends = "julia-runtime"
+commands = [
+    "mkdir -p /app",
+    "cp -r system-tools/monitoring/systems-observatory/ /app/juisys/",
+    "cd /app/juisys && julia --project=. -e 'using Pkg; Pkg.instantiate()'",
+    "cd /app/juisys && julia --project=. -e 'include(\"src/security.jl\"); using .Security; checks = Security.self_audit(); all_passed = all(c -> c.passed, checks); if !all_passed exit(1) end'",
+]
+
+[layers.juisys-runtime]
+description = "Juisys Julia runtime — privacy-first auditing"
+extends = "julia-runtime"
+copy-from = [
+    { layer = "juisys-build", src = "/app/juisys/", dst = "/app/" },
+]
+entrypoint = ["julia", "--project=/app", "-e", "include(\"/app/src/cli.jl\"); using .CLI; CLI.run()"]
+user = "nonroot"
+labels = { "org.opencontainers.image.title" = "Juisys (Systems Observatory)", "org.opencontainers.image.description" = "Privacy-first GDPR-compliant application auditing tool", "org.opencontainers.image.source" = "https://github.com/hyperpolymath/ambientops", "org.opencontainers.image.licenses" = "PMPL-1.0-or-later" }
+
+# ══════════════════════════════════════════════════════════════════
+# Service: nerdsafe-restart (Bash — pre-reboot validation)
+# Binary: nerdsafe-restart.sh (shell script)
+# Deps: coreutils, findutils, gawk, grep, procps-ng, ShellCheck
+# ══════════════════════════════════════════════════════════════════
+
+[layers.nerdsafe-runtime]
+description = "Nerdsafe-restart validation tools"
+extends = "wolfi-base"
+packages = ["bash", "coreutils", "findutils", "gawk", "grep", "procps", "shellcheck"]
+commands = [
+    "mkdir -p /app",
+    "cp nerdsafe-restart/nerdsafe-restart.sh /usr/local/bin/nerdsafe-restart",
+    "chmod +x /usr/local/bin/nerdsafe-restart",
+]
+entrypoint = ["/usr/local/bin/nerdsafe-restart"]
+cmd = ["check"]
+user = "nonroot"
+labels = { "org.opencontainers.image.title" = "Nerdsafe Restart", "org.opencontainers.image.description" = "Pre-reboot validation for paranoid sysadmins", "org.opencontainers.image.source" = "https://github.com/hyperpolymath/ambientops", "org.opencontainers.image.licenses" = "PMPL-1.0-or-later" }
+
+# ══════════════════════════════════════════════════════════════════
+# Service: session-sentinel (container orchestration)
+# Status: Ephapax rewrite WIP — stub layer for container spec
+# ══════════════════════════════════════════════════════════════════
+
+[layers.session-sentinel-build]
+description = "Build session-sentinel (stub — Ephapax rewrite pending)"
+extends = "wolfi-base"
+commands = [
+    "mkdir -p /app",
+    "cp -r session-sentinel/ /app/session-sentinel/",
+]
+
+[layers.session-sentinel-runtime]
+description = "Session Sentinel runtime (placeholder)"
+extends = "wolfi-static"
+copy-from = [
+    { layer = "session-sentinel-build", src = "/app/session-sentinel/", dst = "/app/" },
+]
+user = "nonroot"
+labels = { "org.opencontainers.image.title" = "Session Sentinel", "org.opencontainers.image.description" = "Session lifecycle management — Ephapax rewrite in progress", "org.opencontainers.image.source" = "https://github.com/hyperpolymath/ambientops", "org.opencontainers.image.licenses" = "PMPL-1.0-or-later" }
+
+# ══════════════════════════════════════════════════════════════════
+# Service: svalinn (Rust+Ada — secure identity vault)
+# Binaries: svalinn-vault (Rust), svalinn-cli (Ada)
+# Ports: 8443 (TLS, IPv6 only)
+# Deps: WireGuard, firewalld, SELinux
+# ══════════════════════════════════════════════════════════════════
+
+[layers.svalinn-build]
+description = "Build Svalinn vault core (Rust)"
+extends = "rust-toolchain"
+commands = [
+    "mkdir -p /build",
+    "cp -r reasonably-good-token-vault/ /build/rgtv/",
+    "cd /build/rgtv/vault-core && RUSTFLAGS='-C target-feature=+cet' cargo build --release --locked",
+]
+
+[layers.svalinn-runtime]
+description = "Svalinn secure vault runtime"
+extends = "wolfi-base"
+packages = ["wireguard-tools", "ca-certificates", "openssl"]
+copy-from = [
+    { layer = "svalinn-build", src = "/build/rgtv/vault-core/target/release/svalinn-vault", dst = "/usr/local/bin/svalinn-vault" },
+]
+entrypoint = ["/usr/local/bin/svalinn-vault"]
+cmd = ["serve", "--config", "/vault/config/vault.toml"]
+user = "svalinn"
+expose = [8443]
+volumes = ["/vault/data", "/vault/config", "/vault/keys"]
+healthcheck = { cmd = ["/usr/local/bin/svalinn-vault", "health"], interval = "30s", timeout = "10s", start-period = "5s", retries = 3 }
+labels = { "org.opencontainers.image.title" = "Svalinn Vault", "org.opencontainers.image.description" = "Secure identity vault with post-quantum signing", "org.opencontainers.image.source" = "https://github.com/hyperpolymath/ambientops", "org.opencontainers.image.licenses" = "PMPL-1.0-or-later" }
+
+# ══════════════════════════════════════════════════════════════════
+# Service: immutable-linux-auditor (C++ via CMake — audit tool)
+# Binary: immutable-linux-auditor
+# ══════════════════════════════════════════════════════════════════
+
+[layers.ila-build]
+description = "Build immutable-linux-auditor"
+extends = "wolfi-base"
+packages = ["cmake", "ninja", "pkgconf", "gcc", "g++", "build-base"]
+commands = [
+    "mkdir -p /build",
+    "cp -r immutable-linux-auditor/ /build/ila/",
+    "cd /build/ila && cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release",
+    "cd /build/ila && cmake --build build",
+]
+
+[layers.ila-runtime]
+description = "Immutable Linux Auditor runtime"
+extends = "wolfi-base"
+packages = ["libgcc", "libstdc++"]
+copy-from = [
+    { layer = "ila-build", src = "/build/ila/build/immutable-linux-auditor", dst = "/usr/local/bin/immutable-linux-auditor" },
+]
+entrypoint = ["/usr/local/bin/immutable-linux-auditor"]
+user = "nonroot"
+labels = { "org.opencontainers.image.title" = "Immutable Linux Auditor", "org.opencontainers.image.description" = "Audit tool for immutable Linux distributions", "org.opencontainers.image.source" = "https://github.com/hyperpolymath/ambientops", "org.opencontainers.image.licenses" = "PMPL-1.0-or-later" }
+
+# ══════════════════════════════════════════════════════════════════
+# Security (applies to ALL services)
+# ══════════════════════════════════════════════════════════════════
+
+[security]
+non-root = true
+read-only-root = true
+no-new-privileges = true
+cap-drop = ["ALL"]
+seccomp-profile = "default"
+
+[security.signing]
+algorithm = "ML-DSA-87"
+provider = "cerro-torre"
+
+[security.sbom]
+format = "spdx-json"
+output = "sbom.spdx.json"
+include-deps = true
+
+# ══════════════════════════════════════════════════════════════════
+# Verification (vordr + svalinn)
+# ══════════════════════════════════════════════════════════════════
+
+[verify]
+vordr = true
+svalinn = true
+scan-on-build = true
+fail-on = ["critical", "high"]
+
+# ══════════════════════════════════════════════════════════════════
+# Targets — composable service sets
+# ══════════════════════════════════════════════════════════════════
+
+[targets.development]
+description = "All services with debug logging"
+layers = [
+    "clinician-build",
+    "hct-build",
+    "cfk-build",
+    "panoptes-build",
+    "displace-build",
+    "observatory-build",
+    "har-build",
+    "sor-build",
+    "nerdsafe-runtime",
+]
+env = { LOG_LEVEL = "debug", RUST_LOG = "debug" }
+
+[targets.production]
+description = "All runtime-optimised service layers"
+layers = [
+    "clinician-runtime",
+    "hct-runtime",
+    "cfk-runtime",
+    "panoptes-runtime",
+    "displace-runtime",
+    "observatory-runtime",
+    "har-runtime",
+    "sor-runtime",
+    "nerdsafe-runtime",
+    "svalinn-runtime",
+    "ila-runtime",
+]
+env = { LOG_LEVEL = "info", RUST_LOG = "info" }
+
+[targets.test]
+description = "Build layers for CI/CD test matrix"
+layers = [
+    "clinician-build",
+    "hct-build",
+    "cfk-build",
+    "panoptes-build",
+    "displace-build",
+    "observatory-build",
+    "har-build",
+    "sor-build",
+]
+env = { LOG_LEVEL = "debug", RUST_LOG = "debug,test=trace" }
+
+[targets.core-ops]
+description = "Core operations: clinician + hardware-crash-team + observatory"
+layers = [
+    "clinician-runtime",
+    "hct-runtime",
+    "observatory-runtime",
+]
+env = { LOG_LEVEL = "info", RUST_LOG = "info" }
+
+[targets.file-tools]
+description = "File management: czech-file-knife + panoptes + displace"
+layers = [
+    "cfk-runtime",
+    "panoptes-runtime",
+    "displace-runtime",
+]
+env = { LOG_LEVEL = "info" }
+
+[targets.security-vault]
+description = "Security infrastructure: svalinn vault"
+layers = [
+    "svalinn-runtime",
+]
+env = { LOG_LEVEL = "info" }
+
+[targets.recovery]
+description = "Recovery and validation tools"
+layers = [
+    "sor-runtime",
+    "nerdsafe-runtime",
+    "ila-runtime",
+]
+env = { LOG_LEVEL = "info" }
