@@ -20,7 +20,7 @@ default:
 
 # Show project info
 info:
-    @echo "Project: {{project}}"
+    @echo "Project: monitoring"
     @echo "Version: {{version}}"
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -29,7 +29,7 @@ info:
 
 # Build the project
 build:
-    @echo "Building {{project}}..."
+    @echo "Building monitoring..."
 
 # Clean build artifacts
 clean:

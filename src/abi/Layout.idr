@@ -6,9 +6,9 @@
 |||
 ||| @see https://en.wikipedia.org/wiki/Data_structure_alignment
 
-module {{PROJECT}}.ABI.Layout
+module SRC.ABI.Layout
 
-import {{PROJECT}}.ABI.Types
+import SRC.ABI.Types
 import Data.Vect
 import Data.So
 

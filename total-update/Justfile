@@ -281,19 +281,19 @@ man:
 # Build container image
 container-build tag="latest":
     @if [ -f Containerfile ]; then \
-        podman build -t {{project}}:{{tag}} -f Containerfile .; \
+        podman build -t total-update:{{tag}} -f Containerfile .; \
     else \
         echo "No Containerfile found"; \
     fi
 
 # Run container
 container-run tag="latest" *args:
-    podman run --rm -it {{project}}:{{tag}} {{args}}
+    podman run --rm -it total-update:{{tag}} {{args}}
 
 # Push container image
 container-push registry="ghcr.io/hyperpolymath" tag="latest":
-    podman tag {{project}}:{{tag}} {{registry}}/{{project}}:{{tag}}
-    podman push {{registry}}/{{project}}:{{tag}}
+    podman tag total-update:{{tag}} {{registry}}/total-update:{{tag}}
+    podman push {{registry}}/total-update:{{tag}}
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # CI & AUTOMATION

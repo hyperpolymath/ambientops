@@ -3,12 +3,12 @@
 ||| This module defines the Application Binary Interface (ABI) for this library.
 ||| All type definitions include formal proofs of correctness.
 |||
-||| Replace {{PROJECT}} with your project name.
+||| Replace BROAD_SPECTRUM with your project name.
 ||| Replace {{TYPES}} with your actual type definitions.
 |||
 ||| @see https://idris2.readthedocs.io for Idris2 documentation
 
-module {{PROJECT}}.ABI.Types
+module BROAD_SPECTRUM.ABI.Types
 
 import Data.Bits
 import Data.So

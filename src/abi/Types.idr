@@ -10,7 +10,7 @@
 |||
 ||| @see https://idris2.readthedocs.io for Idris2 documentation
 
-module {{PROJECT}}.ABI.Types
+module SRC.ABI.Types
 
 import Data.Bits
 import Data.So

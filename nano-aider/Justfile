@@ -11,22 +11,22 @@ default:
 
 # Build in debug mode
 build:
-    @echo "Building {{project}} (debug)..."
+    @echo "Building nano-aider (debug)..."
     gprbuild -P {{gpr}} -XNANO_AIDER_BUILD_MODE=debug
 
 # Build in release mode
 release:
-    @echo "Building {{project}} (release)..."
+    @echo "Building nano-aider (release)..."
     gprbuild -P {{gpr}} -XNANO_AIDER_BUILD_MODE=release
 
 # Build using Alire
 alr-build:
-    @echo "Building {{project}} with Alire..."
+    @echo "Building nano-aider with Alire..."
     alr build
 
 # Run the application
 run: build
-    @echo "Running {{project}}..."
+    @echo "Running nano-aider..."
     ./bin/nano-aider
 
 # Run with list flag
@@ -78,7 +78,7 @@ uninstall:
 
 # Show project information
 info:
-    @echo "Project: {{project}}"
+    @echo "Project: nano-aider"
     @echo "GPR File: {{gpr}}"
     @echo ""
     @echo "Ada Source Files:"

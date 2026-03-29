@@ -3,12 +3,12 @@
 ||| This module defines the Application Binary Interface (ABI) for this library.
 ||| All type definitions include formal proofs of correctness.
 |||
-||| Replace {{PROJECT}} with your project name.
+||| Replace CZECH_FILE_KNIFE with your project name.
 ||| Replace {{TYPES}} with your actual type definitions.
 |||
 ||| @see https://idris2.readthedocs.io for Idris2 documentation
 
-module {{PROJECT}}.ABI.Types
+module CZECH_FILE_KNIFE.ABI.Types
 
 import Data.Bits
 import Data.So

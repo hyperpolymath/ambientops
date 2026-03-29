@@ -5,9 +5,9 @@
 |||
 ||| @see https://en.wikipedia.org/wiki/Data_structure_alignment
 
-module {{PROJECT}}.ABI.Layout
+module CZECH_FILE_KNIFE.ABI.Layout
 
-import {{PROJECT}}.ABI.Types
+import CZECH_FILE_KNIFE.ABI.Types
 import Data.Vect
 import Data.So
 

@@ -59,7 +59,7 @@
     (critical)
     (high)
     (medium
-      ("ABI-FFI templates (Types.idr, Layout.idr, Foreign.idr, main.zig) still have {{PROJECT}} placeholders"))
+      ("ABI-FFI templates (Types.idr, Layout.idr, Foreign.idr, main.zig) still have AMBIENTOPS placeholders"))
     (low
       ("In-memory only — no persistence layer")
       ("Consider distributed metrics aggregation")))
