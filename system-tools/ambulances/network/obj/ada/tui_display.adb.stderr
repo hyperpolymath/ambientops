@@ -1,0 +1,2 @@
+tui_display.adb:66:37: warning: static range out of bounds of subtype of "Standard.Integer" defined at line 19 [enabled by default]
+tui_display.adb:66:37: warning: Constraint_Error will be raised at run time [enabled by default]

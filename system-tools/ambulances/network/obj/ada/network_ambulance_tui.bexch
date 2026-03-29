@@ -1,0 +1,20 @@
+[GENERATED OBJECT FILE]
+b__network_ambulance_tui.o
+[PROJECT FILES]
+/var/mnt/eclipse/repos/network-ambulance/network_ambulance_tui.gpr
+20260129214207 6ebe9791297f180bf85cbbf7f9923bdd
+[BOUND OBJECT FILES]
+/var/mnt/eclipse/repos/network-ambulance/obj/ada/network_state.o
+/var/mnt/eclipse/repos/network-ambulance/obj/ada/tui_display.o
+/var/mnt/eclipse/repos/network-ambulance/obj/ada/network_ambulance_tui.o
+[GENERATED SOURCE FILES]
+b__network_ambulance_tui.ads
+b__network_ambulance_tui.adb
+b__network_ambulance_tui.ali
+[RESULTING OPTIONS]
+-L/var/mnt/eclipse/repos/network-ambulance/obj/ada/
+-L/var/mnt/eclipse/repos/network-ambulance/obj/ada/
+-L/usr/lib/gcc/x86_64-redhat-linux/15/adalib/
+-static
+-lgnat
+-ldl
