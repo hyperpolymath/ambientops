@@ -139,7 +139,7 @@ defmodule HAR.Contracts.K9Contract do
   @ets_table :har_k9_contracts
 
   # Valid breach policy atoms — allowlist to prevent atom exhaustion.
-  # SECURITY: Never call String.to_atom on user input.
+  # SECURITY: Never call String.to_existing_atom on user input.
   @valid_breach_policies [:log, :alert, :circuit_break, :degrade]
 
   # Valid consistency guarantee atoms.
@@ -581,7 +581,7 @@ defmodule HAR.Contracts.K9Contract do
   @doc """
   Safely parse a breach policy string to its corresponding atom.
 
-  Uses pattern matching on known strings — NEVER String.to_atom.
+  Uses pattern matching on known strings — NEVER String.to_existing_atom.
   Unknown input defaults to `:log` (safest policy).
 
   ## Examples

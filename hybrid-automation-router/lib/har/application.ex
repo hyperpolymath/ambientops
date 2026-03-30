@@ -66,6 +66,6 @@ defmodule HAR.Application do
   defp nodes_from_env do
     System.get_env("HAR_CLUSTER_NODES", "")
     |> String.split(",", trim: true)
-    |> Enum.map(&String.to_atom/1)
+    |> Enum.map(&String.to_existing_atom/1)
   end
 end

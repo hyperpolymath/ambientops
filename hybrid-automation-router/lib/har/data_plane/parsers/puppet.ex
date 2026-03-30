@@ -346,7 +346,7 @@ defmodule HAR.DataPlane.Parsers.Puppet do
   defp normalize_resource_type("apt::source"), do: :repository_create
   defp normalize_resource_type("firewall"), do: :firewall_rule
   defp normalize_resource_type("class"), do: :class_include
-  defp normalize_resource_type(type), do: String.to_atom("puppet.#{type}")
+  defp normalize_resource_type(type), do: String.to_existing_atom("puppet.#{type}")
 
   # Parameter normalization
 

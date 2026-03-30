@@ -121,15 +121,15 @@ defmodule HAR.ControlPlane.RoutingTable do
   end
 
   defp parse_pattern(pattern) when is_map(pattern) do
-    Map.new(pattern, fn {k, v} -> {String.to_atom(k), v} end)
+    Map.new(pattern, fn {k, v} -> {String.to_existing_atom(k), v} end)
   end
 
   defp parse_backend(%{"name" => name} = backend) do
     %{
       name: name,
-      type: Map.get(backend, "type", "local") |> String.to_atom(),
+      type: Map.get(backend, "type", "local") |> String.to_existing_atom(),
       priority: Map.get(backend, "priority", 50),
-      capabilities: Map.get(backend, "capabilities", []) |> Enum.map(&String.to_atom/1),
+      capabilities: Map.get(backend, "capabilities", []) |> Enum.map(&String.to_existing_atom/1),
       metadata: Map.get(backend, "metadata", %{})
     }
   end

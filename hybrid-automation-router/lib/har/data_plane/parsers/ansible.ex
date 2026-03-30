@@ -151,7 +151,7 @@ defmodule HAR.DataPlane.Parsers.Ansible do
   defp normalize_module_type("command", _args), do: :command_run
   defp normalize_module_type("shell", _args), do: :command_run
   defp normalize_module_type("script", _args), do: :script_execute
-  defp normalize_module_type(module, _args), do: String.to_atom("ansible." <> module)
+  defp normalize_module_type(module, _args), do: String.to_existing_atom("ansible." <> module)
 
   defp service_type_from_state(args) when is_map(args) do
     case Map.get(args, "state") do

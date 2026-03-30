@@ -46,7 +46,7 @@ defmodule SystemObservatory.Ambient do
   end
 
   defp build_payload(weather, theme) do
-    state = String.to_atom(weather["state"])
+    state = String.to_existing_atom(weather["state"])
     theme_state = Themes.apply_state(theme, state)
 
     %{

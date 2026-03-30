@@ -168,7 +168,7 @@ defmodule TotalUpdate.Daemon do
       config =
         Regex.scan(~r/\((\w+[-\w]*)\s+[.\s]*([^\)]+)\)/, content)
         |> Enum.reduce(%{}, fn [_, key, value], acc ->
-          atom_key = key |> String.replace("-", "_") |> String.to_atom()
+          atom_key = key |> String.replace("-", "_") |> String.to_existing_atom()
           parsed_value = parse_value(String.trim(value))
           Map.put(acc, atom_key, parsed_value)
         end)

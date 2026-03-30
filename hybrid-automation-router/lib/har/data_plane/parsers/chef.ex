@@ -172,7 +172,7 @@ defmodule HAR.DataPlane.Parsers.Chef do
 
       # Symbol
       String.starts_with?(value, ":") ->
-        String.slice(value, 1..-1//1) |> String.to_atom()
+        String.slice(value, 1..-1//1) |> String.to_existing_atom()
 
       # Quoted string
       String.match?(value, ~r/^['"].*['"]$/) ->
@@ -211,7 +211,7 @@ defmodule HAR.DataPlane.Parsers.Chef do
     |> Enum.map(fn
       [_, str, "", ""] -> str
       [_, "", str, ""] -> str
-      [_, "", "", sym] -> String.to_atom(sym)
+      [_, "", "", sym] -> String.to_existing_atom(sym)
     end)
   end
 
@@ -231,10 +231,10 @@ defmodule HAR.DataPlane.Parsers.Chef do
           # Array of actions
           ~r/:(\w+)/
           |> Regex.scan(action_str)
-          |> Enum.map(fn [_, action] -> String.to_atom(action) end)
+          |> Enum.map(fn [_, action] -> String.to_existing_atom(action) end)
         else
           # Single action
-          [String.to_atom(String.slice(action_str, 1..-1//1))]
+          [String.to_existing_atom(String.slice(action_str, 1..-1//1))]
         end
 
       nil ->
@@ -265,7 +265,7 @@ defmodule HAR.DataPlane.Parsers.Chef do
       |> Enum.map(fn
         [_, action, resource] -> {:notifies, action, resource, :delayed}
         [_, action, resource, ""] -> {:notifies, action, resource, :delayed}
-        [_, action, resource, timing] -> {:notifies, action, resource, String.to_atom(timing)}
+        [_, action, resource, timing] -> {:notifies, action, resource, String.to_existing_atom(timing)}
       end)
 
     # subscribes :action, 'resource[name]', :timing
@@ -274,7 +274,7 @@ defmodule HAR.DataPlane.Parsers.Chef do
       |> Enum.map(fn
         [_, action, resource] -> {:subscribes, action, resource, :delayed}
         [_, action, resource, ""] -> {:subscribes, action, resource, :delayed}
-        [_, action, resource, timing] -> {:subscribes, action, resource, String.to_atom(timing)}
+        [_, action, resource, timing] -> {:subscribes, action, resource, String.to_existing_atom(timing)}
       end)
 
     notifies ++ subscribes
@@ -422,7 +422,7 @@ defmodule HAR.DataPlane.Parsers.Chef do
   defp normalize_resource_type("docker_container", _action), do: :docker_container_run
   defp normalize_resource_type("docker_image", _action), do: :docker_image_pull
 
-  defp normalize_resource_type(type, _action), do: String.to_atom("chef.#{type}")
+  defp normalize_resource_type(type, _action), do: String.to_existing_atom("chef.#{type}")
 
   # Parameter normalization
 

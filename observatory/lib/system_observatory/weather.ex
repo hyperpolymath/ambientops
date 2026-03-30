@@ -189,7 +189,7 @@ defmodule SystemObservatory.Weather do
     states =
       categories
       |> Map.values()
-      |> Enum.map(fn cat -> String.to_atom(cat["state"]) end)
+      |> Enum.map(fn cat -> String.to_existing_atom(cat["state"]) end)
 
     cond do
       :act in states -> :act

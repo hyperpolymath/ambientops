@@ -400,7 +400,7 @@ defmodule HAR.DataPlane.Parsers.Pulumi do
 
   defp atomize_keys(map) when is_map(map) do
     Map.new(map, fn
-      {k, v} when is_binary(k) -> {String.to_atom(k), atomize_value(v)}
+      {k, v} when is_binary(k) -> {String.to_existing_atom(k), atomize_value(v)}
       {k, v} -> {k, atomize_value(v)}
     end)
   end

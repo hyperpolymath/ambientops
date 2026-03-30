@@ -57,7 +57,7 @@ defmodule Mix.Tasks.Har.Transform do
       Mix.raise("File not found: #{input_file}")
     end
 
-    target = String.to_atom(opts[:to])
+    target = String.to_existing_atom(opts[:to])
     graph = load_graph(input_file)
 
     transform_opts =
@@ -82,7 +82,7 @@ defmodule Mix.Tasks.Har.Transform do
     vertices =
       Enum.map(data["vertices"] || [], fn v ->
         HAR.Semantic.Operation.new(
-          String.to_atom(v["type"]),
+          String.to_existing_atom(v["type"]),
           atomize_keys(v["params"] || %{}),
           id: v["id"],
           target: atomize_keys(v["target"] || %{}),
@@ -95,7 +95,7 @@ defmodule Mix.Tasks.Har.Transform do
         HAR.Semantic.Dependency.new(
           e["from"],
           e["to"],
-          String.to_atom(e["type"]),
+          String.to_existing_atom(e["type"]),
           metadata: atomize_keys(e["metadata"] || %{})
         )
       end)
@@ -109,7 +109,7 @@ defmodule Mix.Tasks.Har.Transform do
 
   defp atomize_keys(map) when is_map(map) do
     Map.new(map, fn
-      {k, v} when is_binary(k) -> {String.to_atom(k), atomize_keys(v)}
+      {k, v} when is_binary(k) -> {String.to_existing_atom(k), atomize_keys(v)}
       {k, v} -> {k, atomize_keys(v)}
     end)
   end
@@ -123,7 +123,7 @@ defmodule Mix.Tasks.Har.Transform do
   defp maybe_add(opts, _key, nil), do: opts
 
   defp maybe_add(opts, key, value) do
-    Keyword.put(opts, key, String.to_atom(value))
+    Keyword.put(opts, key, String.to_existing_atom(value))
   end
 
   defp write_output(output, nil) do

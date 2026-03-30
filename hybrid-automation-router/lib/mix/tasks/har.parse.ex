@@ -105,7 +105,7 @@ defmodule Mix.Tasks.Har.Parse do
   end
 
   defp detect_format(_file, format) when is_binary(format) do
-    String.to_atom(format)
+    String.to_existing_atom(format)
   end
 
   defp format_output(graph, opts) do

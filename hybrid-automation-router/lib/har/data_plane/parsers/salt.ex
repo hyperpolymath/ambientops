@@ -120,7 +120,7 @@ defmodule HAR.DataPlane.Parsers.Salt do
   defp normalize_function_type("group.absent"), do: :group_delete
   defp normalize_function_type("cmd.run"), do: :command_run
   defp normalize_function_type("cmd.script"), do: :script_execute
-  defp normalize_function_type(function), do: String.to_atom("salt." <> function)
+  defp normalize_function_type(function), do: String.to_existing_atom("salt." <> function)
 
   defp normalize_function_params("pkg.installed", args) do
     %{

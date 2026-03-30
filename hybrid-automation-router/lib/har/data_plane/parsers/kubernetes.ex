@@ -176,7 +176,7 @@ defmodule HAR.DataPlane.Parsers.Kubernetes do
   defp normalize_kind("CronJob"), do: :cron_create
   defp normalize_kind("HorizontalPodAutoscaler"), do: :autoscaler_create
   defp normalize_kind("CustomResourceDefinition"), do: :crd_create
-  defp normalize_kind(kind), do: String.to_atom("kubernetes.#{String.downcase(kind)}")
+  defp normalize_kind(kind), do: String.to_existing_atom("kubernetes.#{String.downcase(kind)}")
 
   # Parameter normalization
 

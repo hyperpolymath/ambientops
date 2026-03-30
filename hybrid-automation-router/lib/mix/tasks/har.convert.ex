@@ -71,7 +71,7 @@ defmodule Mix.Tasks.Har.Convert do
     end
 
     source_format = detect_format(input_file, opts[:from])
-    target_format = String.to_atom(opts[:to])
+    target_format = String.to_existing_atom(opts[:to])
 
     if opts[:verbose] do
       Mix.shell().info("Converting #{input_file}")
@@ -142,13 +142,13 @@ defmodule Mix.Tasks.Har.Convert do
   end
 
   defp detect_format(_file, format) when is_binary(format) do
-    String.to_atom(format)
+    String.to_existing_atom(format)
   end
 
   defp maybe_add(opts, _key, nil), do: opts
 
   defp maybe_add(opts, key, value) do
-    Keyword.put(opts, key, String.to_atom(value))
+    Keyword.put(opts, key, String.to_existing_atom(value))
   end
 
   defp write_output(output, nil, _format) do

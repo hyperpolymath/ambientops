@@ -8,11 +8,11 @@ if config_env() == :prod do
     cluster_nodes:
       System.get_env("HAR_CLUSTER_NODES", "")
       |> String.split(",", trim: true)
-      |> Enum.map(&String.to_atom/1)
+      |> Enum.map(&String.to_existing_atom/1)
 
   # Erlang cookie for distribution
   if cookie = System.get_env("RELEASE_COOKIE") do
-    config :kernel, :cookie, String.to_atom(cookie)
+    config :kernel, :cookie, String.to_existing_atom(cookie)
   end
 
   # TLS certificates

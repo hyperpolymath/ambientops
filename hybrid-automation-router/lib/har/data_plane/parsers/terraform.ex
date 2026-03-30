@@ -705,7 +705,7 @@ defmodule HAR.DataPlane.Parsers.Terraform do
   defp normalize_resource_type("local_sensitive_file"), do: :file_write
 
   # Fallback for unknown resource types
-  defp normalize_resource_type(type), do: String.to_atom("terraform." <> type)
+  defp normalize_resource_type(type), do: String.to_existing_atom("terraform." <> type)
 
   # Parameter Normalization
 
@@ -812,7 +812,7 @@ defmodule HAR.DataPlane.Parsers.Terraform do
 
   defp extract_provider(type) do
     case String.split(type, "_", parts: 2) do
-      [provider, _] -> String.to_atom(provider)
+      [provider, _] -> String.to_existing_atom(provider)
       _ -> :unknown
     end
   end
