@@ -51,7 +51,8 @@ __pycache__/
 
 # Ada/SPARK
 *.ali
-/obj/
+*.o
+obj/
 /bin/
 
 # Haskell
