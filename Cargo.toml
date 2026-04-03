@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: PMPL-1.0-or-later
 [workspace]
-members = ["hardware-crash-team", "clinician", "contracts-rust"]
+members = ["hardware-crash-team", "clinician", "contracts-rust", "port-endoscope"]
 exclude = ["personal-sysadmin", "displace", "panoptes", "_pathroot/rust/mustfile-orchestrator", "ambulances/network"]
 resolver = "2"

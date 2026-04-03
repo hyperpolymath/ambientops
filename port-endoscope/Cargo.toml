@@ -1,0 +1,17 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+[package]
+name = "port-endoscope"
+version = "0.1.0"
+edition = "2021"
+authors = ["Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>"]
+description = "Automatic port recovery daemon — detects stuck/orphaned ports and reclaims them"
+license = "PMPL-1.0-or-later"
+repository = "https://github.com/hyperpolymath/ambientops"
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }
+nix = { version = "0.29", features = ["signal", "process"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+anyhow = "1"
+libc = "0.2"
