@@ -3,42 +3,155 @@
 :toc:
 :icons: font
 
-The README makes claims. This file backs them up.
+The README makes claims. This file backs them up with evidence from real code.
 
-[quote, README]
+== Core Claims & Evidence
+
+=== Claim 1: "Hospital Model: 4 Departments (Ward, Emergency Room, Operating Room, Records)"
+
+**From README** (lines 12-18):
 ____
-AmbientOps is a hospital-model operations framework providing **trustworthy system help** without fearware, nagware, or scammy "optimizers". It is organised as a **hybrid monorepo**: core hospital departments live here, external tools stay as satellites.
+AmbientOps presents system tooling as four "departments":
+
+* **Ward** — System Weather + gentle ambient guidance (`observatory/`)
+* **Emergency Room** — Panic-safe intake with one-click stabilization (`emergency-room/`)
+* **Operating Room** — Planned procedures: Scan → Plan → Apply → Undo → Receipt (`clinician/`, `hardware-crash-team/`, `composer/`)
+* **Records** — Receipts, undo tokens, and referrals (`records/`)
 ____
 
-== Technology Choices
+**Evidence**: `/var/mnt/eclipse/repos/ambientops/observatory/` (Elixir, ~600 LOC) implements Ward: system metrics aggregation, weather UI generation (calm/watch/act), event hub for all component outputs. `/var/mnt/eclipse/repos/ambientops/emergency-room/` (V, ~1800 LOC) implements ER: panic-safe intake with one-click system stabilization. `/var/mnt/eclipse/repos/ambientops/clinician/` (Rust, ~4400 LOC) and `/var/mnt/eclipse/repos/ambientops/hardware-crash-team/` (Rust, ~700 LOC) implement OR: multi-step procedures. `/var/mnt/eclipse/repos/ambientops/records/referrals/` (Elixir, ~400 LOC) implements Records: undo bundle storage, cross-platform bug reporting.
 
+**Caveat**: Hospital metaphor is *architectural* (data flow + responsibility boundaries), not formally enforced. Each department can be used independently; nothing prevents a bug report from jumping directly to Clinician (skipping ER).
+
+=== Claim 2: "8 JSON Schemas Define Inter-Component Data Format"
+
+**From README** (lines 92-109):
+____
 [cols="1,2"]
 |===
-| Technology | Learn More
+| Schema | Purpose
 
-| **Rust** | https://www.rust-lang.org
-| **Zig** | https://ziglang.org
-| **Idris2 ABI** | https://www.idris-lang.org
+| `evidence-envelope` | A&E intake / scan output with artifacts and findings
+| `procedure-plan` | Operating Theatre steps with risk and reversibility
+| `receipt` | Execution result with undo bundle and evidence
+| `system-weather` | Ward UI payload: calm/watch/act with trends
+| `message-intent` | Command messaging between components
+| `run-bundle` | Execution bundle with completion info
+| `pack-manifest` | Scan pack definition with platform filters
+| `ambient-payload` | Ambient mode indicator data
 |===
+____
+
+**Evidence**: `/var/mnt/eclipse/repos/ambientops/contracts/` contains 8 JSON schemas (`.json` files) defining inter-component contracts. Example: `/var/mnt/eclipse/repos/ambientops/contracts/evidence-envelope-schema.json` defines the intake payload structure. `/var/mnt/eclipse/repos/ambientops/contracts-rust/` provides Rust structs with `serde` serialization matching each schema. `/var/mnt/eclipse/repos/ambientops/contracts/deno-validators.ts` (Deno) validates payloads against schemas at runtime.
+
+**Caveat**: Schemas are *JSON Schema 7* (syntactic validation only). No semantic proofs that plan → execution → receipt causality is preserved. A bug in the Clinician could ignore the receipt and re-apply a dangerous procedure.
+
+=== Claim 3: "Evidence-First Approach: Show Measurements, Not Hype"
+
+**From README** (lines 123-132):
+____
+== Safety and Trust Principles
+
+* No fearware claims ("304 errors fixed!")
+* Evidence first: show measurements, not hype
+* Scan is non-mutating by default
+* Apply requires explicit approval
+* DRY RUN by default for all destructive operations
+* Undo and receipts are first-class
+* Privacy controls are visible and simple (local-only by default)
+____
+
+**Evidence**: `/var/mnt/eclipse/repos/ambientops/hardware-crash-team/src/main.rs` implements `--format text` output that shows actual PCI device state (not inflated "fixes"). `/var/mnt/eclipse/repos/ambientops/hardware-crash-team/src/bin/plan.rs` (dry-run flag) defaults to `--dry-run`, requiring explicit `--force` to apply. `/var/mnt/eclipse/repos/ambientops/clinician/src/procedure.rs` logs undo tokens to local files only (no cloud uploads).
+
+**Caveat**: Evidence principle is *by design*, not enforced. Nothing prevents a future module from claiming "404 issues fixed" via marketing language. Trust is aspirational, not mechanically verified.
 
 == Dogfooded Across The Account
 
-Uses the hyperpolymath ABI/FFI standard (Idris2 + Zig). Same pattern used across
-https://github.com/hyperpolymath/proven[proven],
-https://github.com/hyperpolymath/burble[burble], and
-https://github.com/hyperpolymath/gossamer[gossamer].
+Uses hyperpolymath operations stack (Rust + Elixir + V + Deno + contracts-first architecture). Same pattern across:
+- https://github.com/hyperpolymath/panic-attacker[panic-attacker] — Software health scanner (Ward input)
+- https://github.com/hyperpolymath/hypatia[hypatia] — Neurosymbolic CI/CD intelligence (OR augmentation)
+- https://github.com/hyperpolymath/verisimdb[verisimdb] — Multi-modal database (cross-department state)
+- https://github.com/hyperpolymath/gitbot-fleet[gitbot-fleet] — Bot orchestration (Records automation)
+
+All share: *Data-contract boundaries, evidence-first methodology, undo as first-class citizen.*
 
 == File Map
 
-[cols="1,2"]
+[cols="1,3"]
 |===
-| Path | What's There
+| Path | Contents & Purpose
 
-| `src/` | Source code
-| `ffi/` | Foreign function interface
-| `test(s)/` | Test suite
+| `clinician/src/main.rs` | Rust AI-assisted sysadmin (~4400 LOC): case intake, diagnostic flow, procedure recommendation. Feature-gated (ai, storage, p2p optional).
+
+| `clinician/src/procedure.rs` | Procedure executor: plan validation, step sequencing, undo bundle generation, receipt emission
+
+| `emergency-room/src/main.v` | V language ER system (~1800 LOC): panic-safe intake, one-click stabilization, minimal UI, local-only execution
+
+| `emergency-room/src/stabilize.v` | Stabilization procedures: system cooling, crash-safe checkpoints, graceful shutdown
+
+| `hardware-crash-team/src/main.rs` | PCI hardware diagnostics (~700 LOC): device enumeration, zombie detection, remediation planning
+
+| `hardware-crash-team/src/scan.rs` | Hardware scanner: BAR enumeration, lspci enrichment, interrupt checking, ATS2 vendor lookup
+
+| `hardware-crash-team/src/remediation.rs` | Remediation strategies: pci-stub binding, vfio-pci passthrough, power-off, unbind, dual-mode disable
+
+| `hardware-crash-team/src/output.rs` | Output formats: text (human), JSON (structured), SARIF 2.1.0 (tooling integration)
+
+| `observatory/lib/observability_server.ex` | Elixir metrics server (~600 LOC): event ingestion, aggregation, weather computation, dashboard fanout
+
+| `observatory/lib/system_weather.ex` | System weather engine: calm (everything ok), watch (anomalies detected), act (critical threshold breached), trend analysis
+
+| `records/referrals/lib/bug_reporting.ex` | Multi-platform bug reporting MCP (~400 LOC): GitHub issue creation, GitLab integration, Jira tickets (pluggable)
+
+| `contracts/evidence-envelope-schema.json` | JSON Schema: scan output format (platform, artifacts, findings, timestamps)
+
+| `contracts/procedure-plan-schema.json` | JSON Schema: operating theatre plan (steps, preconditions, risks, reversibility flags)
+
+| `contracts/receipt-schema.json` | JSON Schema: execution result (step results, undo bundle location, evidence references, operator attestation)
+
+| `contracts/system-weather-schema.json` | JSON Schema: Ward UI payload (status: calm/watch/act, metrics, trends, anomalies)
+
+| `contracts/message-intent-schema.json` | JSON Schema: inter-component messaging (from, to, command, args, expected reply schema)
+
+| `contracts/run-bundle-schema.json` | JSON Schema: execution metadata (job ID, timestamps, resource usage, completion status)
+
+| `contracts/pack-manifest-schema.json` | JSON Schema: scan pack definition (tools, platform filters, artifact collection rules)
+
+| `contracts/ambient-payload-schema.json` | JSON Schema: ambient mode indicator (user context, attention level, system load)
+
+| `contracts-rust/src/lib.rs` | Serde types matching all 8 JSON schemas, From<T> conversions between components
+
+| `contracts/deno-validators.ts` | Deno runtime validators: ajv-based JSON Schema validation, error reporting
+
+| `Cargo.toml` | Rust workspace root: clinician, hardware-crash-team, contracts-rust crates
+
+| `Makefile` | Build targets: `just build-all`, `just test-all`, language-specific builds (cargo, mix, v, deno)
+
+| `.machine_readable/6a2/STATE.a2ml` | Project state: component completion percentages, remaining work, current blockers
+
+| `.machine_readable/6a2/META.a2ml` | Architecture decisions: hospital model rationale, schema-first design, undo principles
+
+| `.machine_readable/6a2/ECOSYSTEM.a2ml` | Relationships: panic-attacker (Ward input), hypatia (OR AI), verisimdb (shared DB), gitbot-fleet (Records)
 |===
+
+== Status
+
+**Honest Assessment**: Hybrid maturity. Observatory + Hardware-Crash-Team are functional (85% + 75%). Clinician is AI-assisted but untested at scale (55%). ER is panic-safe but minimal (75%). Records/referrals MVP (65%). Composer (orchestration) is stubs (10%).
+
+**What Works**:
+- Observatory: metrics aggregation, weather computation, event fanout
+- Hardware-Crash-Team: PCI scanning, remediation planning, 27 tests
+- Emergency Room: one-click stabilization, safe fallbacks
+- Contracts: 8 schemas defined, validation working
+- Records: bug report creation (GitHub/GitLab tested)
+
+**What's Incomplete**:
+- Clinician: full AI workflow integration, feature gates not tested
+- Composer: orchestration engine (stubs only)
+- End-to-end: hospital model integration untested
+- Undo fidelity: some procedures don't have undo bundles
+- VeriSimDB integration: planned, not implemented
 
 == Questions?
 
-Open an issue or reach out directly — happy to explain anything in more detail.
+Open an issue or reach out at j.d.a.jewell@open.ac.uk — happy to explain the hospital model, schema-first architecture, or evidence-first methodology.
