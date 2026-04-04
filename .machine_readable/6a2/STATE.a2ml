@@ -7,8 +7,10 @@
 [metadata]
 project = "ambientops"
 version = "0.2.0"
-last-updated = "2026-03-23"
+last-updated = "2026-04-04"
 status = "active"
+crg-contracts-rust = "C"
+note = "contracts-rust achieved CRG C: 72 tests (15 unit + 12 property + 5 E2E + 12 contract + 13 aspect + 12 benchmarks)"
 
 [project-context]
 name = "ambientops"

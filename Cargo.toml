@@ -3,3 +3,7 @@
 members = ["hardware-crash-team", "clinician", "contracts-rust", "port-endoscope"]
 exclude = ["personal-sysadmin", "displace", "panoptes", "_pathroot/rust/mustfile-orchestrator", "ambulances/network"]
 resolver = "2"
+
+[workspace.dependencies]
+proptest = "1.4"
+criterion = "0.5"
