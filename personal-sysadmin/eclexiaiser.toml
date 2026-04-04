@@ -5,15 +5,16 @@
 name = "personal-sysadmin"
 
 [[functions]]
-name = "process_batch"
-source = "src/batch.rs"
-energy-budget-mj = 50.0
-carbon-budget-mg = 10.0
+name = "analyze"
+source = "src/tools/crisis.rs"
+energy-budget-mj = 80.0
+carbon-budget-mg = 16.0
 
 [[functions]]
-name = "render_page"
-source = "src/web.rs"
-energy-budget-mj = 5.0
+name = "handle"
+source = "src/tools/security.rs"
+energy-budget-mj = 25.0
+carbon-budget-mg = 5.0
 
 [carbon]
 provider = "static"
