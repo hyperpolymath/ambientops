@@ -1,0 +1,25 @@
+{
+  "groove_version": "1",
+  "service_id": "network-dashboard",
+  "service_version": "0.1.0",
+  "mode": "active",
+  "capabilities": {
+    "network-monitoring": {
+      "type": "monitoring",
+      "description": "Real-time monitoring of Twingate, ZeroTier, IPFS, IPv6 ingress, BGP, and general network health across the FlatRacoon Network Stack via Phoenix LiveView",
+      "protocol": "http",
+      "endpoint": "/",
+      "requires_auth": false,
+      "panel_compatible": true
+    }
+  },
+  "consumes": [],
+  "endpoints": {
+    "health": "/health"
+  },
+  "health": "/health",
+  "ports": {
+    "http": 4050
+  },
+  "applicability": ["individual", "team"]
+}

@@ -1,0 +1,33 @@
+{
+  "groove_version": "1",
+  "service_id": "hybrid-automation-router",
+  "service_version": "0.1.0",
+  "mode": "active",
+  "capabilities": {
+    "config-routing": {
+      "type": "api-gateway",
+      "description": "Routes and transforms infrastructure automation configs between IaC formats (Ansible, Salt, Terraform, bash) — BGP-style routing for configuration management",
+      "protocol": "http",
+      "endpoint": "/api",
+      "requires_auth": false,
+      "panel_compatible": true
+    },
+    "config-transform": {
+      "type": "build-tool",
+      "description": "Transforms configuration from one IaC source format to a target format via the transform API endpoint",
+      "protocol": "http",
+      "endpoint": "/api/transform",
+      "requires_auth": false,
+      "panel_compatible": true
+    }
+  },
+  "consumes": [],
+  "endpoints": {
+    "health": "/health"
+  },
+  "health": "/health",
+  "ports": {
+    "http": 4050
+  },
+  "applicability": ["individual", "team"]
+}

@@ -1,0 +1,25 @@
+{
+  "groove_version": "1",
+  "service_id": "panoptes",
+  "service_version": "1.0.0",
+  "mode": "active",
+  "capabilities": {
+    "file-scanning": {
+      "type": "monitoring",
+      "description": "Declarative filesystem watcher that uses local AI (Moondream via Ollama) to automatically rename images and documents based on visual content — all processing on-device, privacy-preserving",
+      "protocol": "http",
+      "endpoint": "/",
+      "requires_auth": false,
+      "panel_compatible": true
+    }
+  },
+  "consumes": [],
+  "endpoints": {
+    "health": "/health"
+  },
+  "health": "/health",
+  "ports": {
+    "http": 8080
+  },
+  "applicability": ["individual"]
+}
