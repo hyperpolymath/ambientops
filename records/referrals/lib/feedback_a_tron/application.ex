@@ -15,6 +15,11 @@ defmodule FeedbackATron.Application do
   @impl true
   def start(_type, _args) do
     children = [
+      # VeriSimDB persistence layer — must start first so that the Deduplicator
+      # warm-up (triggered 500 ms after init) finds the ETS table already created,
+      # and so that AuditLog dual-writes are wired from the first logged event.
+      FeedbackATron.VeriSimDBClient,
+
       # Core services
       FeedbackATron.Submitter,
       FeedbackATron.Deduplicator,

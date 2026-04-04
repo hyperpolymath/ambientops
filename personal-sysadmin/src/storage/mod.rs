@@ -1,13 +1,16 @@
 // SPDX-License-Identifier: PMPL-1.0-or-later
-//! ArangoDB storage layer for knowledge base and solution graph
+//! VeriSimDB storage layer for knowledge base and solution graph.
+//!
+//! Replaces the previous ArangoDB stub with real HTTP calls to a local
+//! VeriSimDB instance (default: http://localhost:8080).  Solutions are
+//! stored as hexads whose modalities carry the structured fields.
 
-// Allow dead code - scaffolding for future database integration
-#![allow(dead_code)]
-
-use anyhow::Result;
+use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 
-/// Solution stored in the knowledge base
+// ── domain types ────────────────────────────────────────────────────────────
+
+/// Solution stored in the knowledge base.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Solution {
     pub id: String,
@@ -23,15 +26,16 @@ pub struct Solution {
     pub updated_at: chrono::DateTime<chrono::Utc>,
 }
 
+/// Where a solution originated.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum SolutionSource {
-    Local,          // Learned locally
-    Mesh(String),   // Shared from peer
-    Forum(String),  // Scraped from forum
-    Manual,         // User-provided
+    Local,          // Learned locally on this machine
+    Mesh(String),   // Shared from a mesh peer (peer ID)
+    Forum(String),  // Scraped from an online forum (URL)
+    Manual,         // Entered manually by the user
 }
 
-/// Problem-solution relationship for graph queries
+/// Problem-solution relationship (used by callers building relations).
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ProblemRelation {
     pub from_problem: String,
@@ -40,83 +44,317 @@ pub struct ProblemRelation {
     pub context: Vec<String>,
 }
 
-/// ArangoDB storage client
-pub struct Storage {
-    // TODO: Add arangors client when ArangoDB is configured
-    // client: arangors::Connection,
-    // db: arangors::Database,
-    config: StorageConfig,
+// ── VeriSimDB wire types ─────────────────────────────────────────────────────
+
+/// Request body sent to POST /api/v1/hexads.
+///
+/// VeriSimDB hexads carry six modalities; we use:
+/// - `perceptual`  — category tag
+/// - `conceptual`  — problem description
+/// - `procedural`  — solution text (serialised commands/tags/source/counts)
+/// - `temporal`    — ISO-8601 timestamps
+/// - `contextual`  — the full Solution JSON for round-trip fidelity
+/// - `intentional` — solution ID
+#[derive(Debug, Serialize)]
+struct HexadRequest {
+    modalities: HexadModalities,
 }
 
+/// The six named modality slots VeriSimDB uses for storage and responses.
+#[derive(Debug, Serialize, Deserialize)]
+struct HexadModalities {
+    perceptual: String,
+    conceptual: String,
+    procedural: String,
+    temporal: String,
+    contextual: String,
+    intentional: String,
+}
+
+/// Minimal shape of a VeriSimDB hexad response.
+#[derive(Debug, Deserialize)]
+struct HexadResponse {
+    id: String,
+    modalities: HexadModalities,
+}
+
+/// Shape of a VQL query response from GET /api/v1/query.
+#[derive(Debug, Deserialize)]
+struct QueryResponse {
+    results: Vec<HexadResponse>,
+}
+
+// ── config ────────────────────────────────────────────────────────────────────
+
+/// Configuration for the VeriSimDB HTTP client.
 #[derive(Debug, Clone)]
 pub struct StorageConfig {
-    pub host: String,
-    pub port: u16,
-    pub database: String,
-    pub username: String,
-    pub password: String,
+    /// Base URL of the VeriSimDB instance, e.g. `http://localhost:8080`.
+    pub base_url: String,
 }
 
 impl Default for StorageConfig {
     fn default() -> Self {
         Self {
-            host: "localhost".to_string(),
-            port: 8529,
-            database: "psa".to_string(),
-            username: "root".to_string(),
-            password: String::new(),
+            base_url: "http://localhost:8080".to_string(),
         }
     }
 }
 
+// ── client ────────────────────────────────────────────────────────────────────
+
+/// VeriSimDB HTTP storage client.
+pub struct Storage {
+    /// Shared reqwest client (keep-alive connection pool).
+    client: reqwest::Client,
+    config: StorageConfig,
+}
+
 impl Storage {
-    /// Create new storage connection
+    /// Create a new storage client and verify the VeriSimDB instance is reachable.
     pub async fn new() -> Result<Self> {
         let config = StorageConfig::default();
+        let client = reqwest::Client::new();
 
-        // TODO: Connect to ArangoDB
-        // For now, use fallback local storage
-        tracing::info!("Storage initialized (local mode - ArangoDB not configured)");
+        // Verify the VeriSimDB instance is up before proceeding.
+        let health_url = format!("{}/health", config.base_url);
+        match client.get(&health_url).send().await {
+            Ok(resp) if resp.status().is_success() => {
+                tracing::info!("Storage connected to VeriSimDB at {}", config.base_url);
+            }
+            Ok(resp) => {
+                tracing::warn!(
+                    "VeriSimDB health check returned non-success status {}: continuing anyway",
+                    resp.status()
+                );
+            }
+            Err(err) => {
+                tracing::warn!(
+                    "Could not reach VeriSimDB at {} ({}): operating in degraded mode",
+                    config.base_url,
+                    err
+                );
+            }
+        }
 
-        Ok(Self { config })
+        Ok(Self { client, config })
     }
 
-    /// Store a new solution
+    // ── write path ────────────────────────────────────────────────────────────
+
+    /// Store a new solution as a VeriSimDB hexad.
+    ///
+    /// Returns the VeriSimDB-assigned hexad ID (falls back to the solution's
+    /// own ID if the server does not return one).
     pub async fn store_solution(&self, solution: &Solution) -> Result<String> {
         tracing::debug!("Storing solution: {}", solution.id);
-        // TODO: ArangoDB insert
-        Ok(solution.id.clone())
+
+        // Serialise procedural payload: commands + tags + source + counts.
+        let procedural = serde_json::to_string(&serde_json::json!({
+            "commands": solution.commands,
+            "tags": solution.tags,
+            "source": solution.source,
+            "success_count": solution.success_count,
+            "failure_count": solution.failure_count,
+        }))
+        .context("serialise procedural modality")?;
+
+        // Store the full solution in `contextual` for lossless round-trips.
+        let contextual =
+            serde_json::to_string(solution).context("serialise contextual modality")?;
+
+        let body = HexadRequest {
+            modalities: HexadModalities {
+                perceptual: solution.category.clone(),
+                conceptual: solution.problem.clone(),
+                procedural,
+                temporal: format!(
+                    "created={} updated={}",
+                    solution.created_at.to_rfc3339(),
+                    solution.updated_at.to_rfc3339()
+                ),
+                contextual,
+                intentional: solution.id.clone(),
+            },
+        };
+
+        let url = format!("{}/api/v1/hexads", self.config.base_url);
+        let resp = self
+            .client
+            .post(&url)
+            .json(&body)
+            .send()
+            .await
+            .context("POST /api/v1/hexads")?;
+
+        if resp.status().is_success() {
+            let hexad: HexadResponse = resp.json().await.context("decode hexad response")?;
+            tracing::debug!("Stored solution {} as hexad {}", solution.id, hexad.id);
+            Ok(hexad.id)
+        } else {
+            let status = resp.status();
+            let text = resp.text().await.unwrap_or_default();
+            tracing::warn!("store_solution: VeriSimDB returned {}: {}", status, text);
+            // Fall back to the solution's own ID so callers are not blocked.
+            Ok(solution.id.clone())
+        }
     }
 
-    /// Find solutions by category
+    // ── read path ─────────────────────────────────────────────────────────────
+
+    /// Retrieve a single hexad by ID and decode the embedded Solution.
+    pub async fn get_solution(&self, hexad_id: &str) -> Result<Option<Solution>> {
+        tracing::debug!("Fetching hexad: {}", hexad_id);
+
+        let url = format!("{}/api/v1/hexads/{}", self.config.base_url, hexad_id);
+        let resp = self
+            .client
+            .get(&url)
+            .send()
+            .await
+            .context("GET /api/v1/hexads/{id}")?;
+
+        if resp.status() == reqwest::StatusCode::NOT_FOUND {
+            return Ok(None);
+        }
+
+        let hexad: HexadResponse = resp.json().await.context("decode hexad response")?;
+        let solution: Solution = serde_json::from_str(&hexad.modalities.contextual)
+            .context("decode solution from contextual modality")?;
+        Ok(Some(solution))
+    }
+
+    /// Find solutions whose `perceptual` modality matches the given category.
+    ///
+    /// Uses the VQL query endpoint with a perceptual-filter expression.
     pub async fn find_by_category(&self, category: &str) -> Result<Vec<Solution>> {
         tracing::debug!("Finding solutions in category: {}", category);
-        // TODO: ArangoDB query
-        Ok(vec![])
+        self.vql_query(&format!("perceptual:{}", category)).await
     }
 
-    /// Search solutions by text
+    /// Full-text search across the `conceptual` and `procedural` modalities.
     pub async fn search(&self, query: &str) -> Result<Vec<Solution>> {
         tracing::debug!("Searching solutions: {}", query);
-        // TODO: ArangoDB fulltext search
-        Ok(vec![])
+        // Search conceptual (problem) and procedural (solution/commands/tags).
+        self.vql_query(&format!("conceptual:{} OR procedural:{}", query, query))
+            .await
     }
 
-    /// Get related solutions via graph traversal
+    /// Find solutions related to a given problem by searching the conceptual
+    /// modality.  The `depth` hint is passed as a query parameter for
+    /// VeriSimDB implementations that support graph-aware traversal.
     pub async fn find_related(&self, problem: &str, depth: u32) -> Result<Vec<Solution>> {
-        tracing::debug!("Finding related solutions for: {} (depth {})", problem, depth);
-        // TODO: ArangoDB graph traversal
-        Ok(vec![])
+        tracing::debug!(
+            "Finding related solutions for: {} (depth {})",
+            problem,
+            depth
+        );
+
+        let url = format!("{}/api/v1/query", self.config.base_url);
+        let resp = self
+            .client
+            .get(&url)
+            .query(&[
+                ("q", format!("conceptual:{}", problem).as_str()),
+                ("depth", &depth.to_string()),
+            ])
+            .send()
+            .await
+            .context("GET /api/v1/query (find_related)")?;
+
+        self.decode_query_response(resp).await
     }
 
-    /// Record solution success/failure for learning
+    // ── update path ───────────────────────────────────────────────────────────
+
+    /// Record the outcome of applying a solution so future lookups can be
+    /// ranked by confidence.
+    ///
+    /// Fetches the existing hexad, updates the counts, then re-stores it.
     pub async fn record_outcome(&self, solution_id: &str, success: bool) -> Result<()> {
         tracing::debug!("Recording outcome for {}: {}", solution_id, success);
-        // TODO: Update success/failure counts
+
+        // Retrieve the existing solution by searching for its intentional ID.
+        let results = self
+            .vql_query(&format!("intentional:{}", solution_id))
+            .await?;
+
+        if let Some(mut solution) = results.into_iter().next() {
+            if success {
+                solution.success_count = solution.success_count.saturating_add(1);
+            } else {
+                solution.failure_count = solution.failure_count.saturating_add(1);
+            }
+            solution.updated_at = chrono::Utc::now();
+            self.store_solution(&solution).await?;
+        } else {
+            tracing::warn!(
+                "record_outcome: solution {} not found in VeriSimDB — skipping update",
+                solution_id
+            );
+        }
+
         Ok(())
     }
 
-    /// Get storage config
+    // ── helpers ───────────────────────────────────────────────────────────────
+
+    /// Issue a VQL query string against GET /api/v1/query and collect results.
+    async fn vql_query(&self, vql: &str) -> Result<Vec<Solution>> {
+        let url = format!("{}/api/v1/query", self.config.base_url);
+        let resp = self
+            .client
+            .get(&url)
+            .query(&[("q", vql)])
+            .send()
+            .await
+            .with_context(|| format!("GET /api/v1/query?q={}", vql))?;
+
+        self.decode_query_response(resp).await
+    }
+
+    /// Decode a VeriSimDB query response into a list of Solutions.
+    ///
+    /// Returns an empty list (rather than an error) on non-success HTTP
+    /// status so callers can continue with degraded data.
+    async fn decode_query_response(
+        &self,
+        resp: reqwest::Response,
+    ) -> Result<Vec<Solution>> {
+        if !resp.status().is_success() {
+            let status = resp.status();
+            let text = resp.text().await.unwrap_or_default();
+            tracing::warn!("VeriSimDB query returned {}: {}", status, text);
+            return Ok(vec![]);
+        }
+
+        let qr: QueryResponse = resp
+            .json()
+            .await
+            .context("decode VeriSimDB query response")?;
+
+        let solutions = qr
+            .results
+            .into_iter()
+            .filter_map(|hexad| {
+                match serde_json::from_str::<Solution>(&hexad.modalities.contextual) {
+                    Ok(s) => Some(s),
+                    Err(err) => {
+                        tracing::warn!(
+                            "Skipping hexad {}: could not decode solution ({})",
+                            hexad.id,
+                            err
+                        );
+                        None
+                    }
+                }
+            })
+            .collect();
+
+        Ok(solutions)
+    }
+
+    /// Expose configuration for introspection and diagnostics.
     pub fn config(&self) -> &StorageConfig {
         &self.config
     }

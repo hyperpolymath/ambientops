@@ -31,6 +31,8 @@ defmodule SystemObservatory.MixProject do
       {:telemetry, "~> 1.2"},
       {:telemetry_metrics, "~> 1.0"},
       {:jason, "~> 1.4"},
+      # HTTP client for VeriSimDB persistence layer
+      {:req, "~> 0.5"},
       {:ex_doc, "~> 0.34", only: :dev, runtime: false}
     ]
   end

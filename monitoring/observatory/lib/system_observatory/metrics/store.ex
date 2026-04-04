@@ -4,13 +4,31 @@ defmodule SystemObservatory.Metrics.Store do
   @moduledoc """
   In-memory metrics store for time series data.
 
-  Stores metrics from system scans in a ring buffer.
+  Stores metrics from system scans in a ring buffer and dual-writes each
+  metric to VeriSimDB for durable historical persistence.
+
+  ## Dual-write architecture
+
+  Every `record/4` call performs two writes:
+
+  1. **Ring buffer** (synchronous, in-process) — the canonical fast path for
+     recent metrics queries.  This path is unaffected by VeriSimDB latency or
+     availability.
+
+  2. **VeriSimDB** (asynchronous, fire-and-forget) — persists each metric as
+     a hexad document via `SystemObservatory.VeriSimDB.store_metric/1`.  The
+     write is dispatched on a separate `Task` so it never blocks callers or
+     the GenServer loop.  Failures are logged as warnings but do NOT affect
+     the ring buffer write.
+
+  To query historical data that predates the current ring buffer use
+  `SystemObservatory.VeriSimDB.query_by_name/2` directly.
 
   ## CRITICAL: Advisory Data Only (CRIT-003 compliance)
 
   JuSys is NEVER the source of truth. All data stored here is:
   - **Derived**: Calculated from observations, not authoritative
-  - **Ephemeral**: May be lost on restart, no persistence guarantees
+  - **Ephemeral (ring buffer)**: May be truncated; use VeriSimDB for history
   - **Stale-able**: Has TTL, becomes unreliable after expiry
   - **Provenance-tracked**: Includes source information
 
@@ -22,6 +40,8 @@ defmodule SystemObservatory.Metrics.Store do
   """
 
   use GenServer
+
+  require Logger
 
   # Default TTL: 1 hour - data older than this should be considered stale
   @default_ttl_seconds 3600
@@ -144,7 +164,25 @@ defmodule SystemObservatory.Metrics.Store do
       advisory: true
     }
 
+    # 1. Write to in-memory ring buffer (fast, synchronous)
     metrics = [metric | state.metrics] |> Enum.take(state.max_size)
+
+    # 2. Fire-and-forget write to VeriSimDB (asynchronous, non-blocking).
+    #    We dispatch via the application's Task.Supervisor so the task is
+    #    properly tracked and cleaned up on shutdown.  :nolink ensures a
+    #    VeriSimDB failure never propagates back to the store process.
+    Task.Supervisor.start_child(SystemObservatory.TaskSupervisor, fn ->
+      case SystemObservatory.VeriSimDB.store_metric(metric) do
+        {:ok, id} ->
+          Logger.debug("[Store] VeriSimDB hexad stored: #{inspect(id)}")
+
+        {:error, reason} ->
+          Logger.warning(
+            "[Store] VeriSimDB dual-write failed for metric #{inspect(name)}: #{inspect(reason)}"
+          )
+      end
+    end)
+
     {:noreply, %{state | metrics: metrics}}
   end
 

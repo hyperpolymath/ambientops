@@ -15,6 +15,8 @@ defmodule FeedbackATron.Deduplicator do
   use GenServer
   require Logger
 
+  alias FeedbackATron.VeriSimDBClient
+
   @similarity_threshold 0.85
   @ets_table :feedback_submissions
 
@@ -170,6 +172,10 @@ defmodule FeedbackATron.Deduplicator do
     }
 
     :ets.insert(@ets_table, {hash, updated})
+
+    # Dual-write to VeriSimDB for durability across restarts.
+    # This is a best-effort cast; ETS is already updated so the fast path is live.
+    VeriSimDBClient.persist_submission(submission, updated)
 
     # Update indexes
     new_state = %{state |

@@ -12,7 +12,11 @@ defmodule SystemObservatory.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      # Start the metrics store
+      # Task supervisor for fire-and-forget VeriSimDB persistence writes.
+      # Must start before the metrics store so VeriSimDB tasks have a home
+      # as soon as the first metric is recorded.
+      {Task.Supervisor, name: SystemObservatory.TaskSupervisor},
+      # Start the metrics store (dual-writes to ring buffer + VeriSimDB)
       SystemObservatory.Metrics.Store,
       # Start the event correlator
       SystemObservatory.Correlator

@@ -19,6 +19,8 @@ defmodule FeedbackATron.AuditLog do
   use GenServer
   require Logger
 
+  alias FeedbackATron.VeriSimDBClient
+
   @log_file "feedback_a_tron_audit.jsonl"
   @max_log_size 10_000_000  # 10MB before rotation
 
@@ -214,8 +216,13 @@ defmodule FeedbackATron.AuditLog do
       data: data
     }
 
+    # Primary write: JSONL flat file (retained for local tail / rotation).
     line = Jason.encode!(entry) <> "\n"
     IO.write(state.log_handle, line)
+
+    # Dual-write to VeriSimDB for durable, queryable audit history.
+    # Best-effort cast — a VeriSimDB outage must never block audit logging.
+    VeriSimDBClient.persist_audit(event_type, data, state.session_id)
 
     # Also log to console in dev
     if Application.get_env(:feedback_a_tron, :env) == :dev do
