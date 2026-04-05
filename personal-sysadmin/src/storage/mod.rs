@@ -78,7 +78,7 @@ struct HexadResponse {
     modalities: HexadModalities,
 }
 
-/// Shape of a VQL query response from GET /api/v1/query.
+/// Shape of a VCL query response from GET /api/v1/query.
 #[derive(Debug, Deserialize)]
 struct QueryResponse {
     results: Vec<HexadResponse>,
@@ -226,17 +226,17 @@ impl Storage {
 
     /// Find solutions whose `perceptual` modality matches the given category.
     ///
-    /// Uses the VQL query endpoint with a perceptual-filter expression.
+    /// Uses the VCL query endpoint with a perceptual-filter expression.
     pub async fn find_by_category(&self, category: &str) -> Result<Vec<Solution>> {
         tracing::debug!("Finding solutions in category: {}", category);
-        self.vql_query(&format!("perceptual:{}", category)).await
+        self.vcl_query(&format!("perceptual:{}", category)).await
     }
 
     /// Full-text search across the `conceptual` and `procedural` modalities.
     pub async fn search(&self, query: &str) -> Result<Vec<Solution>> {
         tracing::debug!("Searching solutions: {}", query);
         // Search conceptual (problem) and procedural (solution/commands/tags).
-        self.vql_query(&format!("conceptual:{} OR procedural:{}", query, query))
+        self.vcl_query(&format!("conceptual:{} OR procedural:{}", query, query))
             .await
     }
 
@@ -276,7 +276,7 @@ impl Storage {
 
         // Retrieve the existing solution by searching for its intentional ID.
         let results = self
-            .vql_query(&format!("intentional:{}", solution_id))
+            .vcl_query(&format!("intentional:{}", solution_id))
             .await?;
 
         if let Some(mut solution) = results.into_iter().next() {
@@ -299,16 +299,16 @@ impl Storage {
 
     // ── helpers ───────────────────────────────────────────────────────────────
 
-    /// Issue a VQL query string against GET /api/v1/query and collect results.
-    async fn vql_query(&self, vql: &str) -> Result<Vec<Solution>> {
+    /// Issue a VCL query string against GET /api/v1/query and collect results.
+    async fn vcl_query(&self, vcl: &str) -> Result<Vec<Solution>> {
         let url = format!("{}/api/v1/query", self.config.base_url);
         let resp = self
             .client
             .get(&url)
-            .query(&[("q", vql)])
+            .query(&[("q", vcl)])
             .send()
             .await
-            .with_context(|| format!("GET /api/v1/query?q={}", vql))?;
+            .with_context(|| format!("GET /api/v1/query?q={}", vcl))?;
 
         self.decode_query_response(resp).await
     }

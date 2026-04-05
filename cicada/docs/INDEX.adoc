@@ -98,7 +98,7 @@ This is the central documentation hub for *CIcaDA* (Palimpsest Crypto Identity),
 | `.machine_readable/META.scm`
 
 | link:../.machine_readable/ECOSYSTEM.scm[ECOSYSTEM.scm]
-| Ecosystem position: relationships to ambientops, panic-attacker, verisimdb, hypatia, echidna, gitbot-fleet, explicit-trust-plane
+| Ecosystem position: relationships to ambientops, panic-attacker, verisim, hypatia, echidna, gitbot-fleet, explicit-trust-plane
 | `.machine_readable/ECOSYSTEM.scm`
 
 | link:../ABI-FFI-README.md[ABI/FFI Architecture]

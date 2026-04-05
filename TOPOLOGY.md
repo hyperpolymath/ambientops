@@ -50,7 +50,7 @@
                                             ▼
                         ┌─────────────────────────────────────────┐
                         │          SATELLITE ECOSYSTEM            │
-                        │ (panic-attacker, verisimdb, hypatia,    │
+                        │ (panic-attacker, verisim, hypatia,    │
                         │  gitbot-fleet, echidna)                 │
                         └─────────────────────────────────────────┘
 ```

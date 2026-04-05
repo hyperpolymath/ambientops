@@ -11,7 +11,7 @@ defmodule FeedbackATron.VeriSimDBClient do
   VeriSimDB API used:
     POST /api/v1/hexads          — store a hexad record
     GET  /api/v1/hexads/{id}     — retrieve a hexad by ID
-    GET  /api/v1/query           — execute a VQL query
+    GET  /api/v1/query           — execute a VCL query
     GET  /health                 — health check
 
   Configuration:
@@ -125,7 +125,7 @@ defmodule FeedbackATron.VeriSimDBClient do
     query_url = "#{base_url}/api/v1/query"
 
     params = [
-      vql: "SELECT * FROM hexads WHERE record_type = '#{@record_type_submission}'"
+      vcl: "SELECT * FROM hexads WHERE record_type = '#{@record_type_submission}'"
     ]
 
     case Req.get(query_url, params: params) do

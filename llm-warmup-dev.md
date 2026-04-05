@@ -205,7 +205,7 @@ just assail            # panic-attacker pre-commit
 | Satellite | Role |
 |-----------|------|
 | panic-attacker | Pre-commit security scanner |
-| verisimdb | 8-modality versioned database |
+| verisim | 8-modality versioned database |
 | hypatia | Neurosymbolic CI/CD scanner |
 | gitbot-fleet | Bot orchestration |
 | echidna | Theorem prover dispatch |

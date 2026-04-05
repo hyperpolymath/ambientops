@@ -64,7 +64,7 @@ Fixed with pci-stub + vfio-pci null driver approach. This tool generalises that 
 
 == v0.5.0 - Integration
 
-* [ ] verisimdb integration (store findings as hexads)
+* [ ] verisim integration (store findings as hexads)
 * [ ] Hypatia integration (feed patterns to rule engine)
 * [ ] SARIF output for CI/CD
 * [ ] MCP server mode (AI agent integration)

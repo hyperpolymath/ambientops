@@ -40,7 +40,7 @@ crossterm = { version = "0.28", optional = true }
 
 [features]
 default = []
-verisimdb = ["reqwest", "tokio"]
+verisim = ["reqwest", "tokio"]
 tui = ["ratatui", "crossterm"]
 
 [dev-dependencies]

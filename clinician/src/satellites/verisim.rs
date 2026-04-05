@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: PMPL-1.0-or-later
-//! verisimdb integration — similarity database for security patterns
+//! verisim integration — similarity database for security patterns
 //!
-//! Invokes ingest-scan.sh and verisim-query CLI for VQL queries.
+//! Invokes ingest-scan.sh and verisim-query CLI for VCL queries.
 
 use anyhow::{bail, Result};
 
-/// Ingest a scan result into verisimdb
+/// Ingest a scan result into verisim
 pub async fn ingest(repo: &str, scan_path: &str) -> Result<()> {
-    println!("Ingesting scan for '{}' into verisimdb...", repo);
+    println!("Ingesting scan for '{}' into verisim...", repo);
     println!("{}", "-".repeat(50));
 
-    // Check if verisimdb-data repo with ingest script exists
+    // Check if verisim-data repo with ingest script exists
     let script = find_ingest_script().await;
 
     match script {
@@ -32,8 +32,8 @@ pub async fn ingest(repo: &str, scan_path: &str) -> Result<()> {
             }
         }
         None => {
-            println!("  verisimdb-data ingest script not found.");
-            println!("  Expected at: ~/Documents/hyperpolymath-repos/verisimdb-data/scripts/ingest-scan.sh");
+            println!("  verisim-data ingest script not found.");
+            println!("  Expected at: ~/Documents/hyperpolymath-repos/verisim-data/scripts/ingest-scan.sh");
             println!("  Clone: git clone https://github.com/hyperpolymath/verisimdb-data");
         }
     }
@@ -41,9 +41,9 @@ pub async fn ingest(repo: &str, scan_path: &str) -> Result<()> {
     Ok(())
 }
 
-/// Query verisimdb with VQL
-pub async fn query(vql: &str) -> Result<()> {
-    println!("Querying verisimdb: {}", vql);
+/// Query verisim with VCL
+pub async fn query(vcl: &str) -> Result<()> {
+    println!("Querying verisim: {}", vcl);
     println!("{}", "-".repeat(50));
 
     // Check for verisim-query CLI
@@ -55,7 +55,7 @@ pub async fn query(vql: &str) -> Result<()> {
     match which {
         Ok(w) if w.status.success() => {
             let result = tokio::process::Command::new("verisim-query")
-                .args(["--vql", vql])
+                .args(["--vcl", vcl])
                 .output()
                 .await?;
 
@@ -69,9 +69,9 @@ pub async fn query(vql: &str) -> Result<()> {
         }
         _ => {
             println!("  verisim-query not found in PATH.");
-            println!("  Build: cd ~/Documents/hyperpolymath-repos/verisimdb && cargo build -p verisim-api");
-            println!("\n  Alternative: query verisimdb-data git repo directly:");
-            println!("    ls ~/Documents/hyperpolymath-repos/verisimdb-data/scans/");
+            println!("  Build: cd ~/Documents/hyperpolymath-repos/verisim && cargo build -p verisim-api");
+            println!("\n  Alternative: query verisim-data git repo directly:");
+            println!("    ls ~/Documents/hyperpolymath-repos/verisim-data/scans/");
         }
     }
 
@@ -83,7 +83,7 @@ async fn find_ingest_script() -> Option<String> {
         .or_else(|_| std::env::var("HOME").map(|h| format!("{h}/Documents/hyperpolymath-repos")))
         .unwrap_or_default();
     let paths = [
-        format!("{repos_dir}/verisimdb-data/scripts/ingest-scan.sh"),
+        format!("{repos_dir}/verisim-data/scripts/ingest-scan.sh"),
     ];
 
     for path in &paths {

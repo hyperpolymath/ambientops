@@ -32,7 +32,7 @@ struct CacheHexadModalities {
     temporal: String,
     /// TTL in seconds as a decimal string.
     procedural: String,
-    /// Full cache key (same as `conceptual`) for direct lookup via VQL.
+    /// Full cache key (same as `conceptual`) for direct lookup via VCL.
     intentional: String,
 }
 
@@ -43,7 +43,7 @@ struct HexadResponse {
     modalities: CacheHexadModalities,
 }
 
-/// VQL query results wrapper.
+/// VCL query results wrapper.
 #[derive(Debug, serde::Deserialize)]
 struct QueryResponse {
     results: Vec<HexadResponse>,

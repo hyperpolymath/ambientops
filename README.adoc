@@ -113,8 +113,8 @@ The `contracts-rust/` crate provides Rust structs with `serde` serialization and
 
 External tools that integrate with AmbientOps but live in their own repos:
 
-* **panic-attacker** — Software health scanner (feeds verisimdb)
-* **verisimdb** / **verisimdb-data** — Multimodal database for scan results
+* **panic-attacker** — Software health scanner (feeds verisim)
+* **verisim** / **verisim-data** — Multimodal database for scan results
 * **hypatia** — Neurosymbolic CI/CD intelligence
 * **gitbot-fleet** — Bot orchestration (rhodibot, echidnabot, etc.)
 * **echidna** — Neurosymbolic theorem proving (30 prover backends)

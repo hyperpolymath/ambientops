@@ -14,7 +14,7 @@ defmodule SystemObservatory.VeriSimDB do
   runtime, falling back to `http://localhost:8080`.
 
   ```
-  VERISIMDB_URL=http://verisimdb.internal:8080
+  VERISIMDB_URL=http://verisim.internal:8080
   ```
 
   ## VeriSimDB API surface used
@@ -23,7 +23,7 @@ defmodule SystemObservatory.VeriSimDB do
   |--------|--------------------------|----------------------------------|
   | POST   | /api/v1/hexads           | Persist a single metric hexad    |
   | GET    | /api/v1/hexads/{id}      | Retrieve a hexad by ID           |
-  | GET    | /api/v1/query            | Run a VQL query                  |
+  | GET    | /api/v1/query            | Run a VCL query                  |
   | GET    | /health                  | Liveness check                   |
 
   ## Advisory data contract
@@ -78,9 +78,9 @@ defmodule SystemObservatory.VeriSimDB do
   end
 
   @doc """
-  Run a VQL query against VeriSimDB.
+  Run a VCL query against VeriSimDB.
 
-  `vql` is a raw VQL string.  Optional `opts` map is forwarded as query
+  `vcl` is a raw VCL string.  Optional `opts` map is forwarded as query
   parameters (e.g. `%{"limit" => 100}`).
 
   Returns `{:ok, results}` where `results` is a list of hexads, or
@@ -91,8 +91,8 @@ defmodule SystemObservatory.VeriSimDB do
       VeriSimDB.query("metric.name = \"cpu.usage\"", %{"limit" => 50})
   """
   @spec query(String.t(), map()) :: {:ok, list(map())} | {:error, term()}
-  def query(vql, opts \\ %{}) when is_binary(vql) do
-    params = Map.merge(%{"q" => vql}, opts)
+  def query(vcl, opts \\ %{}) when is_binary(vcl) do
+    params = Map.merge(%{"q" => vcl}, opts)
 
     case get("/api/v1/query", params) do
       {:ok, %{"results" => results}} when is_list(results) ->
@@ -120,8 +120,8 @@ defmodule SystemObservatory.VeriSimDB do
   @spec query_by_name(String.t(), non_neg_integer()) ::
           {:ok, list(map())} | {:error, term()}
   def query_by_name(name, limit \\ 1000) when is_binary(name) and is_integer(limit) do
-    vql = ~s(payload.name = "#{String.replace(name, ~s("), ~s(\\"))}")
-    query(vql, %{"limit" => limit})
+    vcl = ~s(payload.name = "#{String.replace(name, ~s("), ~s(\\"))}")
+    query(vcl, %{"limit" => limit})
   end
 
   @doc """
@@ -155,7 +155,7 @@ defmodule SystemObservatory.VeriSimDB do
       # Timestamps as ISO 8601 strings
       "recorded_at" => format_datetime(Map.get(metric, :timestamp)),
       "derived_at" => format_datetime(Map.get(metric, :derived_at)),
-      # Embed the full metric as the hexad payload so VQL can filter on it
+      # Embed the full metric as the hexad payload so VCL can filter on it
       "payload" => %{
         "name" => metric.name,
         "value" => metric.value,

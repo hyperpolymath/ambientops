@@ -65,4 +65,4 @@ Output: text (default), json, sarif.
 
 ## Satellites (Separate Repos)
 
-panic-attacker, verisimdb, hypatia, gitbot-fleet, echidna.
+panic-attacker, verisim, hypatia, gitbot-fleet, echidna.

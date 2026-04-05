@@ -19,7 +19,7 @@ ambientops/                      ← Hybrid monorepo
 
 **Data flow:** ER intake → Evidence Envelope → Procedure Plan → Receipt → System Weather
 
-**Satellites (separate repos):** panic-attacker, verisimdb, hypatia, gitbot-fleet, echidna
+**Satellites (separate repos):** panic-attacker, verisim, hypatia, gitbot-fleet, echidna
 
 ## Build
 

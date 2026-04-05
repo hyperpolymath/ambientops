@@ -70,7 +70,7 @@ ____
 Uses hyperpolymath operations stack (Rust + Elixir + V + Deno + contracts-first architecture). Same pattern across:
 - https://github.com/hyperpolymath/panic-attacker[panic-attacker] — Software health scanner (Ward input)
 - https://github.com/hyperpolymath/hypatia[hypatia] — Neurosymbolic CI/CD intelligence (OR augmentation)
-- https://github.com/hyperpolymath/verisimdb[verisimdb] — Multi-modal database (cross-department state)
+- https://github.com/hyperpolymath/verisimdb[verisim] — Multi-modal database (cross-department state)
 - https://github.com/hyperpolymath/gitbot-fleet[gitbot-fleet] — Bot orchestration (Records automation)
 
 All share: *Data-contract boundaries, evidence-first methodology, undo as first-class citizen.*
@@ -131,7 +131,7 @@ All share: *Data-contract boundaries, evidence-first methodology, undo as first-
 
 | `.machine_readable/6a2/META.a2ml` | Architecture decisions: hospital model rationale, schema-first design, undo principles
 
-| `.machine_readable/6a2/ECOSYSTEM.a2ml` | Relationships: panic-attacker (Ward input), hypatia (OR AI), verisimdb (shared DB), gitbot-fleet (Records)
+| `.machine_readable/6a2/ECOSYSTEM.a2ml` | Relationships: panic-attacker (Ward input), hypatia (OR AI), verisim (shared DB), gitbot-fleet (Records)
 |===
 
 == Status

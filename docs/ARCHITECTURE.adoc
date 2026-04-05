@@ -123,8 +123,8 @@ External tools that integrate via contract types:
 | Satellite | Category | Integration
 
 | nafa-app | Ward UI | ReScript/Deno mobile journey planner, consumes system-weather
-| panic-attacker | Diagnostics | Software health scanner → verisimdb
-| verisimdb / verisimdb-data | Data Pipeline | Multimodal scan result database
+| panic-attacker | Diagnostics | Software health scanner → verisim
+| verisim / verisim-data | Data Pipeline | Multimodal scan result database
 | hypatia | CI/CD | Neurosymbolic pattern detection → gitbot-fleet
 | gitbot-fleet | Automation | Bot orchestration (rhodibot, echidnabot, etc.)
 | echidna | Verification | Neurosymbolic theorem proving (30 backends)

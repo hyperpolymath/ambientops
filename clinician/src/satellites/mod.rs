@@ -3,12 +3,12 @@
 //!
 //! Provides CLI wrappers for external AmbientOps tools:
 //! - panic-attacker: Vulnerability/weak-point scanning
-//! - verisimdb: Similarity database for security patterns
+//! - verisim: Similarity database for security patterns
 //! - hypatia: Neurosymbolic pattern matching
 //! - echidna: Formal verification of procedure reversibility
 
 pub mod panic_attacker;
-pub mod verisimdb;
+pub mod verisim;
 pub mod hypatia;
 pub mod echidna;
 
@@ -20,10 +20,10 @@ use serde::{Deserialize, Serialize};
 pub enum SatelliteAction {
     /// Scan a target with panic-attacker
     Scan { target: String, output: Option<String> },
-    /// Ingest scan results into verisimdb
+    /// Ingest scan results into verisim
     Ingest { repo: String, scan_path: String },
-    /// Query verisimdb with VQL
-    Query { vql: String },
+    /// Query verisim with VCL
+    Query { vcl: String },
     /// Verify procedure reversibility with echidna
     Verify { procedure_path: String },
     /// Check gitbot-fleet status
@@ -37,10 +37,10 @@ pub async fn handle(action: SatelliteAction) -> Result<()> {
             panic_attacker::scan(&target, output.as_deref()).await?;
         }
         SatelliteAction::Ingest { repo, scan_path } => {
-            verisimdb::ingest(&repo, &scan_path).await?;
+            verisim::ingest(&repo, &scan_path).await?;
         }
-        SatelliteAction::Query { vql } => {
-            verisimdb::query(&vql).await?;
+        SatelliteAction::Query { vcl } => {
+            verisim::query(&vcl).await?;
         }
         SatelliteAction::Verify { procedure_path } => {
             echidna::verify(&procedure_path).await?;
