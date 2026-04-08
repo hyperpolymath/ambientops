@@ -54,10 +54,8 @@ ambientops-contracts = { path = "../contracts-rust" }
 arangors = { version = "0.6", optional = true }
 redis = { version = "0.27", features = ["tokio-comp", "connection-manager"], optional = true }
 ollama-rs = { version = "0.2", optional = true }
-libp2p = { version = "0.56.0", features = ["tokio", "mdns", "gossipsub", "kad", "tcp", "noise", "yamux"], optional = true }
 ndarray = { version = "0.16", optional = true }
 scraper = { version = "0.21", optional = true }
-tantivy = { version = "0.22", optional = true }
 bluer = { version = "0.17", features = ["bluetoothd"], optional = true }
 
 [dev-dependencies]
@@ -75,8 +73,8 @@ gpu = []          # GPU acceleration for local SLM
 storage = ["arangors"]    # ArangoDB knowledge base
 cache = ["redis"]         # Dragonfly/Redis caching
 ai = ["ollama-rs"]        # Ollama SLM integration
-p2p = ["libp2p"]          # P2P mesh communication
-search = ["tantivy"]      # Local full-text search index
+p2p = []                  # Reserved for future P2P mesh communication
+search = []               # Reserved for future local full-text index integration
 forum = ["scraper"]       # Forum HTML scraping
 anomaly = ["ndarray"]     # ESN/LSM anomaly detection
 bluetooth = ["bluer"]     # Bluetooth device monitoring (BT Sentinel)

@@ -4,9 +4,9 @@ name: Hypatia Security Scan
 
 on:
   push:
-    branches: [ main, master, develop ]
+    branches: ['**']
   pull_request:
-    branches: [ main, master ]
+    branches: ['**']
   schedule:
     - cron: '0 0 * * 0'  # Weekly on Sunday
   workflow_dispatch:
@@ -40,12 +40,10 @@ jobs:
       - name: Build Hypatia scanner (if needed)
         working-directory: ${{ env.HOME }}/hypatia
         run: |
-          if [ ! -f hypatia-v2 ]; then
-            echo "Building hypatia-v2 scanner..."
-            cd scanner
+          if [ ! -x hypatia ] && [ ! -x hypatia-v2 ]; then
+            echo "Building hypatia scanner escript..."
             mix deps.get
             mix escript.build
-            mv hypatia ../hypatia-v2
           fi
 
       - name: Run Hypatia scan
@@ -64,52 +62,148 @@ jobs:
           CRITICAL=$(jq '[.[] | select(.severity == "critical")] | length' hypatia-findings.json)
           HIGH=$(jq '[.[] | select(.severity == "high")] | length' hypatia-findings.json)
           MEDIUM=$(jq '[.[] | select(.severity == "medium")] | length' hypatia-findings.json)
+          SECRET_COUNT=$(jq '[.[] | select(((.type // "") | test("secret"; "i")) or ((.reason // "") | test("secret"; "i")) or ((.rule // "") | test("secret"; "i")))] | length' hypatia-findings.json)
+          VULNERABILITY_COUNT=$(jq '[.[] | select(((.type // "") | test("vuln|vulnerab|cve"; "i")) or ((.reason // "") | test("vuln|vulnerab|cve"; "i")) or ((.rule // "") | test("vuln|vulnerab|cve"; "i")))] | length' hypatia-findings.json)
+          INCIDENT_COUNT=$((SECRET_COUNT + VULNERABILITY_COUNT))
 
           echo "critical=$CRITICAL" >> $GITHUB_OUTPUT
           echo "high=$HIGH" >> $GITHUB_OUTPUT
           echo "medium=$MEDIUM" >> $GITHUB_OUTPUT
+          echo "secret_count=$SECRET_COUNT" >> $GITHUB_OUTPUT
+          echo "vulnerability_count=$VULNERABILITY_COUNT" >> $GITHUB_OUTPUT
+          echo "incident_count=$INCIDENT_COUNT" >> $GITHUB_OUTPUT
 
           echo "## Hypatia Scan Results" >> $GITHUB_STEP_SUMMARY
           echo "- Total findings: $FINDING_COUNT" >> $GITHUB_STEP_SUMMARY
           echo "- Critical: $CRITICAL" >> $GITHUB_STEP_SUMMARY
           echo "- High: $HIGH" >> $GITHUB_STEP_SUMMARY
           echo "- Medium: $MEDIUM" >> $GITHUB_STEP_SUMMARY
+          echo "- Secrets: $SECRET_COUNT" >> $GITHUB_STEP_SUMMARY
+          echo "- Vulnerabilities: $VULNERABILITY_COUNT" >> $GITHUB_STEP_SUMMARY
+          echo "- Incident findings (secret + vulnerability): $INCIDENT_COUNT" >> $GITHUB_STEP_SUMMARY
+
+      - name: Immediate dispatch to gitbot-fleet (incident findings)
+        if: steps.scan.outputs.incident_count > 0
+        env:
+          DISPATCH_TOKEN: ${{ secrets.FARM_DISPATCH_TOKEN }}
+          REPO: ${{ github.repository }}
+          REF: ${{ github.ref }}
+          SHA: ${{ github.sha }}
+          RUN_ID: ${{ github.run_id }}
+          INCIDENT_COUNT: ${{ steps.scan.outputs.incident_count }}
+          SECRET_COUNT: ${{ steps.scan.outputs.secret_count }}
+          VULNERABILITY_COUNT: ${{ steps.scan.outputs.vulnerability_count }}
+        run: |
+          set -euo pipefail
+          if [ -z "${DISPATCH_TOKEN:-}" ]; then
+            echo "::warning::FARM_DISPATCH_TOKEN not configured; skipping immediate cross-repo dispatch."
+            exit 0
+          fi
+
+          cat > dispatch-payload.json <<EOF
+          {
+            "event_type": "hypatia-security-alert",
+            "client_payload": {
+              "source_repo": "${REPO}",
+              "ref": "${REF}",
+              "sha": "${SHA}",
+              "run_id": "${RUN_ID}",
+              "incident_count": "${INCIDENT_COUNT}",
+              "secret_count": "${SECRET_COUNT}",
+              "vulnerability_count": "${VULNERABILITY_COUNT}",
+              "artifact": "hypatia-findings"
+            }
+          }
+          EOF
+
+          curl -fsSL \
+            -X POST \
+            -H "Authorization: token ${DISPATCH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/hyperpolymath/gitbot-fleet/dispatches \
+            -d @dispatch-payload.json
 
       - name: Upload findings artifact
+        if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: hypatia-findings
           path: hypatia-findings.json
           retention-days: 90
 
-      - name: Submit findings to gitbot-fleet (Phase 2)
-        if: steps.scan.outputs.findings_count > 0
+      - name: Publish non-incident findings to gitbot-fleet shared-context
+        if: steps.scan.outputs.findings_count > 0 && steps.scan.outputs.incident_count == 0
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          GITHUB_SHA: ${{ github.sha }}
+          DISPATCH_TOKEN: ${{ secrets.FARM_DISPATCH_TOKEN }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.sha }}
         run: |
-          echo "📤 Submitting ${{ steps.scan.outputs.findings_count }} findings to gitbot-fleet..."
+          set -euo pipefail
+          if [ -z "${DISPATCH_TOKEN:-}" ]; then
+            echo "::warning::FARM_DISPATCH_TOKEN not configured; skipping non-incident publication."
+            exit 0
+          fi
 
-          # Clone gitbot-fleet to temp directory
-          FLEET_DIR="/tmp/gitbot-fleet-$$"
-          git clone https://github.com/hyperpolymath/gitbot-fleet.git "$FLEET_DIR"
+          jq empty hypatia-findings.json
 
-          # Run submission script
-          bash "$FLEET_DIR/scripts/submit-finding.sh" hypatia-findings.json
+          TIMESTAMP="$(date -u +%Y%m%d-%H%M%S)"
+          REPO_SLUG="$(echo "$REPO" | tr '/' '-' | tr -cd 'a-zA-Z0-9._-')"
+          TARGET_FILE="shared-context/findings/${REPO_SLUG}/${TIMESTAMP}.json"
+          FLEET_DIR="/tmp/gitbot-fleet-${TIMESTAMP}-$$"
 
-          # Cleanup
-          rm -rf "$FLEET_DIR"
+          trap 'rm -rf "$FLEET_DIR"' EXIT
+          git clone "https://x-access-token:${DISPATCH_TOKEN}@github.com/hyperpolymath/gitbot-fleet.git" "$FLEET_DIR"
+          cd "$FLEET_DIR"
 
-          echo "✅ Finding submission complete"
+          git checkout findings-submissions 2>/dev/null || git checkout -b findings-submissions
+          mkdir -p "$(dirname "$TARGET_FILE")"
+
+          jq --arg repo "$REPO" --arg commit "$SHA" --arg submitted_at "$(date -u +%Y-%m-%dT%H:%M:%SZ)" '
+            def submission_meta: {
+              repo: $repo,
+              commit: $commit,
+              submitted_at: $submitted_at,
+              scanner_version: "hypatia-v2"
+            };
+            if type == "array" then
+              {findings: ., submission_metadata: submission_meta}
+            elif type == "object" and (has("findings")) and (.findings | type == "array") then
+              . + {submission_metadata: submission_meta}
+            elif type == "object" then
+              {findings: [.], submission_metadata: submission_meta}
+            else
+              error("Unsupported findings JSON shape")
+            end
+          ' "$GITHUB_WORKSPACE/hypatia-findings.json" > "$TARGET_FILE"
+
+          ln -sf "$(basename "$TARGET_FILE")" "shared-context/findings/${REPO_SLUG}/latest.json"
+          FINDING_COUNT="$(jq '.findings | length' "$TARGET_FILE")"
+
+          git add "$TARGET_FILE" "shared-context/findings/${REPO_SLUG}/latest.json"
+          git config user.name "Hypatia Finding Submitter"
+          git config user.email "hypatia@reposystem.dev"
+
+          if git diff --cached --quiet; then
+            echo "No non-incident finding changes to publish."
+            exit 0
+          fi
+
+          git commit -m "findings: ${REPO} @ $(date +%Y-%m-%d)
+
+          Submitted: ${FINDING_COUNT} findings
+          Commit: ${SHA}
+          Scanner: hypatia-v2
+
+          Automated submission from GitHub Actions."
+
+          git push origin findings-submissions
 
       - name: Check for critical issues
-        if: steps.scan.outputs.critical > 0
+        if: steps.scan.outputs.incident_count > 0
         run: |
-          echo "⚠️  Critical security issues found!"
-          echo "Review hypatia-findings.json for details"
-          # Don't fail the build yet - just warn
-          # exit 1
+          echo "::error::Security incident findings detected (secrets/vulnerabilities)."
+          echo "::error::Review hypatia-findings.json for details."
+          exit 1
 
       - name: Generate scan report
         run: |

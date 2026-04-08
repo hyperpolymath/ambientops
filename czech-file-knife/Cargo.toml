@@ -61,7 +61,7 @@ directories = "6.0"
 
 # Search
 fuzzy-matcher = "0.3"
-tantivy = "0.25"
+tantivy = "0.26"
 glob = "0.3"
 regex = "1.10"
 walkdir = "2.4"

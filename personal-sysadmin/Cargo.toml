@@ -40,7 +40,6 @@ ndarray = "0.16"
 
 # Forum/solution search
 scraper = "0.21"              # HTML parsing for forums
-tantivy = "0.22"              # Local search index
 
 # Logging and errors
 tracing = "0.1"
