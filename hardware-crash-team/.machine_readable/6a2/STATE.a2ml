@@ -1,39 +1,42 @@
-;; SPDX-License-Identifier: PMPL-1.0-or-later
-(state
-  (metadata
-    (version "0.1.0")
-    (last-updated "2026-02-08")
-    (status active))
-  (project-context
-    (name "hardware-crash-team")
-    (purpose "Diagnose and remediate hardware-induced system crashes")
-    (completion-percentage 35))
-  (components
-    (component "scanner"
-      (status working)
-      (description "PCI device enumeration, zombie detection, partial binding detection")
-      (remaining "BAR enumeration, lspci enrichment, interrupt checking"))
-    (component "analyzer"
-      (status stub)
-      (description "Crash log analyzer - correlate crashes with hardware")
-      (remaining "journalctl parsing, boot history, correlation scoring"))
-    (component "remediation"
-      (status working)
-      (description "Plan/Apply/Undo workflow with receipt generation")
-      (remaining "rpm-ostree integration, grubby, systemd-boot, multi-device plans"))
-    (component "tui"
-      (status planned)
-      (description "ATS2 TUI for interactive diagnostics"))
-    (component "integration"
-      (status planned)
-      (description "verisimdb, hypatia, MCP server, SARIF output")))
-  (blockers-and-issues
-    (issue "IOMMU group count reads 0 despite IOMMU being active - sysfs path issue")
-    (issue "lspci-based description enrichment not yet implemented")
-    (issue "Crash analyzer is stub only"))
-  (critical-next-actions
-    (action "Implement BAR memory region enumeration in scanner")
-    (action "Add lspci description enrichment")
-    (action "Implement journalctl parser for crash analyzer")
-    (action "Add multi-device remediation plans (GPU + audio codec together)")
-    (action "Test rpm-ostree kargs integration on Fedora Atomic")))
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# STATE.a2ml — Hardware Crash Team project state
+[metadata]
+project = "hardware-crash-team"
+version = "0.1.0"
+last-updated = "2026-02-08"
+status = "active"
+session = "converted from scheme — 2026-04-11"
+
+[project-context]
+name = "Hardware Crash Team"
+purpose = """PCI device enumeration, zombie detection, partial binding detection"""
+completion-percentage = 35
+
+[position]
+phase = "initial"   # design | implementation | testing | maintenance | archived
+maturity = "experimental"  # experimental | alpha | beta | production | lts
+
+[route-to-mvp]
+milestones = [
+  # No milestones recorded
+]
+
+[blockers-and-issues]
+issues = [
+  "IOMMU group count reads 0 despite IOMMU being active - sysfs path issue",
+]
+
+[critical-next-actions]
+actions = [
+  "Implement BAR memory region enumeration in scanner",
+  "Add lspci description enrichment",
+  "Implement journalctl parser for crash analyzer",
+  "Add multi-device remediation plans (GPU + audio codec together)",
+  "Test rpm-ostree kargs integration on Fedora Atomic",
+]
+
+[maintenance-status]
+last-run-utc = "2026-02-08T00:00:00Z"
+last-result = "unknown"  # unknown | pass | warn | fail
