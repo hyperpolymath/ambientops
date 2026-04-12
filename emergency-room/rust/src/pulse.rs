@@ -6,6 +6,8 @@
 
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
+use serde_json::json;
+use std::env;
 use std::fs;
 use std::path::Path;
 use std::process::Command;
@@ -19,6 +21,10 @@ const CRITICAL_SWAP_PCT: u8 = 95;
 
 const OOM_NOTIFY_ID: &str = "82101";
 const MEM_NOTIFY_ID: &str = "82102";
+const NOTIFY_FAIL_SUPPRESS_THRESHOLD: u32 = 3;
+const NOTIFY_SUPPRESS_SECONDS: i64 = 300;
+const BACKEND_DEGRADED_THRESHOLD: u32 = 3;
+const SESSION_WARN_COOLDOWN_SECONDS: i64 = 60;
 
 #[derive(Clone)]
 pub struct Config {
@@ -31,12 +37,20 @@ pub struct Config {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[serde(default)]
 struct WatchState {
     last_scan_epoch: i64,
     last_oom_signature: String,
     last_oom_notify_epoch: i64,
     last_mem_notify_epoch: i64,
     last_mem_level: String,
+    notify_fail_streak: u32,
+    notify_suppressed_until_epoch: i64,
+    last_notify_error: String,
+    consecutive_journal_failures: u32,
+    consecutive_mem_failures: u32,
+    last_loop_ok_epoch: i64,
+    last_no_session_log_epoch: i64,
 }
 
 #[derive(Debug, Clone)]
@@ -93,6 +107,7 @@ pub fn run(cfg: Config) -> Result<(), Box<dyn std::error::Error>> {
 
     loop {
         let now_epoch = Utc::now().timestamp();
+        maybe_recover_notification_channel(&mut state, now_epoch);
         let since_epoch = state
             .last_scan_epoch
             .max(now_epoch - cfg.lookback_seconds.max(30))
@@ -100,24 +115,53 @@ pub fn run(cfg: Config) -> Result<(), Box<dyn std::error::Error>> {
 
         match read_oom_kills_since(since_epoch) {
             Ok(events) => {
+                if state.consecutive_journal_failures >= BACKEND_DEGRADED_THRESHOLD {
+                    log_line("journal access recovered");
+                }
+                state.consecutive_journal_failures = 0;
                 handle_oom_events(&cfg, &mut state, now_epoch, &events);
             }
             Err(e) => {
-                log_line(&format!("warn: unable to read oom journal events: {e}"));
+                state.consecutive_journal_failures = state.consecutive_journal_failures.saturating_add(1);
+                let failures = state.consecutive_journal_failures;
+                if failures <= 2 || failures % 10 == 0 {
+                    log_line(&format!(
+                        "warn: unable to read oom journal events (consecutive={failures}): {e}"
+                    ));
+                }
+                if failures == BACKEND_DEGRADED_THRESHOLD {
+                    log_line("degraded: journal backend has repeated failures; continuing in best-effort mode");
+                }
             }
         }
 
         match read_memory_snapshot() {
             Ok(snapshot) => {
+                if state.consecutive_mem_failures >= BACKEND_DEGRADED_THRESHOLD {
+                    log_line("memory snapshot backend recovered");
+                }
+                state.consecutive_mem_failures = 0;
                 handle_memory_pressure(&cfg, &mut state, now_epoch, &snapshot);
             }
             Err(e) => {
-                log_line(&format!("warn: unable to read memory snapshot: {e}"));
+                state.consecutive_mem_failures = state.consecutive_mem_failures.saturating_add(1);
+                let failures = state.consecutive_mem_failures;
+                if failures <= 2 || failures % 10 == 0 {
+                    log_line(&format!(
+                        "warn: unable to read memory snapshot (consecutive={failures}): {e}"
+                    ));
+                }
+                if failures == BACKEND_DEGRADED_THRESHOLD {
+                    log_line("degraded: memory snapshot backend has repeated failures; continuing in best-effort mode");
+                }
             }
         }
 
         state.last_scan_epoch = now_epoch;
-        let _ = save_state(&cfg.state_path, &state);
+        state.last_loop_ok_epoch = now_epoch;
+        if let Err(e) = save_state(&cfg.state_path, &state) {
+            log_line(&format!("warn: unable to persist pulse state: {e}"));
+        }
 
         if cfg.once {
             break;
@@ -155,6 +199,8 @@ fn handle_oom_events(cfg: &Config, state: &mut WatchState, now_epoch: i64, event
 
     if send_notification(
         cfg,
+        state,
+        now_epoch,
         OOM_NOTIFY_ID,
         "critical",
         "dialog-warning",
@@ -189,7 +235,16 @@ fn handle_memory_pressure(cfg: &Config, state: &mut WatchState, now_epoch: i64, 
                     "Memory pressure is back to normal.\nAvailable: {}MB ({}%), swap used: {}%.",
                     snapshot.available_mb, snapshot.available_pct, snapshot.swap_used_pct
                 );
-                if send_notification(cfg, MEM_NOTIFY_ID, "low", "dialog-information", title, &body) {
+                if send_notification(
+                    cfg,
+                    state,
+                    now_epoch,
+                    MEM_NOTIFY_ID,
+                    "low",
+                    "dialog-information",
+                    title,
+                    &body,
+                ) {
                     state.last_mem_notify_epoch = now_epoch;
                 }
             }
@@ -215,7 +270,16 @@ fn handle_memory_pressure(cfg: &Config, state: &mut WatchState, now_epoch: i64, 
             } else {
                 "dialog-warning"
             };
-            if send_notification(cfg, MEM_NOTIFY_ID, urgency, icon, title, &body) {
+            if send_notification(
+                cfg,
+                state,
+                now_epoch,
+                MEM_NOTIFY_ID,
+                urgency,
+                icon,
+                title,
+                &body,
+            ) {
                 state.last_mem_notify_epoch = now_epoch;
             }
             log_line(&format!(
@@ -378,13 +442,35 @@ fn is_noise_process(comm: &str) -> bool {
     )
 }
 
-fn send_notification(cfg: &Config, replace_id: &str, urgency: &str, icon: &str, title: &str, body: &str) -> bool {
+fn send_notification(
+    cfg: &Config,
+    state: &mut WatchState,
+    now_epoch: i64,
+    replace_id: &str,
+    urgency: &str,
+    icon: &str,
+    title: &str,
+    body: &str,
+) -> bool {
     if cfg.dry_run {
         log_line(&format!("dry-run notify ({urgency}): {title} — {body}"));
+        record_notify_success(state);
         return true;
     }
 
-    let status = Command::new("notify-send")
+    if now_epoch < state.notify_suppressed_until_epoch {
+        return false;
+    }
+
+    if !notification_context_ready() {
+        if now_epoch - state.last_no_session_log_epoch >= SESSION_WARN_COOLDOWN_SECONDS {
+            log_line("warn: no GUI notification session detected; skipping desktop notification");
+            state.last_no_session_log_epoch = now_epoch;
+        }
+        return false;
+    }
+
+    let output = Command::new("notify-send")
         .args([
             "--app-name",
             "AmbientOps",
@@ -397,9 +483,93 @@ fn send_notification(cfg: &Config, replace_id: &str, urgency: &str, icon: &str, 
             title,
             body,
         ])
-        .status();
+        .output();
 
-    status.map(|s| s.success()).unwrap_or(false)
+    match output {
+        Ok(out) if out.status.success() => {
+            record_notify_success(state);
+            true
+        }
+        Ok(out) => {
+            let stderr = String::from_utf8_lossy(&out.stderr).trim().to_string();
+            let detail = if stderr.is_empty() {
+                format!("notify-send exit status {}", out.status)
+            } else {
+                stderr
+            };
+            record_notify_failure(state, now_epoch, &detail);
+            false
+        }
+        Err(e) => {
+            record_notify_failure(state, now_epoch, &format!("unable to execute notify-send: {e}"));
+            false
+        }
+    }
+}
+
+fn record_notify_success(state: &mut WatchState) {
+    if state.notify_fail_streak > 0 || state.notify_suppressed_until_epoch > 0 {
+        log_line("notification backend recovered");
+    }
+    state.notify_fail_streak = 0;
+    state.notify_suppressed_until_epoch = 0;
+    state.last_notify_error.clear();
+}
+
+fn record_notify_failure(state: &mut WatchState, now_epoch: i64, detail: &str) {
+    state.notify_fail_streak = state.notify_fail_streak.saturating_add(1);
+    state.last_notify_error = truncate_for_log(detail, 240);
+
+    if state.notify_fail_streak >= NOTIFY_FAIL_SUPPRESS_THRESHOLD {
+        state.notify_suppressed_until_epoch = now_epoch + NOTIFY_SUPPRESS_SECONDS;
+        log_line(&format!(
+            "warn: notification backend failing (streak={}, suppress={}s): {}",
+            state.notify_fail_streak, NOTIFY_SUPPRESS_SECONDS, state.last_notify_error
+        ));
+        return;
+    }
+
+    log_line(&format!(
+        "warn: notification send failed (streak={}): {}",
+        state.notify_fail_streak, state.last_notify_error
+    ));
+}
+
+fn maybe_recover_notification_channel(state: &mut WatchState, now_epoch: i64) {
+    if state.notify_suppressed_until_epoch == 0 || now_epoch < state.notify_suppressed_until_epoch {
+        return;
+    }
+
+    state.notify_suppressed_until_epoch = 0;
+    state.notify_fail_streak = 0;
+    log_line("notification suppression window elapsed; retrying notifications");
+}
+
+fn notification_context_ready() -> bool {
+    let has_display = env::var("WAYLAND_DISPLAY").map(|v| !v.trim().is_empty()).unwrap_or(false)
+        || env::var("DISPLAY").map(|v| !v.trim().is_empty()).unwrap_or(false);
+    let has_session_bus = env::var("DBUS_SESSION_BUS_ADDRESS")
+        .map(|v| !v.trim().is_empty())
+        .unwrap_or(false)
+        || env::var("XDG_RUNTIME_DIR")
+            .ok()
+            .map(|p| Path::new(&p).join("bus").exists())
+            .unwrap_or(false);
+    has_display && has_session_bus
+}
+
+fn truncate_for_log(s: &str, max_chars: usize) -> String {
+    let mut out = String::new();
+    let mut count = 0usize;
+    for ch in s.chars() {
+        if count >= max_chars {
+            out.push_str("...");
+            break;
+        }
+        out.push(ch);
+        count += 1;
+    }
+    out
 }
 
 fn normalize_level(level: &str) -> &str {
@@ -410,10 +580,19 @@ fn normalize_level(level: &str) -> &str {
 }
 
 fn load_state(path: &str) -> WatchState {
-    fs::read_to_string(path)
-        .ok()
-        .and_then(|raw| serde_json::from_str::<WatchState>(&raw).ok())
-        .unwrap_or_default()
+    let raw = match fs::read_to_string(path) {
+        Ok(raw) => raw,
+        Err(_) => return WatchState::default(),
+    };
+
+    match serde_json::from_str::<WatchState>(&raw) {
+        Ok(state) => state,
+        Err(e) => {
+            backup_corrupt_state(path, &raw);
+            log_line(&format!("warn: state file was invalid JSON, reset to defaults: {e}"));
+            WatchState::default()
+        }
+    }
 }
 
 fn save_state(path: &str, state: &WatchState) -> Result<(), Box<dyn std::error::Error>> {
@@ -427,8 +606,117 @@ fn save_state(path: &str, state: &WatchState) -> Result<(), Box<dyn std::error::
     Ok(())
 }
 
+fn backup_corrupt_state(path: &str, raw: &str) {
+    let backup = format!("{path}.corrupt.{}", Utc::now().timestamp());
+    if fs::write(&backup, raw).is_ok() {
+        log_line(&format!("saved corrupt state backup: {backup}"));
+    }
+}
+
 fn log_line(message: &str) {
     println!("{} [ambientops-pulse] {}", Utc::now().to_rfc3339(), message);
+}
+
+fn command_exists(cmd: &str) -> bool {
+    env::var_os("PATH")
+        .map(|paths| env::split_paths(&paths).any(|p| p.join(cmd).exists()))
+        .unwrap_or(false)
+}
+
+fn probe_write_access(dir: &Path) -> bool {
+    if fs::create_dir_all(dir).is_err() {
+        return false;
+    }
+    let probe = dir.join(".pulse-write-probe.tmp");
+    if fs::write(&probe, "ok").is_err() {
+        return false;
+    }
+    let _ = fs::remove_file(probe);
+    true
+}
+
+fn recent_user_core_dumps(minutes: u64) -> Result<u32, Box<dyn std::error::Error>> {
+    let since = format!("{minutes} min ago");
+    let out = Command::new("journalctl")
+        .args(["--user", "-p", "err", "--since", &since, "--no-pager"])
+        .output()?;
+    if !out.status.success() {
+        let stderr = String::from_utf8_lossy(&out.stderr).trim().to_string();
+        let msg = if stderr.is_empty() {
+            format!("journalctl returned non-zero status: {}", out.status)
+        } else {
+            stderr
+        };
+        return Err(msg.into());
+    }
+    let logs = String::from_utf8_lossy(&out.stdout);
+    Ok(logs.lines().filter(|line| line.contains("dumped core")).count() as u32)
+}
+
+pub fn doctor(cfg: &Config) -> Result<(), Box<dyn std::error::Error>> {
+    let state_path = Path::new(&cfg.state_path);
+    let state_dir = state_path.parent().unwrap_or(Path::new("."));
+
+    let has_journalctl = command_exists("journalctl");
+    let has_notify_send = command_exists("notify-send");
+    let has_ps = command_exists("ps");
+    let has_notify_context = notification_context_ready();
+    let state_file_exists = state_path.exists();
+    let state_dir_writable = probe_write_access(state_dir);
+    let recent_core_dumps_10m = recent_user_core_dumps(10).unwrap_or(0);
+
+    let mut issues: Vec<String> = Vec::new();
+    if !has_journalctl {
+        issues.push("journalctl not found on PATH".to_string());
+    }
+    if !has_notify_send {
+        issues.push("notify-send not found; desktop notifications unavailable".to_string());
+    }
+    if !has_ps {
+        issues.push("ps not found; top-process hints unavailable".to_string());
+    }
+    if !state_dir_writable {
+        issues.push(format!(
+            "state directory is not writable: {}",
+            state_dir.display()
+        ));
+    }
+    if !has_notify_context {
+        issues.push("GUI notification context is missing (DISPLAY/WAYLAND or DBus)".to_string());
+    }
+    if recent_core_dumps_10m > 0 {
+        issues.push(format!(
+            "observed {recent_core_dumps_10m} user core-dump error entries in last 10m"
+        ));
+    }
+
+    let status = if !state_dir_writable || !has_journalctl {
+        "unhealthy"
+    } else if issues.is_empty() {
+        "healthy"
+    } else {
+        "degraded"
+    };
+
+    let report = json!({
+        "timestamp": Utc::now().to_rfc3339(),
+        "component": "ambientops-pulse",
+        "status": status,
+        "state_path": cfg.state_path,
+        "checks": {
+            "journalctl_found": has_journalctl,
+            "notify_send_found": has_notify_send,
+            "ps_found": has_ps,
+            "notification_context_ready": has_notify_context,
+            "state_file_exists": state_file_exists,
+            "state_dir_writable": state_dir_writable,
+            "recent_user_core_dumps_10m": recent_core_dumps_10m
+        },
+        "issues": issues
+    });
+
+    println!("{}", serde_json::to_string_pretty(&report)?);
+    Ok(())
 }
 
 #[cfg(test)]

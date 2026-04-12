@@ -24,7 +24,7 @@ ConditionEnvironment=|WAYLAND_DISPLAY
 
 [Service]
 Type=simple
-ExecStart=%h/.local/bin/emergency-room pulse --poll-seconds 20 --lookback-seconds 180 --notify-cooldown-seconds 120 --state-path %h/.local/share/ambientops/pulse/state.json
+ExecStart=%h/.local/bin/emergency-room pulse --poll-seconds 30 --lookback-seconds 180 --notify-cooldown-seconds 300 --state-path %h/.local/share/ambientops/pulse/state.json
 Restart=always
 RestartSec=10
 

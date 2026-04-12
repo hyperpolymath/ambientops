@@ -92,6 +92,9 @@ struct PulseArgs {
     /// Run one iteration and exit
     #[arg(long)]
     once: bool,
+    /// Run self-diagnostics and print a health report as JSON
+    #[arg(long)]
+    doctor: bool,
     #[arg(short = 'n', long)]
     dry_run: bool,
 }
@@ -209,6 +212,14 @@ fn run_pulse(args: PulseArgs) {
         once: args.once,
         dry_run: args.dry_run,
     };
+
+    if args.doctor {
+        if let Err(e) = pulse::doctor(&cfg) {
+            eprintln!("\x1b[31m[ERROR]\x1b[0m pulse doctor failed: {e}");
+            std::process::exit(1);
+        }
+        return;
+    }
 
     if let Err(e) = pulse::run(cfg) {
         eprintln!("\x1b[31m[ERROR]\x1b[0m pulse failed: {e}");
