@@ -1,0 +1,32 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+= recovery/emergency-room — V-lang Deprecated (2026-04-12)
+:toc:
+
+== Status
+
+The V-lang implementation in `src/` is *deprecated* as of 2026-04-12
+following the estate-wide V-lang ban (2026-04-10).
+
+This directory is a snapshot of `emergency-button` at an earlier point.
+The source is line-for-line identical (1,840 LOC, same nine files).
+
+== Migration Target
+
+Use `emergency-button/rust/` directly — it is the canonical Rust rewrite
+of exactly this codebase:
+
+[source,bash]
+----
+cargo build -p emergency-button
+./target/debug/emergency-button trigger
+----
+
+See `ambientops/emergency-button/MIGRATION.adoc` for the full module map
+and build instructions.
+
+== Next Steps
+
+. Confirm no scripts point to `recovery/emergency-room/` specifically.
+. Once confirmed, delete `src/*.v` and `v.mod` from this directory.
+. If `recovery/` serves a distinct purpose, document it in `recovery/README.adoc`.

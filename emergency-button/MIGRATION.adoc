@@ -1,0 +1,63 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+= Emergency Button — V-lang Deprecated (2026-04-12)
+:toc:
+
+== Status
+
+The V-lang implementation in `src/` is *deprecated* as of 2026-04-12
+following the estate-wide V-lang ban (2026-04-10).
+
+== Migration Target: Rust
+
+The canonical Rust rewrite is at `rust/` in this directory:
+
+[source,toml]
+----
+# ambientops/Cargo.toml workspace already includes this crate:
+# "emergency-button/rust"
+----
+
+[cols="1,1"]
+|===
+| V module (deprecated) | Rust module
+
+| `src/main.v`       | `rust/src/main.rs`
+| `src/incident.v`   | `rust/src/incident.rs`
+| `src/capture.v`    | `rust/src/capture.rs`
+| `src/backup.v`     | `rust/src/backup.rs`
+| `src/handoff.v`    | `rust/src/handoff.rs`
+| `src/utils.v`      | inlined in respective modules
+|===
+
+== Build and Run
+
+[source,bash]
+----
+# From ambientops/ root
+cargo build -p emergency-button
+cargo test  -p emergency-button
+
+# Run
+./target/debug/emergency-button trigger
+./target/debug/emergency-button trigger --dry-run
+./target/debug/emergency-button trigger --quick-backup /mnt/backup
+----
+
+== Feature Parity
+
+All V features are preserved:
+
+* `trigger` subcommand — incident bundle, diagnostics, receipt, optional backup, handoff
+* PII redaction — passwords, tokens, AWS/GitHub keys, SSNs, emails
+* Path validation (CRIT-001/CRIT-002) — no shell metacharacters
+* Atomic writes — write to `.tmp` then rename
+* Platform-specific capture modules — Linux / macOS / Windows
+* Handoff to `psa` / `big-up` with correlation ID
+
+== Next Steps
+
+. Build and smoke-test the Rust binary.
+. Run on a real incident to confirm output parity with the V binary.
+. Update any scripts that invoke `v run src/` to use the compiled binary.
+. Once confirmed healthy, delete `src/*.v` and `v.mod`.

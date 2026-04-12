@@ -1,0 +1,72 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+= Emergency Room — V-lang Deprecated (2026-04-12)
+:toc:
+
+== Status
+
+The V-lang implementation in `src/` is *deprecated* as of 2026-04-12
+following the estate-wide V-lang ban (2026-04-10).
+
+== Migration Target: Rust
+
+The canonical Rust rewrite is at `rust/` in this directory:
+
+[source,toml]
+----
+# ambientops/Cargo.toml workspace already includes this crate:
+# "emergency-room/rust"
+----
+
+[cols="1,1"]
+|===
+| V module (deprecated) | Rust module
+
+| `src/main.v`             | `rust/src/main.rs`
+| `src/incident.v`         | `rust/src/incident.rs`
+| `src/capture.v`          | `rust/src/capture.rs`
+| `src/backup.v`           | `rust/src/backup.rs`
+| `src/handoff.v`          | `rust/src/handoff.rs`
+| `src/boot_guardian.v`    | `rust/src/boot_guardian.rs`
+| `src/shutdown_marshal.v` | `rust/src/shutdown_marshal.rs`
+| `src/utils.v`            | inlined in respective modules
+|===
+
+== Build and Run
+
+[source,bash]
+----
+# From ambientops/ root
+cargo build -p emergency-room
+cargo test  -p emergency-room
+
+# Trigger mode (same as emergency-button)
+./target/debug/emergency-room trigger
+./target/debug/emergency-room trigger --dry-run
+
+# Boot loop detection
+./target/debug/emergency-room boot-guardian --record
+./target/debug/emergency-room boot-guardian --check
+
+# Graceful shutdown orchestration
+./target/debug/emergency-room shutdown-marshal --reason user-initiated
+./target/debug/emergency-room shutdown-marshal --dry-run
+----
+
+== Feature Parity
+
+All V features are preserved:
+
+* `trigger` subcommand — incident bundle, diagnostics, receipt, backup, handoff
+* `boot-guardian` — boot stamp file, loop detection (5 boots / 10 min window),
+  PCIe link-error scan from dmesg (CC-003)
+* `shutdown-marshal` — component notification (observatory/clinician/session-sentinel
+  via systemctl or SIGTERM), ungraceful-shutdown tracking, clean shutdown record
+* PII redaction, path validation (CRIT-001/CRIT-002), atomic writes
+
+== Next Steps
+
+. Build and smoke-test the Rust binary.
+. Test `boot-guardian --record` as a systemd `ExecStartPre=` in the unit file.
+. Run `shutdown-marshal --dry-run` to verify component list is current.
+. Once confirmed healthy, delete `src/*.v` and `v.mod`.
