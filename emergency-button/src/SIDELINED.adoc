@@ -1,0 +1,32 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+= Emergency Room — V-lang Implementation SIDELINED
+:toc:
+
+== Status
+
+The V-lang implementation of emergency-room (`src/`) is *sidelined*
+as of 2026-04-12 following the estate-wide V-lang ban (2026-04-10).
+
+== Migration Target
+
+The replacement is a **Gleam / Rust** implementation. Target: `src-gleam/`.
+
+[cols="1,1"]
+|===
+| V module (sidelined) | Migration target
+
+| `main.v`             | Gleam supervisor entrypoint
+| `incident.v`         | Gleam `incident` module
+| `capture.v`          | Gleam `capture` module
+| `handoff.v`          | Gleam `handoff` module
+| `backup.v`           | Rust S3/object-store crate
+| `boot_guardian.v`    | Gleam / Rust systemd watchdog
+| `shutdown_marshal.v` | Gleam / Rust SIGTERM handler
+| `utils.v`            | Gleam stdlib / Rust utilities
+|===
+
+Tests (`*_test.v`, `integration_test.v`) should be ported as Gleam EUnit
+or Rust integration tests.
+
+The V-lang source is retained for reference but MUST NOT be compiled or deployed.

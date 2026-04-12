@@ -1,0 +1,25 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+= Volumod — V-lang Implementation SIDELINED
+:toc:
+
+== Status
+
+The V-lang implementation of volumod (`src/`) is *sidelined*
+as of 2026-04-12 following the estate-wide V-lang ban (2026-04-10).
+
+== Migration Target
+
+The replacement is a **Rust + PipeWire** implementation using the
+Ephapax-proven resource types for audio buffer management.
+Target: `src-rust/`.
+
+The DSP core (`core/`, `engine/`, `processors/`) maps naturally to
+Rust's ownership model. The platform audio capture (`platform/`)
+uses PipeWire bindings via `pipewire-rs`.
+
+The Bebop FFI bridge (`ffi/bebop_bridge.v`, `ffi/bebop_types.v`)
+should be replaced with a native Rust Bebop implementation or
+direct serde serialisation.
+
+The V-lang source is retained for reference but MUST NOT be compiled or deployed.
