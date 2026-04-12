@@ -1033,6 +1033,26 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "48c757948c5ede0e46177b7add2e67155f70e33c07fea8284df6576da70b3719"
 
 [[package]]
+name = "emergency-button"
+version = "0.2.0"
+dependencies = [
+ "chrono",
+ "clap",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "emergency-room"
+version = "0.2.0"
+dependencies = [
+ "chrono",
+ "clap",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "encoding_rs"
 version = "0.8.35"
 source = "registry+https://github.com/rust-lang/crates.io-index"

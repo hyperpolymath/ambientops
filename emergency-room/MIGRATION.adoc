@@ -29,6 +29,7 @@ The canonical Rust rewrite is at `rust/` in this directory:
 | `src/handoff.v`          | `rust/src/handoff.rs`
 | `src/boot_guardian.v`    | `rust/src/boot_guardian.rs`
 | `src/shutdown_marshal.v` | `rust/src/shutdown_marshal.rs`
+| (new) AmbientOps Pulse   | `rust/src/pulse.rs`
 | `src/utils.v`            | inlined in respective modules
 |===
 
@@ -51,6 +52,13 @@ cargo test  -p emergency-room
 # Graceful shutdown orchestration
 ./target/debug/emergency-room shutdown-marshal --reason user-initiated
 ./target/debug/emergency-room shutdown-marshal --dry-run
+
+# Memory pressure / oomd observer (read-only, no process killing)
+./target/debug/emergency-room pulse --once
+./target/debug/emergency-room pulse --poll-seconds 20
+
+# Install as user service
+./emergency-room/systemd/install-pulse.sh
 ----
 
 == Feature Parity
@@ -62,11 +70,15 @@ All V features are preserved:
   PCIe link-error scan from dmesg (CC-003)
 * `shutdown-marshal` — component notification (observatory/clinician/session-sentinel
   via systemctl or SIGTERM), ungraceful-shutdown tracking, clean shutdown record
+* `pulse` (`oom-watch` alias) — journal-based `systemd-oomd` kill detection and memory-pressure
+  notifications with dedupe/cooldown and persistent cursor state
 * PII redaction, path validation (CRIT-001/CRIT-002), atomic writes
 
 == Next Steps
 
 . Build and smoke-test the Rust binary.
+. Enable `ambientops-pulse.service` via `systemd --user` where desktop
+  notifications are required.
 . Test `boot-guardian --record` as a systemd `ExecStartPre=` in the unit file.
 . Run `shutdown-marshal --dry-run` to verify component list is current.
 . Once confirmed healthy, delete `src/*.v` and `v.mod`.

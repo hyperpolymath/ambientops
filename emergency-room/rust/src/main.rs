@@ -9,6 +9,7 @@ mod boot_guardian;
 mod capture;
 mod handoff;
 mod incident;
+mod pulse;
 mod shutdown_marshal;
 
 use clap::{Args, Parser, Subcommand};
@@ -32,6 +33,9 @@ enum Command {
     BootGuardian(BootGuardianArgs),
     /// Orchestrate graceful system shutdown
     ShutdownMarshal(ShutdownArgs),
+    /// Watch journal for oomd kill events and notify safely
+    #[command(name = "pulse", alias = "oom-watch")]
+    Pulse(PulseArgs),
 }
 
 #[derive(Args)]
@@ -71,6 +75,27 @@ struct ShutdownArgs {
     dry_run: bool,
 }
 
+#[derive(Args)]
+struct PulseArgs {
+    /// Poll interval in seconds
+    #[arg(long, default_value_t = 20)]
+    poll_seconds: u64,
+    /// Initial lookback window in seconds on first run
+    #[arg(long, default_value_t = 180)]
+    lookback_seconds: i64,
+    /// Minimum seconds between desktop notifications
+    #[arg(long, default_value_t = 120)]
+    notify_cooldown_seconds: i64,
+    /// Persisted state path for deduplication and cursoring
+    #[arg(long)]
+    state_path: Option<String>,
+    /// Run one iteration and exit
+    #[arg(long)]
+    once: bool,
+    #[arg(short = 'n', long)]
+    dry_run: bool,
+}
+
 fn main() {
     let cli = Cli::parse();
 
@@ -78,6 +103,7 @@ fn main() {
         Some(Command::Trigger(args)) => run_trigger(args),
         Some(Command::BootGuardian(args)) => run_boot_guardian(args),
         Some(Command::ShutdownMarshal(args)) => run_shutdown_marshal(args),
+        Some(Command::Pulse(args)) => run_pulse(args),
         None => print_help(),
     }
 }
@@ -109,7 +135,7 @@ fn run_trigger(args: TriggerArgs) {
         }
     };
 
-    println!("\x1b[32m[OK]\x1b[0m Created incident bundle: {}", inc.path);
+    println!("\x1b[32m[OK]\x1b[0m Created incident bundle: {}", inc.path.display());
     println!("\x1b[34m[INFO]\x1b[0m Correlation ID: {}", inc.correlation_id);
     println!();
 
@@ -130,7 +156,7 @@ fn run_trigger(args: TriggerArgs) {
 
     println!();
     println!("\x1b[32m════════════════════════════════════════════\x1b[0m");
-    println!("\x1b[32m[DONE]\x1b[0m Incident bundle ready: {}", inc.path);
+    println!("\x1b[32m[DONE]\x1b[0m Incident bundle ready: {}", inc.path.display());
     println!("\x1b[32m════════════════════════════════════════════\x1b[0m");
 }
 
@@ -169,6 +195,27 @@ fn run_shutdown_marshal(args: ShutdownArgs) {
     }
 }
 
+fn run_pulse(args: PulseArgs) {
+    let state_path = args.state_path.unwrap_or_else(|| {
+        let home = std::env::var("HOME").unwrap_or_else(|_| ".".to_string());
+        format!("{home}/.local/share/ambientops/pulse/state.json")
+    });
+
+    let cfg = pulse::Config {
+        poll_seconds: args.poll_seconds,
+        lookback_seconds: args.lookback_seconds,
+        notify_cooldown_seconds: args.notify_cooldown_seconds,
+        state_path,
+        once: args.once,
+        dry_run: args.dry_run,
+    };
+
+    if let Err(e) = pulse::run(cfg) {
+        eprintln!("\x1b[31m[ERROR]\x1b[0m pulse failed: {e}");
+        std::process::exit(1);
+    }
+}
+
 fn print_help() {
     println!("\x1b[1memergency-room\x1b[0m — Emergency recovery orchestrator");
     println!();
@@ -176,4 +223,6 @@ fn print_help() {
     println!("    trigger           Create incident bundle and capture diagnostics");
     println!("    boot-guardian     Detect boot loops, record boot events");
     println!("    shutdown-marshal  Orchestrate graceful shutdown");
+    println!("    pulse             Watch for OOM kills and memory pressure");
+    println!("                      Alias: oom-watch");
 }

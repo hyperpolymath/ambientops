@@ -1,0 +1,52 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# AmbientOps Pulse (user service)
+# Install:
+#   cp emergency-room/systemd/ambientops-pulse.service ~/.config/systemd/user/
+#   systemctl --user daemon-reload
+#   systemctl --user enable --now ambientops-pulse.service
+
+[Unit]
+Description=AmbientOps Pulse - notify on memory pressure and oomd kills
+Documentation=https://github.com/hyperpolymath/ambientops
+After=graphical-session.target dbus.service dbus.socket
+Wants=graphical-session.target dbus.service
+Requires=dbus.socket
+
+# Keep restart loops contained.
+StartLimitBurst=8
+StartLimitIntervalSec=1800
+
+# Notifications require an active desktop session bus.
+ConditionEnvironment=|DISPLAY
+ConditionEnvironment=|WAYLAND_DISPLAY
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/emergency-room pulse --poll-seconds 20 --lookback-seconds 180 --notify-cooldown-seconds 120 --state-path %h/.local/share/ambientops/pulse/state.json
+Restart=always
+RestartSec=10
+
+Environment=HOME=%h
+Environment=XDG_RUNTIME_DIR=/run/user/%U
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=ambientops-pulse
+
+# This service is read-only observability + notifications.
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=%h/.local/share/ambientops/pulse
+PrivateTmp=false
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictNamespaces=true
+RestrictRealtime=true
+LockPersonality=true
+
+[Install]
+WantedBy=default.target
