@@ -13,6 +13,7 @@ mod pulse;
 mod shutdown_marshal;
 
 use clap::{Args, Parser, Subcommand};
+use std::path::Path;
 
 #[derive(Parser)]
 #[command(
@@ -89,6 +90,9 @@ struct PulseArgs {
     /// Persisted state path for deduplication and cursoring
     #[arg(long)]
     state_path: Option<String>,
+    /// Append-only A2ML event log path for pulse diagnostics
+    #[arg(long)]
+    a2ml_log_path: Option<String>,
     /// Run one iteration and exit
     #[arg(long)]
     once: bool,
@@ -203,12 +207,21 @@ fn run_pulse(args: PulseArgs) {
         let home = std::env::var("HOME").unwrap_or_else(|_| ".".to_string());
         format!("{home}/.local/share/ambientops/pulse/state.json")
     });
+    let a2ml_log_path = args.a2ml_log_path.unwrap_or_else(|| {
+        Path::new(&state_path)
+            .parent()
+            .unwrap_or(Path::new("."))
+            .join("pulse-events.a2ml")
+            .to_string_lossy()
+            .to_string()
+    });
 
     let cfg = pulse::Config {
         poll_seconds: args.poll_seconds,
         lookback_seconds: args.lookback_seconds,
         notify_cooldown_seconds: args.notify_cooldown_seconds,
         state_path,
+        a2ml_log_path,
         once: args.once,
         dry_run: args.dry_run,
     };

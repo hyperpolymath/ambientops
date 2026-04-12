@@ -56,6 +56,7 @@ cargo test  -p emergency-room
 # Memory pressure / oomd observer (read-only, no process killing)
 ./target/debug/emergency-room pulse --once
 ./target/debug/emergency-room pulse --poll-seconds 20
+./target/debug/emergency-room pulse --a2ml-log-path ~/.local/share/ambientops/pulse/pulse-events.a2ml
 ./target/debug/emergency-room pulse --doctor
 
 # Install as user service
@@ -72,7 +73,8 @@ All V features are preserved:
 * `shutdown-marshal` — component notification (observatory/clinician/session-sentinel
   via systemctl or SIGTERM), ungraceful-shutdown tracking, clean shutdown record
 * `pulse` (`oom-watch` alias) — journal-based `systemd-oomd` kill detection and memory-pressure
-  notifications with dedupe/cooldown and persistent cursor state
+  notifications with dedupe/cooldown, miniKanren-style diagnostics, persistent cursor state,
+  and append-only A2ML event envelopes
 * PII redaction, path validation (CRIT-001/CRIT-002), atomic writes
 
 == Next Steps

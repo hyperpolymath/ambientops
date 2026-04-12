@@ -7,8 +7,12 @@
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+use std::collections::{hash_map::DefaultHasher, HashMap, HashSet};
 use std::env;
 use std::fs;
+use std::fs::OpenOptions;
+use std::hash::{Hash, Hasher};
+use std::io::Write;
 use std::path::Path;
 use std::process::Command;
 use std::thread;
@@ -32,6 +36,7 @@ pub struct Config {
     pub lookback_seconds: i64,
     pub notify_cooldown_seconds: i64,
     pub state_path: String,
+    pub a2ml_log_path: String,
     pub once: bool,
     pub dry_run: bool,
 }
@@ -93,6 +98,342 @@ struct MemorySnapshot {
     swap_used_pct: u8,
 }
 
+#[derive(Debug, Clone, Serialize)]
+struct PulseAssessment {
+    category: String,
+    severity: String,
+    summary: String,
+    action: String,
+    confidence: f32,
+}
+
+#[derive(Debug, Clone, Copy)]
+struct ReasoningContext {
+    memory_level: MemoryLevel,
+    available_pct: u8,
+    swap_used_pct: u8,
+    oom_event_seen: bool,
+    notify_backend_degraded: bool,
+    journal_backend_degraded: bool,
+    memory_backend_degraded: bool,
+}
+
+impl ReasoningContext {
+    fn from_state(state: &WatchState, snapshot: Option<&MemorySnapshot>, oom_event_seen: bool, now_epoch: i64) -> Self {
+        let memory_level = snapshot
+            .map(classify_memory_level)
+            .unwrap_or_else(|| MemoryLevel::from_str(&state.last_mem_level));
+        let available_pct = snapshot.map(|s| s.available_pct).unwrap_or(100);
+        let swap_used_pct = snapshot.map(|s| s.swap_used_pct).unwrap_or(0);
+
+        Self {
+            memory_level,
+            available_pct,
+            swap_used_pct,
+            oom_event_seen,
+            notify_backend_degraded: state.notify_fail_streak >= NOTIFY_FAIL_SUPPRESS_THRESHOLD
+                || state.notify_suppressed_until_epoch > now_epoch,
+            journal_backend_degraded: state.consecutive_journal_failures >= BACKEND_DEGRADED_THRESHOLD,
+            memory_backend_degraded: state.consecutive_mem_failures >= BACKEND_DEGRADED_THRESHOLD,
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+enum LogicTerm {
+    Atom(String),
+    Var(String),
+    Compound(String, Vec<LogicTerm>),
+}
+
+#[derive(Debug, Clone)]
+struct LogicClause {
+    head: LogicTerm,
+    body: Vec<LogicTerm>,
+    confidence: f32,
+}
+
+type LogicSubstitution = HashMap<String, LogicTerm>;
+
+#[derive(Debug, Default)]
+struct MiniKanrenLikeEngine {
+    clauses: Vec<LogicClause>,
+}
+
+impl MiniKanrenLikeEngine {
+    fn add_fact(&mut self, head: LogicTerm, confidence: f32) {
+        self.clauses.push(LogicClause {
+            head,
+            body: Vec::new(),
+            confidence,
+        });
+    }
+
+    fn add_rule(&mut self, head: LogicTerm, body: Vec<LogicTerm>, confidence: f32) {
+        self.clauses.push(LogicClause {
+            head,
+            body,
+            confidence,
+        });
+    }
+
+    fn walk(&self, term: &LogicTerm, subst: &LogicSubstitution) -> LogicTerm {
+        match term {
+            LogicTerm::Var(name) => {
+                if let Some(next) = subst.get(name) {
+                    self.walk(next, subst)
+                } else {
+                    term.clone()
+                }
+            }
+            _ => term.clone(),
+        }
+    }
+
+    fn unify(&self, left: &LogicTerm, right: &LogicTerm, subst: &LogicSubstitution) -> Option<LogicSubstitution> {
+        let left = self.walk(left, subst);
+        let right = self.walk(right, subst);
+
+        match (&left, &right) {
+            (LogicTerm::Var(v1), LogicTerm::Var(v2)) if v1 == v2 => Some(subst.clone()),
+            (LogicTerm::Var(v), term) | (term, LogicTerm::Var(v)) => {
+                let mut next = subst.clone();
+                next.insert(v.clone(), term.clone());
+                Some(next)
+            }
+            (LogicTerm::Atom(a), LogicTerm::Atom(b)) if a == b => Some(subst.clone()),
+            (LogicTerm::Compound(name1, args1), LogicTerm::Compound(name2, args2))
+                if name1 == name2 && args1.len() == args2.len() =>
+            {
+                let mut merged = subst.clone();
+                for (a, b) in args1.iter().zip(args2.iter()) {
+                    merged = self.unify(a, b, &merged)?;
+                }
+                Some(merged)
+            }
+            _ => None,
+        }
+    }
+
+    fn query(&self, goal: &LogicTerm) -> Vec<(LogicSubstitution, f32)> {
+        let mut results = Vec::new();
+        for clause in &self.clauses {
+            if let Some(initial_subst) = self.unify(goal, &clause.head, &HashMap::new()) {
+                if clause.body.is_empty() {
+                    results.push((initial_subst, clause.confidence));
+                } else if let Some((proved_subst, body_confidence)) = self.prove_body(&clause.body, &initial_subst) {
+                    results.push((proved_subst, clause.confidence * body_confidence));
+                }
+            }
+        }
+        results.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
+        results
+    }
+
+    fn prove_body(&self, goals: &[LogicTerm], subst: &LogicSubstitution) -> Option<(LogicSubstitution, f32)> {
+        let mut current = subst.clone();
+        let mut confidence = 1.0f32;
+
+        for goal in goals {
+            let resolved = self.walk(goal, &current);
+            let mut matches = self.query(&resolved).into_iter();
+            let (next_subst, next_confidence) = matches.next()?;
+            current.extend(next_subst);
+            confidence *= next_confidence;
+        }
+
+        Some((current, confidence))
+    }
+}
+
+fn atom(value: &str) -> LogicTerm {
+    LogicTerm::Atom(value.to_string())
+}
+
+fn var(value: &str) -> LogicTerm {
+    LogicTerm::Var(value.to_string())
+}
+
+fn compound(name: &str, args: Vec<LogicTerm>) -> LogicTerm {
+    LogicTerm::Compound(name.to_string(), args)
+}
+
+fn subst_atom(subst: &LogicSubstitution, key: &str) -> Option<String> {
+    match subst.get(key) {
+        Some(LogicTerm::Atom(value)) => Some(value.clone()),
+        _ => None,
+    }
+}
+
+fn infer_assessments(ctx: &ReasoningContext) -> Vec<PulseAssessment> {
+    let mut engine = MiniKanrenLikeEngine::default();
+
+    let swap_state = if ctx.swap_used_pct >= WARN_SWAP_PCT { "high" } else { "low" };
+    let avail_state = if ctx.available_pct <= WARN_MEM_PCT { "low" } else { "ok" };
+    let oom_state = if ctx.oom_event_seen { "seen" } else { "none" };
+    let notify_state = if ctx.notify_backend_degraded { "degraded" } else { "healthy" };
+    let journal_state = if ctx.journal_backend_degraded { "degraded" } else { "healthy" };
+    let memory_backend_state = if ctx.memory_backend_degraded { "degraded" } else { "healthy" };
+
+    engine.add_fact(compound("mem_level", vec![atom(ctx.memory_level.as_str())]), 1.0);
+    engine.add_fact(compound("swap_state", vec![atom(swap_state)]), 1.0);
+    engine.add_fact(compound("available_state", vec![atom(avail_state)]), 1.0);
+    engine.add_fact(compound("oom_event", vec![atom(oom_state)]), 1.0);
+    engine.add_fact(compound("notify_backend", vec![atom(notify_state)]), 1.0);
+    engine.add_fact(compound("journal_backend", vec![atom(journal_state)]), 1.0);
+    engine.add_fact(compound("memory_backend", vec![atom(memory_backend_state)]), 1.0);
+
+    engine.add_rule(
+        compound(
+            "assessment",
+            vec![
+                atom("stability"),
+                atom("critical"),
+                atom("OOM kills observed during critical memory pressure; possible crash loop."),
+                atom("Investigate: journalctl --user -p err --since '5 min ago' | grep 'dumped core'"),
+            ],
+        ),
+        vec![
+            compound("mem_level", vec![atom("critical")]),
+            compound("oom_event", vec![atom("seen")]),
+        ],
+        0.98,
+    );
+    engine.add_rule(
+        compound(
+            "assessment",
+            vec![
+                atom("memory"),
+                atom("critical"),
+                atom("Memory pressure is critical and likely to trigger app terminations."),
+                atom("Close high-RSS apps and inspect top consumers with ps -eo pid,rss,comm --sort=-rss"),
+            ],
+        ),
+        vec![compound("mem_level", vec![atom("critical")])],
+        0.92,
+    );
+    engine.add_rule(
+        compound(
+            "assessment",
+            vec![
+                atom("memory"),
+                atom("warning"),
+                atom("Memory pressure is elevated."),
+                atom("Trim workloads, close heavy tabs/apps, and monitor for escalation."),
+            ],
+        ),
+        vec![compound("mem_level", vec![atom("warning")])],
+        0.72,
+    );
+    engine.add_rule(
+        compound(
+            "assessment",
+            vec![
+                atom("memory"),
+                atom("warning"),
+                atom("Swap usage is high; thrashing risk is increasing."),
+                atom("Reduce concurrent workloads; consider increasing swap or free RAM."),
+            ],
+        ),
+        vec![compound("swap_state", vec![atom("high")])],
+        0.74,
+    );
+    engine.add_rule(
+        compound(
+            "assessment",
+            vec![
+                atom("notifications"),
+                atom("warning"),
+                atom("Notification backend is degraded; pulse is operating in log-first mode."),
+                atom("Check DISPLAY/WAYLAND/DBus session, then restart ambientops-pulse.service."),
+            ],
+        ),
+        vec![compound("notify_backend", vec![atom("degraded")])],
+        0.79,
+    );
+    engine.add_rule(
+        compound(
+            "assessment",
+            vec![
+                atom("telemetry"),
+                atom("warning"),
+                atom("journalctl access is degraded; OOM visibility may be incomplete."),
+                atom("Verify journalctl permissions and user session journal availability."),
+            ],
+        ),
+        vec![compound("journal_backend", vec![atom("degraded")])],
+        0.76,
+    );
+    engine.add_rule(
+        compound(
+            "assessment",
+            vec![
+                atom("telemetry"),
+                atom("warning"),
+                atom("Memory snapshot backend is degraded; pressure classification may be stale."),
+                atom("Inspect /proc/meminfo access and service sandbox permissions."),
+            ],
+        ),
+        vec![compound("memory_backend", vec![atom("degraded")])],
+        0.76,
+    );
+    engine.add_rule(
+        compound(
+            "assessment",
+            vec![
+                atom("memory"),
+                atom("low"),
+                atom("Memory pressure is normal."),
+                atom("No action required."),
+            ],
+        ),
+        vec![
+            compound("mem_level", vec![atom("normal")]),
+            compound("swap_state", vec![atom("low")]),
+            compound("available_state", vec![atom("ok")]),
+        ],
+        0.55,
+    );
+
+    let query = compound(
+        "assessment",
+        vec![var("Category"), var("Severity"), var("Summary"), var("Action")],
+    );
+    let results = engine.query(&query);
+
+    let mut seen = HashSet::new();
+    let mut assessments = Vec::new();
+    for (subst, confidence) in results {
+        let Some(category) = subst_atom(&subst, "Category") else {
+            continue;
+        };
+        let Some(severity) = subst_atom(&subst, "Severity") else {
+            continue;
+        };
+        let Some(summary) = subst_atom(&subst, "Summary") else {
+            continue;
+        };
+        let Some(action) = subst_atom(&subst, "Action") else {
+            continue;
+        };
+
+        let dedupe_key = format!("{category}|{severity}|{summary}|{action}");
+        if seen.contains(&dedupe_key) {
+            continue;
+        }
+        seen.insert(dedupe_key);
+        assessments.push(PulseAssessment {
+            category,
+            severity,
+            summary,
+            action,
+            confidence,
+        });
+    }
+
+    assessments
+}
+
 pub fn run(cfg: Config) -> Result<(), Box<dyn std::error::Error>> {
     let mut state = load_state(&cfg.state_path);
     if state.last_scan_epoch == 0 {
@@ -101,13 +442,32 @@ pub fn run(cfg: Config) -> Result<(), Box<dyn std::error::Error>> {
     state.last_mem_level = normalize_level(&state.last_mem_level).to_string();
 
     log_line(&format!(
-        "ambientops-pulse started (poll={}s, lookback={}s, cooldown={}s, state={})",
-        cfg.poll_seconds, cfg.lookback_seconds, cfg.notify_cooldown_seconds, cfg.state_path
+        "ambientops-pulse started (poll={}s, lookback={}s, cooldown={}s, state={}, a2ml={})",
+        cfg.poll_seconds,
+        cfg.lookback_seconds,
+        cfg.notify_cooldown_seconds,
+        cfg.state_path,
+        cfg.a2ml_log_path
     ));
+    let startup_context = ReasoningContext::from_state(&state, None, false, Utc::now().timestamp());
+    emit_a2ml_event(
+        &cfg,
+        "pulse_start",
+        "low",
+        "ambientops-pulse started",
+        json!({
+            "poll_seconds": cfg.poll_seconds,
+            "lookback_seconds": cfg.lookback_seconds,
+            "notify_cooldown_seconds": cfg.notify_cooldown_seconds,
+            "state_path": cfg.state_path.as_str(),
+            "a2ml_log_path": cfg.a2ml_log_path.as_str()
+        }),
+        &infer_assessments(&startup_context),
+    );
 
     loop {
         let now_epoch = Utc::now().timestamp();
-        maybe_recover_notification_channel(&mut state, now_epoch);
+        maybe_recover_notification_channel(&cfg, &mut state, now_epoch);
         let since_epoch = state
             .last_scan_epoch
             .max(now_epoch - cfg.lookback_seconds.max(30))
@@ -117,6 +477,18 @@ pub fn run(cfg: Config) -> Result<(), Box<dyn std::error::Error>> {
             Ok(events) => {
                 if state.consecutive_journal_failures >= BACKEND_DEGRADED_THRESHOLD {
                     log_line("journal access recovered");
+                    let context = ReasoningContext::from_state(&state, None, false, now_epoch);
+                    emit_a2ml_event(
+                        &cfg,
+                        "backend_recovered",
+                        "low",
+                        "journal backend recovered",
+                        json!({
+                            "backend": "journalctl",
+                            "consecutive_failures_before_recovery": state.consecutive_journal_failures
+                        }),
+                        &infer_assessments(&context),
+                    );
                 }
                 state.consecutive_journal_failures = 0;
                 handle_oom_events(&cfg, &mut state, now_epoch, &events);
@@ -131,6 +503,19 @@ pub fn run(cfg: Config) -> Result<(), Box<dyn std::error::Error>> {
                 }
                 if failures == BACKEND_DEGRADED_THRESHOLD {
                     log_line("degraded: journal backend has repeated failures; continuing in best-effort mode");
+                    let context = ReasoningContext::from_state(&state, None, false, now_epoch);
+                    emit_a2ml_event(
+                        &cfg,
+                        "backend_degraded",
+                        "warning",
+                        "journal backend has repeated failures",
+                        json!({
+                            "backend": "journalctl",
+                            "consecutive_failures": failures,
+                            "error": e.to_string()
+                        }),
+                        &infer_assessments(&context),
+                    );
                 }
             }
         }
@@ -139,6 +524,18 @@ pub fn run(cfg: Config) -> Result<(), Box<dyn std::error::Error>> {
             Ok(snapshot) => {
                 if state.consecutive_mem_failures >= BACKEND_DEGRADED_THRESHOLD {
                     log_line("memory snapshot backend recovered");
+                    let context = ReasoningContext::from_state(&state, Some(&snapshot), false, now_epoch);
+                    emit_a2ml_event(
+                        &cfg,
+                        "backend_recovered",
+                        "low",
+                        "memory snapshot backend recovered",
+                        json!({
+                            "backend": "meminfo",
+                            "consecutive_failures_before_recovery": state.consecutive_mem_failures
+                        }),
+                        &infer_assessments(&context),
+                    );
                 }
                 state.consecutive_mem_failures = 0;
                 handle_memory_pressure(&cfg, &mut state, now_epoch, &snapshot);
@@ -153,6 +550,19 @@ pub fn run(cfg: Config) -> Result<(), Box<dyn std::error::Error>> {
                 }
                 if failures == BACKEND_DEGRADED_THRESHOLD {
                     log_line("degraded: memory snapshot backend has repeated failures; continuing in best-effort mode");
+                    let context = ReasoningContext::from_state(&state, None, false, now_epoch);
+                    emit_a2ml_event(
+                        &cfg,
+                        "backend_degraded",
+                        "warning",
+                        "memory snapshot backend has repeated failures",
+                        json!({
+                            "backend": "meminfo",
+                            "consecutive_failures": failures,
+                            "error": e.to_string()
+                        }),
+                        &infer_assessments(&context),
+                    );
                 }
             }
         }
@@ -181,6 +591,8 @@ fn handle_oom_events(cfg: &Config, state: &mut WatchState, now_epoch: i64, event
     };
 
     state.last_oom_signature = event.signature.clone();
+    let context = ReasoningContext::from_state(state, None, true, now_epoch);
+    let assessments = infer_assessments(&context);
 
     let cooldown_ok = now_epoch - state.last_oom_notify_epoch >= cfg.notify_cooldown_seconds;
     if !cooldown_ok {
@@ -188,16 +600,38 @@ fn handle_oom_events(cfg: &Config, state: &mut WatchState, now_epoch: i64, event
             "oom event observed (suppressed by cooldown): {} {}",
             event.timestamp, event.target_hint
         ));
+        emit_a2ml_event(
+            cfg,
+            "oom_kill",
+            "critical",
+            "systemd-oomd kill observed (notification suppressed by cooldown)",
+            json!({
+                "timestamp": event.timestamp,
+                "target_hint": event.target_hint,
+                "target_path": event.target_path,
+                "cooldown_seconds": cfg.notify_cooldown_seconds,
+                "notification_sent": false,
+                "suppressed_by_cooldown": true
+            }),
+            &assessments,
+        );
         return;
     }
 
+    let reasoner_hint = assessments
+        .iter()
+        .find(|a| a.category == "stability" || a.category == "memory")
+        .or_else(|| assessments.first())
+        .map(|a| format!("\nReasoner ({:.0}%): {}\nAction: {}", a.confidence * 100.0, a.summary, a.action))
+        .unwrap_or_default();
+
     let title = "Memory Shortage Avoided";
     let body = format!(
-        "systemd-oomd terminated {} due to sustained memory pressure.\nInspect with: journalctl --since \"10 min ago\" -u systemd-oomd --no-pager",
-        event.target_hint
+        "systemd-oomd terminated {} due to sustained memory pressure.\nInspect with: journalctl --since \"10 min ago\" -u systemd-oomd --no-pager{}",
+        event.target_hint, reasoner_hint
     );
 
-    if send_notification(
+    let notified = send_notification(
         cfg,
         state,
         now_epoch,
@@ -206,9 +640,24 @@ fn handle_oom_events(cfg: &Config, state: &mut WatchState, now_epoch: i64, event
         "dialog-warning",
         title,
         &body,
-    ) {
+    );
+    if notified {
         state.last_oom_notify_epoch = now_epoch;
     }
+    emit_a2ml_event(
+        cfg,
+        "oom_kill",
+        "critical",
+        "systemd-oomd kill observed",
+        json!({
+            "timestamp": event.timestamp,
+            "target_hint": event.target_hint,
+            "target_path": event.target_path,
+            "notification_sent": notified,
+            "suppressed_by_cooldown": false
+        }),
+        &assessments,
+    );
 
     log_line(&format!(
         "oom kill event: {} target={} ({})",
@@ -226,16 +675,24 @@ fn handle_memory_pressure(cfg: &Config, state: &mut WatchState, now_epoch: i64, 
     if !changed && !cooldown_ok {
         return;
     }
+    let context = ReasoningContext::from_state(state, Some(snapshot), false, now_epoch);
+    let assessments = infer_assessments(&context);
 
     match level {
         MemoryLevel::Normal => {
             if previous != MemoryLevel::Normal {
                 let title = "Memory Recovered";
+                let reasoner_hint = assessments
+                    .iter()
+                    .find(|a| a.category == "memory")
+                    .or_else(|| assessments.first())
+                    .map(|a| format!("\nReasoner ({:.0}%): {}", a.confidence * 100.0, a.summary))
+                    .unwrap_or_default();
                 let body = format!(
-                    "Memory pressure is back to normal.\nAvailable: {}MB ({}%), swap used: {}%.",
-                    snapshot.available_mb, snapshot.available_pct, snapshot.swap_used_pct
+                    "Memory pressure is back to normal.\nAvailable: {}MB ({}%), swap used: {}%.{}",
+                    snapshot.available_mb, snapshot.available_pct, snapshot.swap_used_pct, reasoner_hint
                 );
-                if send_notification(
+                let notified = send_notification(
                     cfg,
                     state,
                     now_epoch,
@@ -244,9 +701,24 @@ fn handle_memory_pressure(cfg: &Config, state: &mut WatchState, now_epoch: i64, 
                     "dialog-information",
                     title,
                     &body,
-                ) {
+                );
+                if notified {
                     state.last_mem_notify_epoch = now_epoch;
                 }
+                emit_a2ml_event(
+                    cfg,
+                    "memory_recovered",
+                    "low",
+                    "memory pressure recovered to normal",
+                    json!({
+                        "available_mb": snapshot.available_mb,
+                        "available_pct": snapshot.available_pct,
+                        "swap_used_pct": snapshot.swap_used_pct,
+                        "previous_level": previous.as_str(),
+                        "notification_sent": notified
+                    }),
+                    &assessments,
+                );
             }
         }
         MemoryLevel::Warning | MemoryLevel::Critical => {
@@ -256,9 +728,15 @@ fn handle_memory_pressure(cfg: &Config, state: &mut WatchState, now_epoch: i64, 
             } else {
                 "Memory Pressure Warning"
             };
+            let reasoner_hint = assessments
+                .iter()
+                .find(|a| a.category == "stability" || a.category == "memory")
+                .or_else(|| assessments.first())
+                .map(|a| format!("Reasoner ({:.0}%): {} Action: {}", a.confidence * 100.0, a.summary, a.action))
+                .unwrap_or_default();
             let body = format!(
-                "Available: {}MB ({}%), swap used: {}%.\n{}\nConsider closing heavy apps/tabs.",
-                snapshot.available_mb, snapshot.available_pct, snapshot.swap_used_pct, top
+                "Available: {}MB ({}%), swap used: {}%.\n{}\n{}\nConsider closing heavy apps/tabs.",
+                snapshot.available_mb, snapshot.available_pct, snapshot.swap_used_pct, top, reasoner_hint
             );
             let urgency = if level == MemoryLevel::Critical {
                 "critical"
@@ -270,7 +748,7 @@ fn handle_memory_pressure(cfg: &Config, state: &mut WatchState, now_epoch: i64, 
             } else {
                 "dialog-warning"
             };
-            if send_notification(
+            let notified = send_notification(
                 cfg,
                 state,
                 now_epoch,
@@ -279,9 +757,25 @@ fn handle_memory_pressure(cfg: &Config, state: &mut WatchState, now_epoch: i64, 
                 icon,
                 title,
                 &body,
-            ) {
+            );
+            if notified {
                 state.last_mem_notify_epoch = now_epoch;
             }
+            emit_a2ml_event(
+                cfg,
+                "memory_pressure",
+                level.as_str(),
+                "memory pressure warning/critical event",
+                json!({
+                    "level": level.as_str(),
+                    "available_mb": snapshot.available_mb,
+                    "available_pct": snapshot.available_pct,
+                    "swap_used_pct": snapshot.swap_used_pct,
+                    "top_process_summary": top,
+                    "notification_sent": notified
+                }),
+                &assessments,
+            );
             log_line(&format!(
                 "memory {}: available={}MB ({}%), swap={}%",
                 level.as_str(),
@@ -454,11 +948,40 @@ fn send_notification(
 ) -> bool {
     if cfg.dry_run {
         log_line(&format!("dry-run notify ({urgency}): {title} — {body}"));
+        let context = ReasoningContext::from_state(state, None, false, now_epoch);
+        emit_a2ml_event(
+            cfg,
+            "notification",
+            "low",
+            "notification emitted in dry-run mode",
+            json!({
+                "replace_id": replace_id,
+                "urgency": urgency,
+                "icon": icon,
+                "title": title,
+                "dry_run": true
+            }),
+            &infer_assessments(&context),
+        );
         record_notify_success(state);
         return true;
     }
 
     if now_epoch < state.notify_suppressed_until_epoch {
+        let context = ReasoningContext::from_state(state, None, false, now_epoch);
+        emit_a2ml_event(
+            cfg,
+            "notification_suppressed",
+            "warning",
+            "notification suppressed due to previous backend failures",
+            json!({
+                "replace_id": replace_id,
+                "urgency": urgency,
+                "title": title,
+                "suppressed_until_epoch": state.notify_suppressed_until_epoch
+            }),
+            &infer_assessments(&context),
+        );
         return false;
     }
 
@@ -467,6 +990,19 @@ fn send_notification(
             log_line("warn: no GUI notification session detected; skipping desktop notification");
             state.last_no_session_log_epoch = now_epoch;
         }
+        let context = ReasoningContext::from_state(state, None, false, now_epoch);
+        emit_a2ml_event(
+            cfg,
+            "notification_skipped",
+            "warning",
+            "no GUI notification session detected",
+            json!({
+                "replace_id": replace_id,
+                "urgency": urgency,
+                "title": title
+            }),
+            &infer_assessments(&context),
+        );
         return false;
     }
 
@@ -488,6 +1024,22 @@ fn send_notification(
     match output {
         Ok(out) if out.status.success() => {
             record_notify_success(state);
+            let context = ReasoningContext::from_state(state, None, false, now_epoch);
+            emit_a2ml_event(
+                cfg,
+                "notification",
+                "low",
+                "desktop notification delivered",
+                json!({
+                    "replace_id": replace_id,
+                    "urgency": urgency,
+                    "icon": icon,
+                    "title": title,
+                    "dry_run": false,
+                    "success": true
+                }),
+                &infer_assessments(&context),
+            );
             true
         }
         Ok(out) => {
@@ -498,10 +1050,39 @@ fn send_notification(
                 stderr
             };
             record_notify_failure(state, now_epoch, &detail);
+            let context = ReasoningContext::from_state(state, None, false, now_epoch);
+            emit_a2ml_event(
+                cfg,
+                "notification_failure",
+                "warning",
+                "notify-send returned non-zero status",
+                json!({
+                    "replace_id": replace_id,
+                    "urgency": urgency,
+                    "title": title,
+                    "error": detail
+                }),
+                &infer_assessments(&context),
+            );
             false
         }
         Err(e) => {
-            record_notify_failure(state, now_epoch, &format!("unable to execute notify-send: {e}"));
+            let detail = format!("unable to execute notify-send: {e}");
+            record_notify_failure(state, now_epoch, &detail);
+            let context = ReasoningContext::from_state(state, None, false, now_epoch);
+            emit_a2ml_event(
+                cfg,
+                "notification_failure",
+                "warning",
+                "notify-send execution failed",
+                json!({
+                    "replace_id": replace_id,
+                    "urgency": urgency,
+                    "title": title,
+                    "error": detail
+                }),
+                &infer_assessments(&context),
+            );
             false
         }
     }
@@ -535,7 +1116,7 @@ fn record_notify_failure(state: &mut WatchState, now_epoch: i64, detail: &str) {
     ));
 }
 
-fn maybe_recover_notification_channel(state: &mut WatchState, now_epoch: i64) {
+fn maybe_recover_notification_channel(cfg: &Config, state: &mut WatchState, now_epoch: i64) {
     if state.notify_suppressed_until_epoch == 0 || now_epoch < state.notify_suppressed_until_epoch {
         return;
     }
@@ -543,6 +1124,18 @@ fn maybe_recover_notification_channel(state: &mut WatchState, now_epoch: i64) {
     state.notify_suppressed_until_epoch = 0;
     state.notify_fail_streak = 0;
     log_line("notification suppression window elapsed; retrying notifications");
+    let context = ReasoningContext::from_state(state, None, false, now_epoch);
+    emit_a2ml_event(
+        cfg,
+        "notification_recovery",
+        "low",
+        "notification suppression window elapsed",
+        json!({
+            "event": "suppression_elapsed",
+            "notify_fail_streak_reset": true
+        }),
+        &infer_assessments(&context),
+    );
 }
 
 fn notification_context_ready() -> bool {
@@ -613,6 +1206,67 @@ fn backup_corrupt_state(path: &str, raw: &str) {
     }
 }
 
+fn event_integrity_hash(payload: &serde_json::Value) -> String {
+    let payload_json = serde_json::to_string(payload).unwrap_or_else(|_| "{}".to_string());
+    let mut hasher = DefaultHasher::new();
+    payload_json.hash(&mut hasher);
+    format!("siphash13:{:016x}", hasher.finish())
+}
+
+fn append_a2ml_envelope(path: &str, envelope: &serde_json::Value) -> Result<(), Box<dyn std::error::Error>> {
+    if let Some(parent) = Path::new(path).parent() {
+        fs::create_dir_all(parent)?;
+    }
+
+    let is_new_file = !Path::new(path).exists();
+    let mut file = OpenOptions::new().create(true).append(true).open(path)?;
+
+    if is_new_file {
+        writeln!(file, "# SPDX-License-Identifier: PMPL-1.0-or-later")?;
+        writeln!(file, "# AmbientOps Pulse A2ML log (append-only JSON envelopes)")?;
+    }
+    writeln!(file, "{}", serde_json::to_string(envelope)?)?;
+    Ok(())
+}
+
+fn emit_a2ml_event(
+    cfg: &Config,
+    event_type: &str,
+    severity: &str,
+    message: &str,
+    context: serde_json::Value,
+    assessments: &[PulseAssessment],
+) {
+    let issued_at = Utc::now().to_rfc3339();
+    let payload = json!({
+        "event_id": format!("{}-{event_type}", Utc::now().timestamp_millis()),
+        "event_type": event_type,
+        "severity": severity,
+        "component": "ambientops-pulse",
+        "issued_at": issued_at,
+        "message": message,
+        "context": context,
+        "diagnostics": assessments
+    });
+    let envelope = json!({
+        "a2ml": {
+            "version": "1.0",
+            "type": "pulse-event",
+            "issuer": "ambientops-pulse",
+            "issued_at": issued_at,
+            "event_hash": event_integrity_hash(&payload)
+        },
+        "payload": payload
+    });
+
+    if let Err(e) = append_a2ml_envelope(&cfg.a2ml_log_path, &envelope) {
+        log_line(&format!(
+            "warn: unable to append A2ML pulse log entry at {}: {e}",
+            cfg.a2ml_log_path
+        ));
+    }
+}
+
 fn log_line(message: &str) {
     println!("{} [ambientops-pulse] {}", Utc::now().to_rfc3339(), message);
 }
@@ -656,6 +1310,8 @@ fn recent_user_core_dumps(minutes: u64) -> Result<u32, Box<dyn std::error::Error
 pub fn doctor(cfg: &Config) -> Result<(), Box<dyn std::error::Error>> {
     let state_path = Path::new(&cfg.state_path);
     let state_dir = state_path.parent().unwrap_or(Path::new("."));
+    let a2ml_log_path = Path::new(&cfg.a2ml_log_path);
+    let a2ml_log_dir = a2ml_log_path.parent().unwrap_or(Path::new("."));
 
     let has_journalctl = command_exists("journalctl");
     let has_notify_send = command_exists("notify-send");
@@ -663,6 +1319,8 @@ pub fn doctor(cfg: &Config) -> Result<(), Box<dyn std::error::Error>> {
     let has_notify_context = notification_context_ready();
     let state_file_exists = state_path.exists();
     let state_dir_writable = probe_write_access(state_dir);
+    let a2ml_log_exists = a2ml_log_path.exists();
+    let a2ml_dir_writable = probe_write_access(a2ml_log_dir);
     let recent_core_dumps_10m = recent_user_core_dumps(10).unwrap_or(0);
 
     let mut issues: Vec<String> = Vec::new();
@@ -681,6 +1339,12 @@ pub fn doctor(cfg: &Config) -> Result<(), Box<dyn std::error::Error>> {
             state_dir.display()
         ));
     }
+    if !a2ml_dir_writable {
+        issues.push(format!(
+            "A2ML log directory is not writable: {}",
+            a2ml_log_dir.display()
+        ));
+    }
     if !has_notify_context {
         issues.push("GUI notification context is missing (DISPLAY/WAYLAND or DBus)".to_string());
     }
@@ -690,19 +1354,21 @@ pub fn doctor(cfg: &Config) -> Result<(), Box<dyn std::error::Error>> {
         ));
     }
 
-    let status = if !state_dir_writable || !has_journalctl {
+    let status = if !state_dir_writable || !a2ml_dir_writable || !has_journalctl {
         "unhealthy"
     } else if issues.is_empty() {
         "healthy"
     } else {
         "degraded"
     };
+    let issues_for_event = issues.clone();
 
     let report = json!({
         "timestamp": Utc::now().to_rfc3339(),
         "component": "ambientops-pulse",
         "status": status,
-        "state_path": cfg.state_path,
+        "state_path": cfg.state_path.as_str(),
+        "a2ml_log_path": cfg.a2ml_log_path.as_str(),
         "checks": {
             "journalctl_found": has_journalctl,
             "notify_send_found": has_notify_send,
@@ -710,12 +1376,42 @@ pub fn doctor(cfg: &Config) -> Result<(), Box<dyn std::error::Error>> {
             "notification_context_ready": has_notify_context,
             "state_file_exists": state_file_exists,
             "state_dir_writable": state_dir_writable,
+            "a2ml_log_exists": a2ml_log_exists,
+            "a2ml_log_dir_writable": a2ml_dir_writable,
             "recent_user_core_dumps_10m": recent_core_dumps_10m
         },
         "issues": issues
     });
 
     println!("{}", serde_json::to_string_pretty(&report)?);
+    let doctor_context = ReasoningContext {
+        memory_level: MemoryLevel::Normal,
+        available_pct: 100,
+        swap_used_pct: 0,
+        oom_event_seen: recent_core_dumps_10m > 0,
+        notify_backend_degraded: !has_notify_send || !has_notify_context,
+        journal_backend_degraded: !has_journalctl,
+        memory_backend_degraded: false,
+    };
+    let severity = match status {
+        "unhealthy" => "critical",
+        "degraded" => "warning",
+        _ => "low",
+    };
+    emit_a2ml_event(
+        cfg,
+        "doctor_report",
+        severity,
+        "pulse doctor completed",
+        json!({
+            "status": status,
+            "issues": issues_for_event,
+            "recent_user_core_dumps_10m": recent_core_dumps_10m,
+            "state_path": cfg.state_path.as_str(),
+            "a2ml_log_path": cfg.a2ml_log_path.as_str()
+        }),
+        &infer_assessments(&doctor_context),
+    );
     Ok(())
 }
 
@@ -751,5 +1447,32 @@ mod tests {
         assert_eq!(classify_memory_level(&normal), MemoryLevel::Normal);
         assert_eq!(classify_memory_level(&warn), MemoryLevel::Warning);
         assert_eq!(classify_memory_level(&critical), MemoryLevel::Critical);
+    }
+
+    #[test]
+    fn infers_possible_crash_loop_for_oom_plus_critical_memory() {
+        let ctx = ReasoningContext {
+            memory_level: MemoryLevel::Critical,
+            available_pct: 10,
+            swap_used_pct: 97,
+            oom_event_seen: true,
+            notify_backend_degraded: false,
+            journal_backend_degraded: false,
+            memory_backend_degraded: false,
+        };
+        let assessments = infer_assessments(&ctx);
+        assert!(assessments.iter().any(|a| a.summary.contains("possible crash loop")));
+    }
+
+    #[test]
+    fn event_integrity_hash_is_stable() {
+        let payload = serde_json::json!({
+            "event": "memory_pressure",
+            "level": "warning",
+            "available_pct": 22
+        });
+        let first = event_integrity_hash(&payload);
+        let second = event_integrity_hash(&payload);
+        assert_eq!(first, second);
     }
 }
