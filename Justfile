@@ -3,6 +3,8 @@
 
 set shell := ["bash", "-euo", "pipefail", "-c"]
 
+import? "contractile.just"
+
 repo := justfile_directory()
 
 # Default: show available recipes

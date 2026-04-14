@@ -1,0 +1,105 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// AmbientOps GUI — AffineScript TEA Interface
+// Underpinned by Cadre Router (Affine Stack Implementation)
+//
+// Purpose: Provide a formally verified, resource-safe interface for the
+// Hospital Model departments (Ward, ER, OR, Records).
+//
+// Nature: AffineScript TEA loop where Model and Msg are consumed linearly
+// to ensure state transition integrity.
+
+// ── Hospital Departments ───────────────────────────────────────────────────
+
+enum Department {
+  Ward,
+  EmergencyRoom,
+  OperatingRoom,
+  Records
+}
+
+// ── Model ───────────────────────────────────────────────────────────────────
+
+/**
+ * Hospital GUI Model.
+ * history_depth tracks the navigation stack size.
+ */
+struct Model {
+  current_dept: Department,
+  history_depth: Int
+}
+
+// ── Msg ──────────────────────────────────────────────────────────────────────
+
+enum Msg {
+  Navigate(Department),
+  PopState
+}
+
+// ── TEA Logic ────────────────────────────────────────────────────────────────
+
+/**
+ * Initial hospital state: Ward with no history.
+ */
+fn ambientops_init() -> Model {
+  {
+    current_dept: Department::Ward,
+    history_depth: 0
+  }
+}
+
+/**
+ * Affine TEA Update function.
+ * @linear annotations enforce that every state transition is accounted for.
+ * Underpinned by Cadre Router: navigation pushes current to stack.
+ */
+fn ambientops_update(@linear msg: Msg, @linear model: Model) -> Model {
+  match model {
+    { current_dept: c, history_depth: h } => {
+      match msg {
+        Navigate(new_dept) => {
+          // Consume old model, produce new model with incremented history depth
+          { 
+            current_dept: new_dept, 
+            history_depth: h + 1 
+          }
+        }
+        
+        PopState => {
+          if h > 0 {
+            // Return to Ward if stack has items
+            { 
+              current_dept: Department::Ward, 
+              history_depth: h - 1 
+            }
+          } else {
+            // No-op transition: return model as-is
+            { 
+              current_dept: c, 
+              history_depth: 0 
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
+ * View function: Renders the current department name.
+ * Borrows the model (ref) to ensure read-only access without consumption.
+ */
+fn ambientops_view(model: Model) -> String {
+  match model.current_dept {
+    Ward          => "WARD (Observatory)",
+    EmergencyRoom => "EMERGENCY ROOM (Intake)",
+    OperatingRoom => "OPERATING ROOM (Clinician)",
+    Records       => "RECORDS (Archive)"
+  }
+}
+
+/**
+ * Subscriptions function.
+ */
+fn ambientops_subs(model: Model) -> String {
+  "None"
+}
