@@ -1,5 +1,5 @@
--- SPDX-License-Identifier: PMPL-1.0-or-later
-||| Foreign Function Interface Declarations
+||| SPDX-License-Identifier: PMPL-1.0-or-later
+||| Foreign Function Interface Declarations for AMBIENTOPS
 |||
 ||| This module declares all C-compatible functions that will be
 ||| implemented in the Zig FFI layer.
@@ -7,10 +7,10 @@
 ||| All functions are declared here with type signatures and safety proofs.
 ||| Implementations live in ffi/zig/
 
-module SRC.ABI.Foreign
+module Ambientops.ABI.Foreign
 
-import SRC.ABI.Types
-import SRC.ABI.Layout
+import Ambientops.ABI.Types
+import Ambientops.ABI.Layout
 
 %default total
 
@@ -21,7 +21,7 @@ import SRC.ABI.Layout
 ||| Initialize the library
 ||| Returns a handle to the library instance, or Nothing on failure
 export
-%foreign "C:src_init, libsrc"
+%foreign "C:ambientops_init, libambientops"
 prim__init : PrimIO Bits64
 
 ||| Safe wrapper for library initialization
@@ -33,7 +33,7 @@ init = do
 
 ||| Clean up library resources
 export
-%foreign "C:src_free, libsrc"
+%foreign "C:ambientops_free, libambientops"
 prim__free : Bits64 -> PrimIO ()
 
 ||| Safe wrapper for cleanup
@@ -47,7 +47,7 @@ free h = primIO (prim__free (handlePtr h))
 
 ||| Example operation: process data
 export
-%foreign "C:src_process, libsrc"
+%foreign "C:ambientops_process, libambientops"
 prim__process : Bits64 -> Bits32 -> PrimIO Bits32
 
 ||| Safe wrapper with error handling
@@ -70,12 +70,12 @@ prim__getString : Bits64 -> String
 
 ||| Free C string
 export
-%foreign "C:src_free_string, libsrc"
+%foreign "C:ambientops_free_string, libambientops"
 prim__freeString : Bits64 -> PrimIO ()
 
 ||| Get string result from library
 export
-%foreign "C:src_get_string, libsrc"
+%foreign "C:ambientops_get_string, libambientops"
 prim__getResult : Bits64 -> PrimIO Bits64
 
 ||| Safe string getter
@@ -96,7 +96,7 @@ getString h = do
 
 ||| Process array data
 export
-%foreign "C:src_process_array, libsrc"
+%foreign "C:ambientops_process_array, libambientops"
 prim__processArray : Bits64 -> Bits64 -> Bits32 -> PrimIO Bits32
 
 ||| Safe array processor
@@ -123,7 +123,7 @@ processArray h buf len = do
 
 ||| Get last error message
 export
-%foreign "C:src_last_error, libsrc"
+%foreign "C:ambientops_last_error, libambientops"
 prim__lastError : PrimIO Bits64
 
 ||| Retrieve last error as string
@@ -150,7 +150,7 @@ errorDescription NullPointer = "Null pointer"
 
 ||| Get library version
 export
-%foreign "C:src_version, libsrc"
+%foreign "C:ambientops_version, libambientops"
 prim__version : PrimIO Bits64
 
 ||| Get version as string
@@ -162,7 +162,7 @@ version = do
 
 ||| Get library build info
 export
-%foreign "C:src_build_info, libsrc"
+%foreign "C:ambientops_build_info, libambientops"
 prim__buildInfo : PrimIO Bits64
 
 ||| Get build information
@@ -181,16 +181,16 @@ public export
 Callback : Type
 Callback = Bits64 -> Bits32 -> Bits32
 
-||| Register a callback (typed foreign declaration avoids unsafe cast)
+||| Register a callback
 export
-%foreign "C:src_register_callback, libsrc"
-prim__registerCallback : Bits64 -> (Bits64 -> Bits32 -> Bits32) -> PrimIO Bits32
+%foreign "C:ambientops_register_callback, libambientops"
+prim__registerCallback : Bits64 -> AnyPtr -> PrimIO Bits32
 
 ||| Safe callback registration
 export
 registerCallback : Handle -> Callback -> IO (Either Result ())
 registerCallback h cb = do
-  result <- primIO (prim__registerCallback (handlePtr h) cb)
+  result <- primIO (prim__registerCallback (handlePtr h) (cast cb))
   pure $ case resultFromInt result of
     Just Ok => Right ()
     Just err => Left err
@@ -206,7 +206,7 @@ registerCallback h cb = do
 
 ||| Check if library is initialized
 export
-%foreign "C:src_is_initialized, libsrc"
+%foreign "C:ambientops_is_initialized, libambientops"
 prim__isInitialized : Bits64 -> PrimIO Bits32
 
 ||| Check initialization status
