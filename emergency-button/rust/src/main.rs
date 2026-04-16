@@ -79,7 +79,7 @@ fn run_trigger(args: TriggerArgs) {
         }
     };
 
-    println!("\x1b[32m[OK]\x1b[0m Created incident bundle: {}", inc.path);
+    println!("\x1b[32m[OK]\x1b[0m Created incident bundle: {}", inc.path.display());
     println!("\x1b[34m[INFO]\x1b[0m Correlation ID: {}", inc.correlation_id);
     println!();
 
@@ -101,7 +101,7 @@ fn run_trigger(args: TriggerArgs) {
 
     println!();
     println!("\x1b[32m════════════════════════════════════════════\x1b[0m");
-    println!("\x1b[32m[DONE]\x1b[0m Incident bundle ready: {}", inc.path);
+    println!("\x1b[32m[DONE]\x1b[0m Incident bundle ready: {}", inc.path.display());
     println!("\x1b[32m════════════════════════════════════════════\x1b[0m");
 }
 
