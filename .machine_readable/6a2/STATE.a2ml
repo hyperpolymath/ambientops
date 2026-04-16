@@ -352,10 +352,12 @@ priority-3 = [
 # ============================================================================
 
 [session-2026-04-16]
-summary = "Cleared two compile blockers discovered by `check current standing`; workspace now green."
+summary = "Cleared compile blockers + swept all workspace warnings; workspace now fully green."
 changes = [
   "emergency-button/rust/src/main.rs: added .display() to two PathBuf format calls (lines 82, 104)",
   "clinician/src/main.rs: rewritten as minimal working dispatcher — imports modules from crate, uses real enum names, stubs non-wired subcommands. Full CLI surface tracked as P1 follow-up.",
+  "Warning sweep: deleted unused `verbose` field/flag from emergency-button + emergency-room; deleted unused `inode`/`cmdline` fields and 4 unused pub utility functions from port-endoscope; deleted dead `events` binding in hardware-crash-team analyzer; cfg-gated Screen enum in hardware-crash-team/tui to `any(feature = \"tui\", test)`; dropped unused imports in clinician/lib.rs and contracts-rust property_tests; removed stray parens in proptest strategy.",
+  "Cargo.toml: moved [profile.release] from clinician/Cargo.toml to workspace root (clears 'profiles for the non root package will be ignored' warning).",
 ]
-test-baseline = "cargo test --workspace: 195 passed, 0 failed (13 suites: contracts-rust 47, clinician 15+13+12+5, contracts-rust property 12, aspect 5, E2E 9, hardware-crash-team 77, others 0)"
-build-status = "cargo check --workspace: clean (1 unused-import warning in clinician lib)"
+test-baseline = "cargo test --workspace: 195 passed, 0 failed (13 suites); cargo test -p hardware-crash-team --features tui: 76 passed, 0 failed. ZERO warnings under both builds."
+build-status = "cargo build --workspace: clean; cargo build -p hardware-crash-team --features tui: clean."

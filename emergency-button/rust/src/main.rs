@@ -37,10 +37,6 @@ struct TriggerArgs {
     /// Preview actions without executing
     #[arg(short = 'n', long)]
     dry_run: bool,
-
-    /// Verbose output
-    #[arg(short = 'V', long)]
-    verbose: bool,
 }
 
 fn main() {
@@ -56,7 +52,6 @@ fn run_trigger(args: TriggerArgs) {
     let cfg = incident::Config {
         quick_backup_dest: args.quick_backup.clone(),
         dry_run: args.dry_run,
-        verbose: args.verbose,
     };
 
     println!();
@@ -118,7 +113,6 @@ fn print_help() {
     println!("\x1b[1mOPTIONS (for trigger):\x1b[0m");
     println!("    -b, --quick-backup <path>   Run quick backup to destination (opt-in)");
     println!("    -n, --dry-run               Preview actions without executing");
-    println!("    -V, --verbose               Verbose output");
     println!();
     println!("\x1b[1mSAFETY:\x1b[0m");
     println!("    Default action is non-destructive and offline-first");

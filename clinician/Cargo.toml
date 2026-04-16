@@ -80,7 +80,5 @@ anomaly = ["ndarray"]     # ESN/LSM anomaly detection
 bluetooth = ["bluer"]     # Bluetooth device monitoring (BT Sentinel)
 all = ["storage", "cache", "ai", "p2p", "search", "forum", "anomaly", "bluetooth"]
 
-[profile.release]
-lto = true
-codegen-units = 1
-strip = true
+# NOTE: release-profile tuning lives in the workspace root Cargo.toml so it
+# applies consistently across all member crates.

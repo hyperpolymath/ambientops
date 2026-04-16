@@ -160,7 +160,6 @@ pub fn diagnose(boots: usize, device_filter: Option<&str>) -> Result<CrashDiagno
     let mut correlations: Vec<HardwareCorrelation> = device_crash_count
         .iter()
         .map(|(device, &count)| {
-            let events = device_events.get(device).map(|e| e.len()).unwrap_or(0);
             let event_desc = device_events
                 .get(device)
                 .and_then(|e| e.first())
