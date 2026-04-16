@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: PMPL-1.0-or-later
 // Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 //
-// Handoff to specialized tools (psa, big-up).
+// Handoff to specialized tools (psa, ambientops).
 // CRIT-001: Path validation before any shell invocation.
 
 use crate::incident::{atomic_write, Config, Incident, SCHEMA_VERSION};
@@ -14,7 +14,7 @@ struct HandoffTarget {
 
 const TARGETS: &[HandoffTarget] = &[
     HandoffTarget { name: "psa",    command: "psa"    },
-    HandoffTarget { name: "big-up", command: "big-up" },
+    HandoffTarget { name: "ambientops", command: "ambientops" },
 ];
 
 /// Validate path contains only safe chars (no shell metacharacters).
@@ -57,12 +57,12 @@ pub fn run(inc: &Incident, cfg: &Config) {
             }
         }
     } else {
-        println!("\x1b[33m[INFO]\x1b[0m No specialized tools found (psa, big-up)");
+        println!("\x1b[33m[INFO]\x1b[0m No specialized tools found (psa, ambientops)");
         println!("\x1b[34m[INFO]\x1b[0m Incident bundle is ready for manual review");
         println!();
         println!("\x1b[36mSuggested next steps:\x1b[0m");
         println!("  1. Review logs in: {}", inc.logs_path.display());
-        println!("  2. Install psa or big-up for enhanced diagnostics");
+        println!("  2. Install psa or ambientops for enhanced diagnostics");
         println!("  3. Share the incident bundle for analysis");
     }
 }

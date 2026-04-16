@@ -315,7 +315,7 @@ fn write_receipt(incident Incident, config Config) ! {
 	content << '1. Review the captured diagnostics in the `logs/` directory'
 	content << '2. If issues persist, run specialized tools:'
 	content << '   - `psa crisis --incident ${incident.path}`'
-	content << '   - `big-up scan --incident ${incident.path}`'
+	content << '   - `ambientops scan --incident ${incident.path}`'
 	content << '3. Report findings via feedback-o-tron'
 	content << ''
 	content << '== License'

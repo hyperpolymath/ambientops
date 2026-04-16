@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: PMPL-1.0-or-later
-// Handoff logic to specialized tools (psa, big-up)
+// Handoff logic to specialized tools (psa, ambientops)
 // CRIT-001 fix: Path validation to prevent command injection
 
 module main
@@ -61,8 +61,8 @@ fn handoff(incident Incident, config Config) {
 			description: 'Personal Sysadmin crisis mode (legacy)'
 		},
 		HandoffTarget{
-			name: 'big-up'
-			command: 'big-up'
+			name: 'ambientops'
+			command: 'ambientops'
 			args: ['scan', '--incident', incident.path, '--correlation-id', incident.correlation_id]
 			description: 'Advanced diagnostics (non-mutating)'
 		},
@@ -97,12 +97,12 @@ fn handoff(incident Incident, config Config) {
 		// Execute the handoff (spawn, don't wait)
 		spawn_tool(target)
 	} else {
-		println('${c_yellow}[INFO]${c_reset} No specialized tools found (psa, big-up)')
+		println('${c_yellow}[INFO]${c_reset} No specialized tools found (psa, ambientops)')
 		println('${c_blue}[INFO]${c_reset} Incident bundle is ready for manual review')
 		println('')
 		println('${c_cyan}Suggested next steps:${c_reset}')
 		println('  1. Review logs in: ${incident.logs_path}')
-		println('  2. Install psa or big-up for enhanced diagnostics')
+		println('  2. Install psa or ambientops for enhanced diagnostics')
 		println('  3. Share the incident bundle for analysis')
 	}
 }
