@@ -4,8 +4,8 @@
 //! Port introspection via /proc/net/{tcp,udp} and /proc/*/fd.
 //!
 //! Parses the kernel's network socket tables directly from procfs rather than
-//! shelling out to `ss` or `lsof`.  This gives us PID ownership, socket state,
-//! and inode mapping without any external dependencies.
+//! shelling out to `ss` or `lsof`.  This gives us PID ownership and socket
+//! state without any external dependencies.
 
 use anyhow::Result;
 use std::collections::HashMap;
@@ -23,8 +23,6 @@ pub struct PortHolder {
     pub socket_state: String,
     /// File descriptor number within the process (if determinable).
     pub fd: Option<u32>,
-    /// Socket inode number.
-    pub inode: u64,
 }
 
 /// TCP socket states from /proc/net/tcp (hex state field).
@@ -173,7 +171,6 @@ pub fn find_port_holders(port: u16, proto: &str) -> Result<Vec<PortHolder>> {
                 local_port,
                 socket_state: state,
                 fd: Some(fd),
-                inode,
             });
         } else {
             // Socket exists but no process found (maybe kernel-owned or permission denied)
@@ -182,7 +179,6 @@ pub fn find_port_holders(port: u16, proto: &str) -> Result<Vec<PortHolder>> {
                 local_port,
                 socket_state: state,
                 fd: None,
-                inode,
             });
         }
     }
@@ -208,7 +204,6 @@ pub fn find_all_listening() -> Result<Vec<PortHolder>> {
             local_port,
             socket_state: state,
             fd: if pid > 0 { Some(fd) } else { None },
-            inode,
         });
     }
 
@@ -230,38 +225,3 @@ pub fn find_all_listening() -> Result<Vec<PortHolder>> {
     Ok(holders)
 }
 
-/// Check if a specific port is free (no holders).
-pub fn is_port_free(port: u16, proto: &str) -> bool {
-    find_port_holders(port, proto)
-        .map(|h| h.is_empty())
-        .unwrap_or(true)
-}
-
-/// Try to bind to a port to verify it's truly available.
-/// Returns true if the port can be bound (and immediately releases it).
-pub fn can_bind(port: u16) -> bool {
-    use std::net::{TcpListener, SocketAddr};
-    let addr: SocketAddr = ([127, 0, 0, 1], port).into();
-    TcpListener::bind(addr).is_ok()
-}
-
-/// Find the next available port starting from `start`.
-/// Useful for fallback port selection.
-pub fn find_free_port(start: u16) -> Option<u16> {
-    for port in start..=65535 {
-        if can_bind(port) {
-            return Some(port);
-        }
-    }
-    None
-}
-
-/// Suggest a fallback port if the requested port is stuck.
-/// Tries the requested port first, then scans upward.
-pub fn suggest_port(preferred: u16) -> u16 {
-    if can_bind(preferred) {
-        preferred
-    } else {
-        find_free_port(preferred + 1).unwrap_or(0)
-    }
-}

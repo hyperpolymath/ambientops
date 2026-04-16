@@ -45,8 +45,6 @@ struct TriggerArgs {
     quick_backup: Option<String>,
     #[arg(short = 'n', long)]
     dry_run: bool,
-    #[arg(short = 'V', long)]
-    verbose: bool,
 }
 
 #[derive(Args)]
@@ -119,7 +117,6 @@ fn run_trigger(args: TriggerArgs) {
     let cfg = incident::Config {
         quick_backup_dest: args.quick_backup.clone(),
         dry_run: args.dry_run,
-        verbose: args.verbose,
     };
 
     println!();

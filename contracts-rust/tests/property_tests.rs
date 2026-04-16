@@ -8,7 +8,6 @@
 use ambientops_contracts::*;
 use chrono::Utc;
 use proptest::prelude::*;
-use serde_json::json;
 use uuid::Uuid;
 
 // =============================================================================
@@ -152,7 +151,7 @@ fn arb_receipt() -> impl Strategy<Value = Receipt> {
                 Just(Uuid::new_v4()),
                 Just(Uuid::new_v4()),
                 prop::collection::vec(
-                    ("[a-z0-9_]{1,20}"),
+                    "[a-z0-9_]{1,20}",
                     step_count as usize,
                 ),
             )

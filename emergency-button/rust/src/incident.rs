@@ -13,7 +13,6 @@ pub const SCHEMA_VERSION: &str = "1.0.0";
 pub struct Config {
     pub quick_backup_dest: Option<String>,
     pub dry_run: bool,
-    pub verbose: bool,
 }
 
 pub struct Incident {

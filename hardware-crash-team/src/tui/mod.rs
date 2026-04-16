@@ -26,6 +26,7 @@ pub fn run() -> anyhow::Result<()> {
 }
 
 /// Screen identifiers
+#[cfg(any(feature = "tui", test))]
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Screen {
     DeviceList,
@@ -35,6 +36,7 @@ pub enum Screen {
     StatusDashboard,
 }
 
+#[cfg(any(feature = "tui", test))]
 impl Screen {
     /// Cycle to next screen
     pub fn next(self) -> Self {
