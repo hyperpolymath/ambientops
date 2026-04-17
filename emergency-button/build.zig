@@ -16,9 +16,30 @@
 
 const std = @import("std");
 
+/// Path to the directory containing libproven_ffi.a (from verification-ecosystem/proven).
+const DEFAULT_PROVEN_LIB_PATH =
+    "/var/mnt/eclipse/repos/verification-ecosystem/proven/ffi/zig/zig-out-standalone/lib";
+
+/// Path to the directory containing proven.h.
+const DEFAULT_PROVEN_INCLUDE_PATH =
+    "/var/mnt/eclipse/repos/verification-ecosystem/proven/bindings/c/include";
+
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
+
+    // Allow callers to override proven library paths (for CI).
+    const proven_lib_path = b.option(
+        []const u8,
+        "proven-lib-path",
+        "Directory containing libproven_ffi.a (default: " ++ DEFAULT_PROVEN_LIB_PATH ++ ")",
+    ) orelse DEFAULT_PROVEN_LIB_PATH;
+
+    const proven_include_path = b.option(
+        []const u8,
+        "proven-include-path",
+        "Directory containing proven.h (default: " ++ DEFAULT_PROVEN_INCLUDE_PATH ++ ")",
+    ) orelse DEFAULT_PROVEN_INCLUDE_PATH;
 
     // -------------------------------------------------------------------------
     // Modules: one per source file, with explicit import wiring.
@@ -64,7 +85,11 @@ pub fn build(b: *std.Build) void {
         },
         .target = target,
         .optimize = optimize,
+        .link_libc = true,
     });
+    backup_mod.addLibraryPath(.{ .cwd_relative = proven_lib_path });
+    backup_mod.addIncludePath(.{ .cwd_relative = proven_include_path });
+    backup_mod.linkSystemLibrary("proven_ffi", .{});
 
     // Main module — wires in all imports for main.zig.
     const main_mod = b.createModule(.{
@@ -78,7 +103,11 @@ pub fn build(b: *std.Build) void {
         },
         .target = target,
         .optimize = optimize,
+        .link_libc = true,
     });
+    main_mod.addLibraryPath(.{ .cwd_relative = proven_lib_path });
+    main_mod.addIncludePath(.{ .cwd_relative = proven_include_path });
+    main_mod.linkSystemLibrary("proven_ffi", .{});
 
     // -------------------------------------------------------------------------
     // Executable.
@@ -168,17 +197,20 @@ pub fn build(b: *std.Build) void {
     }
     // backup (module-embedded tests)
     {
-        const t = b.addTest(.{
-            .root_module = b.createModule(.{
-                .root_source_file = b.path("src/zig/backup.zig"),
-                .imports = &.{
-                    .{ .name = "utils", .module = utils_mod },
-                    .{ .name = "incident", .module = incident_mod },
-                },
-                .target = target,
-                .optimize = optimize,
-            }),
+        const backup_test_mod = b.createModule(.{
+            .root_source_file = b.path("src/zig/backup.zig"),
+            .imports = &.{
+                .{ .name = "utils", .module = utils_mod },
+                .{ .name = "incident", .module = incident_mod },
+            },
+            .target = target,
+            .optimize = optimize,
+            .link_libc = true,
         });
+        backup_test_mod.addLibraryPath(.{ .cwd_relative = proven_lib_path });
+        backup_test_mod.addIncludePath(.{ .cwd_relative = proven_include_path });
+        backup_test_mod.linkSystemLibrary("proven_ffi", .{});
+        const t = b.addTest(.{ .root_module = backup_test_mod });
         const r = b.addRunArtifact(t);
         run_test_step.dependOn(&r.step);
         unit_step.dependOn(&r.step);
@@ -219,19 +251,22 @@ pub fn build(b: *std.Build) void {
     }
     // integration_test.zig (ported V integration test file)
     {
-        const t = b.addTest(.{
-            .root_module = b.createModule(.{
-                .root_source_file = b.path("src/zig/integration_test.zig"),
-                .imports = &.{
-                    .{ .name = "utils", .module = utils_mod },
-                    .{ .name = "incident", .module = incident_mod },
-                    .{ .name = "handoff", .module = handoff_mod },
-                    .{ .name = "backup", .module = backup_mod },
-                },
-                .target = target,
-                .optimize = optimize,
-            }),
+        const integ_test_mod = b.createModule(.{
+            .root_source_file = b.path("src/zig/integration_test.zig"),
+            .imports = &.{
+                .{ .name = "utils", .module = utils_mod },
+                .{ .name = "incident", .module = incident_mod },
+                .{ .name = "handoff", .module = handoff_mod },
+                .{ .name = "backup", .module = backup_mod },
+            },
+            .target = target,
+            .optimize = optimize,
+            .link_libc = true,
         });
+        integ_test_mod.addLibraryPath(.{ .cwd_relative = proven_lib_path });
+        integ_test_mod.addIncludePath(.{ .cwd_relative = proven_include_path });
+        integ_test_mod.linkSystemLibrary("proven_ffi", .{});
+        const t = b.addTest(.{ .root_module = integ_test_mod });
         const r = b.addRunArtifact(t);
         run_test_step.dependOn(&r.step);
         integ_step.dependOn(&r.step);

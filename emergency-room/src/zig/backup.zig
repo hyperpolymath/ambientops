@@ -9,33 +9,63 @@ const std = @import("std");
 const utils = @import("utils");
 const incident = @import("incident");
 
+// ── FFI: proven_path_has_traversal from libproven_ffi ──────────────────────────
+
+/// C ABI result type for boolean operations (matches ProvenBoolResult in proven.h).
+const ProvenBoolResult = extern struct {
+    status: c_int,
+    value:  bool,
+};
+
+const PROVEN_OK: c_int = 0;
+
+/// Check if a byte slice contains a directory traversal sequence ("..").
+/// Linked from verification-ecosystem/proven (libproven_ffi).
+extern fn proven_path_has_traversal(ptr: [*]const u8, len: usize) ProvenBoolResult;
+
 // ── Path validation (CRIT-002) ────────────────────────────────────────────────
 
 const SHELL_DANGEROUS_CHARS: []const u8 = ";|&$`(){}[]<>\n\r*?~!#";
 
 /// Validate a path is safe for shell interpolation.
 /// Returns the normalized path on success, error otherwise.
+///
+/// Checks:
+///   1. No empty paths
+///   2. No shell metacharacters (injection prevention)
+///   3. No directory traversal sequences ("..") via proven_path_has_traversal
 pub fn validateSafePath(
     allocator: std.mem.Allocator,
     path: []const u8,
 ) ![]u8 {
     if (path.len == 0) return error.EmptyPath;
 
+    // Gate 1: Shell character filtering.
     for (path) |c| {
         for (SHELL_DANGEROUS_CHARS) |bad| {
             if (c == bad) return error.DangerousCharacterInPath;
         }
     }
 
-    // Normalize and check for traversal outside home directory.
+    // Gate 2: Proven-backed traversal detection.
+    // proven_path_has_traversal is formally-verified; fail-closed on error.
+    const result = proven_path_has_traversal(path.ptr, path.len);
+    if (result.status != PROVEN_OK) {
+        return error.PathTraversal;
+    }
+    if (result.value) {
+        // result.value == true means traversal detected → deny.
+        return error.PathTraversal;
+    }
+
+    // Normalize for the caller's convenience.
     var real_buf: [std.fs.max_path_bytes]u8 = undefined;
     const normalized = std.fs.realpath(path, &real_buf) catch {
-        // If path doesn't exist yet, at least check for ".." manually.
-        if (std.mem.indexOf(u8, path, "..") != null) return error.PathTraversal;
+        // If path doesn't exist yet, we've already validated no traversal
+        // via proven_path_has_traversal above.
         return allocator.dupe(u8, path);
     };
 
-    if (std.mem.indexOf(u8, normalized, "..") != null) return error.PathTraversal;
     return allocator.dupe(u8, normalized);
 }
 

@@ -16,9 +16,30 @@
 
 const std = @import("std");
 
+/// Path to the directory containing libproven_ffi.a (from verification-ecosystem/proven).
+const DEFAULT_PROVEN_LIB_PATH =
+    "/var/mnt/eclipse/repos/verification-ecosystem/proven/ffi/zig/zig-out-standalone/lib";
+
+/// Path to the directory containing proven.h.
+const DEFAULT_PROVEN_INCLUDE_PATH =
+    "/var/mnt/eclipse/repos/verification-ecosystem/proven/bindings/c/include";
+
 pub fn build(b: *std.Build) void {
     const target   = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
+
+    // Allow callers to override proven library paths (for CI).
+    const proven_lib_path = b.option(
+        []const u8,
+        "proven-lib-path",
+        "Directory containing libproven_ffi.a (default: " ++ DEFAULT_PROVEN_LIB_PATH ++ ")",
+    ) orelse DEFAULT_PROVEN_LIB_PATH;
+
+    const proven_include_path = b.option(
+        []const u8,
+        "proven-include-path",
+        "Directory containing proven.h (default: " ++ DEFAULT_PROVEN_INCLUDE_PATH ++ ")",
+    ) orelse DEFAULT_PROVEN_INCLUDE_PATH;
 
     // ── Modules ────────────────────────────────────────────────────────────────
     // Each source file is its own module so test executables can import them
@@ -56,9 +77,13 @@ pub fn build(b: *std.Build) void {
         .root_source_file = b.path("src/zig/backup.zig"),
         .target           = target,
         .optimize         = optimize,
+        .link_libc        = true,
     });
     backup_mod.addImport("utils",    utils_mod);
     backup_mod.addImport("incident", incident_mod);
+    backup_mod.addLibraryPath(.{ .cwd_relative = proven_lib_path });
+    backup_mod.addIncludePath(.{ .cwd_relative = proven_include_path });
+    backup_mod.linkSystemLibrary("proven_ffi", .{});
 
     const boot_guardian_mod = b.createModule(.{
         .root_source_file = b.path("src/zig/boot_guardian.zig"),
@@ -83,6 +108,7 @@ pub fn build(b: *std.Build) void {
         .root_source_file = b.path("src/zig/main.zig"),
         .target           = target,
         .optimize         = optimize,
+        .link_libc        = true,
     });
     main_mod.addImport("utils",           utils_mod);
     main_mod.addImport("capture",         capture_mod);
@@ -91,6 +117,9 @@ pub fn build(b: *std.Build) void {
     main_mod.addImport("backup",          backup_mod);
     main_mod.addImport("boot_guardian",   boot_guardian_mod);
     main_mod.addImport("shutdown_marshal", shutdown_marshal_mod);
+    main_mod.addLibraryPath(.{ .cwd_relative = proven_lib_path });
+    main_mod.addIncludePath(.{ .cwd_relative = proven_include_path });
+    main_mod.linkSystemLibrary("proven_ffi", .{});
 
     // ── Executable ─────────────────────────────────────────────────────────────
 
@@ -125,12 +154,16 @@ pub fn build(b: *std.Build) void {
             .root_source_file = b.path(ts.src),
             .target           = target,
             .optimize         = optimize,
+            .link_libc        = true,
         });
         t_mod.addImport("utils",    utils_mod);
         t_mod.addImport("capture",  capture_mod);
         t_mod.addImport("incident", incident_mod);
         t_mod.addImport("handoff",  handoff_mod);
         t_mod.addImport("backup",   backup_mod);
+        t_mod.addLibraryPath(.{ .cwd_relative = proven_lib_path });
+        t_mod.addIncludePath(.{ .cwd_relative = proven_include_path });
+        t_mod.linkSystemLibrary("proven_ffi", .{});
 
         const t = b.addTest(.{ .root_module = t_mod });
         const run_t = b.addRunArtifact(t);
