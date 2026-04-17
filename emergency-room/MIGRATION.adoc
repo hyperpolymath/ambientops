@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: PMPL-1.0-or-later
 // Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
-= Emergency Room — V-lang Deprecated (2026-04-12)
+= Emergency Room — V-lang Deprecated (2026-04-12); Zig Port Complete (2026-04-17)
 :toc:
 
 == Status
@@ -8,7 +8,55 @@
 The V-lang implementation in `src/` is *deprecated* as of 2026-04-12
 following the estate-wide V-lang ban (2026-04-10).
 
-== Migration Target: Rust
+A Zig port is *complete* as of 2026-04-17 at `src/zig/`.
+The binary name is `emergency-button` (unchanged).
+Both the Rust crate and the Zig port are maintained until one is designated canonical.
+
+== Migration Target: Zig (Preferred — 2026-04-17)
+
+The Zig port is at `src/zig/` in this directory, built via `build.zig` at the repo root.
+
+[cols="1,1"]
+|===
+| V module (deprecated) | Zig module
+
+| `src/main.v`             | `src/zig/main.zig`
+| `src/incident.v`         | `src/zig/incident.zig`
+| `src/capture.v`          | `src/zig/capture.zig`
+| `src/backup.v`           | `src/zig/backup.zig`
+| `src/handoff.v`          | `src/zig/handoff.zig`
+| `src/boot_guardian.v`    | `src/zig/boot_guardian.zig`
+| `src/shutdown_marshal.v` | `src/zig/shutdown_marshal.zig`
+| `src/utils.v`            | `src/zig/utils.zig`
+|===
+
+=== Build and Run (Zig)
+
+[source,bash]
+----
+zig build                            # Compile the binary
+zig build test                       # Run all tests
+zig build run -- --help              # Run with --help
+zig build -Doptimize=ReleaseSafe     # Release build with safety checks
+
+# Trigger mode
+./zig-out/bin/emergency-button trigger
+./zig-out/bin/emergency-button trigger --dry-run
+
+# Boot loop detection
+./zig-out/bin/emergency-button boot-guardian --record
+./zig-out/bin/emergency-button boot-guardian --check
+
+# Graceful shutdown orchestration
+./zig-out/bin/emergency-button shutdown-marshal --reason user
+./zig-out/bin/emergency-button shutdown-marshal --dry-run
+----
+
+=== Port Completion (2026-04-17)
+
+Port complete; deletion of `src/*.v` and `v.mod` pending behavioural verification.
+
+== Migration Target: Rust (Secondary)
 
 The canonical Rust rewrite is at `rust/` in this directory:
 
