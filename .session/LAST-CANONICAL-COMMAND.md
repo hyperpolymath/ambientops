@@ -4,7 +4,7 @@
 - Timestamp (UTC): 2026-04-12T22:45:00Z
 - Repo path: /var/mnt/eclipse/repos/ambientops
 - Protocol path: continuity/planned-session-close
-- Standards dir: /var/mnt/eclipse/repos/standards/session-management-standards
+- Standards dir: /var/mnt/eclipse/repos/developer-ecosystem/standards/session-management-standards
 
 ## Continuity Core (update while executing)
 

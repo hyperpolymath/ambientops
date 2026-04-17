@@ -19,7 +19,7 @@ AmbientOps presents system tooling as four "departments":
 * **Records** — Receipts, undo tokens, and referrals (`records/`)
 ____
 
-**Evidence**: `/var/mnt/eclipse/repos/ambientops/observatory/` (Elixir, ~600 LOC) implements Ward: system metrics aggregation, weather UI generation (calm/watch/act), event hub for all component outputs. `/var/mnt/eclipse/repos/ambientops/emergency-room/` (V, ~1800 LOC) implements ER: panic-safe intake with one-click system stabilization. `/var/mnt/eclipse/repos/ambientops/clinician/` (Rust, ~4400 LOC) and `/var/mnt/eclipse/repos/ambientops/hardware-crash-team/` (Rust, ~700 LOC) implement OR: multi-step procedures. `/var/mnt/eclipse/repos/ambientops/records/referrals/` (Elixir, ~400 LOC) implements Records: undo bundle storage, cross-platform bug reporting.
+**Evidence**: `/var/mnt/eclipse/repos/systems-ecosystem/ambientops/observatory/` (Elixir, ~600 LOC) implements Ward: system metrics aggregation, weather UI generation (calm/watch/act), event hub for all component outputs. `/var/mnt/eclipse/repos/systems-ecosystem/ambientops/emergency-room/` (V, ~1800 LOC) implements ER: panic-safe intake with one-click system stabilization. `/var/mnt/eclipse/repos/systems-ecosystem/ambientops/clinician/` (Rust, ~4400 LOC) and `/var/mnt/eclipse/repos/systems-ecosystem/ambientops/hardware-crash-team/` (Rust, ~700 LOC) implement OR: multi-step procedures. `/var/mnt/eclipse/repos/systems-ecosystem/ambientops/records/referrals/` (Elixir, ~400 LOC) implements Records: undo bundle storage, cross-platform bug reporting.
 
 **Caveat**: Hospital metaphor is *architectural* (data flow + responsibility boundaries), not formally enforced. Each department can be used independently; nothing prevents a bug report from jumping directly to Clinician (skipping ER).
 
@@ -42,7 +42,7 @@ ____
 |===
 ____
 
-**Evidence**: `/var/mnt/eclipse/repos/ambientops/contracts/` contains 8 JSON schemas (`.json` files) defining inter-component contracts. Example: `/var/mnt/eclipse/repos/ambientops/contracts/evidence-envelope-schema.json` defines the intake payload structure. `/var/mnt/eclipse/repos/ambientops/contracts-rust/` provides Rust structs with `serde` serialization matching each schema. `/var/mnt/eclipse/repos/ambientops/contracts/deno-validators.ts` (Deno) validates payloads against schemas at runtime.
+**Evidence**: `/var/mnt/eclipse/repos/systems-ecosystem/ambientops/contracts/` contains 8 JSON schemas (`.json` files) defining inter-component contracts. Example: `/var/mnt/eclipse/repos/systems-ecosystem/ambientops/contracts/evidence-envelope-schema.json` defines the intake payload structure. `/var/mnt/eclipse/repos/systems-ecosystem/ambientops/contracts-rust/` provides Rust structs with `serde` serialization matching each schema. `/var/mnt/eclipse/repos/systems-ecosystem/ambientops/contracts/deno-validators.ts` (Deno) validates payloads against schemas at runtime.
 
 **Caveat**: Schemas are *JSON Schema 7* (syntactic validation only). No semantic proofs that plan → execution → receipt causality is preserved. A bug in the Clinician could ignore the receipt and re-apply a dangerous procedure.
 
@@ -61,7 +61,7 @@ ____
 * Privacy controls are visible and simple (local-only by default)
 ____
 
-**Evidence**: `/var/mnt/eclipse/repos/ambientops/hardware-crash-team/src/main.rs` implements `--format text` output that shows actual PCI device state (not inflated "fixes"). `/var/mnt/eclipse/repos/ambientops/hardware-crash-team/src/bin/plan.rs` (dry-run flag) defaults to `--dry-run`, requiring explicit `--force` to apply. `/var/mnt/eclipse/repos/ambientops/clinician/src/procedure.rs` logs undo tokens to local files only (no cloud uploads).
+**Evidence**: `/var/mnt/eclipse/repos/systems-ecosystem/ambientops/hardware-crash-team/src/main.rs` implements `--format text` output that shows actual PCI device state (not inflated "fixes"). `/var/mnt/eclipse/repos/systems-ecosystem/ambientops/hardware-crash-team/src/bin/plan.rs` (dry-run flag) defaults to `--dry-run`, requiring explicit `--force` to apply. `/var/mnt/eclipse/repos/systems-ecosystem/ambientops/clinician/src/procedure.rs` logs undo tokens to local files only (no cloud uploads).
 
 **Caveat**: Evidence principle is *by design*, not enforced. Nothing prevents a future module from claiming "404 issues fixed" via marketing language. Trust is aspirational, not mechanically verified.
 
