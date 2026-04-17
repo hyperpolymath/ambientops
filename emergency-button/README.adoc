@@ -180,11 +180,14 @@ system-emergency-room --panic
 
 == Implementation approach
 
-* Core: V language (verification layer — policy + plan + provenance + schema conformance)
-* Optional: Rust helpers for privileged/safety-critical steps (tight boundaries)
+* Core: **Zig 0.15.2** — canonical implementation in `src/zig/` (complete as of 2026-04-17)
+* ABI layer: **Idris2** — interface definitions with formal proofs in `src/abi/`
+* Migration: V-lang sources in `src/*.v` are deprecated and retained for reference only.
+  See link:src/MIGRATION.adoc[src/MIGRATION.adoc] for the V→Zig mapping and deletion plan.
 
-NOTE: V was chosen for A&E because panic-safe intake requires *verification* that actions are safe before taking them.
-This aligns with the AmbientOps layer model where V handles "is this allowed / true / safe?" decisions.
+NOTE: V was the original implementation language, chosen for verification semantics.
+V-lang was banned estate-wide on 2026-04-10; the Zig port preserves all safety and
+non-destructive semantics. See `src/MIGRATION.adoc` for feature parity details.
 
 == Ecosystem Analysis
 

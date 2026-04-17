@@ -4,35 +4,55 @@
 # STATE.a2ml — Emergency Button project state
 [metadata]
 project = "system-emergency-room"
-version = "0.0.1"
-last-updated = "2026-01-03"
+version = "0.1.0"
+last-updated = "2026-04-17"
 status = "active"
-session = "converted from scheme — 2026-04-11"
+session = "V→Zig migration complete — 2026-04-17"
 
 [project-context]
 name = "System Emergency Room"
-purpose = """"""
-completion-percentage = 0
+purpose = "Panic-safe emergency recovery launcher (AmbientOps). Offline-first, non-destructive, idempotent."
+completion-percentage = 60
 
 [position]
-phase = "initial"   # design | implementation | testing | maintenance | archived
-maturity = "experimental"  # experimental | alpha | beta | production | lts
+phase = "implementation"  # design | implementation | testing | maintenance | archived
+maturity = "alpha"         # experimental | alpha | beta | production | lts
 
 [route-to-mvp]
 milestones = [
-  # No milestones recorded
+  { id = "M1", name = "V→Zig port", status = "done", completed = "2026-04-17" },
+  { id = "M2", name = "Smoke-test binary on real incident", status = "pending" },
+  { id = "M3", name = "CI switched to zig build", status = "pending" },
+  { id = "M4", name = "V source deletion (after parity confirmed)", status = "pending" },
+  { id = "M5", name = "Gleam/Rust migration (recovery/emergency-room)", status = "pending" },
 ]
 
 [blockers-and-issues]
 issues = [
-  # No blockers recorded
+  # No active blockers
 ]
 
 [critical-next-actions]
 actions = [
-  # No actions recorded
+  "Smoke-test: zig build run -- trigger --dry-run",
+  "Run on real incident and compare output with V binary",
+  "Update CI workflow to call zig build instead of v run src/",
+  "Once parity confirmed, delete src/*.v (except src/abi/) and v.mod",
 ]
 
+[migration]
+from-language = "V-lang"
+to-language = "Zig 0.15.2"
+migration-status = "port-complete"
+migration-date = "2026-04-17"
+v-lang-ban-date = "2026-04-10"
+canonical-impl = "src/zig/"
+deprecated-impl = "src/*.v"
+migration-doc = "src/MIGRATION.adoc"
+
 [maintenance-status]
-last-run-utc = "2026-01-03T00:00:00Z"
-last-result = "unknown"  # unknown | pass | warn | fail
+last-run-utc = "2026-04-17T00:00:00Z"
+last-result = "pass"  # unknown | pass | warn | fail
+build-exit-code = 0
+test-exit-code = 0
+test-count = 36

@@ -31,6 +31,10 @@ or Rust integration tests.
 
 The V-lang source is retained for reference but MUST NOT be compiled or deployed.
 
+NOTE: As of 2026-04-17 the Zig port of `emergency-button` is complete. Matching
+symlinks now live in `src/zig/` alongside these V symlinks — every `.zig` file
+in `src/zig/` points into `../../../../emergency-button/src/zig/<name>.zig`.
+
 == De-duplication note (2026-04-17)
 
 The seven `.v` files this directory shared with `../../emergency-button/src/`

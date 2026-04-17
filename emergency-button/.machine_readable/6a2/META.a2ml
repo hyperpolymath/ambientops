@@ -3,8 +3,8 @@
 #
 # META.a2ml — Emergency Button meta-level information
 [metadata]
-version = "0.1.0"
-last-updated = "2026-04-11"
+version = "0.2.0"
+last-updated = "2026-04-17"
 
 [project-info]
 license = "PMPL-1.0-or-later"
@@ -12,13 +12,23 @@ author = "Jonathan D.A. Jewell (hyperpolymath)"
 
 [architecture-decisions]
 decisions = [
-  # No ADRs recorded
+  { id = "ADR-001", title = "V-lang → Zig migration", status = "accepted", date = "2026-04-17",
+    context = "Estate-wide V-lang ban declared 2026-04-10.",
+    decision = "Port all V sources to Zig 0.15.2. Canonical impl at src/zig/. V sources retained for reference only.",
+    consequences = "build.zig replaces v.mod. zig build / zig build test replace v run / v test." },
+  { id = "ADR-002", title = "Symlink deduplication with recovery/emergency-room", status = "accepted", date = "2026-04-17",
+    context = "recovery/emergency-room/src/ had byte-identical V sources (7 files).",
+    decision = "Replace duplicates with relative symlinks. Zig files follow same pattern in src/zig/.",
+    consequences = "Single source of truth in emergency-button. Deletion sequence: delete from emergency-button first." },
 ]
 
 [development-practices]
 versioning = "SemVer"
 documentation = "AsciiDoc"
-build-tool = "just"
+build-tool = "just + zig"
+primary-language = "Zig 0.15.2"
+abi-layer = "Idris2"
+test-runner = "zig build test"
 
 [maintenance-axes]
 scoping-first = true

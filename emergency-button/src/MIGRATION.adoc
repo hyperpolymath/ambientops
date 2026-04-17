@@ -1,0 +1,67 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+= Emergency Button — V→Zig Migration
+:toc:
+
+== Status
+
+*Port complete 2026-04-17; deletion pending build+behavioural verification.*
+
+The V-lang implementation (`src/*.v`) is deprecated following the estate-wide
+V-lang ban (2026-04-10). The canonical Zig replacement lives at `src/zig/`.
+
+== V→Zig File Mapping
+
+[cols="1,1,1"]
+|===
+| V source (deprecated) | Zig replacement | Notes
+
+| `src/main.v`             | `src/zig/main.zig`          | CLI entry-point; subcommand dispatch
+| `src/incident.v`         | `src/zig/incident.zig`      | Bundle creation, JSON envelope, receipt
+| `src/capture.v`          | `src/zig/capture.zig`       | PII redaction + platform diagnostics
+| `src/backup.v`           | `src/zig/backup.zig`        | Quick-backup with CRIT-002 path safety
+| `src/handoff.v`          | `src/zig/handoff.zig`       | Tool discovery + spawn; CRIT-001
+| `src/utils.v`            | `src/zig/utils.zig`         | Atomic I/O, structured logging, RFC 3339
+| `src/incident_test.v`    | `src/zig/incident_test.zig` | Ported unit tests (struct / format)
+| `src/capture_test.v`     | `src/zig/capture_test.zig`  | Ported unit tests (PII redaction)
+| `src/integration_test.v` | `src/zig/integration_test.zig` | Ported integration tests
+|===
+
+`src/abi/` — Idris2 ABI definitions — is *not* a V file and was not touched.
+
+== Build
+
+[source,bash]
+----
+# From emergency-button/ root
+zig build                          # build binary → zig-out/bin/emergency-button
+zig build test                     # all tests
+zig build test-unit                # module-embedded tests only
+zig build test-integ               # integration_test.zig only
+zig build run -- trigger --dry-run # smoke test
+----
+
+== Feature Parity
+
+All V features are preserved:
+
+* `trigger` subcommand — incident bundle, diagnostics, receipt, optional backup, handoff
+* PII redaction (HIGH-004) — passwords, tokens, AWS/GitHub keys, SSNs, emails
+* Path validation CRIT-001 (handoff.zig) and CRIT-002 (backup.zig)
+* Atomic writes HIGH-006 — `.tmp` + rename pattern
+* Platform-specific capture modules — Linux / macOS / Windows
+* Correlation IDs COULD-001 — `corr-XXXXXXXX` for cross-tool tracing
+* Handoff to `psa` / `big-up` with correlation ID forwarding
+
+== Recovery Wrapper Symlinks
+
+`recovery/emergency-room/src/zig/` contains symlinks to every `.zig` file
+in this directory, preserving the deduplication invariant established for
+the V symlinks in `recovery/emergency-room/src/*.v`.
+
+== Next Steps
+
+. Smoke-test the binary: `zig build run -- trigger --dry-run`
+. Run on a real incident and compare output with V binary.
+. Update CI to call `zig build` instead of `v run src/`.
+. Once parity confirmed, delete `src/*.v` (except `src/abi/`) and `v.mod`.

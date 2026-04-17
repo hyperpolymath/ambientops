@@ -8,13 +8,19 @@ last-updated = "2026-04-11"
 
 [project]
 name = "Emergency Button"
-purpose = ""
-role = ""
+purpose = "Standalone CLI tool: panic-safe incident capture, PII-redacted diagnostics, atomic writes, handoff to psa/big-up."
+role = "First-responder intake tool in the AmbientOps hospital model."
 
 [position-in-ecosystem]
-category = ""
+category = "ambientops/emergency-room"
+monorepo = "systems-ecosystem/ambientops"
+consumer = "recovery/emergency-room (suite wrapper via symlinks)"
 
 [related-projects]
 projects = [
-  # No related projects recorded
+  { name = "recovery/emergency-room", relationship = "consumer", notes = "In-tree consumer; src/zig/ symlinks into this project" },
+  { name = "ambientops/observatory", relationship = "sibling", notes = "Metrics/weather layer" },
+  { name = "ambientops/clinician", relationship = "handoff-target", notes = "Operating Theatre — psa handoff target" },
+  { name = "panic-attacker", relationship = "ci-tool", notes = "Linting via panic-attack assail in CI" },
+  { name = "hypatia", relationship = "ci-tool", notes = "Neurosymbolic CI/CD intelligence" },
 ]
