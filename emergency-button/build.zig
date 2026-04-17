@@ -25,8 +25,9 @@ const DEFAULT_ZIG_API_INCLUDE_PATH =
     "/var/mnt/eclipse/repos/developer-ecosystem/zig-api/generated/abi";
 
 /// Path to the directory containing libproven_ffi.a (transitive dep of libzig_api).
+/// Points to proven's standard zig-out/lib output (zig-out-standalone symlink removed 2026-04-17).
 const DEFAULT_PROVEN_LIB_PATH =
-    "/var/mnt/eclipse/repos/verification-ecosystem/proven/ffi/zig/zig-out-standalone/lib";
+    "/var/mnt/eclipse/repos/verification-ecosystem/proven/ffi/zig/zig-out/lib";
 
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
