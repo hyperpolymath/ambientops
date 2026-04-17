@@ -16,30 +16,40 @@
 
 const std = @import("std");
 
-/// Path to the directory containing libproven_ffi.a (from verification-ecosystem/proven).
+/// Path to the directory containing libzig_api.a (from developer-ecosystem/zig-api).
+const DEFAULT_ZIG_API_LIB_PATH =
+    "/var/mnt/eclipse/repos/developer-ecosystem/zig-api/ffi/zig/zig-out/lib";
+
+/// Path to the directory containing zig_api.h.
+const DEFAULT_ZIG_API_INCLUDE_PATH =
+    "/var/mnt/eclipse/repos/developer-ecosystem/zig-api/generated/abi";
+
+/// Path to the directory containing libproven_ffi.a (transitive dep of libzig_api).
 const DEFAULT_PROVEN_LIB_PATH =
     "/var/mnt/eclipse/repos/verification-ecosystem/proven/ffi/zig/zig-out-standalone/lib";
-
-/// Path to the directory containing proven.h.
-const DEFAULT_PROVEN_INCLUDE_PATH =
-    "/var/mnt/eclipse/repos/verification-ecosystem/proven/bindings/c/include";
 
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
-    // Allow callers to override proven library paths (for CI).
+    // Allow callers to override library paths (for CI).
+    const zig_api_lib_path = b.option(
+        []const u8,
+        "zig-api-lib-path",
+        "Directory containing libzig_api.a (default: " ++ DEFAULT_ZIG_API_LIB_PATH ++ ")",
+    ) orelse DEFAULT_ZIG_API_LIB_PATH;
+
+    const zig_api_include_path = b.option(
+        []const u8,
+        "zig-api-include-path",
+        "Directory containing zig_api.h (default: " ++ DEFAULT_ZIG_API_INCLUDE_PATH ++ ")",
+    ) orelse DEFAULT_ZIG_API_INCLUDE_PATH;
+
     const proven_lib_path = b.option(
         []const u8,
         "proven-lib-path",
-        "Directory containing libproven_ffi.a (default: " ++ DEFAULT_PROVEN_LIB_PATH ++ ")",
+        "Directory containing libproven_ffi.a (transitive; default: " ++ DEFAULT_PROVEN_LIB_PATH ++ ")",
     ) orelse DEFAULT_PROVEN_LIB_PATH;
-
-    const proven_include_path = b.option(
-        []const u8,
-        "proven-include-path",
-        "Directory containing proven.h (default: " ++ DEFAULT_PROVEN_INCLUDE_PATH ++ ")",
-    ) orelse DEFAULT_PROVEN_INCLUDE_PATH;
 
     // -------------------------------------------------------------------------
     // Modules: one per source file, with explicit import wiring.
@@ -87,8 +97,11 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
         .link_libc = true,
     });
+    backup_mod.addLibraryPath(.{ .cwd_relative = zig_api_lib_path });
+    backup_mod.addIncludePath(.{ .cwd_relative = zig_api_include_path });
+    backup_mod.linkSystemLibrary("zig_api", .{});
+    // libzig_api.a references proven_path_has_traversal from libproven_ffi.
     backup_mod.addLibraryPath(.{ .cwd_relative = proven_lib_path });
-    backup_mod.addIncludePath(.{ .cwd_relative = proven_include_path });
     backup_mod.linkSystemLibrary("proven_ffi", .{});
 
     // Main module — wires in all imports for main.zig.
@@ -105,8 +118,11 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
         .link_libc = true,
     });
+    main_mod.addLibraryPath(.{ .cwd_relative = zig_api_lib_path });
+    main_mod.addIncludePath(.{ .cwd_relative = zig_api_include_path });
+    main_mod.linkSystemLibrary("zig_api", .{});
+    // libzig_api.a references proven_path_has_traversal from libproven_ffi.
     main_mod.addLibraryPath(.{ .cwd_relative = proven_lib_path });
-    main_mod.addIncludePath(.{ .cwd_relative = proven_include_path });
     main_mod.linkSystemLibrary("proven_ffi", .{});
 
     // -------------------------------------------------------------------------
@@ -207,8 +223,10 @@ pub fn build(b: *std.Build) void {
             .optimize = optimize,
             .link_libc = true,
         });
+        backup_test_mod.addLibraryPath(.{ .cwd_relative = zig_api_lib_path });
+        backup_test_mod.addIncludePath(.{ .cwd_relative = zig_api_include_path });
+        backup_test_mod.linkSystemLibrary("zig_api", .{});
         backup_test_mod.addLibraryPath(.{ .cwd_relative = proven_lib_path });
-        backup_test_mod.addIncludePath(.{ .cwd_relative = proven_include_path });
         backup_test_mod.linkSystemLibrary("proven_ffi", .{});
         const t = b.addTest(.{ .root_module = backup_test_mod });
         const r = b.addRunArtifact(t);
@@ -263,8 +281,10 @@ pub fn build(b: *std.Build) void {
             .optimize = optimize,
             .link_libc = true,
         });
+        integ_test_mod.addLibraryPath(.{ .cwd_relative = zig_api_lib_path });
+        integ_test_mod.addIncludePath(.{ .cwd_relative = zig_api_include_path });
+        integ_test_mod.linkSystemLibrary("zig_api", .{});
         integ_test_mod.addLibraryPath(.{ .cwd_relative = proven_lib_path });
-        integ_test_mod.addIncludePath(.{ .cwd_relative = proven_include_path });
         integ_test_mod.linkSystemLibrary("proven_ffi", .{});
         const t = b.addTest(.{ .root_module = integ_test_mod });
         const r = b.addRunArtifact(t);

@@ -16,7 +16,7 @@ const utils = @import("utils");
 const incident_mod = @import("incident");
 
 // =============================================================================
-// FFI: proven_path_has_traversal from libproven_ffi
+// FFI: proven_path_has_traversal from libzig_api / libproven_ffi
 // =============================================================================
 
 /// C ABI result type for boolean operations (matches ProvenBoolResult in proven.h).
@@ -28,7 +28,8 @@ const ProvenBoolResult = extern struct {
 const PROVEN_OK: c_int = 0;
 
 /// Check if a byte slice contains a directory traversal sequence ("..").
-/// Linked from verification-ecosystem/proven (libproven_ffi).
+/// Linked via libzig_api (which transitively links libproven_ffi).
+/// This is the formally-verified path-validation gate from proven.
 extern fn proven_path_has_traversal(ptr: [*]const u8, len: usize) ProvenBoolResult;
 
 // =============================================================================
