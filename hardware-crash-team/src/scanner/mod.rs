@@ -688,7 +688,6 @@ fn read_kernel_version() -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::types::*;
 
     fn make_device(slot: &str, driver: Option<&str>, power: PowerState, issues: Vec<DeviceIssue>) -> PciDevice {
         PciDevice {

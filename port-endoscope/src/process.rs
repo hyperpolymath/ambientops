@@ -3,9 +3,9 @@
 
 //! Process introspection and termination via procfs and signals.
 //!
-//! Reads /proc/<pid>/stat, /proc/<pid>/status, and /proc/<pid>/cmdline to
-//! determine process name, state (zombie, sleeping, running), and age.
-//! Provides graceful kill (SIGTERM → wait → SIGKILL) for port reclamation.
+//! Reads /proc/<pid>/stat and /proc/<pid>/status to determine process name,
+//! state (zombie, sleeping, running), and age. Provides graceful kill
+//! (SIGTERM → wait → SIGKILL) for port reclamation.
 
 use anyhow::Result;
 use std::fs;
@@ -20,8 +20,6 @@ pub struct ProcessInfo {
     pub is_zombie: bool,
     /// Process age in seconds (since start time), if determinable.
     pub age_secs: Option<u64>,
-    /// Full command line (from /proc/<pid>/cmdline).
-    pub cmdline: String,
 }
 
 /// Read process information from /proc/<pid>/.
@@ -30,7 +28,6 @@ pub fn get_process_info(pid: u32) -> ProcessInfo {
         name: "<unknown>".to_string(),
         is_zombie: false,
         age_secs: None,
-        cmdline: String::new(),
     };
 
     if pid == 0 {
@@ -64,16 +61,10 @@ pub fn get_process_info(pid: u32) -> ProcessInfo {
     // Read process start time for age calculation
     let age_secs = calculate_process_age(pid);
 
-    // Read command line
-    let cmdline = fs::read_to_string(format!("/proc/{}/cmdline", pid))
-        .map(|s| s.replace('\0', " ").trim().to_string())
-        .unwrap_or_default();
-
     ProcessInfo {
         name,
         is_zombie,
         age_secs,
-        cmdline,
     }
 }
 

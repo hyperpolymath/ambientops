@@ -32,10 +32,9 @@ pub mod tools;       // Task-specific administrative utilities.
 
 /// SYSTEM PATHS: Standardized cross-platform directory resolution.
 pub mod dirs {
-    use directories::ProjectDirs;
     use std::path::PathBuf;
 
-    /// RESOLUTION: Dispatches to the OS-appropriate storage locations 
+    /// RESOLUTION: Dispatches to the OS-appropriate storage locations
     /// using the `directories` crate.
     pub fn config_dir() -> PathBuf {
         // ... [Path resolution implementation]

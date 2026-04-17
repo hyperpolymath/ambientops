@@ -2,15 +2,15 @@
 # STATE.a2ml — Project state checkpoint
 # Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath)
 # Converted from STATE.scm on 2026-03-15
-# Updated: 2026-03-20 (system log analysis session)
+# Updated: 2026-04-16 (compile blockers cleared; V-lang migration to Rust confirmed)
 
 [metadata]
 project = "ambientops"
 version = "0.2.0"
-last-updated = "2026-04-04"
+last-updated = "2026-04-16"
 status = "active"
 crg-contracts-rust = "C"
-note = "contracts-rust achieved CRG C: 72 tests (15 unit + 12 property + 5 E2E + 12 contract + 13 aspect + 12 benchmarks)"
+note = "contracts-rust achieved CRG C: 72 tests (15 unit + 12 property + 5 E2E + 12 contract + 13 aspect + 12 benchmarks). Workspace now green: 195 tests pass across 13 suites, 0 failures."
 
 [project-context]
 name = "ambientops"
@@ -335,8 +335,8 @@ update = "Needs service-autopsy integration"
 
 [next-actions]
 priority-1 = [
-  "Fix HCT main.rs to compile (in progress — other bot)",
   "Wire cross-component Evidence Envelope flow end-to-end",
+  "Expand clinician main.rs: re-wire full subcommand surface (process/network/disk/service/security/mesh/satellite) via clap Subcommand wrappers over tools::*Action enums",
 ]
 priority-2 = [
   "WirePlumber BT sentinel — implement D-Bus monitoring (stub exists)",
@@ -346,3 +346,18 @@ priority-3 = [
   "ServiceAutopsy → BundleIngestion integration",
   "Add clinician auto-remediation rules to live supervision tree",
 ]
+
+# ============================================================================
+# SESSION: 2026-04-16 — Compile Blocker Clearance
+# ============================================================================
+
+[session-2026-04-16]
+summary = "Cleared compile blockers + swept all workspace warnings; workspace now fully green."
+changes = [
+  "emergency-button/rust/src/main.rs: added .display() to two PathBuf format calls (lines 82, 104)",
+  "clinician/src/main.rs: rewritten as minimal working dispatcher — imports modules from crate, uses real enum names, stubs non-wired subcommands. Full CLI surface tracked as P1 follow-up.",
+  "Warning sweep: deleted unused `verbose` field/flag from emergency-button + emergency-room; deleted unused `inode`/`cmdline` fields and 4 unused pub utility functions from port-endoscope; deleted dead `events` binding in hardware-crash-team analyzer; cfg-gated Screen enum in hardware-crash-team/tui to `any(feature = \"tui\", test)`; dropped unused imports in clinician/lib.rs and contracts-rust property_tests; removed stray parens in proptest strategy.",
+  "Cargo.toml: moved [profile.release] from clinician/Cargo.toml to workspace root (clears 'profiles for the non root package will be ignored' warning).",
+]
+test-baseline = "cargo test --workspace: 195 passed, 0 failed (13 suites); cargo test -p hardware-crash-team --features tui: 76 passed, 0 failed. ZERO warnings under both builds."
+build-status = "cargo build --workspace: clean; cargo build -p hardware-crash-team --features tui: clean."
