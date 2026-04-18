@@ -253,7 +253,7 @@ broad-spectrum/
 │   └── ReportImpl.res    # Report implementation
 ├── tests/                 # ReScript test files
 ├── lib/                   # Compiled JavaScript output
-├── justfile              # Task runner
+├── Justfile              # Task runner
 ├── Mustfile.ncl          # Nickel configuration contract
 └── deno.json             # Deno task definitions
 ```
@@ -322,7 +322,7 @@ Contributions are welcome! Please follow these guidelines:
 
 1. *Language Policy*: Use ReScript only (no TypeScript)
 2. *Runtime*: Deno only (no npm/bun runtime deps)
-3. *Build System*: Use justfile (no Makefile)
+3. *Build System*: Use Justfile (no Makefile)
 4. *Testing*: Add tests for new features
 5. *Documentation*: Update README and CLAUDE.md
 6. *Commits*: Use conventional commit format (feat:, fix:, docs:, etc.)

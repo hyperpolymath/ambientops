@@ -77,7 +77,7 @@ while read repo; do
     pct=$((count * 100 / total))
     echo "[$count/$total] ($pct%) $repo"
     
-    add_if_missing "$repo" "justfile" "$JUSTFILE_CONTENT" "Add justfile"
+    add_if_missing "$repo" "justfile" "$JUSTFILE_CONTENT" "Add Justfile"
     add_if_missing "$repo" "Mustfile" "$MUSTFILE_CONTENT" "Add Mustfile"
     
 done < /tmp/repos-to-configure.txt

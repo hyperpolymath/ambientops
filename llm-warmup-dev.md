@@ -92,7 +92,7 @@ cfk-vfs, cfk-providers, cfk-integrations, cfk-ios, cfk-cache).
 | Total Update | total-update/elixir/ | totalupdate + dnfinition |
 | HAR | hybrid-automation-router/ | mix.exs |
 | System Observatory | system-tools/monitoring/observatory/ | mix.exs |
-| System Observatory v2 | system-tools/monitoring/systems-observatory/ | justfile |
+| System Observatory v2 | system-tools/monitoring/systems-observatory/ | Justfile |
 
 ## Clinician Feature Gates
 

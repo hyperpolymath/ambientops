@@ -41,7 +41,7 @@ See `.claude/CLAUDE.md` for the complete language policy. Key points:
 **BANNED:**
 - TypeScript - Use ReScript
 - Node.js/npm/bun - Use Deno
-- Makefiles - Use justfile
+- Makefiles - Use Justfile
 
 ## Project Structure
 
@@ -69,7 +69,7 @@ broad-spectrum/
 ├── lib/                   # Compiled JavaScript output
 ├── rescript.json          # ReScript build configuration
 ├── deno.json             # Deno task definitions
-├── justfile              # Task runner (replaces Makefile)
+├── Justfile              # Task runner (replaces Makefile)
 ├── Mustfile.ncl          # Nickel configuration contract
 └── package.json          # Dev deps only (ReScript compiler)
 ```
@@ -170,7 +170,7 @@ The project uses only:
 GitHub Actions enforce:
 - **ts-blocker.yml**: No TypeScript files allowed
 - **npm-bun-blocker.yml**: No npm/bun lock files
-- **makefile-blocker.yml**: No Makefiles (use justfile)
+- **makefile-blocker.yml**: No Makefiles (use Justfile)
 
 ## Resources
 

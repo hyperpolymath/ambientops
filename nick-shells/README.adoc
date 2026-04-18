@@ -69,7 +69,7 @@ nick-shells/
 │   ├── aibdp.json            # AI Boundary Declaration Protocol
 │   └── humans.txt            # Credits and acknowledgments
 ├── nickel.version            # Pinned Nickel version requirements
-├── justfile                  # Development task runner
+├── Justfile                  # Development task runner
 └── must.ncl                  # Must deployment configuration
 ----
 

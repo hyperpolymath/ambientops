@@ -246,7 +246,7 @@ Compliance Level: 🥇 GOLD
 
 ### Manual Verification
 
-Using justfile:
+Using Justfile:
 
 ```bash
 just verify-rsr

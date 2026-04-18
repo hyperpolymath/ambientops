@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - .well-known/ directory (security.txt, ai.txt, humans.txt)
 - Community standards (CODE_OF_CONDUCT.md, CONTRIBUTING.md, MAINTAINERS.md)
 - Comprehensive SECURITY.md policy
-- justfile for build automation
+- Justfile for build automation
 - RSR compliance verification script
 
 == [0.1.0] - 2025-11-22

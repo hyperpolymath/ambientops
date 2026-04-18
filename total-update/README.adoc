@@ -273,7 +273,7 @@ totalupdate/
 │           ├── daemon.ex
 │           └── scheduler.ex
 ├── docs/
-├── justfile
+├── Justfile
 └── README.adoc
 ----
 

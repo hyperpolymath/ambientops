@@ -341,7 +341,7 @@ HAR follows the [Rhodium Standard Repository](https://github.com/yourusername/rh
 - ✅ humans.txt - Attribution and credits
 
 *Build System (2/2)*
-- ✅ justfile - Build automation (30+ recipes)
+- ✅ Justfile - Build automation (30+ recipes)
 - ✅ mix.exs - Elixir package manager
 
 *Testing (2/3)*

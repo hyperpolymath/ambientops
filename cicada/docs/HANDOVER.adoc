@@ -94,7 +94,7 @@ ambientops/cicada/
 +-- TOPOLOGY.md                   # Architecture diagram and completion dashboard
 +-- Project.toml                  # Julia dependencies
 +-- install.sh                    # Installation script
-+-- justfile                      # Build recipes
++-- Justfile                      # Build recipes
 +-- README.adoc                   # User-facing documentation
 +-- LICENSE                       # PMPL-1.0-or-later
 ----
@@ -328,7 +328,7 @@ julia --project=. src/main.jl --help
 # Generate a key
 julia --project=. src/main.jl generate -e your@email.com
 
-# Using justfile
+# Using Justfile
 just build
 just test
 ----

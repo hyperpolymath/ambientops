@@ -172,7 +172,7 @@ Comprehensive build automation with multiple tools.
 
 **Evidence**:
 - ✓ Project.toml: Julia package manifest with dependencies
-- ✓ justfile: 40+ build recipes for all common tasks
+- ✓ Justfile: 40+ build recipes for all common tasks
   - install, test, format, lint
   - Key management commands
   - GitHub integration helpers

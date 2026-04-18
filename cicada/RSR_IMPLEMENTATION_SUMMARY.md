@@ -228,7 +228,7 @@ Documentation/
 └── RSR_COMPLIANCE.md    500 lines (Compliance report)
 
 Build & Verification/
-├── justfile             250 lines (40+ recipes)
+├── Justfile             250 lines (40+ recipes)
 └── scripts/verify_rsr.jl 300 lines (Automated verification)
 ```
 
@@ -246,7 +246,7 @@ Build & Verification/
 - **Code**: ~3,500 lines Julia
 - **Tests**: ~400 lines
 - **Documentation**: ~4,600 lines (docs + community standards)
-- **Build/Tools**: ~550 lines (justfile + scripts)
+- **Build/Tools**: ~550 lines (Justfile + scripts)
 
 **Total Project Size**: ~9,000+ lines across all files
 
@@ -265,7 +265,7 @@ julia --project=. scripts/verify_rsr.jl
 # ★ EXCELLENT! Gold level compliance achieved!
 ```
 
-### Use justfile Commands
+### Use Justfile Commands
 
 ```bash
 # Development setup
@@ -359,7 +359,7 @@ cat RSR_COMPLIANCE.md
 | Community Docs | 0 files | 3 files (930 lines) | New |
 | Security Docs | Basic | SECURITY.md (480 lines) | +480 lines |
 | .well-known/ | Missing | 3 files (RFC 9116) | New |
-| Build System | Basic | justfile (40+ recipes) | +40 commands |
+| Build System | Basic | Justfile (40+ recipes) | +40 commands |
 | Changelog | None | CHANGELOG.md (300 lines) | New |
 | Verification | Manual | Automated script | Automated |
 | Compliance Report | None | RSR_COMPLIANCE.md (500 lines) | New |
@@ -372,7 +372,7 @@ cat RSR_COMPLIANCE.md
 1. Review new documentation
 2. Run `just ci` to verify all checks pass
 3. Run `julia --project=. scripts/verify_rsr.jl` (when Julia available)
-4. Test justfile recipes
+4. Test Justfile recipes
 5. Review RSR_COMPLIANCE.md for improvement ideas
 
 ### Short Term (v0.2)
