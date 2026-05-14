@@ -1,0 +1,770 @@
+[
+  {
+    "severity": "critical",
+    "rule_module": "code_safety",
+    "type": "elixir_system_cmd_interpolation",
+    "file": "records/referrals/lib/feedback_a_tron/network_verifier.ex"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "code_safety",
+    "type": "elixir_system_cmd_interpolation",
+    "file": "total-update/elixir/dnfinition/lib/dnfinition/backends/guix_backend.ex"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "code_safety",
+    "type": "elixir_system_cmd_interpolation",
+    "file": "total-update/elixir/dnfinition/lib/dnfinition/backends/nix_backend.ex"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "code_safety",
+    "type": "elixir_system_cmd_interpolation",
+    "file": "total-update/elixir/dnfinition/lib/dnfinition/snapshot_manager.ex"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "code_safety",
+    "type": "elixir_system_cmd_interpolation",
+    "file": "total-update/elixir/totalupdate/lib/totalupdate/strategy_engine.ex"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "code_safety",
+    "type": "getexn_on_external",
+    "file": "_pathroot/src/Discovery.res"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "code_safety",
+    "type": "getexn_on_external",
+    "file": "_pathroot/src/nicaug/NicaugCLI.res"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "code_safety",
+    "type": "getexn_on_external",
+    "file": "_pathroot/src/nicaug/PlatformOrchestrator.res"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "code_safety",
+    "type": "unwrap_dangerous_default",
+    "file": "clinician/src/correlation.rs"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "code_safety",
+    "type": "unwrap_dangerous_default",
+    "file": "clinician/src/satellites/panic_attacker.rs"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "code_safety",
+    "type": "unwrap_dangerous_default",
+    "file": "clinician/src/tools/bt_sentinel.rs"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "code_safety",
+    "type": "unwrap_dangerous_default",
+    "file": "clinician/src/tools/network.rs"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "code_safety",
+    "type": "unwrap_dangerous_default",
+    "file": "czech-file-knife/cfk-cache/src/metadata_cache.rs"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "code_safety",
+    "type": "unwrap_dangerous_default",
+    "file": "czech-file-knife/cfk-integrations/src/agrep.rs"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "code_safety",
+    "type": "unwrap_dangerous_default",
+    "file": "czech-file-knife/cfk-ios/src/ffi.rs"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "code_safety",
+    "type": "unwrap_dangerous_default",
+    "file": "czech-file-knife/cfk-ios/src/provider.rs"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "code_safety",
+    "type": "unwrap_dangerous_default",
+    "file": "czech-file-knife/cfk-providers/src/afs.rs"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "code_safety",
+    "type": "unwrap_dangerous_default",
+    "file": "czech-file-knife/cfk-providers/src/box_com.rs"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "code_safety",
+    "type": "unwrap_dangerous_default",
+    "file": "czech-file-knife/cfk-providers/src/dropbox.rs"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "code_safety",
+    "type": "unwrap_dangerous_default",
+    "file": "czech-file-knife/cfk-providers/src/gdrive.rs"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "code_safety",
+    "type": "unwrap_dangerous_default",
+    "file": "czech-file-knife/cfk-providers/src/ipfs.rs"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "code_safety",
+    "type": "unwrap_dangerous_default",
+    "file": "czech-file-knife/cfk-providers/src/onedrive.rs"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "code_safety",
+    "type": "unwrap_dangerous_default",
+    "file": "czech-file-knife/cfk-providers/src/protocols.rs"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "code_safety",
+    "type": "unwrap_dangerous_default",
+    "file": "czech-file-knife/cfk-providers/src/s3.rs"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "code_safety",
+    "type": "unwrap_dangerous_default",
+    "file": "czech-file-knife/cfk-providers/src/webdav.rs"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "code_safety",
+    "type": "unwrap_dangerous_default",
+    "file": "czech-file-knife/cfk-search/src/lib.rs"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "code_safety",
+    "type": "unwrap_dangerous_default",
+    "file": "emergency-button/rust/src/capture.rs"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "code_safety",
+    "type": "unwrap_dangerous_default",
+    "file": "emergency-button/rust/src/incident.rs"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "code_safety",
+    "type": "unwrap_dangerous_default",
+    "file": "emergency-room/rust/src/capture.rs"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "code_safety",
+    "type": "unwrap_dangerous_default",
+    "file": "emergency-room/rust/src/incident.rs"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "code_safety",
+    "type": "unwrap_dangerous_default",
+    "file": "emergency-room/rust/src/pulse.rs"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "code_safety",
+    "type": "unwrap_dangerous_default",
+    "file": "hardware-crash-team/src/scanner/mod.rs"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "code_safety",
+    "type": "unwrap_dangerous_default",
+    "file": "panoptes/src/web/mod.rs"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "code_safety",
+    "type": "unwrap_dangerous_default",
+    "file": "personal-sysadmin/src/correlation.rs"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "code_safety",
+    "type": "unwrap_dangerous_default",
+    "file": "personal-sysadmin/src/tools/network.rs"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "code_safety",
+    "type": "unwrap_dangerous_default",
+    "file": "port-endoscope/src/port.rs"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "security_errors",
+    "type": "secret_detected",
+    "file": "cicada/scripts/verify_rsr.jl"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "security_errors",
+    "type": "secret_detected",
+    "file": "czech-file-knife/docs/DISTRIBUTED_FILESYSTEMS.md"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "security_errors",
+    "type": "secret_detected",
+    "file": "czech-file-knife/docs/DISTRIBUTED_FILESYSTEMS.md"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "security_errors",
+    "type": "secret_detected",
+    "file": "emergency-room/src/zig/capture_test.zig"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "security_errors",
+    "type": "secret_detected",
+    "file": "emergency-room/src/zig/capture_test.zig"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "security_errors",
+    "type": "secret_detected",
+    "file": "hybrid-automation-router/docs/HAR_SECURITY.md"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "security_errors",
+    "type": "secret_detected",
+    "file": "hybrid-automation-router/test/attestation/a2ml_test.exs"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "security_errors",
+    "type": "secret_detected",
+    "file": "hybrid-automation-router/test/attestation/a2ml_test.exs"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "security_errors",
+    "type": "secret_detected",
+    "file": "hybrid-automation-router/test/attestation/a2ml_test.exs"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "security_errors",
+    "type": "secret_detected",
+    "file": "hybrid-automation-router/test/attestation/a2ml_test.exs"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "security_errors",
+    "type": "secret_detected",
+    "file": "session-sentinel/.envrc"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "workflow_audit",
+    "type": "actions_expression_injection",
+    "file": "hypatia-scan.yml"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "workflow_audit",
+    "type": "actions_expression_injection",
+    "file": "mirror.yml"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "workflow_audit",
+    "type": "actions_expression_injection",
+    "file": "quality.yml"
+  },
+  {
+    "severity": "high",
+    "rule_module": "cicd_rules",
+    "type": "missing_requirement",
+    "file": ".github/dependabot.yml"
+  },
+  {
+    "severity": "high",
+    "rule_module": "cicd_rules",
+    "type": "missing_requirement",
+    "file": ".github/workflows/scorecard.yml"
+  },
+  {
+    "severity": "high",
+    "rule_module": "cicd_rules",
+    "type": "missing_requirement",
+    "file": "permissions: read-all"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "from_raw",
+    "file": "czech-file-knife/cfk-ios/src/error.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "from_raw",
+    "file": "czech-file-knife/cfk-ios/src/ffi.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "from_raw",
+    "file": "port-endoscope/src/process.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "mem_forget",
+    "file": "czech-file-knife/cfk-ios/src/ffi.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "ncl_http_url",
+    "file": "panoptes/config.ncl"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "panic_macro",
+    "file": "clinician/src/p2p/mod.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "panic_macro",
+    "file": "clinician/src/storage/mod.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "panic_macro",
+    "file": "contracts-rust/tests/aspect_tests.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "panic_macro",
+    "file": "contracts-rust/tests/e2e_tests.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "panic_macro",
+    "file": "panoptes/src/main.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "shell_download_then_run",
+    "file": "_pathroot/scripts/bootstrap.sh"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "_pathroot/rust/mustfile-orchestrator/src/executor.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "_pathroot/rust/mustfile-orchestrator/src/parser.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "_pathroot/rust/mustfile-orchestrator/src/platform.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "clinician/src/cache/mod.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "clinician/src/p2p/mod.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "clinician/src/reasoning/mod.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "clinician/src/satellites/mod.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "clinician/src/satellites/panic_attacker.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "clinician/src/storage/mod.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "clinician/src/tools/bt_sentinel.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "clinician/src/tools/cache_layer.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "clinician/src/tools/ipfs.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "contracts-rust/benches/contracts_bench.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "contracts-rust/src/ambient_payload.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "contracts-rust/src/conversions.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "contracts-rust/src/envelope.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "contracts-rust/src/message_intent.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "contracts-rust/src/pack_manifest.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "contracts-rust/src/plan.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "contracts-rust/src/receipt.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "contracts-rust/src/run_bundle.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "contracts-rust/src/weather.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "contracts-rust/tests/aspect_tests.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "contracts-rust/tests/contract_tests.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "czech-file-knife/cfk-cache/src/blob_store.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "czech-file-knife/cfk-cache/src/metadata_cache.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "czech-file-knife/cfk-core/src/path.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "czech-file-knife/cfk-integrations/src/agrep.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "czech-file-knife/cfk-integrations/src/aria2.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "czech-file-knife/cfk-integrations/src/pandoc.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "czech-file-knife/cfk-providers/src/afs.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "czech-file-knife/cfk-providers/src/box_com.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "czech-file-knife/cfk-providers/src/dropbox.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "czech-file-knife/cfk-providers/src/gdrive.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "czech-file-knife/cfk-providers/src/local.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "czech-file-knife/cfk-providers/src/nfs.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "czech-file-knife/cfk-providers/src/onedrive.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "czech-file-knife/cfk-providers/src/syncthing.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "czech-file-knife/cfk-providers/src/transport.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "czech-file-knife/cfk-providers/src/webdav.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "czech-file-knife/cfk-search/src/lib.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "czech-file-knife/cfk-vfs/src/lib.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "hardware-crash-team/src/analyzer/mod.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "hardware-crash-team/src/remediation/mod.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "hardware-crash-team/src/sarif.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "hardware-crash-team/src/scanner/mod.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "panoptes/src/main.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "code_safety",
+    "type": "unwrap_without_check",
+    "file": "personal-sysadmin/src/reasoning/mod.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "git_state",
+    "type": "GS005",
+    "file": "."
+  },
+  {
+    "severity": "high",
+    "rule_module": "migration_rules",
+    "type": "deprecated_api",
+    "file": "_pathroot/src/Discovery.res"
+  },
+  {
+    "severity": "high",
+    "rule_module": "migration_rules",
+    "type": "deprecated_api",
+    "file": "_pathroot/src/Envbase.res"
+  },
+  {
+    "severity": "high",
+    "rule_module": "migration_rules",
+    "type": "deprecated_api",
+    "file": "_pathroot/src/nicaug/NicaugCLI.res"
+  },
+  {
+    "severity": "high",
+    "rule_module": "migration_rules",
+    "type": "deprecated_api",
+    "file": "_pathroot/src/nicaug/NickelParser.res"
+  },
+  {
+    "severity": "high",
+    "rule_module": "migration_rules",
+    "type": "deprecated_api",
+    "file": "_pathroot/src/nicaug/NickelTypes.res"
+  },
+  {
+    "severity": "high",
+    "rule_module": "migration_rules",
+    "type": "deprecated_api",
+    "file": "_pathroot/src/nicaug/PlatformOrchestrator.res"
+  },
+  {
+    "severity": "high",
+    "rule_module": "migration_rules",
+    "type": "deprecated_api",
+    "file": "_pathroot/src/Types.res"
+  },
+  {
+    "severity": "high",
+    "rule_module": "migration_rules",
+    "type": "deprecated_api",
+    "file": "_pathroot/src/Validate.res"
+  },
+  {
+    "severity": "high",
+    "rule_module": "migration_rules",
+    "type": "deprecated_api",
+    "file": "broad-spectrum/src/AccessibilityImpl.res"
+  },
+  {
+    "severity": "high",
+    "rule_module": "migration_rules",
+    "type": "deprecated_api",
+    "file": "broad-spectrum/src/DenoBindings.res"
+  },
+  {
+    "severity": "high",
+    "rule_module": "migration_rules",
+    "type": "deprecated_api",
+    "file": "broad-spectrum/src/HtmlParserImpl.res"
+  },
+  {
+    "severity": "high",
+    "rule_module": "migration_rules",
+    "type": "deprecated_api",
+    "file": "broad-spectrum/src/SeoParserImpl.res"
+  },
+  {
+    "severity": "high",
+    "rule_module": "migration_rules",
+    "type": "deprecated_api",
+    "file": "broad-spectrum/src/UrlParserImpl.res"
+  },
+  {
+    "severity": "high",
+    "rule_module": "workflow_audit",
+    "type": "download_then_run",
+    "file": "mirror.yml"
+  },
+  {
+    "severity": "high",
+    "rule_module": "workflow_audit",
+    "type": "unsafe_curl_payload",
+    "file": "hypatia-scan.yml"
+  }
+]
