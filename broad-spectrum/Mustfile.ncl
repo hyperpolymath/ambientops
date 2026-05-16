@@ -16,7 +16,7 @@ let Contract = {
       "bash",       # Build scripts only
     ],
     banned = [
-      "typescript", # Use ReScript instead
+      "typescript", # Use AffineScript instead
       "javascript", # Only generated from ReScript
       "go",         # Use Rust if systems code needed
       "python",     # Except SaltStack
