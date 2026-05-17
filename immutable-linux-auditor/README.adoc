@@ -111,7 +111,7 @@ This project follows the *Hyperpolymath Language Policy* (see `.claude/CLAUDE.md
 | Rust
 
 | Python (general)
-| Rust/ReScript
+| Rust/AffineScript
 |===
 
 == License
