@@ -38,6 +38,11 @@ one deliberate `SPARK_Mode (Off)` are documented honestly under
 
 == SPARK contract coverage (`total-update/ada/dnfinition/src`)
 
+WARNING: ⚠️ The matrix in this section is **FALSE and SUPERSEDED** — see
+<<verified-correction>>. It was written from a source read that never
+compiled and was never `gnatprove`-checked. Retained only to show what
+was claimed vs. what verification found.
+
 Contracts in SPARK live on the package *spec* (`.ads`), not the body
 (`.adb`); body files carrying zero `Pre/Post` is correct, not theatre.
 Spec-level coverage:
@@ -93,25 +98,81 @@ behaviour can destabilise the host. The proof-relevant surface, per
 The Rust crates sit on the application side of this seam; they are never
 the ABI/FFI boundary, satisfying §"Rust is never the ABI".
 
-[#honest-gaps]
-== Honest gaps
+[#verified-correction]
+== ⚠️ Verified correction (standards#127, 2026-05-18) — supersedes the coverage matrix above
 
-* *`backend_interface.ads` (OWED).* This is a pure abstract interface
-  (`type Package_Manager_Backend is interface;`, ~20 `is abstract`
-  primitives: `Install`, `Remove`, `Upgrade`, `Search`, …). It carries
-  no class-wide contracts, so `gnatprove` cannot propagate obligations
-  to the `backend_guix`/`backend_nix` implementations. Adding
-  `Pre'Class`/`Post'Class` to the safety-relevant primitives (notably
-  `Install`/`Remove`/`Upgrade` result states and `Is_Available`
-  preconditions) is the principal remaining SPARK proof obligation.
-  Tracked under `standards#124` / `#127`.
-* *`plugin_registry.ads` (weak).* One contract only; strengthen
-  registration post-state. Lower priority than the interface.
-* *`reversibility_types.ads` is deliberately `SPARK_Mode (Off)`.* The
-  in-file comment documents the reason (a record-component / type-name
-  clash on `Rollback_Result.Snapshot_ID`); SPARK is re-enabled once a
-  genuine proof obligation justifies resolving the clash. This is an
-  honest, documented deferral — explicitly *not* the "theatre" pattern.
+WARNING: An adversarial re-verification (gnat / gnatprove + 2-agent
+static SPARK-RM swarm, then dynamically spot-confirmed on `origin/main`)
+found that the "SPARK contract coverage" matrix and the "real,
+*non-theatrical* SPARK/Ada" claim earlier in this document are *false*.
+They were written from a source read that **never compiled and was never
+`gnatprove`-checked**. The original 2026-05-18 estate audit ("`SPARK_Mode
+On`, theatre") was *correct*; the PR#48 reframing was the inaccuracy.
+The whole `total-update/ada/dnfinition` SPARK story is *theatre*:
+
+* *`backend_interface.ads` — never compiled; illegal SPARK.*
+  `Transaction_Item.Package` used an Ada **reserved word** as a field
+  name (no compiler accepts it). `Install`/`Remove`/`Upgrade`/
+  `Upgrade_System`/`Autoremove` are *functions* with an `in out`
+  controlling parameter — **illegal SPARK** (SPARK RM 4.5.2) — under
+  `pragma SPARK_Mode (On)`. *This PR* fixes the reserved word (renamed
+  `Pkg`, now compiles), honestly sets `SPARK_Mode (Off)` with rationale,
+  and adds sound Ada 2022 `Pre'Class`/`Post'Class` on the SPARK-legal
+  query ops + `plugin_registry` `Pre`s (runtime-checked; the spec for
+  the OWED refactor).
+* *`snapshot_manager.adb:4` — `pragma SPARK_Mode (Off)`* over the entire
+  safety-critical rollback body. gnatprove proves **nothing** about
+  rollback. The body also *never compiled*: `:93` calls
+  `Create_Btrfs_Snapshot`, first declared `:145`, no forward declaration
+  (Ada visibility error). The headline `Rollback_To_Snapshot` `Post`
+  rests on `reversibility_types.adb:26-32`
+  `System_State_Matches_Snapshot` which is `pragma Unreferenced (ID);
+  return True;` — a **hardcoded-`True` vacuous ghost oracle** — and is
+  additionally fail-permissive (`or else Status in Failed |
+  Requires_Reboot`). The "25 Strong" rating is false.
+* *`safety_boundary.adb:6` — `pragma SPARK_Mode (Off)`*; and
+  `safety_boundary.ads:78-101` re-declares `Safe_Install`/`Safe_Remove`/
+  `Safe_Upgrade`/… as *functions* with `in Out …'Class` (the same
+  illegal-SPARK construct, *without* even the honesty escape). No
+  privilege/scope/bound model exists anywhere; the only precondition is
+  `Is_Valid (Token)` (recovery-point presence). The "15 Strong /
+  privilege-containment" rating is false.
+* *`safety_invariant.ads` — legal SPARK but vacuous.* Contracts are
+  definitional tautologies over `Ghost` state that the real (SPARK_Mode
+  Off) enforcement path never updates; e.g. `Lemma_Recovery_Enables_
+  Rollback` has `Post ≡ Pre` by definition. Proved-but-meaningless.
+* *`plugin_registry.ads`* is transitively non-SPARK (uses
+  `Backend_Access` from the non-SPARK `backend_interface`); its `Pre`s
+  (strengthened by this PR) cannot be `gnatprove`-discharged until the
+  refactor below.
+
+=== What this PR genuinely delivers (no theatre, no fake green)
+
+. Real bug fix: `backend_interface.ads` now compiles (reserved word).
+. Honest SPARK boundary on `backend_interface.ads` + documented OWED.
+. Sound Ada 2022 contracts (query-op `Pre'Class`/`Post'Class`,
+  `Register_Backend` `Pre`, six `plugin_registry` non-empty-ID `Pre`s),
+  runtime-enforced and serving as the spec for the SPARK refactor.
+. This verified, honest stance — replacing the false matrix.
+
+=== OWED — large genuine programme, tracked standards#127 (must NOT be faked)
+
+. State-mutating `function` → `procedure (… ; Result : out …)` redesign
+  across `backend_interface` + every backend (`backend_guix`,
+  `backend_nix`) + `safety_boundary`, to make the modification path
+  legal SPARK.
+. Bring `snapshot_manager.adb` / `safety_boundary.adb` into
+  `SPARK_Mode (On)` (they are wholly `Off` today) and fix the
+  `snapshot_manager.adb` elaboration-order error so it compiles.
+. Replace the `System_State_Matches_Snapshot` hardcoded-`True` ghost
+  with a real state model; connect `safety_invariant` ghost state to the
+  executing enforcement path so its lemmas are non-vacuous.
+. Only then can the safety-critical contracts be `gnatprove`-discharged.
+
+NOTE: the `BUILD_MODE=spark` mode and `gnatprove` are real *tooling*, but
+no safety-critical body is analysed by them today. Do not cite ambientops
+as "formally verified" until the OWED programme lands.
+
 * *`.claude/CLAUDE.md` language drift.* Any stale ReScript/Tauri/Deno
   table is superseded by the estate policy and this stance doc; reconcile
   separately.
