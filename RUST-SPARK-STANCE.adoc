@@ -1,0 +1,125 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+= Rust/SPARK Stance — ambientops
+:toc: macro
+:toclevels: 2
+
+toc::[]
+
+== Summary
+
+This monorepo's application logic is largely Rust (≈168 `.rs` files
+across `personal-sysadmin`, `czech-file-knife`, `contracts-rust`,
+`emergency-room/rust`, and other crates). Per the estate language policy
+(`standards/rhodium-standard-repositories/spec/LANGUAGE-POLICY.adoc`
+§Terminology), *"Rust" means "Rust/SPARK"*: Rust is a primary
+implementation language, but the project is *designed to admit
+SPARK/Ada verification modules* across a stable, Idris2-typed boundary,
+with Zig as the FFI layer. Rust here is never the ABI/API/FFI layer.
+
+Unlike a bare-Rust crate, ambientops *already* satisfies the structural
+requirements of that policy and goes further than most estate repos:
+
+* An Idris2 ABI seam exists (`src/abi/{Types,Layout,Foreign}.idr`, plus
+  per-component `*/src/abi/` seams) with no dangerous patterns in the
+  ABI layer — see `PROOF-NEEDS.md` and `ABI-FFI-README.md`.
+* A Zig FFI layer is present (`*/ffi/zig/`, `*/build.zig`).
+* Real, *non-theatrical* SPARK/Ada exists in
+  `total-update/ada/dnfinition/` with a dedicated `spark` build mode in
+  `dnfinition.gpr` (`BUILD_MODE=spark`) and proven subprogram contracts
+  on the safety-critical specs.
+
+This document is the project's compliance stance. The audit (2026-05-18)
+flagged ambientops as "`SPARK_Mode On`, zero contracts, no stance doc".
+That is **inaccurate on contracts** (see the coverage matrix below — the
+safety-critical specs are heavily contracted) and **correct on the
+stance doc** (this file was missing). The one genuine contract gap and
+one deliberate `SPARK_Mode (Off)` are documented honestly under
+<<Honest gaps>>.
+
+== SPARK contract coverage (`total-update/ada/dnfinition/src`)
+
+Contracts in SPARK live on the package *spec* (`.ads`), not the body
+(`.adb`); body files carrying zero `Pre/Post` is correct, not theatre.
+Spec-level coverage:
+
+[cols="2,1,3",options="header"]
+|===
+| Spec | Contracts | Assessment
+
+| `reversibility/snapshot_manager.ads` | 25 | Strong — pre/postconditions on snapshot lifecycle
+| `safety/safety_boundary.ads`         | 15 | Strong — safety-boundary enforcement
+| `safety/safety_invariant.ads`        | 14 | Strong — invariant preservation
+| `plugins/strategy_matrix.ads`        |  5 | Adequate
+| `platform/platform_detection.ads`    |  4 | Adequate
+| `backends/backend_guix.ads`          |  3 | Adequate
+| `backends/backend_nix.ads`           |  2 | Minimal but present
+| `plugins/plugin_registry.ads`        |  1 | Weak — registration pre-only (OWED: strengthen)
+| `backends/backend_interface.ads`     |  0 | **OWED** — abstract interface with no `Pre'Class`/`Post'Class` (see gaps)
+| `reversibility/reversibility_types.ads` | n/a | Deliberate `pragma SPARK_Mode (Off)` — documented in-file (Snapshot_ID name clash); not theatre
+|===
+
+== What is correctness-critical here
+
+ambientops manages host system operations (package transactions,
+reversibility/rollback, emergency intervention) where incorrect
+behaviour can destabilise the host. The proof-relevant surface, per
+`PROOF-NEEDS.md`:
+
+[cols="1,3",options="header"]
+|===
+| Property | Where
+
+| Rollback atomicity (failed op rolls back completely, no partial state)
+| `reversibility/snapshot_manager.ads` (contracted), `reversibility_types.ads`
+| Reversibility-operation idempotency
+| `safety/safety_invariant.ads`, emergency-room components
+| Privilege / scope containment (no operation escalates beyond declared scope)
+| `safety/safety_boundary.ads`
+| Backend transaction soundness (install/remove/upgrade contracts)
+| `backends/backend_*.ads` against the `backend_interface` contract
+|===
+
+== The seam
+
+[cols="1,3",options="header"]
+|===
+| Layer | Artifact
+
+| ABI (Idris2) | `src/abi/{Types,Layout,Foreign}.idr` + per-component `*/src/abi/`
+| FFI (Zig)    | `*/ffi/zig/`, `*/build.zig`
+| SPARK proof  | `total-update/ada/dnfinition/` with `dnfinition.gpr` `BUILD_MODE=spark`; `gnatprove` is the discharge tool for the `.ads` contracts above
+|===
+
+The Rust crates sit on the application side of this seam; they are never
+the ABI/FFI boundary, satisfying §"Rust is never the ABI".
+
+[#honest-gaps]
+== Honest gaps
+
+* *`backend_interface.ads` (OWED).* This is a pure abstract interface
+  (`type Package_Manager_Backend is interface;`, ~20 `is abstract`
+  primitives: `Install`, `Remove`, `Upgrade`, `Search`, …). It carries
+  no class-wide contracts, so `gnatprove` cannot propagate obligations
+  to the `backend_guix`/`backend_nix` implementations. Adding
+  `Pre'Class`/`Post'Class` to the safety-relevant primitives (notably
+  `Install`/`Remove`/`Upgrade` result states and `Is_Available`
+  preconditions) is the principal remaining SPARK proof obligation.
+  Tracked under `standards#124` / `#127`.
+* *`plugin_registry.ads` (weak).* One contract only; strengthen
+  registration post-state. Lower priority than the interface.
+* *`reversibility_types.ads` is deliberately `SPARK_Mode (Off)`.* The
+  in-file comment documents the reason (a record-component / type-name
+  clash on `Rollback_Result.Snapshot_ID`); SPARK is re-enabled once a
+  genuine proof obligation justifies resolving the clash. This is an
+  honest, documented deferral — explicitly *not* the "theatre" pattern.
+* *`.claude/CLAUDE.md` language drift.* Any stale ReScript/Tauri/Deno
+  table is superseded by the estate policy and this stance doc; reconcile
+  separately.
+
+== References
+
+* `standards/rhodium-standard-repositories/spec/LANGUAGE-POLICY.adoc`
+  §Terminology, §"Rust is never the ABI"
+* `PROOF-NEEDS.md` (this repo) — Idris2 proof obligations and priorities
+* `ABI-FFI-README.md` (this repo) — ABI/FFI architecture
+* Estate exemplar stance: `proof-of-work/RUST-SPARK-STANCE.adoc`
