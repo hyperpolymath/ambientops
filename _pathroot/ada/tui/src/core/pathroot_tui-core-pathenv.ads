@@ -1,7 +1,7 @@
 --  _pathroot TUI - PATH Environment Module Specification
 --  Handles PATH environment variable operations
 --
---  SPDX-License-Identifier: PMPL-1.0
+--  SPDX-License-Identifier: PMPL-1.0-or-later
 --  Copyright (C) 2025 Hyper Polymath
 
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
