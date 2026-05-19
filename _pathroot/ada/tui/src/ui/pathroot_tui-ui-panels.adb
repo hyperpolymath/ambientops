@@ -1,7 +1,7 @@
 --  _pathroot TUI - UI Panels Body
 --  Terminal UI panel management (basic text-based implementation)
 --
---  SPDX-License-Identifier: PMPL-1.0
+--  SPDX-License-Identifier: PMPL-1.0-or-later
 --  Copyright (C) 2025 Hyper Polymath
 
 with Ada.Text_IO;            use Ada.Text_IO;

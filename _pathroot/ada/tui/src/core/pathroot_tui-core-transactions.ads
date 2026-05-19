@@ -1,7 +1,7 @@
 --  _pathroot TUI - Transaction Protocol Specification
 --  Handles command-line transaction protocol for scripting
 --
---  SPDX-License-Identifier: PMPL-1.0
+--  SPDX-License-Identifier: PMPL-1.0-or-later
 --  Copyright (C) 2025 Hyper Polymath
 
 package Pathroot_TUI.Core.Transactions is

@@ -1,6 +1,6 @@
 --  Terminal_ANSI - Lightweight ANSI terminal utilities for Ada
 --
---  SPDX-License-Identifier: PMPL-1.0
+--  SPDX-License-Identifier: PMPL-1.0-or-later
 --  Copyright (C) 2025 Hyper Polymath
 
 with Ada.Text_IO;

@@ -1,7 +1,7 @@
 --  _pathroot TUI - Main Package Specification
 --  Ada-based Terminal User Interface for devtools environment management
 --
---  SPDX-License-Identifier: PMPL-1.0
+--  SPDX-License-Identifier: PMPL-1.0-or-later
 --  Copyright (C) 2025 Hyper Polymath
 
 package Pathroot_TUI is

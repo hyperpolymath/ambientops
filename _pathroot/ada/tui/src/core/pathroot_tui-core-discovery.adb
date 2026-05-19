@@ -1,7 +1,7 @@
 --  _pathroot TUI - Discovery Module Body
 --  Handles _pathroot file discovery across platforms
 --
---  SPDX-License-Identifier: PMPL-1.0
+--  SPDX-License-Identifier: PMPL-1.0-or-later
 --  Copyright (C) 2025 Hyper Polymath
 
 with Ada.Directories;

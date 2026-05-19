@@ -3,7 +3,7 @@
 --  This library provides a high-level interface for manipulating the PATH
 --  environment variable across Windows and POSIX platforms.
 --
---  SPDX-License-Identifier: PMPL-1.0
+--  SPDX-License-Identifier: PMPL-1.0-or-later
 --  Copyright (C) 2025 Hyper Polymath
 
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
