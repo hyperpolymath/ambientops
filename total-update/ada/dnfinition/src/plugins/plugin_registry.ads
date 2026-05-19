@@ -141,8 +141,9 @@ package Plugin_Registry is
      with Pre => P /= null;
    --  Register a new plugin
 
-   procedure Unregister_Plugin (ID : String);
-   --  Remove a plugin from the registry
+   procedure Unregister_Plugin (ID : String)
+     with Pre => ID'Length > 0;
+   --  Remove a plugin from the registry (the ID must be non-empty).
 
    procedure Discover_Plugins;
    --  Scan for available plugins and update status
@@ -151,8 +152,9 @@ package Plugin_Registry is
    --  Re-check availability of all plugins
 
    --  Query operations
-   function Get_Plugin (ID : String) return Plugin_Access;
-   --  Get a specific plugin by ID
+   function Get_Plugin (ID : String) return Plugin_Access
+     with Pre => ID'Length > 0;
+   --  Get a specific plugin by ID (the ID must be non-empty).
 
    function Get_Plugin_By_Type (PM : Package_Manager_Type) return Plugin_Access;
    --  Get plugin for a specific package manager type
@@ -160,8 +162,9 @@ package Plugin_Registry is
    function Get_Available_Plugins return Natural;
    --  Count of available plugins
 
-   function Get_Plugin_Metadata (ID : String) return Plugin_Metadata;
-   --  Get metadata for a plugin
+   function Get_Plugin_Metadata (ID : String) return Plugin_Metadata
+     with Pre => ID'Length > 0;
+   --  Get metadata for a plugin (the ID must be non-empty).
 
    --  Priority-based selection
    function Get_Best_Plugin_For
@@ -172,10 +175,13 @@ package Plugin_Registry is
      (Cap : Plugin_Capability) return Natural;
    --  Count plugins with a specific capability
 
-   --  Status management
-   procedure Enable_Plugin (ID : String);
-   procedure Disable_Plugin (ID : String);
-   function Is_Plugin_Enabled (ID : String) return Boolean;
+   --  Status management (all keyed by a non-empty plugin ID)
+   procedure Enable_Plugin (ID : String)
+     with Pre => ID'Length > 0;
+   procedure Disable_Plugin (ID : String)
+     with Pre => ID'Length > 0;
+   function Is_Plugin_Enabled (ID : String) return Boolean
+     with Pre => ID'Length > 0;
 
    --  ═══════════════════════════════════════════════════════════════════════
    --  Built-in Plugin Factories

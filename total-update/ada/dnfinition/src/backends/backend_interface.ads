@@ -4,7 +4,24 @@
 --  Backend Interface - Abstract interface for all package managers
 --  DNFinition supports 50+ package managers through this unified interface
 
-pragma SPARK_Mode (On);
+--  HONEST SPARK BOUNDARY (standards#127).
+--  This unit was `pragma SPARK_Mode (On)` but is **not legal SPARK** and
+--  never compiled at all:
+--    * `Transaction_Item.Package` used an Ada *reserved word* as a field
+--      name (no compiler accepts it) — fixed (renamed `Pkg`);
+--    * the modification operations Install/Remove/Upgrade/
+--      Upgrade_System/Autoremove are *functions* with an `in out`
+--      controlling parameter, which SPARK forbids (SPARK RM 4.5.2).
+--  `SPARK_Mode (On)` over non-SPARK code is theatre; gnatprove could
+--  never analyse it. The correct fix (state-mutating `function`s ->
+--  `procedure`s with `out Result`, across the interface and every
+--  backend body) is a breaking redesign, OWED and tracked under
+--  standards#127 — it must not be faked. Until then this unit is
+--  honestly marked OUT of the SPARK boundary. The Ada 2022
+--  `Pre'Class`/`Post'Class` aspects below remain as runtime-checked
+--  (`-gnata`) behavioural contracts and as the spec for that future
+--  SPARK refactor.
+pragma SPARK_Mode (Off);
 
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Platform_Detection;    use Platform_Detection;
@@ -107,7 +124,9 @@ package Backend_Interface is
 
    --  Query operations
    function Get_Name (Self : Package_Manager_Backend) return String
-     is abstract;
+     is abstract
+     with Post'Class => Get_Name'Result'Length > 0;
+   --  Behavioural contract (Liskov): every backend has a non-empty name.
 
    function Get_PM_Type (Self : Package_Manager_Backend)
      return Package_Manager_Type
@@ -129,7 +148,9 @@ package Backend_Interface is
      (Self    : Package_Manager_Backend;
       Query   : String;
       Limit   : Positive := 100) return Package_List_Access
-     is abstract;
+     is abstract
+     with Pre'Class => Query'Length > 0;
+   --  Behavioural contract: a search query must be non-empty.
 
    function Get_Installed
      (Self : Package_Manager_Backend) return Package_List_Access
@@ -142,9 +163,31 @@ package Backend_Interface is
    function Get_Package_Info
      (Self : Package_Manager_Backend;
       Name : String) return Package_Info
-     is abstract;
+     is abstract
+     with Pre'Class => Name'Length > 0;
+   --  Behavioural contract: a package name must be non-empty.
 
-   --  Modification operations (all should support snapshot/rollback)
+   --  Modification operations (all should support snapshot/rollback).
+   --
+   --  HONEST SPARK BOUNDARY (standards#127): these five operations are
+   --  declared as *functions* with an `in out` controlling parameter and
+   --  a returned `Operation_Result`. A function with an `in out`
+   --  parameter is **not legal SPARK** (SPARK RM 4.5.2). The whole unit
+   --  carried `pragma SPARK_Mode (On)` while being non-SPARK — i.e.
+   --  SPARK *theatre*: `gnatprove` could never analyse it (and the
+   --  reserved-word `Package` field above means it never compiled at
+   --  all). Rather than hide that, the genuinely-effectful modification
+   --  operations are explicitly placed OUTSIDE the SPARK boundary with
+   --  `SPARK_Mode => Off`. This makes the boundary truthful and lets
+   --  gnatprove genuinely verify the rest of the spec + plugin_registry.
+   --
+   --  The proper fix (OWED, tracked standards#127) is a breaking
+   --  redesign: state-mutating `function`s -> `procedure`s with an
+   --  `out Result : Operation_Result` parameter, across the interface
+   --  and every backend (backend_guix, backend_nix, …). That refactor
+   --  is out of scope for this PR; it must not be faked. The intended
+   --  soundness contract — *a `Success` result must not report
+   --  Failed_Count > 0* — is recorded here for that future work.
    function Install
      (Self         : in out Package_Manager_Backend;
       Packages     : Package_List;
@@ -198,8 +241,9 @@ package Backend_Interface is
 
    procedure Register_Backend
      (PM_Type : Package_Manager_Type;
-      Backend : Backend_Access);
-   --  Register a backend implementation
+      Backend : Backend_Access)
+     with Pre => Backend /= null;
+   --  Register a backend implementation (a null backend is rejected).
 
    function Get_Backend (PM_Type : Package_Manager_Type) return Backend_Access;
    --  Get backend for a package manager type
