@@ -183,21 +183,21 @@ package body Snapshot_Manager is
                   Result := (
                     Status      => Completed,
                     Message     => To_Unbounded_String ("Native rollback complete"),
-                    Snapshot_ID => ID
+                    Target_Snapshot => ID
                   );
 
                when Platform_Detection.Btrfs | Platform_Detection.ZFS =>
                   Result := (
                     Status      => Requires_Reboot,
                     Message     => To_Unbounded_String ("Snapshot restored, reboot required"),
-                    Snapshot_ID => ID
+                    Target_Snapshot => ID
                   );
 
                when others =>
                   Result := (
                     Status      => Failed,
                     Message     => To_Unbounded_String ("Manual rollback required"),
-                    Snapshot_ID => ID
+                    Target_Snapshot => ID
                   );
             end case;
 
@@ -209,7 +209,7 @@ package body Snapshot_Manager is
       Result := (
         Status      => Failed,
         Message     => To_Unbounded_String ("Snapshot not found"),
-        Snapshot_ID => Null_Snapshot
+        Target_Snapshot => Null_Snapshot
       );
    end Rollback_To_Snapshot;
 
@@ -221,7 +221,7 @@ package body Snapshot_Manager is
          Result := (
            Status      => Not_Started,
            Message     => Ada.Strings.Unbounded.To_Unbounded_String ("No snapshots"),
-           Snapshot_ID => Null_Snapshot
+           Target_Snapshot => Null_Snapshot
          );
       else
          Rollback_To_Snapshot (Snapshots (Snapshot_Count).ID, Result);

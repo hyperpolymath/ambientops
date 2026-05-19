@@ -1,0 +1,26 @@
+--  SPDX-License-Identifier: PMPL-1.0-or-later
+--  Scoped compile-check project: verifies the reversibility/safety
+--  subsystem (the units touched by the SPARK honest-demotion) WITHOUT
+--  pulling the unrelated, unprovided `ncurses` TUI dependency. Not for
+--  shipping — a verification harness only.
+
+project Checkonly is
+
+   for Source_Dirs use
+     ("src/reversibility",
+      "src/safety",
+      "src/backends",
+      "src/platform");
+   for Object_Dir use "obj-check";
+   --  No `for Main`: compile-only, no bind/link, no ncurses needed.
+
+   package Compiler is
+      for Switches ("Ada") use
+        ("-gnat2022",
+         "-gnatwa",
+         "-gnato13",
+         "-gnatf",
+         "-gnata");   --  assertions on: exercises the retained Pre/Post
+   end Compiler;
+
+end Checkonly;

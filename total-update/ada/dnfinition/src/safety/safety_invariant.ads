@@ -10,21 +10,24 @@
 --  ║             point. The system can ALWAYS roll back to a known-good state.║
 --  ╚═══════════════════════════════════════════════════════════════════════════╝
 --
---  SPARK Proof Level: 2 (Gold)
---  - All preconditions and postconditions are verified
---  - No runtime checks can fail
---  - Memory safety is guaranteed
---
---  To verify: gnatprove -P dnfinition.gpr --level=2
+--  PROOF STATUS (2026-05-18 audit): NOT PROVEN. This unit previously
+--  claimed "SPARK Proof Level: 2 (Gold) - All preconditions and
+--  postconditions are verified". That claim was false:
+--    * GNATprove was never wired into any build or CI; `just prove`
+--      cannot run (the project does not even resolve its ncurses import).
+--    * The unit fails SPARK Phase-2 legality: the body's Refined_State
+--      lists constituents that are not hidden state of this package.
+--    * Every "lemma" body is `null;` with a comment asserting the
+--      property is "trivially true" — assumed, not proved.
+--  SPARK_Mode is now Off and the Gold claim removed. The invariant
+--  "every modifying operation is preceded by a recovery point" is a
+--  tracked, UNPROVEN obligation (PROOF-NEEDS.md, Idris2 model O-SAFE-1).
 
-pragma SPARK_Mode (On);
+pragma SPARK_Mode (Off);
 
 with Reversibility_Types; use Reversibility_Types;
 
-package Safety_Invariant
-  with Abstract_State => Global_State,
-       Initializes    => Global_State
-is
+package Safety_Invariant is
 
    --  ═══════════════════════════════════════════════════════════════════════
    --  Ghost State for Formal Verification

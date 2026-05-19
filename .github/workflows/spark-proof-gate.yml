@@ -1,0 +1,95 @@
+# SPDX-License-Identifier: PMPL-1.0
+name: SPARK Proof Gate
+
+# ambientops anti-theatre gate (P0 of the estate Rust/SPARK audit;
+# hyperpolymath/standards#124 / #135).
+#
+# Self-contained on purpose: it does not `uses:` the standards reusable
+# SPARK Theatre Gate yet, so it works the moment this lands rather than
+# waiting on hyperpolymath/standards#141 to merge. Once #141 is on
+# standards@main this file SHOULD be reduced to a 3-line caller:
+#
+#   jobs:
+#     gate:
+#       uses: hyperpolymath/standards/.github/workflows/spark-theatre-gate.yml@<sha>
+#       with: { paths: "total-update/ada", enforce_zero_contract: false }
+#
+# It exists specifically so the safety_boundary / reversibility_types /
+# safety_invariant honest-demotion cannot silently regress to a false
+# "formally verified" banner. T1 is a hard failure; T2 (zero-contract
+# SPARK_Mode) is a warning while the Ada/SPARK->Rust/SPARK migration tail
+# clears (tracked in PROOF-NEEDS.md).
+
+on:
+  push:
+    branches: [main, master]
+    paths: ["total-update/ada/**", ".github/workflows/spark-proof-gate.yml"]
+  pull_request:
+    paths: ["total-update/ada/**", ".github/workflows/spark-proof-gate.yml"]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  spark-proof-gate:
+    name: SPARK Proof Gate (dnfinition)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4
+
+      - name: Scan total-update/ada for SPARK proof theatre
+        run: |
+          set -uo pipefail
+          SCAN_ROOT="total-update/ada"
+
+          prover_evidence=0
+          if grep -rIlE 'gnatprove' .github/workflows 2>/dev/null | grep -q .; then
+            prover_evidence=1
+          fi
+          for bf in Justfile justfile Mustfile Dustfile; do
+            [ -f "$bf" ] && grep -qI 'gnatprove' "$bf" && prover_evidence=1
+          done
+          if find . \( -name 'gnatprove.out' -o -name '*.spark' \
+                      -o -path '*/gnatprove/*.json' \) \
+                -not -path '*/.git/*' 2>/dev/null | grep -q .; then
+            prover_evidence=1
+          fi
+          echo "prover_evidence=$prover_evidence"
+
+          claim_re='formally verified|SPARK Proof Level|\(Gold\)|all preconditions and postconditions are verified|proving the invariant holds'
+          contract_re='Pre[[:space:]]*=>|Post[[:space:]]*=>|Global[[:space:]]*=>|Depends[[:space:]]*=>|Contract_Cases'
+          sparkon_re='pragma[[:space:]]+SPARK_Mode[[:space:]]*\([[:space:]]*On[[:space:]]*\)|with[[:space:]]+SPARK_Mode[[:space:]]*=>[[:space:]]*On'
+
+          fail=0
+          while IFS= read -r f; do
+            [ -z "$f" ] && continue
+            grep -vE '^[[:space:]]*--' "$f" | grep -qE "$sparkon_re" || continue
+            header="$(awk '
+              /^[[:space:]]*--/ || /^[[:space:]]*$/ { print; next }
+              { exit }' "$f")"
+            has_header_claim=0
+            printf '%s\n' "$header" | grep -qiE "$claim_re" && has_header_claim=1
+            has_contract=0
+            grep -qE "$contract_re" "$f" && has_contract=1
+
+            [ "$prover_evidence" -eq 1 ] && continue
+
+            if [ "$has_header_claim" -eq 1 ]; then
+              echo "::error file=$f::T1 SPARK theatre regression: header banner claims formal proof but no GNATprove run exists. Demote (SPARK_Mode Off + tracked obligation in PROOF-NEEDS.md) or wire gnatprove into CI."
+              fail=1
+            elif [ "$has_contract" -eq 0 ]; then
+              echo "::warning file=$f::T2 zero-contract SPARK_Mode (standards#135): proves nothing here. Demote to SPARK_Mode Off or add contracts."
+            fi
+          done < <(find "$SCAN_ROOT" \( -name '*.ads' -o -name '*.adb' \) \
+                     -not -path '*/.git/*' -not -path '*/obj/*' 2>/dev/null)
+
+          if [ "$fail" -ne 0 ]; then
+            echo "::error::SPARK Proof Gate FAILED — a demoted unit regressed to a hollow 'verified' claim. See PROOF-NEEDS.md (O-REV-*/O-SAFE-*)."
+            exit 1
+          fi
+          echo "✓ SPARK Proof Gate passed — no hollow proof claims in total-update/ada."

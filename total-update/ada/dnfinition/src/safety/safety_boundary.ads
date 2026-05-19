@@ -4,7 +4,7 @@
 --  Safety_Boundary - CRITICAL module enforcing reversibility invariants
 --
 --  ╔═══════════════════════════════════════════════════════════════════════════╗
---  ║  SAFETY INVARIANT (formally verified):                                    ║
+--  ║  SAFETY INVARIANT (runtime-enforced; NOT formally verified):              ║
 --  ║                                                                           ║
 --  ║  "Every modifying package operation MUST be preceded by a valid          ║
 --  ║   recovery point. Operations without recovery points are REJECTED."      ║
@@ -13,12 +13,30 @@
 --  ║  state, preventing unrecoverable system corruption.                      ║
 --  ╚═══════════════════════════════════════════════════════════════════════════╝
 --
+--  PROOF STATUS (2026-05-19 audit, P0 ambientops): NOT PROVEN. This unit
+--  previously declared SPARK_Mode (On) and the banner claimed the invariant
+--  was "formally verified". That claim was false on the same grounds as the
+--  rest of the dnfinition reversibility subsystem (see reversibility_types.ads
+--  and safety_invariant.ads HONESTY NOTEs):
+--    * GNATprove was never wired into any build or CI; no proof obligation
+--      has ever been discharged for this package.
+--    * The Pre/Post contracts below (Is_Valid (Token) etc.) are genuine
+--      *runtime-checked* contracts — they constrain execution but prove
+--      nothing at analysis time. The token type gives a useful defence-in-
+--      depth API discipline, not a machine-checked guarantee.
+--  SPARK_Mode is therefore Off and the "(formally verified)" / "SPARK
+--  contracts proving the invariant holds" wording removed. The invariant
+--  "every modifying operation is preceded by a recovery point" is a tracked,
+--  UNPROVEN obligation: PROOF-NEEDS.md, O-SAFE-2 (Idris2 model). The
+--  anti-theatre CI gate (.github/workflows/spark-proof-gate.yml) prevents
+--  this from silently regressing back to a false "verified" claim.
+--
 --  This module provides:
---  1. SPARK contracts proving the invariant holds
+--  1. Token-typed API discipline for modifying operations (runtime-enforced)
 --  2. Runtime enforcement as a defense-in-depth layer
 --  3. Safe wrappers for all modifying operations
 
-pragma SPARK_Mode (On);
+pragma SPARK_Mode (Off);
 
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Backend_Interface;     use Backend_Interface;
@@ -37,9 +55,12 @@ package Safety_Boundary is
    type Recovery_Point_Token is private;
    Null_Token : constant Recovery_Point_Token;
 
-   function Is_Valid (Token : Recovery_Point_Token) return Boolean
-     with Ghost;
-   --  Ghost function: True if token represents a valid recovery point
+   function Is_Valid (Token : Recovery_Point_Token) return Boolean;
+   --  True if the token represents a valid recovery point. This is a REAL
+   --  runtime function, not Ghost: the bodies below call it for actual
+   --  defense-in-depth checks. The former `with Ghost` was residual proof
+   --  theatre — a ghost entity with no proof, used in executable code,
+   --  which is also an Ada legality error once SPARK_Mode is Off.
 
    function Token_Snapshot_ID (Token : Recovery_Point_Token) return Snapshot_ID
      with Pre => Is_Valid (Token);
