@@ -55,9 +55,12 @@ package Safety_Boundary is
    type Recovery_Point_Token is private;
    Null_Token : constant Recovery_Point_Token;
 
-   function Is_Valid (Token : Recovery_Point_Token) return Boolean
-     with Ghost;
-   --  Ghost function: True if token represents a valid recovery point
+   function Is_Valid (Token : Recovery_Point_Token) return Boolean;
+   --  True if the token represents a valid recovery point. This is a REAL
+   --  runtime function, not Ghost: the bodies below call it for actual
+   --  defense-in-depth checks. The former `with Ghost` was residual proof
+   --  theatre — a ghost entity with no proof, used in executable code,
+   --  which is also an Ada legality error once SPARK_Mode is Off.
 
    function Token_Snapshot_ID (Token : Recovery_Point_Token) return Snapshot_ID
      with Pre => Is_Valid (Token);

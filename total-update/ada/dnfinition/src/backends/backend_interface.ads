@@ -68,7 +68,13 @@ package Backend_Interface is
 
    type Transaction_Item is record
       Kind    : Transaction_Kind;
-      Package : Package_Info;
+      Pkg     : Package_Info;
+      --  Renamed from `Package`: that is an Ada reserved word and was a
+      --  hard legality error (backend_interface.ads:71) that prevented the
+      --  dnfinition subsystem from compiling at all — the concrete reason
+      --  the old SPARK "formally verified" banners were pure theatre
+      --  (GNATprove can prove nothing about code that does not compile).
+      --  Field is unreferenced anywhere; rename is purely local.
    end record;
 
    type Transaction_List is array (Positive range <>) of Transaction_Item;
