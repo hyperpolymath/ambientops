@@ -2,9 +2,18 @@
 --  SPDX-FileCopyrightText: 2025 Jonathan D.A. Jewell <jonathan@hyperpolymath.io>
 
 --  Reversibility Types - Core types for transaction safety and rollback
---  This module uses SPARK for formal verification of reversibility guarantees
+--
+--  HONESTY NOTE (2026-05-18 audit): This unit was previously marked
+--  SPARK_Mode (On) and carried ghost functions
+--  (Snapshot_Exists / System_State_Matches_Snapshot / ...) whose bodies
+--  are stubbed to return True. No GNATprove proof has ever been run or
+--  passed (the unit does not even pass SPARK Phase-2 legality: see the
+--  record-component / type name clash on Rollback_Result.Snapshot_ID).
+--  SPARK_Mode is therefore set Off until a genuine proof obligation
+--  exists. The real reversibility obligations are tracked as proof debt
+--  in PROOF-NEEDS.md (Idris2), NOT claimed as proven here.
 
-pragma SPARK_Mode (On);
+pragma SPARK_Mode (Off);
 
 with Ada.Calendar;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
@@ -87,33 +96,33 @@ package Reversibility_Types is
       Requires_Reboot);
 
    type Rollback_Result is record
-      Status      : Rollback_Status := Not_Started;
-      Message     : Unbounded_String;
-      Snapshot_ID : Snapshot_ID := Null_Snapshot;
+      Status         : Rollback_Status := Not_Started;
+      Message        : Unbounded_String;
+      Target_Snapshot : Snapshot_ID := Null_Snapshot;
+      --  Renamed from Snapshot_ID: a record component named identically to
+      --  the type Snapshot_ID is a SPARK/Ada name clash and was one of the
+      --  legality errors that blocked GNATprove Phase 2.
    end record;
 
    --  ═══════════════════════════════════════════════════════════════════════
-   --  SPARK Contracts for Reversibility Guarantees
+   --  Reversibility Obligations (UNPROVEN — tracked proof debt)
    --  ═══════════════════════════════════════════════════════════════════════
-
-   --  Ghost functions for formal verification
-   function Snapshot_Exists (ID : Snapshot_ID) return Boolean
-     with Ghost;
-   --  True if snapshot with given ID exists in the system
-
-   function Snapshot_Is_Valid (ID : Snapshot_ID) return Boolean
-     with Ghost,
-          Post => (if Snapshot_Is_Valid'Result then Snapshot_Exists (ID));
-   --  True if snapshot exists and is in Valid state
-
-   function System_State_Matches_Snapshot (ID : Snapshot_ID) return Boolean
-     with Ghost,
-          Pre => Snapshot_Exists (ID);
-   --  True if current system state matches the snapshot
-
-   function Current_System_State_ID return Snapshot_ID
-     with Ghost;
-   --  Conceptual ID of current system state (for verification)
+   --
+   --  These properties are NOT formally verified. They were previously
+   --  expressed as SPARK ghost functions with stub bodies (return True),
+   --  which constitutes proof theatre. They are recorded here as prose
+   --  obligations and tracked in PROOF-NEEDS.md for an Idris2 model:
+   --
+   --    O-REV-1  Snapshot_Exists: a snapshot referenced by a non-null
+   --             Snapshot_ID is actually present in backend storage.
+   --    O-REV-2  Snapshot_Is_Valid: a "Valid"-state snapshot is restorable.
+   --    O-REV-3  System_State_Matches_Snapshot: after a Completed rollback,
+   --             on-disk system state equals the snapshot's captured state
+   --             (rollback atomicity / no partial state).
+   --    O-REV-4  Monotonic snapshot IDs: issued IDs strictly increase and
+   --             are never reused after deletion.
+   --
+   --  None of O-REV-1..4 are checked at compile time or runtime today.
 
    --  ═══════════════════════════════════════════════════════════════════════
    --  Configuration

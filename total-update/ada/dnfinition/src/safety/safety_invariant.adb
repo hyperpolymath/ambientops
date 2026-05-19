@@ -1,15 +1,16 @@
 --  SPDX-License-Identifier: PMPL-1.0-or-later
 --  SPDX-FileCopyrightText: 2025 Jonathan D.A. Jewell <jonathan@hyperpolymath.io>
 
---  Safety_Invariant - Implementation of SPARK proof specifications
+--  Safety_Invariant - implementation. NOT SPARK-verified (see spec
+--  PROOF STATUS note). The lemma bodies are `null;` and prove nothing;
+--  they are retained only as executable no-ops documenting the intended
+--  argument. The broken Refined_State aspect (the legality error that
+--  blocked GNATprove Phase 2) has been removed along with the spec's
+--  Abstract_State.
 
-pragma SPARK_Mode (On);
+pragma SPARK_Mode (Off);
 
-package body Safety_Invariant
-  with Refined_State => (Global_State => (Active_Recovery_Point,
-                                          Last_Operation_Had_Recovery,
-                                          Operations_Since_Recovery))
-is
+package body Safety_Invariant is
 
    --  ═══════════════════════════════════════════════════════════════════════
    --  Invariant Definition
