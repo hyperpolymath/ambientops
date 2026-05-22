@@ -55,7 +55,7 @@ arangors = { version = "0.6", optional = true }
 redis = { version = "0.27", features = ["tokio-comp", "connection-manager"], optional = true }
 ollama-rs = { version = "0.3", optional = true }
 ndarray = { version = "0.16", optional = true }
-scraper = { version = "0.21", optional = true }
+scraper = { version = "0.27", optional = true }
 bluer = { version = "0.17", features = ["bluetoothd"], optional = true }
 
 [dev-dependencies]
