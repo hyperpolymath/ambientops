@@ -77,7 +77,7 @@ tree-sitter-javascript = "0.25"
 
 # Document parsing
 quick-xml = "0.31"
-calamine = "0.24"
+calamine = "0.35"
 
 # Hashing for deduplication
 blake3 = "1.5"
