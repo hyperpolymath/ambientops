@@ -36,7 +36,7 @@ ollama-rs = "0.2"             # Local LLM via Ollama
 libp2p = { version = "0.56", features = ["tokio", "mdns", "gossipsub", "kad"] }
 
 # Anomaly detection (integrates with ESN/LSM)
-ndarray = "0.16"
+ndarray = "0.17"
 
 # Forum/solution search
 scraper = "0.21"              # HTML parsing for forums
