@@ -1,8 +1,8 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # STATE.a2ml — Project state checkpoint
 # Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath)
 # Converted from STATE.scm on 2026-03-15
-# Updated: 2026-04-16 (compile blockers cleared; V-lang migration to Rust confirmed)
+# Updated: 2026-04-16 (compile blockers cleared; zig migration to Rust confirmed)
 
 [metadata]
 project = "ambientops"

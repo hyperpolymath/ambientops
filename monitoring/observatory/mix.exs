@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 
 defmodule SystemObservatory.MixProject do
   use Mix.Project
@@ -40,7 +40,7 @@ defmodule SystemObservatory.MixProject do
   defp package do
     [
       name: "system_observatory",
-      licenses: ["PMPL-1.0-or-later"],
+      licenses: ["MPL-2.0"],
       links: %{"GitHub" => @source_url}
     ]
   end

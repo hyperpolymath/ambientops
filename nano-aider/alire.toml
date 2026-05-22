@@ -6,7 +6,7 @@ authors = ["Jonathan D.A. Jewell"]
 maintainers = ["Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>"]
 maintainers-logins = ["hyperpolymath"]
 
-licenses = "MIT OR PMPL-1.0-or-later"
+licenses = "MIT OR MPL-2.0"
 website = "https://github.com/hyperpolymath/nano-aider"
 tags = ["terminal", "tui", "nano", "micro", "editor", "configuration", "ncurses"]
 

@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 
 # Stop application to prevent conflicts with test supervision
 Application.stop(:system_observatory)

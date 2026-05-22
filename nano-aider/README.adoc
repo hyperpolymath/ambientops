@@ -416,7 +416,7 @@ alr build
 nano-aider is dual-licensed under:
 
 * **Palimpsest-MPL-1.0 License** -- Permissive, minimal restrictions
-* **PMPL-1.0-or-later** -- Copyleft, network service protection
+* **MPL-2.0** -- Copyleft, network service protection
 
 Choose whichever license suits your needs. See link:LICENSE.txt[LICENSE.txt] for details.
 

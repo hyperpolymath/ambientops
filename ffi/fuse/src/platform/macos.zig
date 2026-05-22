@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 //! macOS-specific FUSE implementation (macFUSE)
 
 const std = @import("std");

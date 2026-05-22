@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 defmodule FeedbackATron.VeriSimDBClient do
   @moduledoc """
   VeriSimDB persistence layer for FeedbackATron.

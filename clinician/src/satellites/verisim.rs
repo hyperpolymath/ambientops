@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 //! verisim integration — similarity database for security patterns
 //!
 //! Invokes ingest-scan.sh and verisim-query CLI for VCL queries.

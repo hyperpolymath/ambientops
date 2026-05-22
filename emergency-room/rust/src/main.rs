@@ -1,8 +1,8 @@
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 // Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 //
 // Emergency Room — trigger + boot-guardian + shutdown-marshal.
-// Rust replacement for src/*.v (V-lang banned 2026-04-10).
+// Rust replacement for src/*.v (zig banned 2026-04-10).
 
 mod backup;
 mod boot_guardian;

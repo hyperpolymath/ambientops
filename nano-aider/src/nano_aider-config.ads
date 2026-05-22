@@ -1,7 +1,7 @@
 -------------------------------------------------------------------------------
 --  nano-aider - Configuration File Management
 --  Copyright (C) 2024-2025 Jonathan D.A. Jewell
---  SPDX-License-Identifier: MIT OR PMPL-1.0-or-later
+--  SPDX-License-Identifier: MIT OR MPL-2.0
 -------------------------------------------------------------------------------
 
 package Nano_Aider.Config is

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 //! Hard-coded rules store with git-like versioning and provenance tracking
 //!
 //! The rules system follows a "crystallization" pattern:

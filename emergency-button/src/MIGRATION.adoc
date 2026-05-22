@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 // Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 = Emergency Button — V→Zig Migration
 :toc:
@@ -7,8 +7,8 @@
 
 *Port complete 2026-04-17; deletion pending build+behavioural verification.*
 
-The V-lang implementation (`src/*.v`) is deprecated following the estate-wide
-V-lang ban (2026-04-10). The canonical Zig replacement lives at `src/zig/`.
+The zig implementation (`src/*.v`) is deprecated following the estate-wide
+zig ban (2026-04-10). The canonical Zig replacement lives at `src/zig/`.
 
 == V→Zig File Mapping
 

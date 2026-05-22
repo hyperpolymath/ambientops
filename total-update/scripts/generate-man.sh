@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # Generate man pages for dnfinition and totalupdate
 set -euo pipefail
 
@@ -44,7 +44,7 @@ Show platform information
 .SH AUTHOR
 Jonathan D.A. Jewell <jonathan@hyperpolymath.io>
 .SH LICENSE
-PMPL-1.0-or-later
+MPL-2.0
 MANEOF
 
 cat > docs/man/totalupdate.1 << 'MANEOF'
@@ -71,7 +71,7 @@ Automatic snapshots before updates
 .SH AUTHOR
 Jonathan D.A. Jewell <jonathan@hyperpolymath.io>
 .SH LICENSE
-PMPL-1.0-or-later
+MPL-2.0
 MANEOF
 
 echo "Generated: docs/man/dnfinition.1"

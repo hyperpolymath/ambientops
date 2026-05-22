@@ -102,7 +102,7 @@ Born from real NVIDIA Quadro M2000M incident (43+ reboots in 3 days). GPU was in
 
 ## Code Style
 
-- SPDX headers on all files: `PMPL-1.0-or-later`
+- SPDX headers on all files: `MPL-2.0`
 - Author: Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 - Use anyhow::Result for error handling
 - Serde derive on all public types for JSON serialization

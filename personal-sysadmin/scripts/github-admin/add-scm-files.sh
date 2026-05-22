@@ -6,7 +6,7 @@ OWNER="hyperpolymath"
 create_meta() {
     local repo=$1
     cat << 'EOF'
-;; SPDX-License-Identifier: PMPL-1.0-or-later
+;; SPDX-License-Identifier: MPL-2.0
 ;; META.scm - Project metadata and architectural decisions
 
 (define project-meta
@@ -27,7 +27,7 @@ create_ecosystem() {
     local repo=$1
     local name=$(echo "$repo" | sed 's/-/ /g' | sed 's/\b\(.\)/\u\1/g')
     cat << EOF
-;; SPDX-License-Identifier: PMPL-1.0-or-later
+;; SPDX-License-Identifier: MPL-2.0
 ;; ECOSYSTEM.scm - Project ecosystem positioning
 
 (ecosystem
@@ -48,7 +48,7 @@ create_state() {
     local repo=$1
     local name=$(echo "$repo" | sed 's/-/ /g' | sed 's/\b\(.\)/\u\1/g')
     cat << EOF
-;; SPDX-License-Identifier: PMPL-1.0-or-later
+;; SPDX-License-Identifier: MPL-2.0
 ;; STATE.scm - Current project state
 
 (define project-state
@@ -76,7 +76,7 @@ EOF
 
 create_playbook() {
     cat << 'EOF'
-;; SPDX-License-Identifier: PMPL-1.0-or-later
+;; SPDX-License-Identifier: MPL-2.0
 ;; PLAYBOOK.scm - Operational runbook
 
 (define playbook
@@ -94,7 +94,7 @@ EOF
 
 create_agentic() {
     cat << 'EOF'
-;; SPDX-License-Identifier: PMPL-1.0-or-later
+;; SPDX-License-Identifier: MPL-2.0
 ;; AGENTIC.scm - AI agent interaction patterns
 
 (define agentic-config
@@ -115,7 +115,7 @@ EOF
 
 create_neurosym() {
     cat << 'EOF'
-;; SPDX-License-Identifier: PMPL-1.0-or-later
+;; SPDX-License-Identifier: MPL-2.0
 ;; NEUROSYM.scm - Neurosymbolic integration config
 
 (define neurosym-config

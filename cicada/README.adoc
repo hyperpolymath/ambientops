@@ -114,6 +114,6 @@ julia --project=. test/runtests.jl
 
 == License
 
-PMPL-1.0-or-later - see [LICENSE](LICENSE)
+MPL-2.0 - see [LICENSE](LICENSE)
 
 *Built with Julia | Securing the post-quantum future*

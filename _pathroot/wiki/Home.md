@@ -44,4 +44,4 @@ powershell -File envbase.ps1
 
 ## License
 
-PMPL-1.0-or-later
+MPL-2.0

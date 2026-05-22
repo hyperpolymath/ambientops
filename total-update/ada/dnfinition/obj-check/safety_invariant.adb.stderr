@@ -1,0 +1,1 @@
+safety_invariant.ads:99:47: warning: comparison with True is redundant [-gnatwr]

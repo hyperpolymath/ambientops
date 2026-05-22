@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # SPDX-FileCopyrightText: 2026 Jonathan D.A. Jewell (hyperpolymath)
 #
 # 0-AI-MANIFEST.a2ml — Universal AI Agent Entry Point
@@ -10,7 +10,7 @@
 version = "1.1"
 project = "ambientops"
 type = "operations-framework"
-license = "PMPL-1.0-or-later"
+license = "MPL-2.0"
 author = "Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>"
 repo = "https://github.com/hyperpolymath/ambientops"
 
@@ -82,7 +82,7 @@ echidna = "Theorem prover dispatch"
 
 [critical-invariants]
 invariant-1 = "State files in .machine_readable/ ONLY — never in root"
-invariant-2 = "PMPL-1.0-or-later throughout"
+invariant-2 = "MPL-2.0 throughout"
 invariant-3 = "Author: Jonathan D.A. Jewell (hyperpolymath)"
 invariant-4 = "Container: Containerfile not Dockerfile, Podman not Docker"
 invariant-5 = "Rust is a scalpel — only in agent/verify components"

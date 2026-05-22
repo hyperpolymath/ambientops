@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # SPDX-FileCopyrightText: 2025 Jonathan D. A. Jewell <hyperpolymath>
 
 [package]
@@ -7,7 +7,7 @@ version = "3.0.0"
 edition = "2021"
 authors = ["Jonathan D. A. Jewell <hyperpolymath>"]
 description = "Local AI-powered file scanner and renamer with web UI"
-license = "PMPL-1.0-or-later"
+license = "MPL-2.0"
 repository = "https://gitlab.com/hyperpolymath/panoptes"
 readme = "README.adoc"
 keywords = ["ai", "vision", "file-scanner", "ollama", "moondream"]

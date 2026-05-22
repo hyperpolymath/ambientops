@@ -144,7 +144,7 @@ asciidoctor-pdf docs/pathroot-guide.adoc -o docs/pathroot-guide.pdf
 
 ## License
 
-PMPL-1.0-or-later
+MPL-2.0
 
 ## Contributing
 

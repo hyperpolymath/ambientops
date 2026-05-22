@@ -3,7 +3,7 @@
 
 OWNER="hyperpolymath"
 
-JUSTFILE_CONTENT='# SPDX-License-Identifier: PMPL-1.0-or-later
+JUSTFILE_CONTENT='# SPDX-License-Identifier: MPL-2.0
 # Justfile - hyperpolymath standard task runner
 
 default:
@@ -37,7 +37,7 @@ release VERSION:
     @echo "Releasing {{VERSION}}..."
 '
 
-MUSTFILE_CONTENT='# SPDX-License-Identifier: PMPL-1.0-or-later
+MUSTFILE_CONTENT='# SPDX-License-Identifier: MPL-2.0
 # Mustfile - hyperpolymath mandatory checks
 # See: https://github.com/hyperpolymath/mustfile
 

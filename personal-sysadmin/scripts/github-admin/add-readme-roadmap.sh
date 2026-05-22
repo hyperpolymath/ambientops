@@ -7,7 +7,7 @@ create_readme() {
     local repo=$1
     local name=$(echo "$repo" | sed 's/-/ /g' | sed 's/\b\(.\)/\u\1/g')
     cat << EOF
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 = $name
 
 image:https://img.shields.io/badge/license-AGPL--3.0-blue.svg[License]
@@ -29,7 +29,7 @@ See link:CONTRIBUTING.adoc[Contributing Guide]
 
 == License
 
-This project is licensed under PMPL-1.0-or-later. See link:LICENSE[LICENSE] for details.
+This project is licensed under MPL-2.0. See link:LICENSE[LICENSE] for details.
 EOF
 }
 
@@ -37,7 +37,7 @@ create_roadmap() {
     local repo=$1
     local name=$(echo "$repo" | sed 's/-/ /g' | sed 's/\b\(.\)/\u\1/g')
     cat << EOF
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 = $name Roadmap
 
 == Current Status

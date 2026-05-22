@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 //! Message Intent - feedback-a-tron message request format.
 
 use chrono::{DateTime, Utc};

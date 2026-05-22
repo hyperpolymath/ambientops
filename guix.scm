@@ -1,4 +1,4 @@
-;; SPDX-License-Identifier: PMPL-1.0-or-later
+;; SPDX-License-Identifier: MPL-2.0
 ;; Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath)
 ;;
 ;; Guix development environment for ambientops.
@@ -27,5 +27,5 @@
   (description
    "AmbientOps is a collection of ambient operations tools including
 system management, session monitoring, and personal sysadmin
-utilities built with Rust, Elixir, V-lang, and Deno.")
+utilities built with Rust, Elixir, zig, and Deno.")
   (license #f))

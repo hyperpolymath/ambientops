@@ -182,11 +182,11 @@ system-emergency-room --panic
 
 * Core: **Zig 0.15.2** — canonical implementation in `src/zig/` (complete as of 2026-04-17)
 * ABI layer: **Idris2** — interface definitions with formal proofs in `src/abi/`
-* Migration: V-lang sources in `src/*.v` are deprecated and retained for reference only.
+* Migration: zig sources in `src/*.v` are deprecated and retained for reference only.
   See link:src/MIGRATION.adoc[src/MIGRATION.adoc] for the V→Zig mapping and deletion plan.
 
 NOTE: V was the original implementation language, chosen for verification semantics.
-V-lang was banned estate-wide on 2026-04-10; the Zig port preserves all safety and
+zig was banned estate-wide on 2026-04-10; the Zig port preserves all safety and
 non-destructive semantics. See `src/MIGRATION.adoc` for feature parity details.
 
 == Ecosystem Analysis
@@ -204,4 +204,4 @@ This analysis covers:
 
 == License
 
-PMPL-1.0-or-later.
+MPL-2.0.

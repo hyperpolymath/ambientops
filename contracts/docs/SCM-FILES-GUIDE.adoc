@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 = SCM Files Guide (STATE.scm, META.scm, ECOSYSTEM.scm)
 :toc:
 :toclevels: 3
@@ -77,7 +77,7 @@ STATE.scm must be pruned regularly to prevent staleness.
 
 [source,scheme]
 ----
-;; SPDX-License-Identifier: PMPL-1.0-or-later
+;; SPDX-License-Identifier: MPL-2.0
 ;; STATE.scm - Current project state
 
 (define project-state
@@ -153,7 +153,7 @@ META.scm captures _why_ decisions were made:
 
 [source,scheme]
 ----
-;; SPDX-License-Identifier: PMPL-1.0-or-later
+;; SPDX-License-Identifier: MPL-2.0
 ;; META.scm - Project metadata and architectural decisions
 
 (define project-meta
@@ -219,7 +219,7 @@ ECOSYSTEM.scm documents how this project relates to others:
 
 [source,scheme]
 ----
-;; SPDX-License-Identifier: PMPL-1.0-or-later
+;; SPDX-License-Identifier: MPL-2.0
 ;; ECOSYSTEM.scm - Project ecosystem position
 
 (ecosystem

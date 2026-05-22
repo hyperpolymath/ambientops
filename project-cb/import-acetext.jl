@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 #
 # Import AceText .atc (XML) files to comment-bank.scm format.
@@ -41,7 +41,7 @@ function import_acetext(input_path::String, output_path::String="imported-commen
     today = Dates.format(Dates.today(), "yyyy-mm-dd")
 
     open(output_path, "w") do io
-        println(io, ";; SPDX-License-Identifier: PMPL-1.0-or-later")
+        println(io, ";; SPDX-License-Identifier: MPL-2.0")
         println(io, ";; Imported from AceText: $collection_name")
         println(io, ";; Date: $today")
         println(io, ";; Source: $input_path")

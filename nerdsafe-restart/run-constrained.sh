@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # run-constrained.sh - Run nerdsafe-restart container with system-matched constraints
 #
 # This script detects your system's actual resources and constrains the

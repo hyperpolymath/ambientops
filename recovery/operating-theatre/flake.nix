@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # flake.nix - Nix flake for System Operating Theatre
 {
   description = "Plan-first system management tool";

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 //! P2P mesh communication for sharing solutions across clinician instances
 //!
 //! Uses libp2p with TCP+Noise+Yamux transport, mDNS for local peer discovery,

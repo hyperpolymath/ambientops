@@ -40,7 +40,7 @@ Open a GitHub issue with the `security` label, avoiding specific exploit details
 - Strict shell scripts (`set -euo pipefail`)
 - No credential storage in code
 - Secrets managed via GitHub organization secrets
-- PMPL-1.0-or-later license ensures transparency
+- MPL-2.0 license ensures transparency
 
 ## Security-Related Configuration
 

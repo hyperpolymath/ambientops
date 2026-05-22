@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 #
 # STATE.a2ml — Emergency Button project state
@@ -41,11 +41,11 @@ actions = [
 ]
 
 [migration]
-from-language = "V-lang"
+from-language = "zig"
 to-language = "Zig 0.15.2"
 migration-status = "port-complete"
 migration-date = "2026-04-17"
-v-lang-ban-date = "2026-04-10"
+zig-ban-date = "2026-04-10"
 canonical-impl = "src/zig/"
 deprecated-impl = "src/*.v"
 migration-doc = "src/MIGRATION.adoc"

@@ -46,4 +46,4 @@ When a system becomes unresponsive or is about to crash, `system-freeze-ejector`
 
 ## License
 
-PMPL-1.0-or-later
+MPL-2.0

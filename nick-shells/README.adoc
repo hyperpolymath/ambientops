@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 // SPDX-FileCopyrightText: 2025 Jonathan D.A. Jewell <hyperpolymath>
 
 = nick-shells
@@ -276,7 +276,7 @@ If you use nick-shells in academic work, please cite:
   title = {nick-shells},
   year = {2025},
   url = {https://github.com/hyperpolymath/nick-shells},
-  license = {MIT OR PMPL-1.0-or-later}
+  license = {MIT OR MPL-2.0}
 }
 ----
 
@@ -284,7 +284,7 @@ See link:docs/CITATIONS.adoc[docs/CITATIONS.adoc] for additional citation format
 
 == License
 
-Dual-licensed under **MIT** OR **PMPL-1.0-or-later**.
+Dual-licensed under **MIT** OR **MPL-2.0**.
 
 See link:LICENSE.txt[LICENSE.txt] for details.
 

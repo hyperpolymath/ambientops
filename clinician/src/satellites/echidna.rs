@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 //! echidna integration — formal verification of procedure reversibility
 //!
 //! Invokes echidna to verify that remediation procedures are safely reversible.

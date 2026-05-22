@@ -1,4 +1,4 @@
-% SPDX-License-Identifier: PMPL-1.0-or-later
+% SPDX-License-Identifier: MPL-2.0
 % gitvisor CI/CD Rules - Logtalk implementation
 
 :- object(cicd_rules).

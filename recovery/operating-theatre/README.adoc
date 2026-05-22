@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 = System Operating Theatre
 :toc:
 :toclevels: 3
@@ -187,4 +187,4 @@ src/
 
 == License
 
-PMPL-1.0-or-later (plus Palimpsest where indicated).
+MPL-2.0 (plus Palimpsest where indicated).

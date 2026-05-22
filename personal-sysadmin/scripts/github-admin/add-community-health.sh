@@ -4,7 +4,7 @@
 OWNER="hyperpolymath"
 LOG="/tmp/community-health.log"
 
-SECURITY_CONTENT='<!-- SPDX-License-Identifier: PMPL-1.0-or-later -->
+SECURITY_CONTENT='<!-- SPDX-License-Identifier: MPL-2.0 -->
 # Security Policy
 
 ## Supported Versions
@@ -30,7 +30,7 @@ We respond within 48 hours.
 - Secret scanning and push protection
 '
 
-CONTRIBUTING_CONTENT='// SPDX-License-Identifier: PMPL-1.0-or-later
+CONTRIBUTING_CONTENT='// SPDX-License-Identifier: MPL-2.0
 = Contributing Guide
 
 == Getting Started
@@ -51,7 +51,7 @@ CONTRIBUTING_CONTENT='// SPDX-License-Identifier: PMPL-1.0-or-later
 Contributions licensed under project license.
 '
 
-CODE_OF_CONDUCT='<!-- SPDX-License-Identifier: PMPL-1.0-or-later -->
+CODE_OF_CONDUCT='<!-- SPDX-License-Identifier: MPL-2.0 -->
 # Contributor Covenant Code of Conduct
 
 ## Our Pledge

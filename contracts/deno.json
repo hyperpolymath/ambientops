@@ -1,5 +1,5 @@
 {
-  "_spdx": "SPDX-License-Identifier: PMPL-1.0-or-later",
+  "_spdx": "SPDX-License-Identifier: MPL-2.0",
   "$schema": "https://deno.land/x/deno/cli/schemas/config-file.v1.json",
   "name": "@hyperpolymath/ambientops-contracts",
   "version": "1.0.0",

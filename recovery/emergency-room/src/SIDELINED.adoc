@@ -1,12 +1,12 @@
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 // Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
-= Emergency Room — V-lang Implementation SIDELINED
+= Emergency Room — zig Implementation SIDELINED
 :toc:
 
 == Status
 
-The V-lang implementation of emergency-room (`src/`) is *sidelined*
-as of 2026-04-12 following the estate-wide V-lang ban (2026-04-10).
+The zig implementation of emergency-room (`src/`) is *sidelined*
+as of 2026-04-12 following the estate-wide zig ban (2026-04-10).
 
 == Migration Target
 
@@ -29,7 +29,7 @@ The replacement is a **Gleam / Rust** implementation. Target: `src-gleam/`.
 Tests (`*_test.v`, `integration_test.v`) should be ported as Gleam EUnit
 or Rust integration tests.
 
-The V-lang source is retained for reference but MUST NOT be compiled or deployed.
+The zig source is retained for reference but MUST NOT be compiled or deployed.
 
 NOTE: As of 2026-04-17 the Zig port of `emergency-button` is complete. Matching
 symlinks now live in `src/zig/` alongside these V symlinks — every `.zig` file
@@ -41,7 +41,7 @@ The seven `.v` files this directory shared with `../../emergency-button/src/`
 were byte-identical (1,579 LOC of duplicated source). They have been
 replaced with relative symlinks pointing into `emergency-button` so
 both locations stay in lockstep automatically and there is a single
-source of truth for the canonical V-lang implementation:
+source of truth for the canonical zig implementation:
 
 * `backup.v`
 * `capture.v`
@@ -57,7 +57,7 @@ Files unique to recovery/emergency-room (`main.v`, `utils.v`, this
 SIDELINED.adoc) remain as regular files. They are the suite-specific
 glue around the standalone emergency-button tool.
 
-If the V-lang source is eventually deleted (per the V-lang ban,
+If the zig source is eventually deleted (per the zig ban,
 2026-04-10), delete it FROM `emergency-button/src/` first; the
 symlinks here will become broken pointers and can be removed in the
 same commit. Do not delete files here while leaving the canonical

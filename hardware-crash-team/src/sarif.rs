@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 //! SARIF 2.1.0 output format for hardware scan reports
 //!
 //! Maps hardware-crash-team scan results to the Static Analysis Results

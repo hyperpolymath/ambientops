@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 // Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 = CIcaDA - Crypto Identity Project Handover Document
 Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
@@ -20,7 +20,7 @@ CIcaDA (Palimpsest Crypto Identity) is a comprehensive cryptographic identity ma
 | *Full Name* | Palimpsest Crypto Identity (CIcaDA)
 | *UUID* | `449d71e4-0569-4032-8a3c-f519b3386ebb`
 | *Language* | Julia 1.9+
-| *License* | PMPL-1.0-or-later (Palimpsest License)
+| *License* | MPL-2.0 (Palimpsest License)
 | *Parent Repo* | `ambientops` (hybrid monorepo, `cicada/` subdirectory)
 | *Total Implementation* | ~3,500+ lines of Julia code + tests + documentation
 | *Motto* | "Securing Digital Identities with Quantum-Resistant Precision"
@@ -96,7 +96,7 @@ ambientops/cicada/
 +-- install.sh                    # Installation script
 +-- Justfile                      # Build recipes
 +-- README.adoc                   # User-facing documentation
-+-- LICENSE                       # PMPL-1.0-or-later
++-- LICENSE                       # MPL-2.0
 ----
 
 == Technical Architecture

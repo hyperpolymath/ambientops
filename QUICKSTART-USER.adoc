@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 // Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath)
 = AmbientOps Quickstart
 :author: Jonathan D.A. Jewell
@@ -150,7 +150,7 @@ just heal     # Attempt automatic repair
 
 ----
 clinician/             Rust AI-assisted sysadmin (~4400 LOC)
-emergency-room/        V-lang panic-safe intake (~1800 LOC)
+emergency-room/        zig panic-safe intake (~1800 LOC)
 hardware-crash-team/   Rust hardware diagnostics (~700 LOC)
 observatory/           Elixir metrics and monitoring (~600 LOC)
 contracts/             JSON schemas + Deno tests

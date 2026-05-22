@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # nerdsafe-restart - Pre-reboot validation for paranoid sysadmins
 # https://github.com/hyperpolymath/nerdsafe-restart
 

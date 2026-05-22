@@ -29,7 +29,7 @@ Both are written in *Ada 2022* (TUI, formal verification) + *Elixir/OTP* (daemon
 |===
 |Phase |Foundation Development
 |Version |0.1.0
-|License |PMPL-1.0-or-later
+|License |MPL-2.0
 |===
 
 == Key Features
@@ -311,7 +311,7 @@ See link:CONTRIBUTING.md[CONTRIBUTING.md] for guidelines.
 
 == License
 
-link:LICENSE.txt[PMPL-1.0-or-later]
+link:LICENSE.txt[MPL-2.0]
 
 == Author
 

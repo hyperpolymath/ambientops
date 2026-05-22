@@ -1,5 +1,5 @@
 #!/bin/bash
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # Setup script for new hyperpolymath repos
 # Usage: ./setup-new-repo.sh <repo-name>
 
@@ -68,7 +68,7 @@ gh api "repos/$OWNER/$REPO/automated-security-fixes" -X PUT --silent 2>/dev/null
 echo "  Adding dependabot.yml..."
 if ! gh api "repos/$OWNER/$REPO/contents/.github/dependabot.yml" --silent 2>/dev/null; then
     cat > /tmp/dependabot.yml << 'DEP'
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 version: 2
 updates:
   - package-ecosystem: "github-actions"
@@ -97,7 +97,7 @@ fi
 echo "  Adding CodeQL workflow..."
 if ! gh api "repos/$OWNER/$REPO/contents/.github/workflows/codeql.yml" --silent 2>/dev/null; then
     cat > /tmp/codeql.yml << 'CQL'
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 name: CodeQL
 on:
   push:

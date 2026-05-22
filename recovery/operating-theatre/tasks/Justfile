@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # Justfile - System Operating Theatre task runner
 # Integration: nickel configs, feedback-o-tron, palimpsest-license
 
@@ -160,14 +160,14 @@ feedback MESSAGE:
 
 # Check license compliance
 license-check:
-    @echo "Checking PMPL-1.0-or-later compliance..."
+    @echo "Checking MPL-2.0 compliance..."
     @grep -r "SPDX-License-Identifier" src/ || echo "Missing SPDX headers in some files"
     @test -f LICENSE && echo "LICENSE file present" || echo "Missing LICENSE file"
 
 # Add SPDX headers to D files
 license-headers:
     @for f in $$(find src -name "*.d" ! -exec grep -q "SPDX-License-Identifier" {} \; -print); do \
-        echo "// SPDX-License-Identifier: PMPL-1.0-or-later" | cat - "$$f" > temp && mv temp "$$f"; \
+        echo "// SPDX-License-Identifier: MPL-2.0" | cat - "$$f" > temp && mv temp "$$f"; \
     done
     @echo "SPDX headers added"
 

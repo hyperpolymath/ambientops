@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 = Hardware Crash Team
 :author: Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 :toc:
@@ -85,4 +85,4 @@ Born from a real NVIDIA Quadro M2000M incident that caused 43+ system reboots in
 
 == License
 
-PMPL-1.0-or-later (Palimpsest Meta-Public License)
+MPL-2.0 (Palimpsest Meta-Public License)

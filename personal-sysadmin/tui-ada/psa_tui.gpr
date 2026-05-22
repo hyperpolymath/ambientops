@@ -1,4 +1,4 @@
--- SPDX-License-Identifier: PMPL-1.0-or-later
+-- SPDX-License-Identifier: MPL-2.0
 -- Personal Sysadmin TUI - Ada project file
 
 project PSA_TUI is

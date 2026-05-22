@@ -870,7 +870,7 @@ Priority areas for v1.1:
 
 == License
 
-Security Ambulance is licensed under PMPL-1.0-or-later (Palimpsest Meta-Permissive License).
+Security Ambulance is licensed under MPL-2.0 (Palimpsest Meta-Permissive License).
 
 See link:LICENSE[LICENSE] for details.
 

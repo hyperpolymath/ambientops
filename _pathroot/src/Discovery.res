@@ -2,7 +2,7 @@
  * _pathroot Discovery Module
  * Cross-platform discovery of _pathroot marker files
  *
- * SPDX-License-Identifier: PMPL-1.0-or-later
+ * SPDX-License-Identifier: MPL-2.0
  */
 
 open Types

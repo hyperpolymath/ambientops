@@ -8,7 +8,7 @@ Publisher: hyperpolymath
 PublisherUrl: https://github.com/hyperpolymath
 PackageName: Czech File Knife
 PackageUrl: https://github.com/hyperpolymath/czech-file-knife
-License: PMPL-1.0-or-later
+License: MPL-2.0
 LicenseUrl: https://github.com/hyperpolymath/czech-file-knife/blob/main/LICENSE
 ShortDescription: Universal file management toolkit with cloud provider integration
 Description: |

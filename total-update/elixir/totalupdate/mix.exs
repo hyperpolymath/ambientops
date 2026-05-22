@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # SPDX-FileCopyrightText: 2025 Jonathan D.A. Jewell <jonathan@hyperpolymath.io>
 
 defmodule TotalUpdate.MixProject do
@@ -68,7 +68,7 @@ defmodule TotalUpdate.MixProject do
   defp package do
     [
       name: "totalupdate",
-      licenses: ["PMPL-1.0-or-later"],
+      licenses: ["MPL-2.0"],
       links: %{"GitLab" => @source_url}
     ]
   end

@@ -50,7 +50,7 @@ alr build
 
 This project is dual-licensed:
 - **MIT License** - Permissive, minimal restrictions
-- **PMPL-1.0-or-later** - Copyleft, network service protection
+- **MPL-2.0** - Copyleft, network service protection
 
 All contributions must be licensed under both licenses.
 

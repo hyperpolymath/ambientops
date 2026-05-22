@@ -4,7 +4,7 @@
  * A cross-platform system for managing development tool environments
  * with discoverable paths, environment metadata, and automation support.
  *
- * SPDX-License-Identifier: PMPL-1.0-or-later
+ * SPDX-License-Identifier: MPL-2.0
  *
  * @example
  * ```rescript

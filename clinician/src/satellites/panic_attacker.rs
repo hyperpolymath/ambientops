@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 //! panic-attacker integration — vulnerability/weak-point scanning
 //!
 //! Invokes `panic-attack assail <target> --output <path>` and parses JSON results.

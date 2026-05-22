@@ -3,14 +3,14 @@
 ## Identity
 
 - **Name**: AmbientOps
-- **License**: PMPL-1.0-or-later
+- **License**: MPL-2.0
 - **Author**: Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 - **Repo**: https://github.com/hyperpolymath/ambientops
 
 ## Architecture
 
 Hospital-model operations framework. Hybrid monorepo with Rust workspace,
-Elixir applications, V-lang tools, and Deno contract tests.
+Elixir applications, zig tools, and Deno contract tests.
 
 ### Component Map
 
@@ -139,7 +139,7 @@ scan, diagnose, plan, apply, undo, status, tui
 ### Output Formats
 `--format text` (default), `--format json`, `--format sarif`
 
-## V-lang Components
+## zig Components
 
 | Component | Path | Purpose |
 |-----------|------|---------|

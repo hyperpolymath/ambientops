@@ -86,7 +86,7 @@ This repository strictly adheres to the https://github.com/hyperpolymath/0-ai-ga
 Key mandates include:
 
 *   **Canonical File Locations**: `.machine_readable/` for SCM files, `.bot_directives/` for bot-specific instructions.
-*   **Core Invariants**: No SCM duplication, single source of truth, license consistency (PMPL-1.0-or-later), and author attribution to Jonathan D.A. Jewell.
+*   **Core Invariants**: No SCM duplication, single source of truth, license consistency (MPL-2.0), and author attribution to Jonathan D.A. Jewell.
 
 For detailed instructions and AI agent interaction patterns, refer to `0-AI-MANIFEST.a2ml`.
 
@@ -100,7 +100,7 @@ Refer to `CONTRIBUTING.md` for guidelines on how to contribute to `displace`.
 
 == License
 
-`displace` is licensed under the PMPL-1.0-or-later license. See the `LICENSE` file for details.
+`displace` is licensed under the MPL-2.0 license. See the `LICENSE` file for details.
 
 == Security
 

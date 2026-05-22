@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 //! AI/SLM integration - local model with Claude fallback
 //!
 //! When `ai` feature is enabled, uses ollama-rs library.

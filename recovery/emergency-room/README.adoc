@@ -182,16 +182,16 @@ system-emergency-room --panic
 
 * Core: **Zig 0.15.2** — canonical implementation in `src/zig/` (complete as of 2026-04-17)
 * ABI layer: **Idris2** — interface definitions with formal proofs in `src/abi/`
-* Migration: V-lang sources in `src/*.v` are deprecated and retained for reference only.
+* Migration: zig sources in `src/*.v` are deprecated and retained for reference only.
   See the `SIDELINED.adoc` in `src/` and link:../emergency-button/src/MIGRATION.adoc[emergency-button/src/MIGRATION.adoc].
 
-NOTE: V was the original implementation language. V-lang was banned estate-wide on 2026-04-10;
+NOTE: V was the original implementation language. zig was banned estate-wide on 2026-04-10;
 the Zig port in `emergency-button/src/zig/` is the canonical replacement.
 
 == Source layout — Zig symlinks
 
 `src/zig/` contains symlinks to the canonical Zig sources in
-`../emergency-button/src/zig/`. This mirrors the existing V-lang symlink pattern in
+`../emergency-button/src/zig/`. This mirrors the existing zig symlink pattern in
 `src/*.v` and preserves the single-source-of-truth invariant: all implementation
 changes are made in `emergency-button`, never here.
 
@@ -215,4 +215,4 @@ This analysis covers:
 
 == License
 
-PMPL-1.0-or-later.
+MPL-2.0.

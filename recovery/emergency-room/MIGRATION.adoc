@@ -1,12 +1,12 @@
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 // Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
-= recovery/emergency-room — V-lang Deprecated (2026-04-12)
+= recovery/emergency-room — zig Deprecated (2026-04-12)
 :toc:
 
 == Status
 
-The V-lang implementation in `src/` is *deprecated* as of 2026-04-12
-following the estate-wide V-lang ban (2026-04-10).
+The zig implementation in `src/` is *deprecated* as of 2026-04-12
+following the estate-wide zig ban (2026-04-10).
 
 This directory is a snapshot of `emergency-button` at an earlier point.
 The source is line-for-line identical (1,840 LOC, same nine files).

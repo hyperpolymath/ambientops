@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 // Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 //
 // incident.zig — Incident-bundle creation and management.
@@ -329,7 +329,7 @@ pub fn writeReceipt(incident: *const Incident, config: Config) !void {
         \\
         \\== License
         \\
-        \\PMPL-1.0-or-later
+        \\MPL-2.0
         \\
     );
 

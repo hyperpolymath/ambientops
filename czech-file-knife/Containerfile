@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # Build stage
 FROM docker.io/library/rust:1.85-slim-bookworm AS builder
 
@@ -21,7 +21,7 @@ FROM cgr.dev/chainguard/wolfi-base:latest
 
 LABEL org.opencontainers.image.source="https://github.com/hyperpolymath/czech-file-knife"
 LABEL org.opencontainers.image.description="Czech File Knife - Universal file management tool"
-LABEL org.opencontainers.image.licenses="PMPL-1.0-or-later"
+LABEL org.opencontainers.image.licenses="MPL-2.0"
 
 # Install runtime dependencies
 RUN apk add --no-cache fuse3 fuse3-libs ca-certificates

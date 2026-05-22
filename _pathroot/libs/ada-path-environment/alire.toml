@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["Hyper Polymath"]
 maintainers = ["Hyper Polymath <hyperpolymath@example.com>"]
 maintainers-logins = ["hyperpolymath"]
-licenses = "PMPL-1.0-or-later"
+licenses = "MPL-2.0"
 website = "https://github.com/hyperpolymath/ada-path-environment"
 tags = ["environment", "path", "cross-platform", "utilities", "shell"]
 

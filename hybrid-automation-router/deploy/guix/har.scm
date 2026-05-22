@@ -1,4 +1,4 @@
-;; SPDX-License-Identifier: PMPL-1.0-or-later
+;; SPDX-License-Identifier: MPL-2.0
 ;; HAR (Hybrid Automation Router) Guix Package Definition
 ;;
 ;; Install: guix install -f deploy/guix/har.scm

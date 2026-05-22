@@ -1,7 +1,7 @@
 -------------------------------------------------------------------------------
 --  nano-aider - TUI Components (Body)
 --  Copyright (C) 2024-2025 Jonathan D.A. Jewell
---  SPDX-License-Identifier: MIT OR PMPL-1.0-or-later
+--  SPDX-License-Identifier: MIT OR MPL-2.0
 -------------------------------------------------------------------------------
 
 with Ada.Strings.Fixed;

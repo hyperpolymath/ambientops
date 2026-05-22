@@ -186,4 +186,4 @@ nerdctl compose -f nerdctl-compose.yaml --profile storage --profile cache up -d
 
 == License
 
-PMPL-1.0-or-later
+MPL-2.0

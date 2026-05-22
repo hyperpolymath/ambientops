@@ -1,4 +1,4 @@
-<!-- SPDX-License-Identifier: PMPL-1.0-or-later -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
 <!-- Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) -->
 <!-- AMBIENTOPS-ENHANCEMENT-PLAN.md — System log analysis findings and build plan -->
 <!-- Created: 2026-03-20 -->

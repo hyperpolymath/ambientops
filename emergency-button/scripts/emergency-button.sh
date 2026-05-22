@@ -1,5 +1,5 @@
 #!/bin/bash
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # Emergency system cleanup and diagnostics script
 # MED-008 fix: Safe glob handling
 

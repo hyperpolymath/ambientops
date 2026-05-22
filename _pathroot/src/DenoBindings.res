@@ -2,7 +2,7 @@
  * Deno API bindings for ReScript
  * External bindings to Deno runtime APIs
  *
- * SPDX-License-Identifier: PMPL-1.0-or-later
+ * SPDX-License-Identifier: MPL-2.0
  */
 
 // Deno global object

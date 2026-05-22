@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 //! Background daemon with security isolation
 //!
 //! The daemon runs continuously, monitoring system health and applying rules.

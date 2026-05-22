@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 //! Conversions between hardware-crash-team types and contract types.
 //!
 //! These are kept here rather than in hardware-crash-team to avoid circular

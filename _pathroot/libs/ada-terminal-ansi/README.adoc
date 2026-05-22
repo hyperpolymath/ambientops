@@ -232,7 +232,7 @@ procedure Reset_Attributes;
 
 == License
 
-PMPL-1.0-or-later
+MPL-2.0
 
 == Contributing
 

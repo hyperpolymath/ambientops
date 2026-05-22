@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # SPDX-FileCopyrightText: 2025 Jonathan D.A. Jewell <jonathan@hyperpolymath.io>
 
 defmodule DNFinition.MixProject do
@@ -64,7 +64,7 @@ defmodule DNFinition.MixProject do
   defp package do
     [
       name: "dnfinition",
-      licenses: ["PMPL-1.0-or-later"],
+      licenses: ["MPL-2.0"],
       links: %{
         "GitLab" => @source_url
       }

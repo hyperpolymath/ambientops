@@ -69,7 +69,7 @@ gprbuild -P nano_aider.gpr -XNANO_AIDER_BUILD_MODE=release
 
 ## License
 
-Dual-licensed under **MIT** OR **PMPL-1.0-or-later** — choose whichever suits your needs.
+Dual-licensed under **MIT** OR **MPL-2.0** — choose whichever suits your needs.
 
 ## Acknowledgments
 

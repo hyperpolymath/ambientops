@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 //! zig-fuse-ext: Extended Zig FUSE bindings with cloud-optimized features
 //!
 //! Builds on libfuse3 FFI to provide:

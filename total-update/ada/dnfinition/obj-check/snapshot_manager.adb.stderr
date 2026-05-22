@@ -1,0 +1,11 @@
+snapshot_manager.adb:8:09: warning: unit "Ada.Directories" is not referenced [-gnatwu]
+snapshot_manager.adb:9:10: warning: unit "GNAT.OS_Lib" is not referenced [-gnatwu]
+snapshot_manager.adb:14:08: warning: "Reversibility_Types" is already use-visible through previous use_clause at snapshot_manager.ads:20 [-gnatwr]
+snapshot_manager.adb:77:22: warning: "Unbounded" is already use-visible through previous use_clause at snapshot_manager.ads:18 [-gnatwr]
+snapshot_manager.adb:93:24: error: "Create_Btrfs_Snapshot" is undefined
+snapshot_manager.adb:97:24: error: "Create_ZFS_Snapshot" is undefined
+snapshot_manager.adb:101:24: error: "Create_LVM_Snapshot" is undefined
+snapshot_manager.adb:174:22: warning: "Unbounded" is already use-visible through previous use_clause at snapshot_manager.ads:18 [-gnatwr]
+snapshot_manager.adb:364:22: warning: "Unbounded" is already use-visible through previous use_clause at snapshot_manager.ads:18 [-gnatwr]
+snapshot_manager.ads:18:17: warning: no entities of "Ada.Strings.Unbounded" are referenced in spec [-gnatwu]
+snapshot_manager.ads:18:17: warning: with clause might be moved to body [-gnatwu]

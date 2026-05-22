@@ -6,7 +6,7 @@ CIcaDA (Palimpsest Crypto Identity) is a Julia-based cryptographic identity mana
 
 **Project Name**: PalimpsestCryptoIdentity
 **Language**: Julia 1.9+
-**License**: PMPL-1.0-or-later
+**License**: MPL-2.0
 **UUID**: 449d71e4-0569-4032-8a3c-f519b3386ebb
 
 ## Core Features
@@ -60,7 +60,7 @@ CIcaDA/
 ├── install.sh                   # Installation script
 ├── Project.toml                 # Julia dependencies
 ├── README.md                    # User documentation
-├── LICENSE                      # PMPL-1.0-or-later
+├── LICENSE                      # MPL-2.0
 └── CLAUDE.md                    # This file
 ```
 

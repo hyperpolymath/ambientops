@@ -216,4 +216,4 @@ cargo clippy --workspace
 
 == License
 
-PMPL-1.0-or-later OR Palimpsest-0.8
+MPL-2.0 OR Palimpsest-0.8

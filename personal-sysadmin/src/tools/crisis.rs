@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 //! Crisis mode - analyze incident bundles from system-emergency-room
 //!
 //! Integration with system-emergency-room for escalated diagnostics.

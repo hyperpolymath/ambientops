@@ -1,5 +1,5 @@
 @ECHO OFF
-REM SPDX-License-Identifier: PMPL-1.0-or-later
+REM SPDX-License-Identifier: MPL-2.0
 REM _pathroot entry point for Windows cmd
 
 SETLOCAL EnableExtensions

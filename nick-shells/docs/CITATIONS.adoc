@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 // SPDX-FileCopyrightText: 2025 Jonathan D.A. Jewell <hyperpolymath>
 
 = nick-shells - Citation Guide
@@ -16,7 +16,7 @@ This document provides citation formats for academic and professional use.
   year = {2025},
   url = {https://github.com/hyperpolymath/nick-shells},
   version = {0.1.0},
-  license = {MIT OR PMPL-1.0-or-later}
+  license = {MIT OR MPL-2.0}
 }
 ----
 
@@ -55,4 +55,4 @@ _A DOI will be assigned upon first stable release._
 
 == License Note
 
-This software is dual-licensed under MIT OR PMPL-1.0-or-later. When citing, you may reference either license as appropriate for your context.
+This software is dual-licensed under MIT OR MPL-2.0. When citing, you may reference either license as appropriate for your context.

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 // Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 //
 // incident.zig — Incident bundle creation and management.
@@ -285,7 +285,7 @@ pub fn writeReceipt(
     try w.writeAll("2. If issues persist, run specialized tools:\n");
     try w.print("   - `psa crisis --incident {s}`\n", .{incident.path});
     try w.print("   - `ambientops scan --incident {s}`\n", .{incident.path});
-    try w.writeAll("3. Report findings via feedback-o-tron\n\n== License\n\nPMPL-1.0-or-later\n");
+    try w.writeAll("3. Report findings via feedback-o-tron\n\n== License\n\nMPL-2.0\n");
 
     if (config.dry_run) {
         utils.print("\x1b[36m[DRY-RUN]\x1b[0m Would write receipt.adoc\n", .{});

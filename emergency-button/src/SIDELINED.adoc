@@ -1,12 +1,12 @@
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 // Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
-= Emergency Room — V-lang Implementation SIDELINED
+= Emergency Room — zig Implementation SIDELINED
 :toc:
 
 == Status
 
-The V-lang implementation of emergency-room (`src/`) is *sidelined*
-as of 2026-04-12 following the estate-wide V-lang ban (2026-04-10).
+The zig implementation of emergency-room (`src/`) is *sidelined*
+as of 2026-04-12 following the estate-wide zig ban (2026-04-10).
 
 == Migration Target
 
@@ -29,4 +29,4 @@ The replacement is a **Gleam / Rust** implementation. Target: `src-gleam/`.
 Tests (`*_test.v`, `integration_test.v`) should be ported as Gleam EUnit
 or Rust integration tests.
 
-The V-lang source is retained for reference but MUST NOT be compiled or deployed.
+The zig source is retained for reference but MUST NOT be compiled or deployed.

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 //! mustorch - Mustfile Orchestrator CLI
 //!
 //! Command-line interface for the Mustfile orchestration engine

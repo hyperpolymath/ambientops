@@ -1,6 +1,6 @@
 # LOCK_SCOPE.md - Immutable Constraints
 
-<!-- SPDX-License-Identifier: MIT OR PMPL-1.0-or-later -->
+<!-- SPDX-License-Identifier: MIT OR MPL-2.0 -->
 <!-- SPDX-FileCopyrightText: 2025 hyperpolymath -->
 
 > **Lock Scope**: Defines what nano-aider will **NEVER** do. These constraints

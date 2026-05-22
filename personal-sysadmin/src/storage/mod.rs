@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 //! VeriSimDB storage layer for knowledge base and solution graph.
 //!
 //! Replaces the previous ArangoDB stub with real HTTP calls to a local

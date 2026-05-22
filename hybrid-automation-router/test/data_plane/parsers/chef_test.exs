@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 defmodule HAR.DataPlane.Parsers.ChefTest do
   @moduledoc """
   Tests for the Chef recipe parser.

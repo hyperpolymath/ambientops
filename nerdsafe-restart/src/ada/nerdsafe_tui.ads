@@ -1,4 +1,4 @@
---  SPDX-License-Identifier: PMPL-1.0-or-later
+--  SPDX-License-Identifier: MPL-2.0
 --  nerdsafe_tui.ads - Main TUI package specification
 --
 --  This package provides the terminal user interface for nerdsafe-restart,

@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 defmodule HAR.Attestation.A2MLTest do
   @moduledoc """
   Tests for the HAR.Attestation.A2ML module.

@@ -239,7 +239,7 @@ pragma Linker_Options ("-lpathroot_abi");
 
 ## License
 
-All ABI/FFI code: **PMPL-1.0-or-later** (Palimpsest License)
+All ABI/FFI code: **MPL-2.0** (Palimpsest License)
 
 No C code. No header files. Pure verified implementations.
 

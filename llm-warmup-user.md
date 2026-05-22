@@ -3,14 +3,14 @@
 ## What This Is
 
 AmbientOps is a hospital-model operations framework (hybrid monorepo).
-Components are organized by hospital department. License: PMPL-1.0-or-later.
+Components are organized by hospital department. License: MPL-2.0.
 Author: Jonathan D.A. Jewell.
 
 ## Architecture (30-second version)
 
 Hospital metaphor for system operations:
 - **Clinician** (Rust) -- AI-assisted sysadmin with feature gates
-- **Emergency Room** (V-lang) -- Panic-safe intake, evidence envelopes
+- **Emergency Room** (zig) -- Panic-safe intake, evidence envelopes
 - **Hardware Crash Team** (Rust) -- Hardware diagnostics (PCI, lspci, SARIF)
 - **Observatory** (Elixir) -- Metrics, system weather, monitoring
 - **Contracts** (JSON + Deno) -- 8 JSON schemas for data backbone

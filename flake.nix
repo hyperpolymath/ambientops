@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath)
 #
 # Nix flake development environment for ambientops.
@@ -27,7 +27,7 @@
             elixir
             erlang
 
-            # V-lang — protocol implementations
+            # zig — protocol implementations
             vlang
 
             # Deno — scripting and automation

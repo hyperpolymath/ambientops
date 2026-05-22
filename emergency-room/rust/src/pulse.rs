@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 // Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 //
 // AmbientOps Pulse — low-overhead watcher for memory pressure + systemd-oomd kills.
@@ -1222,7 +1222,7 @@ fn append_a2ml_envelope(path: &str, envelope: &serde_json::Value) -> Result<(), 
     let mut file = OpenOptions::new().create(true).append(true).open(path)?;
 
     if is_new_file {
-        writeln!(file, "# SPDX-License-Identifier: PMPL-1.0-or-later")?;
+        writeln!(file, "# SPDX-License-Identifier: MPL-2.0")?;
         writeln!(file, "# AmbientOps Pulse A2ML log (append-only JSON envelopes)")?;
     }
     writeln!(file, "{}", serde_json::to_string(envelope)?)?;

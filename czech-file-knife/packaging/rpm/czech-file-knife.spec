@@ -6,7 +6,7 @@ Version:        0.1.0
 Release:        1%{?dist}
 Summary:        Universal file management toolkit with cloud provider integration
 
-License:        PMPL-1.0-or-later
+License:        MPL-2.0
 URL:            https://github.com/hyperpolymath/czech-file-knife
 Source0:        %{name}-%{version}.tar.gz
 

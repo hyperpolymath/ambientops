@@ -1051,7 +1051,7 @@ See `docs/AMBIENTOPS_INTEGRATION.adoc` for details.
 
 == License
 
-PMPL-1.0-or-later (Palimpsest Meta-Permissive License)
+MPL-2.0 (Palimpsest Meta-Permissive License)
 
 == Philosophy
 

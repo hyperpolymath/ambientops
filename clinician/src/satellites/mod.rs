@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 //! Satellite tool integration for the AmbientOps ecosystem
 //!
 //! Provides CLI wrappers for external AmbientOps tools:

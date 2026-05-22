@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # bootstrap-check.sh - Identify critical bootstrap components
 #
 # This script analyzes your shell configuration to determine the
@@ -213,7 +213,7 @@ echo ""
 echo "Save this to guix-manifest.scm:"
 echo ""
 cat <<'GUIX'
-;; SPDX-License-Identifier: PMPL-1.0-or-later
+;; SPDX-License-Identifier: MPL-2.0
 ;; nerdsafe-restart environment manifest
 ;; Install: guix package -m guix-manifest.scm
 

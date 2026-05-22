@@ -84,7 +84,7 @@ See link:ROADMAP.adoc[ROADMAP.adoc] for planned development phases.
 
 == License
 
-PMPL-1.0-or-later — See link:LICENSE.txt[LICENSE.txt]
+MPL-2.0 — See link:LICENSE.txt[LICENSE.txt]
 
 == Contact
 

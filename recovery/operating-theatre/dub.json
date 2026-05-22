@@ -2,7 +2,7 @@
     "name": "operating-theatre",
     "description": "Plan-first system management and hardening tool",
     "authors": ["Hyperpolymath"],
-    "license": "PMPL-1.0-or-later",
+    "license": "MPL-2.0",
     "targetType": "executable",
     "targetName": "sor",
     "sourcePaths": ["src"],

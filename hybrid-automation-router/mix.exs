@@ -105,7 +105,7 @@ defmodule HAR.MixProject do
   defp package do
     [
       name: "har",
-      licenses: ["PMPL-1.0-or-later"],
+      licenses: ["MPL-2.0"],
       maintainers: ["Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>"],
       links: %{
         "GitHub" => @source_url,

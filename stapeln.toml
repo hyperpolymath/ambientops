@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # stapeln.toml — Layer-based container build for ambientops
 #
 # stapeln builds containers as composable layers (German: "to stack").
@@ -17,7 +17,7 @@ name = "ambientops"
 version = "1.2.0"
 description = "Hospital-model ambient operations framework — container stack"
 author = "Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>"
-license = "PMPL-1.0-or-later"
+license = "MPL-2.0"
 registry = "ghcr.io/hyperpolymath"
 
 [build]
@@ -92,7 +92,7 @@ cmd = ["daemon"]
 user = "psa"
 healthcheck = { cmd = ["/usr/local/bin/psa", "health"], interval = "30s", timeout = "5s", start-period = "5s", retries = 3 }
 env = { PSA_DATA_DIR = "/home/psa/.local/share/psa", PSA_CACHE_DIR = "/home/psa/.cache/psa", PSA_CONFIG_DIR = "/home/psa/.config/psa", RUST_LOG = "info" }
-labels = { "org.opencontainers.image.title" = "AmbientOps Clinician", "org.opencontainers.image.description" = "AI-assisted Linux system administration toolkit", "org.opencontainers.image.source" = "https://github.com/hyperpolymath/ambientops", "org.opencontainers.image.licenses" = "PMPL-1.0-or-later", "org.opencontainers.image.vendor" = "hyperpolymath" }
+labels = { "org.opencontainers.image.title" = "AmbientOps Clinician", "org.opencontainers.image.description" = "AI-assisted Linux system administration toolkit", "org.opencontainers.image.source" = "https://github.com/hyperpolymath/ambientops", "org.opencontainers.image.licenses" = "MPL-2.0", "org.opencontainers.image.vendor" = "hyperpolymath" }
 
 # ══════════════════════════════════════════════════════════════════
 # Service: hardware-crash-team (Rust — hardware diagnostics)
@@ -119,7 +119,7 @@ copy-from = [
 entrypoint = ["/usr/local/bin/hardware-crash-team"]
 cmd = ["scan"]
 user = "nonroot"
-labels = { "org.opencontainers.image.title" = "Hardware Crash Team", "org.opencontainers.image.description" = "Hardware diagnostic and remediation for zombie devices, driver conflicts, PCI bus issues", "org.opencontainers.image.source" = "https://github.com/hyperpolymath/ambientops", "org.opencontainers.image.licenses" = "PMPL-1.0-or-later" }
+labels = { "org.opencontainers.image.title" = "Hardware Crash Team", "org.opencontainers.image.description" = "Hardware diagnostic and remediation for zombie devices, driver conflicts, PCI bus issues", "org.opencontainers.image.source" = "https://github.com/hyperpolymath/ambientops", "org.opencontainers.image.licenses" = "MPL-2.0" }
 
 # ══════════════════════════════════════════════════════════════════
 # Service: czech-file-knife (Rust workspace — universal file tool)
@@ -146,7 +146,7 @@ copy-from = [
 ]
 entrypoint = ["/usr/local/bin/cfk"]
 user = "cfk"
-labels = { "org.opencontainers.image.title" = "Czech File Knife", "org.opencontainers.image.description" = "Universal file management tool with cloud providers, VFS, and search", "org.opencontainers.image.source" = "https://github.com/hyperpolymath/czech-file-knife", "org.opencontainers.image.licenses" = "PMPL-1.0-or-later" }
+labels = { "org.opencontainers.image.title" = "Czech File Knife", "org.opencontainers.image.description" = "Universal file management tool with cloud providers, VFS, and search", "org.opencontainers.image.source" = "https://github.com/hyperpolymath/czech-file-knife", "org.opencontainers.image.licenses" = "MPL-2.0" }
 
 # ══════════════════════════════════════════════════════════════════
 # Service: panoptes (Rust — AI file scanner/renamer)
@@ -175,7 +175,7 @@ cmd = ["--config", "/etc/panoptes/config.ncl", "--watch", "/watch"]
 user = "panoptes"
 volumes = ["/watch"]
 healthcheck = { cmd = ["pgrep", "panoptes"], interval = "30s", timeout = "10s", start-period = "5s", retries = 3 }
-labels = { "org.opencontainers.image.title" = "Panoptes", "org.opencontainers.image.description" = "Local AI-powered file scanner and renamer", "org.opencontainers.image.source" = "https://github.com/hyperpolymath/ambientops", "org.opencontainers.image.licenses" = "PMPL-1.0-or-later" }
+labels = { "org.opencontainers.image.title" = "Panoptes", "org.opencontainers.image.description" = "Local AI-powered file scanner and renamer", "org.opencontainers.image.source" = "https://github.com/hyperpolymath/ambientops", "org.opencontainers.image.licenses" = "MPL-2.0" }
 
 # ══════════════════════════════════════════════════════════════════
 # Service: displace (Rust — verified file copy)
@@ -200,7 +200,7 @@ copy-from = [
 ]
 entrypoint = ["/usr/local/bin/displace"]
 user = "nonroot"
-labels = { "org.opencontainers.image.title" = "Displace", "org.opencontainers.image.description" = "High-performance verified file and directory copying", "org.opencontainers.image.source" = "https://github.com/hyperpolymath/ambientops", "org.opencontainers.image.licenses" = "PMPL-1.0-or-later" }
+labels = { "org.opencontainers.image.title" = "Displace", "org.opencontainers.image.description" = "High-performance verified file and directory copying", "org.opencontainers.image.source" = "https://github.com/hyperpolymath/ambientops", "org.opencontainers.image.licenses" = "MPL-2.0" }
 
 # ══════════════════════════════════════════════════════════════════
 # Service: observatory (Elixir/OTP — metrics, weather, monitoring)
@@ -232,7 +232,7 @@ entrypoint = ["/app/bin/system_observatory"]
 cmd = ["start"]
 user = "observatory"
 healthcheck = { cmd = ["/app/bin/system_observatory", "pid"], interval = "30s", timeout = "10s", start-period = "10s", retries = 3 }
-labels = { "org.opencontainers.image.title" = "System Observatory", "org.opencontainers.image.description" = "Metrics, system weather, and monitoring hub", "org.opencontainers.image.source" = "https://github.com/hyperpolymath/ambientops", "org.opencontainers.image.licenses" = "PMPL-1.0-or-later" }
+labels = { "org.opencontainers.image.title" = "System Observatory", "org.opencontainers.image.description" = "Metrics, system weather, and monitoring hub", "org.opencontainers.image.source" = "https://github.com/hyperpolymath/ambientops", "org.opencontainers.image.licenses" = "MPL-2.0" }
 
 # ══════════════════════════════════════════════════════════════════
 # Service: hybrid-automation-router (Elixir — IaC routing engine)
@@ -267,7 +267,7 @@ user = "har"
 expose = [4050, 4369]
 healthcheck = { cmd = ["curl", "-sf", "http://localhost:4050/health"], interval = "30s", timeout = "10s", start-period = "5s", retries = 3 }
 env = { RELEASE_COOKIE = "har_cluster_cookie", RELEASE_NODE = "har@127.0.0.1", PHX_HOST = "localhost", PHX_SERVER = "true", PORT = "4050" }
-labels = { "org.opencontainers.image.title" = "Hybrid Automation Router", "org.opencontainers.image.description" = "BGP-like routing engine for infrastructure-as-code", "org.opencontainers.image.source" = "https://github.com/hyperpolymath/ambientops", "org.opencontainers.image.licenses" = "PMPL-1.0-or-later" }
+labels = { "org.opencontainers.image.title" = "Hybrid Automation Router", "org.opencontainers.image.description" = "BGP-like routing engine for infrastructure-as-code", "org.opencontainers.image.source" = "https://github.com/hyperpolymath/ambientops", "org.opencontainers.image.licenses" = "MPL-2.0" }
 
 # ══════════════════════════════════════════════════════════════════
 # Service: operating-theatre (D-lang — system recovery)
@@ -294,7 +294,7 @@ copy-from = [
 entrypoint = ["/app/sor"]
 cmd = ["help"]
 user = "nonroot"
-labels = { "org.opencontainers.image.title" = "Operating Theatre", "org.opencontainers.image.description" = "System recovery tool — D-lang operating room", "org.opencontainers.image.source" = "https://github.com/hyperpolymath/ambientops", "org.opencontainers.image.licenses" = "PMPL-1.0-or-later" }
+labels = { "org.opencontainers.image.title" = "Operating Theatre", "org.opencontainers.image.description" = "System recovery tool — D-lang operating room", "org.opencontainers.image.source" = "https://github.com/hyperpolymath/ambientops", "org.opencontainers.image.licenses" = "MPL-2.0" }
 
 # ══════════════════════════════════════════════════════════════════
 # Service: systems-observatory (Julia — GDPR-compliant auditing)
@@ -320,7 +320,7 @@ copy-from = [
 ]
 entrypoint = ["julia", "--project=/app", "-e", "include(\"/app/src/cli.jl\"); using .CLI; CLI.run()"]
 user = "nonroot"
-labels = { "org.opencontainers.image.title" = "Juisys (Systems Observatory)", "org.opencontainers.image.description" = "Privacy-first GDPR-compliant application auditing tool", "org.opencontainers.image.source" = "https://github.com/hyperpolymath/ambientops", "org.opencontainers.image.licenses" = "PMPL-1.0-or-later" }
+labels = { "org.opencontainers.image.title" = "Juisys (Systems Observatory)", "org.opencontainers.image.description" = "Privacy-first GDPR-compliant application auditing tool", "org.opencontainers.image.source" = "https://github.com/hyperpolymath/ambientops", "org.opencontainers.image.licenses" = "MPL-2.0" }
 
 # ══════════════════════════════════════════════════════════════════
 # Service: nerdsafe-restart (Bash — pre-reboot validation)
@@ -340,7 +340,7 @@ commands = [
 entrypoint = ["/usr/local/bin/nerdsafe-restart"]
 cmd = ["check"]
 user = "nonroot"
-labels = { "org.opencontainers.image.title" = "Nerdsafe Restart", "org.opencontainers.image.description" = "Pre-reboot validation for paranoid sysadmins", "org.opencontainers.image.source" = "https://github.com/hyperpolymath/ambientops", "org.opencontainers.image.licenses" = "PMPL-1.0-or-later" }
+labels = { "org.opencontainers.image.title" = "Nerdsafe Restart", "org.opencontainers.image.description" = "Pre-reboot validation for paranoid sysadmins", "org.opencontainers.image.source" = "https://github.com/hyperpolymath/ambientops", "org.opencontainers.image.licenses" = "MPL-2.0" }
 
 # ══════════════════════════════════════════════════════════════════
 # Service: session-sentinel (container orchestration)
@@ -362,7 +362,7 @@ copy-from = [
     { layer = "session-sentinel-build", src = "/app/session-sentinel/", dst = "/app/" },
 ]
 user = "nonroot"
-labels = { "org.opencontainers.image.title" = "Session Sentinel", "org.opencontainers.image.description" = "Session lifecycle management — Ephapax rewrite in progress", "org.opencontainers.image.source" = "https://github.com/hyperpolymath/ambientops", "org.opencontainers.image.licenses" = "PMPL-1.0-or-later" }
+labels = { "org.opencontainers.image.title" = "Session Sentinel", "org.opencontainers.image.description" = "Session lifecycle management — Ephapax rewrite in progress", "org.opencontainers.image.source" = "https://github.com/hyperpolymath/ambientops", "org.opencontainers.image.licenses" = "MPL-2.0" }
 
 # ══════════════════════════════════════════════════════════════════
 # Service: svalinn (Rust+Ada — secure identity vault)
@@ -393,7 +393,7 @@ user = "svalinn"
 expose = [8443]
 volumes = ["/vault/data", "/vault/config", "/vault/keys"]
 healthcheck = { cmd = ["/usr/local/bin/svalinn-vault", "health"], interval = "30s", timeout = "10s", start-period = "5s", retries = 3 }
-labels = { "org.opencontainers.image.title" = "Svalinn Vault", "org.opencontainers.image.description" = "Secure identity vault with post-quantum signing", "org.opencontainers.image.source" = "https://github.com/hyperpolymath/ambientops", "org.opencontainers.image.licenses" = "PMPL-1.0-or-later" }
+labels = { "org.opencontainers.image.title" = "Svalinn Vault", "org.opencontainers.image.description" = "Secure identity vault with post-quantum signing", "org.opencontainers.image.source" = "https://github.com/hyperpolymath/ambientops", "org.opencontainers.image.licenses" = "MPL-2.0" }
 
 # ══════════════════════════════════════════════════════════════════
 # Service: immutable-linux-auditor (C++ via CMake — audit tool)
@@ -420,7 +420,7 @@ copy-from = [
 ]
 entrypoint = ["/usr/local/bin/immutable-linux-auditor"]
 user = "nonroot"
-labels = { "org.opencontainers.image.title" = "Immutable Linux Auditor", "org.opencontainers.image.description" = "Audit tool for immutable Linux distributions", "org.opencontainers.image.source" = "https://github.com/hyperpolymath/ambientops", "org.opencontainers.image.licenses" = "PMPL-1.0-or-later" }
+labels = { "org.opencontainers.image.title" = "Immutable Linux Auditor", "org.opencontainers.image.description" = "Audit tool for immutable Linux distributions", "org.opencontainers.image.source" = "https://github.com/hyperpolymath/ambientops", "org.opencontainers.image.licenses" = "MPL-2.0" }
 
 # ══════════════════════════════════════════════════════════════════
 # Security (applies to ALL services)

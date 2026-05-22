@@ -1,9 +1,9 @@
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 // Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 //
 // build.zig — Zig build script for emergency-button (Zig 0.15.2).
 //
-// Replaces the V build system (v.mod, v run) following the V-lang ban
+// Replaces the V build system (v.mod, v run) following the zig ban
 // (2026-04-10).  The Idris2 ABI definitions in src/abi/ and the legacy FFI
 // library in ffi/zig/ are separate build targets and are not rebuilt here.
 //

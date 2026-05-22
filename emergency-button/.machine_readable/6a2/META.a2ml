@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 #
 # META.a2ml — Emergency Button meta-level information
@@ -7,13 +7,13 @@ version = "0.2.0"
 last-updated = "2026-04-17"
 
 [project-info]
-license = "PMPL-1.0-or-later"
+license = "MPL-2.0"
 author = "Jonathan D.A. Jewell (hyperpolymath)"
 
 [architecture-decisions]
 decisions = [
-  { id = "ADR-001", title = "V-lang → Zig migration", status = "accepted", date = "2026-04-17",
-    context = "Estate-wide V-lang ban declared 2026-04-10.",
+  { id = "ADR-001", title = "zig → Zig migration", status = "accepted", date = "2026-04-17",
+    context = "Estate-wide zig ban declared 2026-04-10.",
     decision = "Port all V sources to Zig 0.15.2. Canonical impl at src/zig/. V sources retained for reference only.",
     consequences = "build.zig replaces v.mod. zig build / zig build test replace v run / v test." },
   { id = "ADR-002", title = "Symlink deduplication with recovery/emergency-room", status = "accepted", date = "2026-04-17",

@@ -1465,7 +1465,7 @@ Priority areas for v0.2:
 
 == License
 
-Network Orchestrator is licensed under PMPL-1.0-or-later (Palimpsest Meta-Permissive License).
+Network Orchestrator is licensed under MPL-2.0 (Palimpsest Meta-Permissive License).
 
 See link:LICENSE[LICENSE] for details.
 

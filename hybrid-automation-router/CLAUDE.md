@@ -150,7 +150,7 @@ hybrid-automation-router/
 **Goal: Prevent vendor lock-in, become infrastructure standard**
 
 Protections:
-1. **PMPL-1.0-or-later License:** Palimpsest License for all original code
+1. **MPL-2.0 License:** Palimpsest License for all original code
 2. **Trademark:** "HAR" and logo protected
 3. **Foundation:** Neutral governance (Linux Foundation model)
 4. **IETF RFC:** Protocol specification standard
@@ -362,4 +362,4 @@ Document significant choices in `docs/adr/` (Architecture Decision Records)
 
 ## License
 
-PMPL-1.0-or-later (Palimpsest License)
+MPL-2.0 (Palimpsest License)

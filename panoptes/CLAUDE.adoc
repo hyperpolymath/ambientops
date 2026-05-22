@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 // SPDX-FileCopyrightText: 2025 Jonathan D. A. Jewell <hyperpolymath>
 
 = CLAUDE.adoc - AI Assistant Integration Guide
@@ -24,7 +24,7 @@ This document provides context for AI assistants (Claude, GPT, etc.) working wit
 |Rust (primary), Nickel (config), Nix (reproducibility)
 
 |License
-|PMPL-1.0-or-later
+|MPL-2.0
 
 |Compliance
 |RSR Gold
@@ -110,7 +110,7 @@ Output: Renamed files based on AI-generated descriptions
 [source,rust]
 ----
 // SPDX header required on all files
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 // SPDX-FileCopyrightText: 2025 Author <handle>
 
 // Use thiserror for custom errors
@@ -188,7 +188,7 @@ This project maintains RSR Gold compliance:
 
 === Category 2: Documentation
 * [x] `README.adoc`
-* [x] `LICENSE.txt` (SPDX: PMPL-1.0-or-later)
+* [x] `LICENSE.txt` (SPDX: MPL-2.0)
 * [x] `SECURITY.md`
 * [x] `CODE_OF_CONDUCT.adoc`
 * [x] `CONTRIBUTING.adoc`

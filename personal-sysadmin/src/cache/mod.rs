@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 //! VeriSimDB-backed cache layer for fast key/value lookups.
 //!
 //! Replaces the previous Dragonfly/Redis stub.  Values are stored as
