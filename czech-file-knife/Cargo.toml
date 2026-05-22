@@ -25,7 +25,7 @@ categories = ["command-line-utilities", "filesystem"]
 
 [workspace.dependencies]
 # Async runtime
-tokio = { version = "1.49", features = ["full"] }
+tokio = { version = "1.52", features = ["full"] }
 async-trait = "0.1"
 futures = "0.3"
 
@@ -40,7 +40,7 @@ oauth2 = "5.0"
 
 # Hashing & Compression
 blake3 = "1.5"
-lz4_flex = "0.12"
+lz4_flex = "0.13"
 hex = "0.4"
 
 # Time & Errors
