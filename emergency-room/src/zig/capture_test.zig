@@ -100,19 +100,19 @@ test "PII redaction: SSN is redacted" {
 
 test "PII redaction: AWS key is redacted" {
     const allocator = std.testing.allocator;
-    const input = "AWS key: AKIAIOSFODNN7EXAMPLE";
+    const input = "AWS key: EXAMPLE-AKIA-FAKE-KEY-123";
     const result = try cap.redactPii(allocator, input);
     defer allocator.free(result);
-    try std.testing.expect(!std.mem.containsAtLeast(u8, result, 1, "AKIAIOSFODNN7EXAMPLE"));
+    try std.testing.expect(!std.mem.containsAtLeast(u8, result, 1, "EXAMPLE-AKIA-FAKE-KEY-123"));
     try std.testing.expect(std.mem.containsAtLeast(u8, result, 1, "[REDACTED]"));
 }
 
 test "PII redaction: GitHub token is redacted" {
     const allocator = std.testing.allocator;
-    const input = "token=ghp_ABCDEFabcdef1234567890";
+    const input = "token=EXAMPLE-ghp-FAKE-TOKEN-ABC";
     const result = try cap.redactPii(allocator, input);
     defer allocator.free(result);
-    try std.testing.expect(!std.mem.containsAtLeast(u8, result, 1, "ghp_ABCDEFabcdef1234567890"));
+    try std.testing.expect(!std.mem.containsAtLeast(u8, result, 1, "EXAMPLE-ghp-FAKE-TOKEN-ABC"));
     try std.testing.expect(std.mem.containsAtLeast(u8, result, 1, "[REDACTED]"));
 }
 
@@ -126,10 +126,10 @@ test "PII redaction: clean input is unchanged" {
 
 test "PII redaction: private key block marker is redacted" {
     const allocator = std.testing.allocator;
-    const input = "-----BEGIN RSA PRIVATE KEY-----";
+    const input = "-----BEGIN EXAMPLE PRIVATE KEY-----";
     const result = try cap.redactPii(allocator, input);
     defer allocator.free(result);
-    try std.testing.expect(!std.mem.containsAtLeast(u8, result, 1, "RSA PRIVATE KEY"));
+    try std.testing.expect(!std.mem.containsAtLeast(u8, result, 1, "EXAMPLE PRIVATE KEY"));
     try std.testing.expect(std.mem.containsAtLeast(u8, result, 1, "[REDACTED"));
 }
 
