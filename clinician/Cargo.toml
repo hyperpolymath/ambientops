@@ -53,7 +53,7 @@ ambientops-contracts = { path = "../contracts-rust" }
 # === Feature-gated dependencies (roadmap items, not yet used in code) ===
 arangors = { version = "0.6", optional = true }
 redis = { version = "0.27", features = ["tokio-comp", "connection-manager"], optional = true }
-ollama-rs = { version = "0.2", optional = true }
+ollama-rs = { version = "0.3", optional = true }
 ndarray = { version = "0.16", optional = true }
 scraper = { version = "0.27", optional = true }
 bluer = { version = "0.17", features = ["bluetoothd"], optional = true }
