@@ -1,6 +1,264 @@
 [
   {
     "severity": "critical",
+    "rule_module": "banned_language",
+    "type": "rescript_file_present",
+    "file": "_pathroot/examples/SafeDOMExample.res"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "banned_language",
+    "type": "rescript_file_present",
+    "file": "_pathroot/src/DenoBindings.res"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "banned_language",
+    "type": "rescript_file_present",
+    "file": "_pathroot/src/Discovery.res"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "banned_language",
+    "type": "rescript_file_present",
+    "file": "_pathroot/src/Envbase.res"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "banned_language",
+    "type": "rescript_file_present",
+    "file": "_pathroot/src/Mod.res"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "banned_language",
+    "type": "rescript_file_present",
+    "file": "_pathroot/src/Types.res"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "banned_language",
+    "type": "rescript_file_present",
+    "file": "_pathroot/src/Validate.res"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "banned_language",
+    "type": "rescript_file_present",
+    "file": "_pathroot/src/nicaug/NicaugCLI.res"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "banned_language",
+    "type": "rescript_file_present",
+    "file": "_pathroot/src/nicaug/NickelParser.res"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "banned_language",
+    "type": "rescript_file_present",
+    "file": "_pathroot/src/nicaug/NickelTypes.res"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "banned_language",
+    "type": "rescript_file_present",
+    "file": "_pathroot/src/nicaug/PlatformOrchestrator.res"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "banned_language",
+    "type": "rescript_file_present",
+    "file": "ambulances/disk/examples/SafeDOMExample.res"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "banned_language",
+    "type": "rescript_file_present",
+    "file": "broad-spectrum/examples/SafeDOMExample.res"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "banned_language",
+    "type": "rescript_file_present",
+    "file": "broad-spectrum/src/Accessibility.res"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "banned_language",
+    "type": "rescript_file_present",
+    "file": "broad-spectrum/src/AccessibilityImpl.res"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "banned_language",
+    "type": "rescript_file_present",
+    "file": "broad-spectrum/src/Auditor.res"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "banned_language",
+    "type": "rescript_file_present",
+    "file": "broad-spectrum/src/Config.res"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "banned_language",
+    "type": "rescript_file_present",
+    "file": "broad-spectrum/src/DenoBindings.res"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "banned_language",
+    "type": "rescript_file_present",
+    "file": "broad-spectrum/src/Fetcher.res"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "banned_language",
+    "type": "rescript_file_present",
+    "file": "broad-spectrum/src/FetcherImpl.res"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "banned_language",
+    "type": "rescript_file_present",
+    "file": "broad-spectrum/src/HtmlParserImpl.res"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "banned_language",
+    "type": "rescript_file_present",
+    "file": "broad-spectrum/src/LinkChecker.res"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "banned_language",
+    "type": "rescript_file_present",
+    "file": "broad-spectrum/src/Main.res"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "banned_language",
+    "type": "rescript_file_present",
+    "file": "broad-spectrum/src/Performance.res"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "banned_language",
+    "type": "rescript_file_present",
+    "file": "broad-spectrum/src/Report.res"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "banned_language",
+    "type": "rescript_file_present",
+    "file": "broad-spectrum/src/ReportImpl.res"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "banned_language",
+    "type": "rescript_file_present",
+    "file": "broad-spectrum/src/SEO.res"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "banned_language",
+    "type": "rescript_file_present",
+    "file": "broad-spectrum/src/SeoParserImpl.res"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "banned_language",
+    "type": "rescript_file_present",
+    "file": "broad-spectrum/src/UrlParser.res"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "banned_language",
+    "type": "rescript_file_present",
+    "file": "broad-spectrum/src/UrlParserImpl.res"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "banned_language",
+    "type": "rescript_file_present",
+    "file": "broad-spectrum/tests/UrlParser_test.res"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "banned_language",
+    "type": "rescript_file_present",
+    "file": "cicada/examples/SafeDOMExample.res"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "banned_language",
+    "type": "rescript_file_present",
+    "file": "composer/examples/SafeDOMExample.res"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "banned_language",
+    "type": "rescript_file_present",
+    "file": "czech-file-knife/examples/SafeDOMExample.res"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "banned_language",
+    "type": "rescript_file_present",
+    "file": "emergency-button/examples/SafeDOMExample.res"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "banned_language",
+    "type": "rescript_file_present",
+    "file": "examples/SafeDOMExample.res"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "banned_language",
+    "type": "rescript_file_present",
+    "file": "ffi/fuse/examples/SafeDOMExample.res"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "banned_language",
+    "type": "rescript_file_present",
+    "file": "ffi/systemd/examples/SafeDOMExample.res"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "banned_language",
+    "type": "rescript_file_present",
+    "file": "observatory/examples/SafeDOMExample.res"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "banned_language",
+    "type": "rescript_file_present",
+    "file": "session-sentinel/examples/SafeDOMExample.res"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "banned_language",
+    "type": "rescript_file_present",
+    "file": "total-recall/examples/SafeDOMExample.res"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "banned_language",
+    "type": "rescript_file_present",
+    "file": "total-update/examples/SafeDOMExample.res"
+  },
+  {
+    "severity": "critical",
+    "rule_module": "banned_language",
+    "type": "rescript_file_present",
+    "file": "traffic-conditioner/examples/SafeDOMExample.res"
+  },
+  {
+    "severity": "critical",
     "rule_module": "code_safety",
     "type": "elixir_system_cmd_interpolation",
     "file": "records/referrals/lib/feedback_a_tron/network_verifier.ex"
@@ -231,18 +489,6 @@
     "severity": "critical",
     "rule_module": "security_errors",
     "type": "secret_detected",
-    "file": "czech-file-knife/docs/DISTRIBUTED_FILESYSTEMS.md"
-  },
-  {
-    "severity": "critical",
-    "rule_module": "security_errors",
-    "type": "secret_detected",
-    "file": "emergency-room/src/zig/capture_test.zig"
-  },
-  {
-    "severity": "critical",
-    "rule_module": "security_errors",
-    "type": "secret_detected",
     "file": "emergency-room/src/zig/capture_test.zig"
   },
   {
@@ -250,24 +496,6 @@
     "rule_module": "security_errors",
     "type": "secret_detected",
     "file": "hybrid-automation-router/docs/HAR_SECURITY.md"
-  },
-  {
-    "severity": "critical",
-    "rule_module": "security_errors",
-    "type": "secret_detected",
-    "file": "hybrid-automation-router/test/attestation/a2ml_test.exs"
-  },
-  {
-    "severity": "critical",
-    "rule_module": "security_errors",
-    "type": "secret_detected",
-    "file": "hybrid-automation-router/test/attestation/a2ml_test.exs"
-  },
-  {
-    "severity": "critical",
-    "rule_module": "security_errors",
-    "type": "secret_detected",
-    "file": "hybrid-automation-router/test/attestation/a2ml_test.exs"
   },
   {
     "severity": "critical",
@@ -693,6 +921,18 @@
     "severity": "high",
     "rule_module": "migration_rules",
     "type": "deprecated_api",
+    "file": "_pathroot/src/Types.res"
+  },
+  {
+    "severity": "high",
+    "rule_module": "migration_rules",
+    "type": "deprecated_api",
+    "file": "_pathroot/src/Validate.res"
+  },
+  {
+    "severity": "high",
+    "rule_module": "migration_rules",
+    "type": "deprecated_api",
     "file": "_pathroot/src/nicaug/NicaugCLI.res"
   },
   {
@@ -712,18 +952,6 @@
     "rule_module": "migration_rules",
     "type": "deprecated_api",
     "file": "_pathroot/src/nicaug/PlatformOrchestrator.res"
-  },
-  {
-    "severity": "high",
-    "rule_module": "migration_rules",
-    "type": "deprecated_api",
-    "file": "_pathroot/src/Types.res"
-  },
-  {
-    "severity": "high",
-    "rule_module": "migration_rules",
-    "type": "deprecated_api",
-    "file": "_pathroot/src/Validate.res"
   },
   {
     "severity": "high",
@@ -754,6 +982,294 @@
     "rule_module": "migration_rules",
     "type": "deprecated_api",
     "file": "broad-spectrum/src/UrlParserImpl.res"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "_pathroot/rust/mustfile-orchestrator/src/executor.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "_pathroot/rust/mustfile-orchestrator/src/parser.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "_pathroot/rust/mustfile-orchestrator/src/platform.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "clinician/src/cache/mod.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "clinician/src/p2p/mod.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "clinician/src/reasoning/mod.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "clinician/src/satellites/mod.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "clinician/src/satellites/panic_attacker.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "clinician/src/storage/mod.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "clinician/src/tools/bt_sentinel.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "clinician/src/tools/cache_layer.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "clinician/src/tools/ipfs.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "contracts-rust/benches/contracts_bench.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "contracts-rust/src/ambient_payload.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "contracts-rust/src/conversions.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "contracts-rust/src/envelope.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "contracts-rust/src/message_intent.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "contracts-rust/src/pack_manifest.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "contracts-rust/src/plan.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "contracts-rust/src/receipt.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "contracts-rust/src/run_bundle.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "contracts-rust/src/weather.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "contracts-rust/tests/aspect_tests.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "contracts-rust/tests/contract_tests.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "czech-file-knife/cfk-cache/src/blob_store.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "czech-file-knife/cfk-cache/src/metadata_cache.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "czech-file-knife/cfk-core/src/path.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "czech-file-knife/cfk-integrations/src/agrep.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "czech-file-knife/cfk-integrations/src/aria2.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "czech-file-knife/cfk-integrations/src/pandoc.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "czech-file-knife/cfk-providers/src/afs.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "czech-file-knife/cfk-providers/src/box_com.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "czech-file-knife/cfk-providers/src/dropbox.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "czech-file-knife/cfk-providers/src/gdrive.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "czech-file-knife/cfk-providers/src/local.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "czech-file-knife/cfk-providers/src/nfs.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "czech-file-knife/cfk-providers/src/onedrive.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "czech-file-knife/cfk-providers/src/syncthing.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "czech-file-knife/cfk-providers/src/transport.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "czech-file-knife/cfk-providers/src/webdav.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "czech-file-knife/cfk-search/src/lib.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "czech-file-knife/cfk-vfs/src/lib.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "hardware-crash-team/src/analyzer/mod.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "hardware-crash-team/src/remediation/mod.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "hardware-crash-team/src/sarif.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "hardware-crash-team/src/scanner/mod.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "panoptes/src/main.rs"
+  },
+  {
+    "severity": "high",
+    "rule_module": "unsafe_panic",
+    "type": "unwrap_without_check",
+    "file": "personal-sysadmin/src/reasoning/mod.rs"
   },
   {
     "severity": "high",

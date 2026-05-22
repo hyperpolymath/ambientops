@@ -16,7 +16,7 @@ clap = { version = "4", features = ["derive", "env"] }
 tokio = { version = "1", features = ["full"] }
 
 # System introspection (Sysinternals-like)
-sysinfo = "0.31"              # Process, CPU, memory, disk
+sysinfo = "0.39"              # Process, CPU, memory, disk
 procfs = "0.17"               # Linux /proc filesystem
 nix = { version = "0.29", features = ["fs", "process", "net", "user"] }
 # netstat2 removed - using procfs directly for /proc/net/* parsing
@@ -36,7 +36,7 @@ ollama-rs = "0.2"             # Local LLM via Ollama
 libp2p = { version = "0.56", features = ["tokio", "mdns", "gossipsub", "kad"] }
 
 # Anomaly detection (integrates with ESN/LSM)
-ndarray = "0.16"
+ndarray = "0.17"
 
 # Forum/solution search
 scraper = "0.21"              # HTML parsing for forums
@@ -55,11 +55,11 @@ directories = "5"
 chrono = { version = "0.4", features = ["serde"] }
 # Security fix: override transitive ring to patch CVE-2025-4432
 ring = "0.17.13"
-lru = "0.16.3"
+lru = "0.18.0"
 uuid = { version = "1", features = ["v4"] }
 
 
-toml = "0.8"
+toml = "1.1"
 
 [dev-dependencies]
 tokio-test = "0.4"
