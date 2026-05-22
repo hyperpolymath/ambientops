@@ -124,7 +124,7 @@ impl ReasoningContext {
             .map(classify_memory_level)
             .unwrap_or_else(|| MemoryLevel::from_str(&state.last_mem_level));
         let available_pct = snapshot.map(|s| s.available_pct).unwrap_or(100);
-        let swap_used_pct = snapshot.map(|s| s.swap_used_pct).unwrap_or(0);
+        let swap_used_pct = snapshot.map(|s| s.swap_used_pct).unwrap_or_else(|| 0);
 
         Self {
             memory_level,
