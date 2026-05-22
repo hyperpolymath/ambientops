@@ -130,7 +130,7 @@ fn redact_email(line: &str) -> String {
     let local_start = line[..at]
         .rfind(|c: char| !(c.is_alphanumeric() || "._%+-".contains(c)))
         .map(|p| p + 1)
-        .unwrap_or(0);
+        .unwrap_or_else(|| 0);
     // Find end of domain
     let domain = &line[at + 1..];
     let domain_end = domain
