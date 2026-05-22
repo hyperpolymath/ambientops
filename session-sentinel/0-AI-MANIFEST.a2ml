@@ -1,6 +1,18 @@
-# STOP - CRITICAL READING REQUIRED
+# SPDX-License-Identifier: MPL-2.0
+# SPDX-FileCopyrightText: 2026 Jonathan D.A. Jewell (hyperpolymath)
+#
+# 0-AI-MANIFEST.a2ml — Universal AI Agent Entry Point
+# Session Sentinel — Multi-AI session health monitor
+#
+# READ THIS FILE FIRST. This is the canonical entry point for all AI agents.
 
-**THIS FILE MUST BE READ FIRST BY ALL AI AGENTS**
+[manifest]
+version = "1.1"
+project = "session-sentinel"
+type = "session-monitor"
+license = "MPL-2.0"
+author = "Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>"
+repo = "https://github.com/hyperpolymath/ambientops"
 
 ## WHAT IS THIS?
 
