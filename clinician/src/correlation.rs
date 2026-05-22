@@ -20,7 +20,7 @@ pub fn generate() -> String {
     let timestamp = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .map(|d| d.as_nanos())
-        .unwrap_or(0);
+        .unwrap_or_else(|_| 0);
 
     // Use timestamp + random component for uniqueness
     let random: u64 = rand_simple();

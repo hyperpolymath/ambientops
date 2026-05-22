@@ -68,7 +68,7 @@ pub fn create_bundle(cfg: &Config) -> Result<Incident, Box<dyn std::error::Error
     let ns = now.timestamp_subsec_nanos();
     let random_suffix = format!("{:04x}", (ns ^ (ns >> 16)) & 0xFFFF);
     let incident_id = format!("incident-{timestamp}-{ns:09}-{random_suffix}");
-    let correlation_id = format!("corr-{:016x}", now.timestamp_nanos_opt().unwrap_or(0));
+    let correlation_id = format!("corr-{:016x}", now.timestamp_nanos_opt().unwrap_or_else(|| 0));
 
     let base_dir = std::env::current_dir()?;
     let incident_path = base_dir.join(&incident_id);
