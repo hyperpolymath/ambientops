@@ -39,7 +39,7 @@ libp2p = { version = "0.56", features = ["tokio", "mdns", "gossipsub", "kad"] }
 ndarray = "0.17"
 
 # Forum/solution search
-scraper = "0.21"              # HTML parsing for forums
+scraper = "0.27"              # HTML parsing for forums
 
 # Logging and errors
 tracing = "0.1"
