@@ -75,7 +75,7 @@ dashmap = "6.1"
 
 # Bytes
 bytes = "1.11"
-lru = "0.16.3"
+lru = "0.16.4"
 
 # FFI
 libc = "0.2"
