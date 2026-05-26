@@ -29,7 +29,7 @@ serde_json = "1"
 
 # AI/SLM Integration (also used for VeriSimDB HTTP calls)
 reqwest = { version = "0.12", features = ["json"] }
-ollama-rs = "0.2"             # Local LLM via Ollama
+ollama-rs = "0.3"             # Local LLM via Ollama
 
 # P2P Communication
 # Updated from 0.54 to 0.56 to fix RUSTSEC-2025-0009 (ring 0.16.20 via rcgen)
