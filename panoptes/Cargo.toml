@@ -92,7 +92,7 @@ glob = "0.3"
 minijinja = "2.0"
 
 # WebSocket for real-time updates
-tokio-tungstenite = "0.24"
+tokio-tungstenite = "0.29"
 futures-util = "0.3"
 
 [dev-dependencies]
