@@ -1,0 +1,75 @@
+;; SPDX-License-Identifier: MPL-2.0
+;; Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+;;
+;; Assail Classifications — ambientops
+;; See panic-attack/.claude/CLAUDE.md § "User-Classification Registry".
+
+(assail-classifications
+  (metadata
+    (version "1.0.0")
+    (project "ambientops")
+    (last-updated "2026-05-26")
+    (entries 10)
+    (status "active"))
+
+  (classification
+    (file "czech-file-knife/cfk-providers/src/local.rs")
+    (category "UnsafeCode")
+    (classification "legitimate-ffi")
+    (audit "audits/audit-ffi-2026-05-26.md")
+    (rationale "Cross-subproject syscall + FFI cluster. cfk-providers calls libc::statvfs; cfk-ios is the iOS FFI bridge; ffi/{fuse,systemd} are kernel/init FFI shims (Zig + Rust); port-endoscope uses libc::sysconf for clock ticks; session-sentinel/interface/ffi is the DBus Zig binding; nerdsafe-restart's Ada TUI uses Unchecked_Conversion against ncurses."))
+  (classification
+    (file "czech-file-knife/cfk-providers/src/nfs.rs")
+    (category "UnsafeCode")
+    (classification "legitimate-ffi")
+    (audit "audits/audit-ffi-2026-05-26.md")
+    (rationale "Cross-subproject syscall + FFI cluster. cfk-providers calls libc::statvfs; cfk-ios is the iOS FFI bridge; ffi/{fuse,systemd} are kernel/init FFI shims (Zig + Rust); port-endoscope uses libc::sysconf for clock ticks; session-sentinel/interface/ffi is the DBus Zig binding; nerdsafe-restart's Ada TUI uses Unchecked_Conversion against ncurses."))
+  (classification
+    (file "czech-file-knife/cfk-ios/src/ffi.rs")
+    (category "UnsafeCode")
+    (classification "legitimate-ffi")
+    (audit "audits/audit-ffi-2026-05-26.md")
+    (rationale "Cross-subproject syscall + FFI cluster. cfk-providers calls libc::statvfs; cfk-ios is the iOS FFI bridge; ffi/{fuse,systemd} are kernel/init FFI shims (Zig + Rust); port-endoscope uses libc::sysconf for clock ticks; session-sentinel/interface/ffi is the DBus Zig binding; nerdsafe-restart's Ada TUI uses Unchecked_Conversion against ncurses."))
+  (classification
+    (file "ffi/systemd/src/main.zig")
+    (category "UnsafeCode")
+    (classification "legitimate-ffi")
+    (audit "audits/audit-ffi-2026-05-26.md")
+    (rationale "Cross-subproject syscall + FFI cluster. cfk-providers calls libc::statvfs; cfk-ios is the iOS FFI bridge; ffi/{fuse,systemd} are kernel/init FFI shims (Zig + Rust); port-endoscope uses libc::sysconf for clock ticks; session-sentinel/interface/ffi is the DBus Zig binding; nerdsafe-restart's Ada TUI uses Unchecked_Conversion against ncurses."))
+  (classification
+    (file "ffi/systemd/shim/src/lib.rs")
+    (category "UnsafeCode")
+    (classification "legitimate-ffi")
+    (audit "audits/audit-ffi-2026-05-26.md")
+    (rationale "Cross-subproject syscall + FFI cluster. cfk-providers calls libc::statvfs; cfk-ios is the iOS FFI bridge; ffi/{fuse,systemd} are kernel/init FFI shims (Zig + Rust); port-endoscope uses libc::sysconf for clock ticks; session-sentinel/interface/ffi is the DBus Zig binding; nerdsafe-restart's Ada TUI uses Unchecked_Conversion against ncurses."))
+  (classification
+    (file "ffi/fuse/src/c.zig")
+    (category "UnsafeFFI")
+    (classification "legitimate-ffi")
+    (audit "audits/audit-ffi-2026-05-26.md")
+    (rationale "Cross-subproject syscall + FFI cluster. cfk-providers calls libc::statvfs; cfk-ios is the iOS FFI bridge; ffi/{fuse,systemd} are kernel/init FFI shims (Zig + Rust); port-endoscope uses libc::sysconf for clock ticks; session-sentinel/interface/ffi is the DBus Zig binding; nerdsafe-restart's Ada TUI uses Unchecked_Conversion against ncurses."))
+  (classification
+    (file "ffi/fuse/src/cloud/cloud_fs.zig")
+    (category "UnsafeCode")
+    (classification "legitimate-ffi")
+    (audit "audits/audit-ffi-2026-05-26.md")
+    (rationale "Cross-subproject syscall + FFI cluster. cfk-providers calls libc::statvfs; cfk-ios is the iOS FFI bridge; ffi/{fuse,systemd} are kernel/init FFI shims (Zig + Rust); port-endoscope uses libc::sysconf for clock ticks; session-sentinel/interface/ffi is the DBus Zig binding; nerdsafe-restart's Ada TUI uses Unchecked_Conversion against ncurses."))
+  (classification
+    (file "port-endoscope/src/process.rs")
+    (category "UnsafeCode")
+    (classification "legitimate-ffi")
+    (audit "audits/audit-ffi-2026-05-26.md")
+    (rationale "Cross-subproject syscall + FFI cluster. cfk-providers calls libc::statvfs; cfk-ios is the iOS FFI bridge; ffi/{fuse,systemd} are kernel/init FFI shims (Zig + Rust); port-endoscope uses libc::sysconf for clock ticks; session-sentinel/interface/ffi is the DBus Zig binding; nerdsafe-restart's Ada TUI uses Unchecked_Conversion against ncurses."))
+  (classification
+    (file "session-sentinel/src/interface/ffi/src/dbus.zig")
+    (category "UnsafeCode")
+    (classification "legitimate-ffi")
+    (audit "audits/audit-ffi-2026-05-26.md")
+    (rationale "Cross-subproject syscall + FFI cluster. cfk-providers calls libc::statvfs; cfk-ios is the iOS FFI bridge; ffi/{fuse,systemd} are kernel/init FFI shims (Zig + Rust); port-endoscope uses libc::sysconf for clock ticks; session-sentinel/interface/ffi is the DBus Zig binding; nerdsafe-restart's Ada TUI uses Unchecked_Conversion against ncurses."))
+  (classification
+    (file "nerdsafe-restart/src/ada/nerdsafe_tui.adb")
+    (category "UnsafeCode")
+    (classification "legitimate-ffi")
+    (audit "audits/audit-ffi-2026-05-26.md")
+    (rationale "Cross-subproject syscall + FFI cluster. cfk-providers calls libc::statvfs; cfk-ios is the iOS FFI bridge; ffi/{fuse,systemd} are kernel/init FFI shims (Zig + Rust); port-endoscope uses libc::sysconf for clock ticks; session-sentinel/interface/ffi is the DBus Zig binding; nerdsafe-restart's Ada TUI uses Unchecked_Conversion against ncurses."))
+)
