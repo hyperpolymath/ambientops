@@ -39,7 +39,7 @@ reqwest = { version = "0.13", features = ["json", "stream"] }
 oauth2 = "5.0"
 
 # Hashing & Compression
-blake3 = "1.5"
+blake3 = "1.8"
 lz4_flex = "0.13"
 hex = "0.4"
 
