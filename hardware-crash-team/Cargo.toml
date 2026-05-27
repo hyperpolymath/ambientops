@@ -36,7 +36,7 @@ ambientops-contracts = { path = "../contracts-rust" }
 
 # TUI
 ratatui = { version = "0.30", default-features = false, features = ["crossterm_0_28"], optional = true }
-crossterm = { version = "0.28", optional = true }
+crossterm = { version = "0.29", optional = true }
 
 [features]
 default = []
