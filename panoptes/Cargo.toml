@@ -23,7 +23,7 @@ async-trait = "0.1"
 notify = "6.1"
 
 # HTTP client & server
-reqwest = { version = "0.12", features = ["json", "multipart"] }
+reqwest = { version = "0.13", features = ["json", "multipart"] }
 axum = { version = "0.8", features = ["ws", "multipart"] }
 tower = "0.4"
 tower-http = { version = "0.6", features = ["fs", "cors", "trace"] }
