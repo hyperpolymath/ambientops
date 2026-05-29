@@ -71,7 +71,7 @@ infer = "0.15"
 # FUSE
 fuser = "0.16"
 parking_lot = "0.12"
-dashmap = "6.1"
+dashmap = "6.2"
 
 # Bytes
 bytes = "1.11"
