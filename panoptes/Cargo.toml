@@ -20,7 +20,7 @@ tokio = { version = "1.40", features = ["full"] }
 async-trait = "0.1"
 
 # File watching
-notify = "6.1"
+notify = "8.2"
 
 # HTTP client & server
 reqwest = { version = "0.13", features = ["json", "multipart"] }
