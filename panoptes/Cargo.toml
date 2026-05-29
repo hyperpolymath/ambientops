@@ -46,7 +46,7 @@ chrono = { version = "0.4", features = ["serde"] }
 base64 = "0.22"
 
 # Error handling
-thiserror = "1.0"
+thiserror = "2.0"
 anyhow = "1.0"
 
 # Database (SQLite for tags/categories)
