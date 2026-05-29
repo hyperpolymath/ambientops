@@ -25,7 +25,7 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 
 # HTTP client (AI module uses curl via tokio::process, reqwest for future)
-reqwest = { version = "0.12.12", features = ["json", "multipart"] }
+reqwest = { version = "0.13.4", features = ["json", "multipart"] }
 
 # Logging and errors
 tracing = "0.1"
