@@ -62,7 +62,7 @@ lopdf = "0.32"
 # Audio metadata
 id3 = "1.13"
 mp3-metadata = "0.4"
-symphonia = { version = "0.5", features = ["all"] }
+symphonia = { version = "0.6", features = ["all"] }
 
 # Archive inspection
 zip = "7.2"
