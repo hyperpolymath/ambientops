@@ -50,7 +50,7 @@ thiserror = "1.0"
 anyhow = "1.0"
 
 # Database (SQLite for tags/categories)
-rusqlite = { version = "0.31", features = ["bundled"] }
+rusqlite = { version = "0.40", features = ["bundled"] }
 
 # Image processing
 image = "0.25"
