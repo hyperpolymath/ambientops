@@ -65,7 +65,7 @@ mp3-metadata = "0.4"
 symphonia = { version = "0.5", features = ["all"] }
 
 # Archive inspection
-zip = "2.1"
+zip = "7.2"
 tar = "0.4"
 flate2 = "1.0"
 
