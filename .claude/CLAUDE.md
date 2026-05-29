@@ -92,7 +92,7 @@ cargo build -p ambientops-clinician --all-features     # Everything (slow)
 | **Guile Scheme** | State/meta files | .machine_readable/6a2/STATE.a2ml, .machine_readable/6a2/META.a2ml, .machine_readable/6a2/ECOSYSTEM.a2ml |
 | **Julia** | Batch scripts, data processing | Per RSR |
 | **OCaml** | AffineScript compiler | Language-specific |
-| **V** | Emergency Room, system tools | Vlang.io, fast compilation |
+| **Zig** | Emergency Room, system tools | Estate default for APIs/FFIs/system tools |
 | **Ada** | Safety-critical systems | Where required |
 | **Bebop** | Wire serialization | JS+Rust peers; TS only as generated artifacts |
 | **Protobuf** | Wire serialization | If Elixir must be a peer |
