@@ -56,7 +56,7 @@ rusqlite = { version = "0.31", features = ["bundled"] }
 image = "0.25"
 
 # PDF processing
-pdf-extract = "0.7"
+pdf-extract = "0.10"
 lopdf = "0.32"
 
 # Audio metadata
