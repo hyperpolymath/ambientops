@@ -98,3 +98,11 @@ node_modules/
 .cache/
 build/
 dist/
+
+# npm-avoidant (standards#67)
+package-lock.json
+**/package-lock.json
+bun.lockb
+yarn.lock
+pnpm-lock.yaml
+.npmrc
