@@ -83,7 +83,7 @@ calamine = "0.35"
 blake3 = "1.5"
 
 # UUID for unique IDs
-uuid = { version = "1.8", features = ["v4", "serde"] }
+uuid = { version = "1.23", features = ["v4", "serde"] }
 
 # Glob patterns
 glob = "0.3"
