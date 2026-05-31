@@ -16,7 +16,7 @@ rust-version = "1.75"
 
 [dependencies]
 # Async runtime
-tokio = { version = "1.40", features = ["full"] }
+tokio = { version = "1.52", features = ["full"] }
 async-trait = "0.1"
 
 # File watching
