@@ -1,0 +1,143 @@
+[![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-pink?logo=github)](https://github.com/sponsors/hyperpolymath)
+
+// SPDX-License-Identifier: MPL-2.0
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath)
+= AmbientOps
+
+image:https://img.shields.io/badge/License-PMPL--1.0-blue.svg[License: PMPL-1.0,link="https://github.com/hyperpolymath/palimpsest-license"]
+image:https://api.thegreenwebfoundation.org/greencheckimage/jewell.nexus[Green Hosting,link="https://www.thegreenwebfoundation.org/green-web-check/?url=jewell.nexus"]
+
+:toc:
+:toclevels: 3
+:icons: font
+:source-highlighter: rouge
+
+AmbientOps is a hospital-model operations framework providing **trustworthy system help** without fearware, nagware, or scammy "optimizers". It is organised as a **hybrid monorepo**: core hospital departments live here, external tools stay as satellites.
+
+== Quick Start
+
+[source,bash]
+----
+# Build everything (requires just, cargo, mix, deno)
+just build-all
+
+# Run all tests
+just test-all
+
+# Build Rust components only
+cargo build --workspace
+
+# Run hardware scan with contract-conformant output
+cargo run -p hardware-crash-team -- scan --envelope
+
+# Generate remediation plan
+cargo run -p hardware-crash-team -- plan 01:00.0 --procedure
+
+# Emergency room with envelope output
+cd emergency-room && v run src/ trigger --envelope
+
+# Generate system weather
+cd observatory && mix sysobs weather --output /tmp/ambientops/weather.json
+
+# Run end-to-end demo
+./scripts/demo-flow.sh --build
+----
+
+== Component Status
+
+[cols="1,1,1,1"]
+|===
+| Component | Language | Tests | Maturity
+
+| contracts | JSON+Deno | 13 steps | 80%
+| contracts-rust | Rust | 7 | 80%
+| observatory | Elixir | 87 | 85%
+| emergency-room | V | 9 (3 files) | 75%
+| records/referrals | Elixir | 8 | 65%
+| hardware-crash-team | Rust | 27 | 75%
+| clinician | Rust | 16 | 55%
+| composer | Gleam (planned) | 0 | 10%
+|===
+
+== The Hospital Model
+
+AmbientOps presents system tooling as four "departments":
+
+* **Ward** — System Weather + gentle ambient guidance (`observatory/`)
+* **Emergency Room** — Panic-safe intake with one-click stabilization (`emergency-room/`)
+* **Operating Room** — Planned procedures: Scan → Plan → Apply → Undo → Receipt (`clinician/`, `hardware-crash-team/`, `composer/`)
+* **Records** — Receipts, undo tokens, and referrals (`records/`)
+
+**Data flow:** Evidence Envelope → Procedure Plan → Receipt → System Weather
+
+See `docs/HOSPITAL_MODEL.adoc` for the full model.
+
+== Directory Structure
+
+[source]
+----
+ambientops/
+├── clinician/            (Rust, ~4400 LOC) — AI-assisted sysadmin [from personal-sysadmin]
+├── emergency-room/       (V, ~1800 LOC)    — Panic-safe intake [from emergency-button]
+├── hardware-crash-team/  (Rust, ~700 LOC)  — PCI zombie detection & remediation
+├── observatory/          (Elixir, ~600 LOC)— Metrics, weather, bundle ingestion
+├── contracts/            (JSON+Deno)       — 8 JSON schemas + validators
+├── contracts-rust/       (Rust)            — Serde types matching JSON schemas
+├── records/referrals/    (Elixir, ~400 LOC)— Multi-platform bug reporting MCP
+├── composer/             (Gleam, stubs)    — Orchestration engine
+├── scripts/              — Demo and utility scripts
+├── docs/                 — Documentation
+├── Cargo.toml            — Rust workspace root
+└── .machine_readable/    — .machine_readable/6a2/STATE.a2ml, .machine_readable/6a2/ECOSYSTEM.a2ml, .machine_readable/6a2/META.a2ml
+----
+
+== Contract Schemas
+
+The `contracts/` directory contains 8 JSON schemas that define the inter-component data format:
+
+[cols="1,2"]
+|===
+| Schema | Purpose
+
+| `evidence-envelope` | A&E intake / scan output with artifacts and findings
+| `procedure-plan` | Operating Theatre steps with risk and reversibility
+| `receipt` | Execution result with undo bundle and evidence
+| `system-weather` | Ward UI payload: calm/watch/act with trends
+| `message-intent` | Command messaging between components
+| `run-bundle` | Execution bundle with completion info
+| `pack-manifest` | Scan pack definition with platform filters
+| `ambient-payload` | Ambient mode indicator data
+|===
+
+The `contracts-rust/` crate provides Rust structs with `serde` serialization and `From` conversions from hardware-crash-team types.
+
+== Satellite Repos
+
+External tools that integrate with AmbientOps but live in their own repos:
+
+* **panic-attacker** — Software health scanner (feeds verisim)
+* **verisim** / **verisim-data** — Multimodal database for scan results
+* **hypatia** — Neurosymbolic CI/CD intelligence
+* **gitbot-fleet** — Bot orchestration (rhodibot, echidnabot, etc.)
+* **echidna** — Neurosymbolic theorem proving (30 prover backends)
+* **network-orchestrator** — Enterprise network management (planned)
+* **traffic-conditioner** — Continuous network optimization (planned)
+
+== Safety and Trust Principles
+
+* No fearware claims ("304 errors fixed!")
+* Evidence first: show measurements, not hype
+* Scan is non-mutating by default
+* Apply requires explicit approval
+* DRY RUN by default for all destructive operations
+* Undo and receipts are first-class
+* Privacy controls are visible and simple (local-only by default)
+
+== License
+
+MPL-2.0 (Palimpsest License).
+
+
+== Architecture
+
+See link:TOPOLOGY.md[TOPOLOGY.md] for a visual architecture map and completion dashboard.
