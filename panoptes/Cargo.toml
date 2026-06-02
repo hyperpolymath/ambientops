@@ -60,7 +60,7 @@ pdf-extract = "0.10"
 lopdf = "0.32"
 
 # Audio metadata
-id3 = "1.13"
+id3 = "1.17"
 mp3-metadata = "0.4"
 symphonia = { version = "0.5", features = ["all"] }
 
