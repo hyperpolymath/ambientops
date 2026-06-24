@@ -1,6 +1,6 @@
 # Contract Schema Wiring
 
-<!-- SPDX-License-Identifier: MPL-2.0 -->
+<!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
 
 How AmbientOps contract schemas connect producers to consumers.
 

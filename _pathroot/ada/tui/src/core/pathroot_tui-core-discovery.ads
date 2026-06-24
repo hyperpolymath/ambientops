@@ -1,7 +1,7 @@
 --  _pathroot TUI - Discovery Module Specification
 --  Handles _pathroot file discovery across platforms
 --
---  SPDX-License-Identifier: PMPL-1.0
+--  SPDX-License-Identifier: MPL-2.0
 --  Copyright (C) 2025 Hyper Polymath
 
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;

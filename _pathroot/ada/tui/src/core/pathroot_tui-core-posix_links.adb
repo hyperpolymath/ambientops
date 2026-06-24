@@ -1,6 +1,6 @@
 --  POSIX Symbolic Link Bindings - Implementation
 --
---  SPDX-License-Identifier: PMPL-1.0
+--  SPDX-License-Identifier: MPL-2.0
 --  Copyright (C) 2025 Hyper Polymath
 
 package body Pathroot_TUI.Core.POSIX_Links is

@@ -1,6 +1,6 @@
 --  Symlink_Manager - Cross-platform symbolic link management for Ada
 --
---  SPDX-License-Identifier: PMPL-1.0
+--  SPDX-License-Identifier: MPL-2.0
 --  Copyright (C) 2025 Hyper Polymath
 
 with Ada.Directories;

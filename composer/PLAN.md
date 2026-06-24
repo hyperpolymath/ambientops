@@ -1,6 +1,6 @@
 # Composer — Orchestration Engine Plan
 
-<!-- SPDX-License-Identifier: MPL-2.0 -->
+<!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
 
 ## Status: Planned (Phase 5)
 

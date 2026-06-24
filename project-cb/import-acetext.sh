@@ -1,5 +1,5 @@
 #!/bin/bash
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: MPL-2.0
 # Import AceText .atc files to comment-bank.scm format
 
 set -e
@@ -23,7 +23,7 @@ echo "Clips found: $(grep -c '<text>' "$INPUT")"
 
 # Generate SCM output
 cat > "$OUTPUT" << EOF
-;; SPDX-License-Identifier: MIT
+;; SPDX-License-Identifier: MPL-2.0
 ;; Imported from AceText: $COLLECTION
 ;; Date: $DATE
 ;; Source: $INPUT

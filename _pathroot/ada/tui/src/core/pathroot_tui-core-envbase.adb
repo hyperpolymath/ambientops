@@ -1,7 +1,7 @@
 --  _pathroot TUI - Envbase Module Body
 --  Handles _envbase JSON parsing and manipulation
 --
---  SPDX-License-Identifier: PMPL-1.0
+--  SPDX-License-Identifier: MPL-2.0
 --  Copyright (C) 2025 Hyper Polymath
 
 with Ada.Directories;

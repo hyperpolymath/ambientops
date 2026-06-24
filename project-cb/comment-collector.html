@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SPDX-License-Identifier: MIT -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -694,7 +694,7 @@ function exportAll() {
   if (!total) { toast('Nothing to export'); return; }
 
   const date = new Date().toISOString().split('T')[0];
-  let scm = `;; SPDX-License-Identifier: MIT
+  let scm = `;; SPDX-License-Identifier: MPL-2.0
 ;; Collected Comments - ${date}
 
 (comment-collection

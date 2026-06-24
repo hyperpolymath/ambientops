@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MPL-2.0
+// SPDX-License-Identifier: CC-BY-SA-4.0
 // SPDX-FileCopyrightText: 2025 Jonathan D. A. Jewell <hyperpolymath>
 
 = CLAUDE.adoc - AI Assistant Integration Guide
@@ -110,7 +110,7 @@ Output: Renamed files based on AI-generated descriptions
 [source,rust]
 ----
 // SPDX header required on all files
-// SPDX-License-Identifier: MPL-2.0
+// SPDX-License-Identifier: CC-BY-SA-4.0
 // SPDX-FileCopyrightText: 2025 Author <handle>
 
 // Use thiserror for custom errors

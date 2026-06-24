@@ -3,7 +3,7 @@
 [![Hex.pm](https://img.shields.io/hexpm/v/har.svg)](https://hex.pm/packages/har)
 [![Hex Docs](https://img.shields.io/badge/hex-docs-blue.svg)](https://hexdocs.pm/har)
 [![CI](https://github.com/hyperpolymath/hybrid-automation-router/actions/workflows/ci.yml/badge.svg)](https://github.com/hyperpolymath/hybrid-automation-router/actions)
-image:https://img.shields.io/badge/License-PMPL--1.0-blue.svg[License: PMPL-1.0,link="https://github.com/hyperpolymath/palimpsest-license"]
+image:https://img.shields.io/badge/License-MPL--2.0-blue.svg[License: PMPL-1.0,link="https://github.com/hyperpolymath/palimpsest-license"]
 
 **Think BGP for infrastructure automation.** HAR treats configuration management like network packet routing - it parses configs from any IaC tool (Ansible, Salt, Terraform), extracts semantic operations, and routes/transforms them to any target format.
 

@@ -1,7 +1,7 @@
 -------------------------------------------------------------------------------
 --  nano-aider - TUI Components
 --  Copyright (C) 2024-2025 Jonathan D.A. Jewell
---  SPDX-License-Identifier: MIT OR MPL-2.0
+--  SPDX-License-Identifier: MPL-2.0 OR MPL-2.0
 -------------------------------------------------------------------------------
 
 with Terminal_Interface.Curses;

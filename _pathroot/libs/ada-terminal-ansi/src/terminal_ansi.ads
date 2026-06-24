@@ -3,7 +3,7 @@
 --  This library provides simple ANSI escape sequence handling for terminal
 --  applications without requiring ncurses or other heavy dependencies.
 --
---  SPDX-License-Identifier: PMPL-1.0
+--  SPDX-License-Identifier: MPL-2.0
 --  Copyright (C) 2025 Hyper Polymath
 
 package Terminal_ANSI is

@@ -1,7 +1,7 @@
 --  POSIX Symbolic Link Bindings
 --  Thin bindings to POSIX readlink/symlink functions
 --
---  SPDX-License-Identifier: PMPL-1.0
+--  SPDX-License-Identifier: MPL-2.0
 --  Copyright (C) 2025 Hyper Polymath
 
 with Interfaces.C; use Interfaces.C;

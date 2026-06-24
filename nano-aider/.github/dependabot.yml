@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: MPL-2.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # Dependabot configuration for nano-aider (Ada project)
 # Note: Dependabot doesn't have native Ada/Alire support
 # This file configures GitHub Actions dependency updates only
