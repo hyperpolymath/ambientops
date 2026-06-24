@@ -38,7 +38,7 @@ jobs:
 
       - name: Validate A2ML manifests
         if: steps.detect.outputs.count > 0
-        uses: hyperpolymath/a2ml-validate-action@cb3c1e298169dc5ac2b42e257068b0fb5920cd5e # main
+        uses: hyperpolymath/a2ml-validate-action@6c471745e88a10245aa1fcd6f637a17ec531ad27 # main
         with:
           path: '.'
           strict: 'false'
