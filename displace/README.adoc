@@ -2,7 +2,7 @@
 
 image:https://img.shields.io/badge/Language-Rust-orange.svg[Rust]
 image:https://img.shields.io/badge/OS-Linux%7CMacOS%7CBSD%7CMinix%7CRISCV%7CUnix-blue.svg[OS Support]
-image:https://img.shields.io/badge/License-PMPL--1.0-blue.svg[License: PMPL-1.0,link="https://github.com/hyperpolymath/palimpsest-license"]
+image:https://img.shields.io/badge/License-MPL--2.0-blue.svg[License: PMPL-1.0,link="https://github.com/hyperpolymath/palimpsest-license"]
 image:https://img.shields.io/badge/Philosophy-Palimpsest-indigo.svg[Palimpsest,link="https://github.com/hyperpolymath/palimpsest-license"]
 image:https://img.shields.io/badge/Verified%20Container-Protocol%20Compliant-green.svg[Verified Container Protocol Compliant]
 

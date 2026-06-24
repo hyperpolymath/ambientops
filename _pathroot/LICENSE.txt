@@ -1,8 +1,8 @@
-SPDX-License-Identifier: MPL-2.0-or-later
+SPDX-License-Identifier: MPL-2.0
 Mozilla Public License Version 2.0
 ==================================
 
-SPDX-License-Identifier: MPL-2.0-or-later
+SPDX-License-Identifier: MPL-2.0
 
 ────────────────────────────────────────────────────────────────────────────────
 PALIMPSEST NOTICE

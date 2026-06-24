@@ -1,7 +1,7 @@
 --  _pathroot TUI - Main Package Body
 --  Ada-based Terminal User Interface for devtools environment management
 --
---  SPDX-License-Identifier: PMPL-1.0
+--  SPDX-License-Identifier: MPL-2.0
 --  Copyright (C) 2025 Hyper Polymath
 
 with Ada.Text_IO;           use Ada.Text_IO;

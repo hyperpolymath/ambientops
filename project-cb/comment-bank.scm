@@ -1,4 +1,4 @@
-;; SPDX-License-Identifier: MIT
+;; SPDX-License-Identifier: MPL-2.0
 ;; Comment Bank - Machine-Readable Format
 ;;
 ;; Structure optimised for:

@@ -1,4 +1,4 @@
-<!-- SPDX-License-Identifier: MIT -->
+<!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
 
 # Comment Bank Project - Ideas
 

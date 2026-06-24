@@ -1,6 +1,6 @@
 // build.zig
 // Build system for pathroot ABI Zig FFI
-// SPDX-License-Identifier: PMPL-1.0
+// SPDX-License-Identifier: MPL-2.0
 
 const std = @import("std");
 

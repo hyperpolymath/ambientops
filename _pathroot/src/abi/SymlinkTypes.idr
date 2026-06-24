@@ -1,6 +1,6 @@
 -- SymlinkTypes.idr
 -- Idris2 ABI definitions for POSIX symlink operations
--- SPDX-License-Identifier: PMPL-1.0
+-- SPDX-License-Identifier: MPL-2.0
 
 module SymlinkTypes
 

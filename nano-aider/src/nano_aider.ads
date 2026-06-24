@@ -1,7 +1,7 @@
 -------------------------------------------------------------------------------
 --  nano-aider - Ada TUI for nano/micro Editor Configuration
 --  Copyright (C) 2024-2025 Jonathan D.A. Jewell
---  SPDX-License-Identifier: MIT OR MPL-2.0
+--  SPDX-License-Identifier: MPL-2.0 OR MPL-2.0
 -------------------------------------------------------------------------------
 --
 --  nano-aider is a sophisticated Terminal User Interface (TUI) application
