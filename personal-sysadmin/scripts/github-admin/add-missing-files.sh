@@ -10,8 +10,11 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "daily"
-    open-pull-requests-limit: 10
+      interval: "weekly"
+    open-pull-requests-limit: 2
+    groups:
+      actions:
+        patterns: ["*"]
 '
 
 # Standard FUNDING.yml content

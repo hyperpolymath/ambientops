@@ -13,105 +13,64 @@ updates:
       actions:
         patterns:
           - "*"
+    open-pull-requests-limit: 2
 
-  # Rust/Cargo - root workspace
+  # Rust/Cargo - group the same dependency across the workspace crates
   - package-ecosystem: "cargo"
-    directory: "/"
+    directories:
+      - "/"
+      - "/czech-file-knife"
+      - "/panoptes"
+      - "/personal-sysadmin"
+      - "/displace"
     schedule:
       interval: "daily"
-
-  # Rust/Cargo - standalone crates
+    open-pull-requests-limit: 3
+    groups:
+      shared-rust-dependencies:
+        group-by: dependency-name
     ignore:
       # Estate policy standards#301 / docs/DEPENDABOT-POLICY.adoc:
       # ignore semver-major bumps so they land via author-supplied PRs
       # paired with call-site updates. Minor + patch flow normally.
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
-  - package-ecosystem: "cargo"
-    directory: "/czech-file-knife"
-    schedule:
-      interval: "daily"
-    ignore:
-      # Estate policy standards#301 / docs/DEPENDABOT-POLICY.adoc:
-      # ignore semver-major bumps so they land via author-supplied PRs
-      # paired with call-site updates. Minor + patch flow normally.
-      - dependency-name: "*"
-        update-types: ["version-update:semver-major"]
-
-  - package-ecosystem: "cargo"
-    directory: "/panoptes"
-    schedule:
-      interval: "daily"
-    ignore:
-      # Estate policy standards#301 / docs/DEPENDABOT-POLICY.adoc:
-      # ignore semver-major bumps so they land via author-supplied PRs
-      # paired with call-site updates. Minor + patch flow normally.
-      - dependency-name: "*"
-        update-types: ["version-update:semver-major"]
-
-  - package-ecosystem: "cargo"
-    directory: "/personal-sysadmin"
-    schedule:
-      interval: "daily"
-    ignore:
-      # Estate policy standards#301 / docs/DEPENDABOT-POLICY.adoc:
-      # ignore semver-major bumps so they land via author-supplied PRs
-      # paired with call-site updates. Minor + patch flow normally.
-      - dependency-name: "*"
-        update-types: ["version-update:semver-major"]
-
-  - package-ecosystem: "cargo"
-    directory: "/displace"
-    schedule:
-      interval: "daily"
-
   # Elixir/Mix
-    ignore:
-      # Estate policy standards#301 / docs/DEPENDABOT-POLICY.adoc:
-      # ignore semver-major bumps so they land via author-supplied PRs
-      # paired with call-site updates. Minor + patch flow normally.
-      - dependency-name: "*"
-        update-types: ["version-update:semver-major"]
   - package-ecosystem: "mix"
     directory: "/"
     schedule:
       interval: "daily"
-
-  # Node.js/npm
+    open-pull-requests-limit: 2
     ignore:
-      # Estate policy standards#301 / docs/DEPENDABOT-POLICY.adoc:
-      # ignore semver-major bumps so they land via author-supplied PRs
-      # paired with call-site updates. Minor + patch flow normally.
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
+
+  # Node.js/npm
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: "daily"
-
-  # Python/pip
+    open-pull-requests-limit: 2
     ignore:
-      # Estate policy standards#301 / docs/DEPENDABOT-POLICY.adoc:
-      # ignore semver-major bumps so they land via author-supplied PRs
-      # paired with call-site updates. Minor + patch flow normally.
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
+
+  # Python/pip
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
       interval: "daily"
-
-  # Nix flakes
+    open-pull-requests-limit: 2
     ignore:
-      # Estate policy standards#301 / docs/DEPENDABOT-POLICY.adoc:
-      # ignore semver-major bumps so they land via author-supplied PRs
-      # paired with call-site updates. Minor + patch flow normally.
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
+
+  # Nix flakes
   - package-ecosystem: "nix"
     directory: "/"
     schedule:
       interval: "daily"
+    open-pull-requests-limit: 2
     ignore:
       # Estate policy standards#301 / docs/DEPENDABOT-POLICY.adoc:
       # ignore semver-major bumps so they land via author-supplied PRs
