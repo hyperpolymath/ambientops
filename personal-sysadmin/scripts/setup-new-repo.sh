@@ -74,8 +74,11 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "daily"
-    open-pull-requests-limit: 10
+      interval: "weekly"
+    open-pull-requests-limit: 2
+    groups:
+      actions:
+        patterns: ["*"]
 DEP
     gh api "repos/$OWNER/$REPO/contents/.github/dependabot.yml" -X PUT \
         -f message="Add dependabot configuration" \
