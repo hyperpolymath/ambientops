@@ -28,7 +28,7 @@ nano-aider will **NEVER** contain:
 | Banned | Reason | Enforced By |
 |--------|--------|-------------|
 | TypeScript | Use ReScript | `rsr-antipattern.yml` |
-| Node.js/npm/bun | Use Deno | `npm-bun-blocker.yml` |
+| Node.js/npm/bun | Use Deno | `runtime-policy.yml` |
 | Go | Use Rust | `rsr-antipattern.yml` |
 | Python (non-SaltStack) | Use Ada/Rust | CI checks |
 | Kotlin/Swift | Use Tauri/Dioxus | Policy |
