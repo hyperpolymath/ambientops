@@ -168,8 +168,7 @@ The project uses only:
 ## CI/CD Enforcement
 
 GitHub Actions enforce:
-- **ts-blocker.yml**: No TypeScript files allowed
-- **npm-bun-blocker.yml**: No npm/bun lock files
+- **runtime-policy.yml**: No npm/bun lock files
 - **makefile-blocker.yml**: No Makefiles (use Justfile)
 
 ## Resources

@@ -49,7 +49,7 @@ Typical repo has **14-19 workflows**. Many are redundant or overlapping:
 |----------|-----------|----------------|
 | Security | codeql.yml, scorecard.yml, security-policy.yml, workflow-linter.yml | Keep all - different purposes |
 | Mirroring | mirror.yml | Keep if secrets configured, else remove |
-| Language Blockers | rsr-antipattern.yml, ts-blocker.yml, npm-bun-blocker.yml | **Consolidate into single blocker** |
+| Language Blockers | rsr-antipattern.yml, runtime-policy.yml | **Consolidate into single blocker** |
 | Build/CI | rust-ci.yml, zig-ffi.yml, release.yml | Keep - project-specific |
 | Quality | quality.yml | Keep |
 | Fuzzing | cflite_batch.yml, cflite_pr.yml | Keep for security testing |
@@ -59,7 +59,7 @@ Typical repo has **14-19 workflows**. Many are redundant or overlapping:
 ## Recommended Optimizations
 
 ### 1. Consolidate Language Blockers
-Merge `ts-blocker.yml`, `npm-bun-blocker.yml`, `rsr-antipattern.yml` into single workflow.
+Merge `runtime-policy.yml`, `rsr-antipattern.yml` into single workflow.
 
 ### 2. Conditional Mirroring
 Add guards to `mirror.yml`:
