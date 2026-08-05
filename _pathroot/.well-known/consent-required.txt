@@ -1,9 +1,9 @@
-# Consent-Aware HTTP Declaration for {{PROJECT_NAME}}
+# Consent-Aware HTTP Declaration for AmbientOps
 # RFC Draft: draft-jewell-http-430-consent-required
 
 Version: 1.0
-Project: {{PROJECT_NAME}}
-Canonical: https://github.com/hyperpolymath/{{PROJECT_NAME}}
+Project: AmbientOps
+Canonical: https://github.com/hyperpolymath/AmbientOps
 
 # Consent Framework
 This project implements the Consent-Aware HTTP framework.
@@ -28,5 +28,5 @@ Required-Headers:
   - X-Attribution: [your-attribution-string]
 
 # How to Request Consent
-Consent-Request-URL: https://hyperpolymath.org/consent/{{PROJECT_NAME}}
+Consent-Request-URL: https://hyperpolymath.org/consent/AmbientOps
 Documentation: https://github.com/hyperpolymath/consent-aware-http

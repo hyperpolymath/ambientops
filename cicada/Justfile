@@ -28,7 +28,7 @@ init:
 
 # Generate a new SSH key
 generate EMAIL ALGO="ed25519":
-    julia --project=. src/main.jl generate -e {{EMAIL}} -a {{ALGO}}
+    julia --project=. src/main.jl generate -e j.d.a.jewell@open.ac.uk -a {{ALGO}}
 
 # List all stored keys
 list:
