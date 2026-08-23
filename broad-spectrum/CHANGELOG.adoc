@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SEO analysis (meta tags, structured data, content)
 - Multiple report formats (Console, JSON, HTML, Markdown)
 
-**ReScript Modules:**
+**AffineScript Modules:**
 - `Config.res` - Configuration types and defaults
 - `UrlParser.res` - URL parsing and validation
 - `Fetcher.res` - HTTP client with retry logic
@@ -69,7 +69,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 === Technical Details
 
 **Build System:**
-- ReScript compiler configuration
+- AffineScript compiler configuration
 - Deno task definitions
 - npm scripts for building
 - GenType for TypeScript FFI
@@ -82,7 +82,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Exponential backoff for retries
 
 **Type Safety:**
-- Full ReScript type checking
+- Full AffineScript type checking
 - TypeScript strict mode
 - GenType-generated type definitions
 - No runtime type errors
@@ -95,7 +95,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 === Design Decisions
 
-- **ReScript over TypeScript** - Compile-time type safety, functional patterns
+- **AffineScript over TypeScript** - Compile-time type safety, functional patterns
 - **Deno over Node.js** - Security, built-in TypeScript, no node_modules
 - **Separate Config module** - Solves circular dependencies
 - **Native URL API** - Fast, standards-compliant parsing

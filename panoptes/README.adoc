@@ -34,7 +34,7 @@ Panoptes is a declarative, Rust-based file system watcher that uses local AI (Mo
 * https://podman.io/[Podman] 4.0+
 * https://github.com/casey/just[Just] command runner
 * https://nickel-lang.org/[Nickel] (optional, for config validation)
-* https://nixos.org/[Nix] (optional, for reproducible builds)
+* https://nixos.org/[Guix] (optional, for reproducible builds)
 
 == Quick Start
 
@@ -59,15 +59,15 @@ just watch
 
 == Installation
 
-=== Using Nix (Recommended)
+=== Using Guix (Recommended)
 
 [source,bash]
 ----
 # Enter development shell
-nix develop
+guix develop
 
 # Or build directly
-nix build
+guix build
 ----
 
 === Using Cargo

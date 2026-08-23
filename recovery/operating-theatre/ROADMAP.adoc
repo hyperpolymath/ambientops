@@ -108,7 +108,7 @@ Deliverables:
   - HAR policy-gated execution hooks (optional)
 * Packaging:
   - installers and/or portable builds per OS
-  - (optional) Guix/Nix definitions as secondary distribution paths
+  - (optional) Guix/Guix definitions as secondary distribution paths
 
 == Phase 4: Release & distribution
 

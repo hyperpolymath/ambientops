@@ -1047,7 +1047,7 @@ See `docs/AMBIENTOPS_INTEGRATION.adoc` for details.
 **Architecture:**
 * Core daemon in Rust (low overhead, safe)
 * CLI in D (robust, cross-distro)
-* Web UI in ReScript (type-safe, fast)
+* Web UI in AffineScript (type-safe, fast)
 
 == License
 

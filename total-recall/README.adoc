@@ -30,7 +30,7 @@ The following infrastructure is in place:
 
 === CI/CD Workflows
 * CodeQL analysis
-* Guix/Nix policy enforcement
+* Guix/Guix policy enforcement
 * Instant-sync for forge propagation
 * Jekyll GitHub Pages
 * Mirror workflow
@@ -54,10 +54,10 @@ Per the https://github.com/hyperpolymath[Hyperpolymath] language policy:
 
 [cols="1,2"]
 |===
-| Primary | ReScript, Rust, Gleam
+| Primary | AffineScript, Rust, Gleam
 | Runtime | Deno
 | Mobile | Tauri 2.0+ / Dioxus
-| Packages | Guix (primary), Nix (fallback)
+| Packages | Guix (primary), Guix (fallback)
 | Config | Nickel, Guile Scheme
 |===
 

@@ -15,7 +15,7 @@
   ],
   "suffix": ".js",
   "bs-dependencies": [
-    "@rescript/core"
+    "@affinescript/core"
   ],
   "gentypeconfig": {
     "language": "typescript",

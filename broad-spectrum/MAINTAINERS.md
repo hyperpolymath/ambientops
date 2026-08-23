@@ -8,7 +8,7 @@ This document lists the maintainers of the Broad Spectrum project.
 
 | Name | GitHub | Role | Focus Areas | TPCF Level |
 |------|--------|------|-------------|------------|
-| Hyperpolymath | [@hyperpolymath](https://github.com/hyperpolymath) | Lead Maintainer | Architecture, ReScript, Security | Perimeter 1 |
+| Hyperpolymath | [@hyperpolymath](https://github.com/hyperpolymath) | Lead Maintainer | Architecture, AffineScript, Security | Perimeter 1 |
 
 ## Emeritus Maintainers
 
@@ -114,7 +114,7 @@ New maintainers receive:
 ### Expertise
 
 Maintainers should have knowledge of:
-- ReScript and functional programming
+- AffineScript and functional programming
 - TypeScript and Deno
 - Website auditing (accessibility, performance, SEO)
 - Version control (Git)

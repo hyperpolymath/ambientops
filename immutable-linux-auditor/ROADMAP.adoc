@@ -79,7 +79,7 @@ ____
 === Phase 5: Release
 
 * [ ] Documentation
-* [ ] Package distribution (Guix, Nix, crates.io)
+* [ ] Package distribution (Guix, Guix, crates.io)
 * [ ] v1.0.0 release
 
 == Timeline

@@ -38,7 +38,7 @@ Both are written in *Ada 2022* (TUI, formal verification) + *Elixir/OTP* (daemon
 
 * *Unified Interface* - Single TUI for 50+ package managers
 * *Reversibility Layer* - Every operation can be rolled back
-** Native rollback for rpm-ostree, Nix, Guix, zypper
+** Native rollback for rpm-ostree, Guix, Guix, zypper
 ** Filesystem snapshots (btrfs, ZFS, LVM)
 ** Transaction logging fallback
 * *Formal Verification* - SPARK proofs for safety-critical operations
@@ -77,7 +77,7 @@ Both are written in *Ada 2022* (TUI, formal verification) + *Elixir/OTP* (daemon
 │                   Package Manager Backends                       │
 ├─────────────┬─────────────┬─────────────┬───────────────────────┤
 │ rpm-ostree  │     dnf     │     apt     │     pacman    │  ...  │
-│   zypper    │     nix     │    guix     │    flatpak    │  ...  │
+│   zypper    │     guix     │    guix     │    flatpak    │  ...  │
 └─────────────┴─────────────┴─────────────┴───────────────────────┘
 ----
 
@@ -108,7 +108,7 @@ Both are written in *Ada 2022* (TUI, formal verification) + *Elixir/OTP* (daemon
 |
 
 |Flatpak, Snap, AppImage
-|Nix, Guix, rpm-ostree
+|Guix, Guix, rpm-ostree
 |
 |===
 

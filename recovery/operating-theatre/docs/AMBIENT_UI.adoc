@@ -360,7 +360,7 @@ See `system-tools-contracts/schemas/ambient-payload.schema.json` and `system-too
 
 === Technology
 
-* **Cross-platform core**: ReScript + Deno
+* **Cross-platform core**: AffineScript + Deno
 * **Native bindings**: Platform-specific tray APIs
 * **Data layer**: Receives ambient-payload via IPC
 
