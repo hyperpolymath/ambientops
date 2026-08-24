@@ -191,7 +191,7 @@ Comprehensive build automation with multiple tools.
 **Just Recipes**: 40+ commands
 **CI Matrix**: 3 versions × 3 platforms = 9 jobs
 
-**Improvements**: Consider adding Nix flake.nix for reproducible builds
+**Improvements**: Consider adding Guix flake.guix for reproducible builds
 
 ### 7. Tests (15/15) ✓✓✓
 
@@ -428,7 +428,7 @@ Despite Gold level compliance, continuous improvement opportunities:
 1. Add code coverage reporting to CI
 2. Implement Aqua.jl quality checks
 3. Add JET.jl static analysis
-4. Create Nix flake.nix for reproducibility
+4. Create Guix flake.guix for reproducibility
 5. Upgrade to Palimpsest License v0.8
 
 ### Medium Term (v0.3)

@@ -57,7 +57,7 @@ v12 release. Version numbers are semantic milestones, not dates.
 - Optional policy profiles (dev, workstation, production)
 
 ## v4.0
-- Plugin system for new sources (e.g., nix, brew, custom scripts)
+- Plugin system for new sources (e.g., guix, brew, custom scripts)
 
 ## v5.0
 - Discover/GNOME Software integration (entry point + embedded view)

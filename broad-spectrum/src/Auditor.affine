@@ -1,4 +1,9 @@
 // SPDX-License-Identifier: MPL-2.0
+// Ported via Harvard Engine (Semantic pass)
+
+module Auditor;
+
+// SPDX-License-Identifier: MPL-2.0
 
 /**
  * Website Auditor — Analysis Orchestrator (ReScript).
@@ -10,7 +15,7 @@
 
 // SCHEMA: Parameters for an audit run.
 @genType
-type auditOptions = {
+struct auditOptions { {
   config: Config.t,
   checkLinks: bool,
   checkAccessibility: bool,
@@ -34,7 +39,7 @@ type auditOptions = {
  *    the final `Report.auditReport`.
  */
 @genType
-let auditWebsite = async (url: string, options: auditOptions): result<Report.auditReport, string> => {
+fn auditWebsite = async (url: string, options: auditOptions): result<Report.auditReport, string> => {
   // ... [Implementation of the parallel audit loop]
 }
 
@@ -44,6 +49,7 @@ let auditWebsite = async (url: string, options: auditOptions): result<Report.aud
  * requests to prevent IP blacklisting or server overload.
  */
 @genType
-let auditMultiple = async (urls: array<string>, options: auditOptions): array<result<Report.auditReport, string>> => {
+fn auditMultiple = async (urls: array<string>, options: auditOptions): array<result<Report.auditReport, string>> => {
   // ... [Sequential execution loop with interval delays]
 }
+

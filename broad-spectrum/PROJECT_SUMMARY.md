@@ -2,13 +2,13 @@
 
 ## Overview
 
-A production-ready CLI website auditor built entirely from scratch using modern functional programming techniques with ReScript, TypeScript, and Deno.
+A production-ready CLI website auditor built entirely from scratch using modern functional programming techniques with AffineScript, TypeScript, and Deno.
 
 ## What Was Built
 
 ### Core Application (100% Complete)
 
-**8 ReScript Modules** (~2,000 lines):
+**8 AffineScript Modules** (~2,000 lines):
 - ✅ Config.res - Configuration system
 - ✅ UrlParser.res - URL parsing & validation
 - ✅ Fetcher.res - HTTP client with retry logic
@@ -37,7 +37,7 @@ A production-ready CLI website auditor built entirely from scratch using modern 
 ### Build System (100% Complete)
 
 - ✅ package.json - npm dependencies & scripts
-- ✅ rescript.json - ReScript build configuration
+- ✅ affinescript.json - AffineScript build configuration
 - ✅ deno.json - Deno task definitions
 - ✅ .gitignore - Proper exclusions
 - ✅ Successful compilation (all modules)
@@ -174,7 +174,7 @@ A production-ready CLI website auditor built entirely from scratch using modern 
 ## Technical Achievements
 
 ### Type Safety
-- ✅ 100% type-safe ReScript code
+- ✅ 100% type-safe AffineScript code
 - ✅ Full TypeScript strict mode
 - ✅ GenType FFI bindings
 - ✅ No `any` types
@@ -197,7 +197,7 @@ A production-ready CLI website auditor built entirely from scratch using modern 
 ### Code Organization
 - ✅ Clear module boundaries
 - ✅ Proper abstraction layers
-- ✅ TypeScript/ReScript interop
+- ✅ TypeScript/AffineScript interop
 - ✅ Documented design decisions
 
 ## Statistics
@@ -205,7 +205,7 @@ A production-ready CLI website auditor built entirely from scratch using modern 
 ### Lines of Code
 
 ```
-ReScript Source:      ~2,000 lines (8 modules)
+AffineScript Source:      ~2,000 lines (8 modules)
 TypeScript Bindings:  ~1,500 lines (6 files)
 TypeScript CLI:         ~300 lines (1 file)
 Tests:                  ~300 lines (3 files)
@@ -303,7 +303,7 @@ deno test --allow-net --allow-read
 
 ## Key Design Decisions
 
-### Why ReScript?
+### Why AffineScript?
 - **Compile-time type safety** - Catches errors before runtime
 - **Functional programming** - Eliminates entire classes of bugs
 - **Excellent inference** - Less boilerplate than TypeScript
@@ -370,7 +370,7 @@ deno test --allow-net --allow-read
 - Example code
 
 ### For Researchers
-- Real-world ReScript application
+- Real-world AffineScript application
 - Functional programming patterns
 - TypeScript FFI examples
 - Modern CLI architecture

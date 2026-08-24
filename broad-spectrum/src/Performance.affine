@@ -1,25 +1,30 @@
+// SPDX-License-Identifier: MPL-2.0
+// Ported via Harvard Engine (Semantic pass)
+
+module Performance;
+
 // Performance.res - Performance metrics collection
 // Re-exports from HtmlParserImpl (pure ReScript implementation)
 
 @genType
-type resourceTiming = HtmlParserImpl.resourceTiming
+struct resourceTiming { HtmlParserImpl.resourceTiming
 
 @genType
-type performanceMetrics = HtmlParserImpl.performanceMetrics
+struct performanceMetrics { HtmlParserImpl.performanceMetrics
 
 @genType
-type performanceResult = {
+struct performanceResult { {
   metrics: performanceMetrics,
   suggestions: array<string>,
   warnings: array<string>,
 }
 
 @genType
-let analyze = async (html: string, url: string): performanceResult => {
-  let metrics = await HtmlParserImpl.analyzePerformance(html, url)
+fn analyze = async (html: string, url: string): performanceResult => {
+  fn metrics = await HtmlParserImpl.analyzePerformance(html, url)
 
-  let suggestions: array<string> = []
-  let warnings: array<string> = []
+  fn suggestions: array<string> = []
+  fn warnings: array<string> = []
 
   // Generate suggestions based on metrics
   if metrics.totalPageSize > 3_000_000 {
@@ -65,8 +70,8 @@ let analyze = async (html: string, url: string): performanceResult => {
 }
 
 @genType
-let calculateScore = (metrics: performanceMetrics): float => {
-  let score = ref(100.0)
+fn calculateScore = (metrics: performanceMetrics): float => {
+  fn score = ref(100.0)
 
   // Deduct based on page load time
   if metrics.loadComplete > 3000.0 {
@@ -118,11 +123,11 @@ let calculateScore = (metrics: performanceMetrics): float => {
 }
 
 @genType
-let getResourcesByType = (metrics: performanceMetrics): Dict.t<array<resourceTiming>> => {
-  let grouped = Dict.make()
+fn getResourcesByType = (metrics: performanceMetrics): Dict.t<array<resourceTiming>> => {
+  fn grouped = Dict.make()
 
   metrics.resources->Array.forEach(resource => {
-    let existing = Dict.get(grouped, resource.resourceType)->Option.getOr([])
+    fn existing = Dict.get(grouped, resource.resourceType)->Option.getOr([])
     Array.push(existing, resource)->ignore
     Dict.set(grouped, resource.resourceType, existing)
   })
@@ -131,11 +136,11 @@ let getResourcesByType = (metrics: performanceMetrics): Dict.t<array<resourceTim
 }
 
 @genType
-let getTotalSizeByType = (metrics: performanceMetrics): Dict.t<int> => {
-  let sizes = Dict.make()
+fn getTotalSizeByType = (metrics: performanceMetrics): Dict.t<int> => {
+  fn sizes = Dict.make()
 
   metrics.resources->Array.forEach(resource => {
-    let existing = Dict.get(sizes, resource.resourceType)->Option.getOr(0)
+    fn existing = Dict.get(sizes, resource.resourceType)->Option.getOr(0)
     Dict.set(sizes, resource.resourceType, existing + resource.size)
   })
 
@@ -143,9 +148,9 @@ let getTotalSizeByType = (metrics: performanceMetrics): Dict.t<int> => {
 }
 
 @genType
-let formatBytes = (bytes: int): string => {
-  let kb = Float.fromInt(bytes) /. 1024.0
-  let mb = kb /. 1024.0
+fn formatBytes = (bytes: int): string => {
+  fn kb = Float.fromInt(bytes) /. 1024.0
+  fn mb = kb /. 1024.0
 
   if mb >= 1.0 {
     `${Float.toFixed(mb, ~digits=2)}MB`
@@ -155,3 +160,4 @@ let formatBytes = (bytes: int): string => {
     `${Int.toString(bytes)}B`
   }
 }
+

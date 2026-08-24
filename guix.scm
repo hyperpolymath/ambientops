@@ -1,31 +1,28 @@
 ;; SPDX-License-Identifier: MPL-2.0
-;; Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath)
-;;
-;; Guix development environment for ambientops.
+;; Guix development environment.
 ;; Usage: guix shell -D -f guix.scm
 
 (use-modules (guix packages)
              (guix build-system gnu)
+             (guix licenses)
+             (gnu packages base)
+             (gnu packages bash)
+             (gnu packages base)
+             (gnu packages java)
              (gnu packages rust)
-             (gnu packages crates-io)
-             (gnu packages erlang)
-             (gnu packages elixir)
-             (gnu packages node))
+             (gnu packages cmake)
+             (gnu packages zig)
+             (gnu packages golang)
+             (gnu packages node)
+             (gnu packages python))
 
 (package
   (name "ambientops")
   (version "0.1.0")
   (source #f)
   (build-system gnu-build-system)
-  (native-inputs
-   (list rust
-         rust-cargo
-         elixir
-         erlang
-         deno))
-  (synopsis "Ambient operations and system management toolkit")
-  (description
-   "AmbientOps is a collection of ambient operations tools including
-system management, session monitoring, and personal sysadmin
-utilities built with Rust, Elixir, zig, and Deno.")
-  (license #f))
+  (inputs (list coreutils bash  make openjdk rust cmake zig go node python))
+  (synopsis "ambientops")
+  (description "ambientops — part of the hyperpolymath ecosystem.")
+  (home-page "https://github.com/hyperpolymath/ambientops")
+  (license ((@@ (guix licenses) license) "MPL-2.0" "https://github.com/hyperpolymath/palimpsest-license")))

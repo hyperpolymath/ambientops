@@ -17,7 +17,7 @@ git clone https://gitlab.com/YOUR_USERNAME/panoptes.git
 cd panoptes
 
 # Set up development environment
-nix develop  # or: just dev
+guix develop  # or: just dev
 
 # Create a branch
 git checkout -b feature/your-feature-name
@@ -159,11 +159,11 @@ Documentation contributions are highly valued:
 
 == Development Setup
 
-=== Using Nix (Recommended)
+=== Using Guix (Recommended)
 
 [source,bash]
 ----
-nix develop
+guix develop
 ----
 
 === Manual Setup

@@ -1,8 +1,13 @@
+// SPDX-License-Identifier: MPL-2.0
+// Ported via Harvard Engine (Semantic pass)
+
+module Report;
+
 // Report.res - Report generation in multiple formats
 // Uses ReportImpl (pure ReScript implementation)
 
 @genType
-type auditReport = {
+struct auditReport { {
   url: string,
   timestamp: string,
   linkCheck: option<LinkChecker.linkCheckResult>,
@@ -14,24 +19,24 @@ type auditReport = {
 }
 
 @genType
-let calculateOverallScore = (
+fn calculateOverallScore = (
   linkCheck: option<LinkChecker.linkCheckResult>,
   accessibility: option<Accessibility.accessibilityResult>,
   performance: option<Performance.performanceResult>,
   seo: option<SEO.seoResult>,
 ): float => {
-  let totalScore = ref(0.0)
-  let totalWeight = ref(0.0)
+  fn totalScore = ref(0.0)
+  fn totalWeight = ref(0.0)
 
   // Link checking: 20% weight
   switch linkCheck {
   | Some(result) => {
-      let brokenPercent = if result.totalLinks > 0 {
+      fn brokenPercent = if result.totalLinks > 0 {
         Float.fromInt(result.brokenLinks) /. Float.fromInt(result.totalLinks) *. 100.0
       } else {
         0.0
       }
-      let linkScore = 100.0 -. brokenPercent
+      fn linkScore = 100.0 -. brokenPercent
       totalScore := totalScore.contents +. linkScore *. 0.2
       totalWeight := totalWeight.contents +. 0.2
     }
@@ -50,7 +55,7 @@ let calculateOverallScore = (
   // Performance: 30% weight
   switch performance {
   | Some(result) => {
-      let perfScore = Performance.calculateScore(result.metrics)
+      fn perfScore = Performance.calculateScore(result.metrics)
       totalScore := totalScore.contents +. perfScore *. 0.3
       totalWeight := totalWeight.contents +. 0.3
     }
@@ -74,7 +79,7 @@ let calculateOverallScore = (
 }
 
 @genType
-let create = (
+fn create = (
   url: string,
   linkCheck: option<LinkChecker.linkCheckResult>,
   accessibility: option<Accessibility.accessibilityResult>,
@@ -82,7 +87,7 @@ let create = (
   seo: option<SEO.seoResult>,
   executionTime: float,
 ): auditReport => {
-  let overallScore = calculateOverallScore(linkCheck, accessibility, performance, seo)
+  fn overallScore = calculateOverallScore(linkCheck, accessibility, performance, seo)
 
   {
     url,
@@ -97,8 +102,8 @@ let create = (
 }
 
 @genType
-let formatConsole = (report: auditReport): string => {
-  let lines: array<string> = []
+fn formatConsole = (report: auditReport): string => {
+  fn lines: array<string> = []
 
   // Header
   Array.push(lines, "\n" ++ String.repeat("=", 80))->ignore
@@ -126,7 +131,7 @@ let formatConsole = (report: auditReport): string => {
         result.checkedLinks
           ->Array.filter(link => link.broken)
           ->Array.forEach(link => {
-            let error = link.errorMessage->Option.getOr("Unknown error")
+            fn error = link.errorMessage->Option.getOr("Unknown error")
             Array.push(lines, `  - ${link.url} [${error}]`)->ignore
           })
       }
@@ -161,7 +166,7 @@ let formatConsole = (report: auditReport): string => {
   // Performance Results
   switch report.performance {
   | Some(result) => {
-      let score = Performance.calculateScore(result.metrics)
+      fn score = Performance.calculateScore(result.metrics)
       Array.push(lines, "PERFORMANCE")->ignore
       Array.push(lines, String.repeat("-", 80))->ignore
       Array.push(lines, `Score: ${Float.toFixed(score, ~digits=1)}/100`)->ignore
@@ -204,7 +209,7 @@ let formatConsole = (report: auditReport): string => {
 
       switch result.data.description {
       | Some(desc) => {
-          let truncated = if String.length(desc) > 100 {
+          fn truncated = if String.length(desc) > 100 {
             String.substring(desc, ~start=0, ~end=100) ++ "..."
           } else {
             desc
@@ -216,8 +221,8 @@ let formatConsole = (report: auditReport): string => {
 
       Array.push(lines, `Word Count: ${Int.toString(result.data.wordCount)}`)->ignore
 
-      let errorCount = SEO.filterIssuesBySeverity(result.issues, "error")->Array.length
-      let warningCount = SEO.filterIssuesBySeverity(result.issues, "warning")->Array.length
+      fn errorCount = SEO.filterIssuesBySeverity(result.issues, "error")->Array.length
+      fn warningCount = SEO.filterIssuesBySeverity(result.issues, "warning")->Array.length
 
       if errorCount > 0 || warningCount > 0 {
         Array.push(lines, `Issues: ${Int.toString(errorCount)} errors, ${Int.toString(warningCount)} warnings`)->ignore
@@ -242,7 +247,7 @@ let formatConsole = (report: auditReport): string => {
 }
 
 @genType
-let format = async (report: auditReport, format: Config.reportFormat): string => {
+fn format = async (report: auditReport, format: Config.reportFormat): string => {
   switch format {
   | Console => formatConsole(report)
   | JSON => ReportImpl.formatAsJSON(report)
@@ -250,3 +255,4 @@ let format = async (report: auditReport, format: Config.reportFormat): string =>
   | Markdown => ReportImpl.formatAsMarkdown(report)
   }
 }
+

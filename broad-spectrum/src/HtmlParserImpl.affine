@@ -1,8 +1,13 @@
+// SPDX-License-Identifier: MPL-2.0
+// Ported via Harvard Engine (Semantic pass)
+
+module HtmlParserImpl;
+
 // HtmlParserImpl.res - Pure ReScript HTML parsing and performance analysis
 // Replaces bindings/htmlParser.ts
 
 @genType
-type resourceTiming = {
+struct resourceTiming { {
   url: string,
   resourceType: string,
   size: int,
@@ -11,7 +16,7 @@ type resourceTiming = {
 }
 
 @genType
-type performanceMetrics = {
+struct performanceMetrics { {
   firstContentfulPaint: option<float>,
   largestContentfulPaint: option<float>,
   cumulativeLayoutShift: option<float>,
@@ -27,8 +32,8 @@ type performanceMetrics = {
 }
 
 // Helper to extract matches from regex
-let extractMatches = (html: string, pattern: Js.Re.t): array<string> => {
-  let matches = Js.String2.match_(html, pattern)
+fn extractMatches = (html: string, pattern: Js.Re.t): array<string> => {
+  fn matches = Js.String2.match_(html, pattern)
   switch matches {
   | Some(arr) => arr
   | None => []
@@ -36,8 +41,8 @@ let extractMatches = (html: string, pattern: Js.Re.t): array<string> => {
 }
 
 // Helper to extract URL from attribute match
-let extractUrlFromMatch = (match_: string, prefix: string): option<string> => {
-  let cleaned = match_
+fn extractUrlFromMatch = (match_: string, prefix: string): option<string> => {
+  fn cleaned = match_
     ->String.replace(prefix ++ "\"", "")
     ->String.replace(prefix ++ "'", "")
     ->String.replaceAll("\"", "")
@@ -52,14 +57,14 @@ let extractUrlFromMatch = (match_: string, prefix: string): option<string> => {
 }
 
 @genType
-let analyzePerformance = async (html: string, _url: string): performanceMetrics => {
-  let resources: array<resourceTiming> = []
-  let totalSize = ref(String.length(html))
-  let totalTransferSize = ref(String.length(html))
+fn analyzePerformance = async (html: string, _url: string): performanceMetrics => {
+  fn resources: array<resourceTiming> = []
+  fn totalSize = ref(String.length(html))
+  fn totalTransferSize = ref(String.length(html))
 
   // Extract script tags
-  let scriptRe = %re("/<script[^>]*src=[\"']([^\"']+)[\"'][^>]*>/gi")
-  let scriptMatches = extractMatches(html, scriptRe)
+  fn scriptRe = %re("/<script[^>]*src=[\"']([^\"']+)[\"'][^>]*>/gi")
+  fn scriptMatches = extractMatches(html, scriptRe)
   scriptMatches->Array.forEach(match_ => {
     switch extractUrlFromMatch(match_, "src=") {
     | Some(url) => {
@@ -78,8 +83,8 @@ let analyzePerformance = async (html: string, _url: string): performanceMetrics 
   })
 
   // Extract stylesheet links
-  let linkRe = %re("/<link[^>]*rel=[\"']stylesheet[\"'][^>]*href=[\"']([^\"']+)[\"'][^>]*>/gi")
-  let linkMatches = extractMatches(html, linkRe)
+  fn linkRe = %re("/<link[^>]*rel=[\"']stylesheet[\"'][^>]*href=[\"']([^\"']+)[\"'][^>]*>/gi")
+  fn linkMatches = extractMatches(html, linkRe)
   linkMatches->Array.forEach(match_ => {
     switch extractUrlFromMatch(match_, "href=") {
     | Some(url) => {
@@ -98,8 +103,8 @@ let analyzePerformance = async (html: string, _url: string): performanceMetrics 
   })
 
   // Extract images
-  let imgRe = %re("/<img[^>]*src=[\"']([^\"']+)[\"'][^>]*>/gi")
-  let imgMatches = extractMatches(html, imgRe)
+  fn imgRe = %re("/<img[^>]*src=[\"']([^\"']+)[\"'][^>]*>/gi")
+  fn imgMatches = extractMatches(html, imgRe)
   imgMatches->Array.forEach(match_ => {
     switch extractUrlFromMatch(match_, "src=") {
     | Some(url) => {
@@ -117,11 +122,11 @@ let analyzePerformance = async (html: string, _url: string): performanceMetrics 
     }
   })
 
-  let resourceCount = Array.length(resources)
-  let estimatedLoadTime = 500.0 +. Float.fromInt(resourceCount) *. 50.0 +. Float.fromInt(totalSize.contents) /. 50000.0
+  fn resourceCount = Array.length(resources)
+  fn estimatedLoadTime = 500.0 +. Float.fromInt(resourceCount) *. 50.0 +. Float.fromInt(totalSize.contents) /. 50000.0
 
-  let score = Float.fromInt(100) -. Float.fromInt(totalSize.contents) /. 100000.0
-  let finalScore = if score < 0.0 { 0.0 } else { score }
+  fn score = Float.fromInt(100) -. Float.fromInt(totalSize.contents) /. 100000.0
+  fn finalScore = if score < 0.0 { 0.0 } else { score }
 
   {
     firstContentfulPaint: Some(800.0 +. Float.fromInt(totalSize.contents) /. 100000.0),
@@ -140,20 +145,20 @@ let analyzePerformance = async (html: string, _url: string): performanceMetrics 
 }
 
 @genType
-type parsedHtml = {
+struct parsedHtml { {
   title: option<string>,
   metaTags: array<{name: string, content: string}>,
   headings: Dict.t<array<string>>,
 }
 
 @genType
-let parseHtml = (html: string): parsedHtml => {
+fn parseHtml = (html: string): parsedHtml => {
   // Extract title
-  let titleRe = %re("/<title[^>]*>([^<]+)<\/title>/i")
-  let titleMatch = Js.Re.exec_(titleRe, html)
-  let title = switch titleMatch {
+  fn titleRe = %re("/<title[^>]*>([^<]+)<\/title>/i")
+  fn titleMatch = Js.Re.exec_(titleRe, html)
+  fn title = switch titleMatch {
   | Some(result) => {
-      let captures = Js.Re.captures(result)
+      fn captures = Js.Re.captures(result)
       switch captures->Array.get(1) {
       | Some(capture) => Js.Nullable.toOption(capture)->Option.map(String.trim)
       | None => None
@@ -163,16 +168,16 @@ let parseHtml = (html: string): parsedHtml => {
   }
 
   // Extract meta tags
-  let metaTags: array<{name: string, content: string}> = []
-  let metaRe = %re("/<meta[^>]*name=[\"']([^\"']+)[\"'][^>]*content=[\"']([^\"']+)[\"'][^>]*>/gi")
-  let metaMatches = extractMatches(html, metaRe)
+  fn metaTags: array<{name: string, content: string}> = []
+  fn metaRe = %re("/<meta[^>]*name=[\"']([^\"']+)[\"'][^>]*content=[\"']([^\"']+)[\"'][^>]*>/gi")
+  fn metaMatches = extractMatches(html, metaRe)
   metaMatches->Array.forEach(_match => {
     // Simple extraction - would need more robust parsing in production
     ()
   })
 
   // Extract headings
-  let headings: Dict.t<array<string>> = Dict.make()
+  fn headings: Dict.t<array<string>> = Dict.make()
   Dict.set(headings, "h1", [])
   Dict.set(headings, "h2", [])
   Dict.set(headings, "h3", [])
@@ -181,15 +186,15 @@ let parseHtml = (html: string): parsedHtml => {
   Dict.set(headings, "h6", [])
 
   for level in 1 to 6 {
-    let tag = `h${Int.toString(level)}`
-    let re = Js.Re.fromStringWithFlags(`<${tag}[^>]*>([^<]+)</${tag}>`, ~flags="gi")
-    let matches = extractMatches(html, re)
-    let headingTexts = matches->Array.filterMap(match_ => {
+    fn tag = `h${Int.toString(level)}`
+    fn re = Js.Re.fromStringWithFlags(`<${tag}[^>]*>([^<]+)</${tag}>`, ~flags="gi")
+    fn matches = extractMatches(html, re)
+    fn headingTexts = matches->Array.filterMap(match_ => {
       // Extract text between tags
-      let startTag = `<${tag}`
-      let endTag = `</${tag}>`
+      fn startTag = `<${tag}`
+      fn endTag = `</${tag}>`
       if String.includes(match_, startTag) && String.includes(match_, endTag) {
-        let text = match_
+        fn text = match_
           ->Js.String2.replaceByRe(%re("/<[^>]+>/g"), "")
           ->String.trim
         if text !== "" { Some(text) } else { None }
@@ -208,6 +213,7 @@ let parseHtml = (html: string): parsedHtml => {
 }
 
 @genType
-let extractLinksFromHtml = (html: string, baseUrl: string): array<string> => {
+fn extractLinksFromHtml = (html: string, baseUrl: string): array<string> => {
   UrlParserImpl.extractLinks(html, baseUrl)
 }
+

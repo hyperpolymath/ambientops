@@ -30,7 +30,7 @@ This document tracks the development progress of nick-shells.
 |✓ |Security hardening module |Umask, core dumps, safety aliases
 |✓ |XDG Base Directory support |Standards-compliant
 |✓ |History configuration |Timestamps, deduplication
-|✓ |RSR-compliant PATH setup |Rust, Deno, Guix, Nix
+|✓ |RSR-compliant PATH setup |Rust, Deno, Guix, Guix
 |✓ |Editor/pager configuration |Auto-detection
 |✓ |Informative prompt |Exit code display
 |✓ |Example configurations |Minimal, interactive, developer
@@ -74,7 +74,7 @@ This document tracks the development progress of nick-shells.
 |Status |Item |Notes
 
 |⏳ |Guix package |guix.scm manifest
-|⏳ |Nix flake |flake.nix
+|⏳ |Guix flake |flake.guix
 |⏳ |Homebrew formula |macOS/Linux package
 |⏳ |AUR package |Arch Linux
 |===

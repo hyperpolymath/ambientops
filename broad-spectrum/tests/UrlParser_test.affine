@@ -1,7 +1,12 @@
+// SPDX-License-Identifier: MPL-2.0
+// Ported via Harvard Engine (Semantic pass)
+
+module UrlParser_test;
+
 // UrlParser_test.res - Tests for URL parsing functionality
 
 // Simple test framework
-let assertEqual = (name: string, actual: 'a, expected: 'a) => {
+fn assertEqual = (name: string, actual: 'a, expected: 'a) => {
   if actual === expected {
     DenoBindings.consoleLog(`PASS: ${name}`)
     true
@@ -13,15 +18,15 @@ let assertEqual = (name: string, actual: 'a, expected: 'a) => {
   }
 }
 
-let assertTrue = (name: string, condition: bool) => {
+fn assertTrue = (name: string, condition: bool) => {
   assertEqual(name, condition, true)
 }
 
-let assertFalse = (name: string, condition: bool) => {
+fn assertFalse = (name: string, condition: bool) => {
   assertEqual(name, condition, false)
 }
 
-let assertSome = (name: string, opt: option<'a>) => {
+fn assertSome = (name: string, opt: option<'a>) => {
   switch opt {
   | Some(_) => {
       DenoBindings.consoleLog(`PASS: ${name}`)
@@ -34,7 +39,7 @@ let assertSome = (name: string, opt: option<'a>) => {
   }
 }
 
-let assertNone = (name: string, opt: option<'a>) => {
+fn assertNone = (name: string, opt: option<'a>) => {
   switch opt {
   | None => {
       DenoBindings.consoleLog(`PASS: ${name}`)
@@ -47,14 +52,14 @@ let assertNone = (name: string, opt: option<'a>) => {
   }
 }
 
-let runTests = () => {
+fn runTests = () => {
   DenoBindings.consoleLog("\n=== URL Parser Tests ===\n")
 
-  let passed = ref(0)
-  let failed = ref(0)
+  fn passed = ref(0)
+  fn failed = ref(0)
 
   // Test parseUrl - valid HTTP URL
-  let result1 = UrlParserImpl.parseUrl("https://example.com/path?query=value#hash")
+  fn result1 = UrlParserImpl.parseUrl("https://example.com/path?query=value#hash")
   if assertSome("parseUrl - valid HTTP URL", result1) {
     passed := passed.contents + 1
     switch result1 {
@@ -82,7 +87,7 @@ let runTests = () => {
   }
 
   // Test parseUrl - invalid URL
-  let result2 = UrlParserImpl.parseUrl("not-a-valid-url")
+  fn result2 = UrlParserImpl.parseUrl("not-a-valid-url")
   if assertNone("parseUrl - invalid URL returns None", result2) {
     passed := passed.contents + 1
   } else {
@@ -115,7 +120,7 @@ let runTests = () => {
   }
 
   // Test normalizeUrl
-  let normalized = UrlParserImpl.normalizeUrl("https://example.com/path/")
+  fn normalized = UrlParserImpl.normalizeUrl("https://example.com/path/")
   if assertEqual("normalizeUrl - removes trailing slash", normalized, "https://example.com/path") {
     passed := passed.contents + 1
   } else {
@@ -132,4 +137,5 @@ let runTests = () => {
   }
 }
 
-let _ = runTests()
+fn _ = runTests()
+

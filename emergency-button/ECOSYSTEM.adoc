@@ -51,7 +51,7 @@ A unified toolkit for Linux system health—from emergency response to preventiv
 │   │  and configuration  │    │  administration.        │               │
 │   │  reconciliation.    │    │  Sysinternals-like.     │               │
 │   │                     │    │                         │               │
-│   │  [Planned]          │    │  [ReScript/Deno]        │               │
+│   │  [Planned]          │    │  [AffineScript/Deno]        │               │
 │   │                     │    │  ✓ EXISTS               │               │
 │   └─────────────────────┘    └─────────────────────────┘               │
 │                                                                         │
@@ -95,7 +95,7 @@ A unified toolkit for Linux system health—from emergency response to preventiv
 
 |personal-sysadmin
 |✓ Active
-|ReScript/Deno
+|AffineScript/Deno
 |AI-assisted admin
 |Everyone
 |===

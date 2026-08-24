@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: MPL-2.0
+// Ported via Harvard Engine (Semantic pass)
+
+module DenoBindings;
+
 // DenoBindings.res - Direct bindings to Deno and Web APIs
 // This module provides ReScript bindings without TypeScript intermediaries
 
@@ -7,7 +12,7 @@
 @scope("Deno") @val external readTextFile: string => promise<string> = "readTextFile"
 
 // Deno.stat for file existence checks
-type fileInfo
+struct fileInfo
 @scope("Deno") @val external stat: string => promise<fileInfo> = "stat"
 
 // Console bindings
@@ -15,13 +20,13 @@ type fileInfo
 @scope("console") @val external consoleError: string => unit = "error"
 
 // Fetch API bindings
-type requestInit = {
+struct requestInit { {
   method: string,
   headers: Dict.t<string>,
   signal: option<{..}>,
 }
 
-type response = {
+struct response { {
   status: int,
   statusText: string,
   ok: bool,
@@ -39,7 +44,7 @@ type response = {
 @send external headersForEach: ({..}, (string, string) => unit) => unit = "forEach"
 
 // AbortController
-type abortController = {signal: {..}}
+struct abortController { {signal: {..}}
 @new external makeAbortController: unit => abortController = "AbortController"
 @send external abort: abortController => unit = "abort"
 
@@ -51,7 +56,7 @@ type abortController = {signal: {..}}
 @scope("performance") @val external now: unit => float = "now"
 
 // URL API bindings
-type url = {
+struct url { {
   href: string,
   protocol: string,
   hostname: string,
@@ -65,7 +70,7 @@ type url = {
 @new external makeUrlWithBase: (string, string) => url = "URL"
 
 // URLSearchParams
-type urlSearchParams
+struct urlSearchParams
 @new external makeSearchParams: string => urlSearchParams = "URLSearchParams"
 @send external searchParamsEntries: urlSearchParams => {..} = "entries"
 @send external searchParamsToString: urlSearchParams => string = "toString"
@@ -86,3 +91,4 @@ module Date = {
 
 // Array.from for iterator conversion
 @scope("Array") @val external arrayFrom: {..} => array<'a> = "from"
+

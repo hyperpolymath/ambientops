@@ -163,7 +163,7 @@ Rust serde types in `contracts-rust/` provide typed access.
 
 ### Allowed
 Rust (agent/verify boxes), V (emergency/system tools), Elixir (observability only),
-Deno (contract tests, automation), ReScript (primary app code), Bash (minimal scripts).
+Deno (contract tests, automation), AffineScript (primary app code), Bash (minimal scripts).
 
 ### Banned
 TypeScript, Node.js, npm/yarn/pnpm/bun, Go, Python, Java/Kotlin, Swift.

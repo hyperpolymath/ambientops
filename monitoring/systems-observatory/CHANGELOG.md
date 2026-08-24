@@ -90,7 +90,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `.well-known/ai.txt` - AI training and usage policies
 - `.well-known/humans.txt` - Attribution and credits
 - `justfile` - Build automation with 20+ recipes
-- `flake.nix` - Nix reproducible builds configuration
+- `flake.guix` - Guix reproducible builds configuration
 
 **Privacy & Security:**
 - 🔒 100% local processing (zero network calls)
@@ -111,7 +111,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GitLab CI/CD pipeline (.gitlab-ci.yml)
 - Docker support (docker-compose.yml)
 - Just recipes for common tasks
-- Nix flake for reproducible builds
+- Guix flake for reproducible builds
 
 **Optional Add-ons:**
 - 🔧 Technical Diagnostics (D language, 900+ lines)

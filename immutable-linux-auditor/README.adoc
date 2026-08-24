@@ -81,7 +81,7 @@ This project follows the *Hyperpolymath Language Policy* (see `.claude/CLAUDE.md
 | Rust
 | Primary implementation (CLI, systems, WASM)
 
-| ReScript
+| AffineScript
 | Web UI if needed
 
 | Deno
@@ -93,7 +93,7 @@ This project follows the *Hyperpolymath Language Policy* (see `.claude/CLAUDE.md
 | Bash/POSIX
 | Automation scripts
 
-| Guix/Nix
+| Guix/Guix
 | Package management
 |===
 
@@ -102,7 +102,7 @@ This project follows the *Hyperpolymath Language Policy* (see `.claude/CLAUDE.md
 | Banned | Replacement
 
 | TypeScript
-| ReScript
+| AffineScript
 
 | Node.js/npm
 | Deno
@@ -111,7 +111,7 @@ This project follows the *Hyperpolymath Language Policy* (see `.claude/CLAUDE.md
 | Rust
 
 | Python (general)
-| Rust/ReScript
+| Rust/AffineScript
 |===
 
 == License

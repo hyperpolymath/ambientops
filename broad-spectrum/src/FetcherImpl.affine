@@ -1,4 +1,9 @@
 // SPDX-License-Identifier: MPL-2.0
+// Ported via Harvard Engine (Semantic pass)
+
+module FetcherImpl;
+
+// SPDX-License-Identifier: MPL-2.0
 // SPDX-FileCopyrightText: 2025 Jonathan D.A. Jewell
 
 /**
@@ -20,7 +25,7 @@
 
 // SCHEMA: Typed representation of an HTTP response for analytical use.
 @genType
-type httpResponse = {
+struct httpResponse { {
   status: int,
   statusText: string,
   headers: Dict.t<string>,
@@ -42,7 +47,7 @@ type httpResponse = {
  * 6. RETURN: Return the structured `httpResponse` record.
  */
 @genType
-let fetchUrl = async (
+fn fetchUrl = async (
   url: string,
   timeout: int,
   userAgent: string,
@@ -58,10 +63,11 @@ let fetchUrl = async (
  * ALGORITHM: Linear Backoff (Delay * AttemptCount).
  */
 @genType
-let rec fetchWithRetry = async (
+fn rec fetchWithRetry = async (
   url: string,
   config: Config.t,
   attempt: int,
 ): result<httpResponse, fetchError> => {
   // ... [Recursive retry implementation]
 }
+

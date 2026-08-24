@@ -2,7 +2,7 @@
 
 ## Overview
 
-Broad Spectrum is a modular website auditing system built with functional programming principles using ReScript, with runtime bindings to Deno/TypeScript for system-level operations.
+Broad Spectrum is a modular website auditing system built with functional programming principles using AffineScript, with runtime bindings to Deno/TypeScript for system-level operations.
 
 ## Core Architecture
 
@@ -102,7 +102,7 @@ The top-level module that coordinates the entire audit process:
 
 ## TypeScript/Deno Bindings Layer
 
-Located in `src/bindings/`, these provide the FFI between ReScript and Deno:
+Located in `src/bindings/`, these provide the FFI between AffineScript and Deno:
 
 **ada.ts** - URL parsing using native URL API
 **fetcher.ts** - HTTP client with fetch() and AbortController
@@ -111,7 +111,7 @@ Located in `src/bindings/`, these provide the FFI between ReScript and Deno:
 **seoParser.ts** - SEO data extraction
 **report.ts** - Report formatting
 
-**Design Decision:** Keep I/O and external dependencies in TypeScript, business logic in ReScript. This provides:
+**Design Decision:** Keep I/O and external dependencies in TypeScript, business logic in AffineScript. This provides:
 - Type safety where it matters (business logic)
 - Flexibility where needed (system integration)
 - Clear separation of concerns
@@ -145,17 +145,17 @@ Output (Console/File)
 **Three-Tier Approach:**
 
 1. **Result Types** - Used for expected errors
-   ```rescript
+   ```affinescript
    type result<'a, 'b> = Ok('a) | Error('b)
    ```
 
 2. **Option Types** - Used for missing data
-   ```rescript
+   ```affinescript
    type option<'a> = Some('a) | None
    ```
 
 3. **Exception Handling** - Used for unexpected errors
-   ```rescript
+   ```affinescript
    try {
      // ... risky code
    } catch {
@@ -184,7 +184,7 @@ Output (Console/File)
 ## Concurrency Model
 
 **Parallel Scanner Execution:**
-```rescript
+```affinescript
 let (linkCheck, accessibility, performance, seo) =
   await Promise.all4((
     linkCheckPromise,
@@ -195,7 +195,7 @@ let (linkCheck, accessibility, performance, seo) =
 ```
 
 **Batch-Limited Link Checking:**
-```rescript
+```affinescript
 for i in 0 to batchCount {
   let batch = Array.slice(urls, ~start, ~end)
   let results = await Promise.all(
@@ -211,7 +211,7 @@ for i in 0 to batchCount {
 
 ## Type Safety
 
-**ReScript Benefits:**
+**AffineScript Benefits:**
 - Compile-time type checking
 - No `null` or `undefined` (use Option instead)
 - Exhaustive pattern matching
@@ -235,7 +235,7 @@ for i in 0 to batchCount {
 - Validate report generation
 
 **Type Tests**
-- ReScript compiler catches type errors
+- AffineScript compiler catches type errors
 - No runtime type checking needed
 
 ## Performance Considerations
@@ -301,8 +301,8 @@ for i in 0 to batchCount {
 ## Build Pipeline
 
 ```
-ReScript Source (.res files)
-    ↓ [rescript compiler]
+AffineScript Source (.res files)
+    ↓ [affinescript compiler]
 JavaScript Modules (.js files)
     ↓ [gentype]
 TypeScript Definitions (.gen.tsx files)

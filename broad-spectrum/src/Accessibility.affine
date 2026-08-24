@@ -1,0 +1,97 @@
+// SPDX-License-Identifier: MPL-2.0
+// Ported via Harvard Engine (Semantic pass)
+
+module Accessibility;
+
+// Accessibility.res - WCAG compliance checks
+// Re-exports from AccessibilityImpl (pure ReScript implementation)
+
+@genType
+struct wcagLevel { AccessibilityImpl.wcagLevel
+
+@genType
+struct accessibilityIssue { AccessibilityImpl.accessibilityIssue
+
+@genType
+struct accessibilityResult { AccessibilityImpl.accessibilityResult
+
+@genType
+fn check = AccessibilityImpl.checkAccessibility
+
+@genType
+fn levelToString = AccessibilityImpl.levelToString
+
+@genType
+fn levelFromString = AccessibilityImpl.levelFromString
+
+@genType
+fn filterByLevel = (issues: array<accessibilityIssue>, level: wcagLevel): array<accessibilityIssue> => {
+  issues->Array.filter(issue => {
+    switch (issue.level, level) {
+    | (A, A) => true
+    | (A, AA) => true
+    | (A, AAA) => true
+    | (AA, AA) => true
+    | (AA, AAA) => true
+    | (AAA, AAA) => true
+    | _ => false
+    }
+  })
+}
+
+@genType
+fn filterByCritical = (issues: array<accessibilityIssue>): array<accessibilityIssue> => {
+  issues->Array.filter(issue => issue.impact === "critical" || issue.impact === "serious")
+}
+
+@genType
+fn calculateScore = (result: accessibilityResult): float => {
+  fn criticalViolations = result.violations->Array.filter(v => v.impact === "critical")->Array.length
+  fn seriousViolations = result.violations->Array.filter(v => v.impact === "serious")->Array.length
+  fn moderateViolations = result.violations->Array.filter(v => v.impact === "moderate")->Array.length
+  fn minorViolations = result.violations->Array.filter(v => v.impact === "minor")->Array.length
+
+  fn totalChecks = Float.fromInt(result.passes + Array.length(result.violations) + result.incomplete)
+
+  if totalChecks === 0.0 {
+    100.0
+  } else {
+    fn deductions =
+      Float.fromInt(criticalViolations) *. 10.0 +.
+      Float.fromInt(seriousViolations) *. 5.0 +.
+      Float.fromInt(moderateViolations) *. 2.0 +.
+      Float.fromInt(minorViolations) *. 0.5
+
+    fn score = 100.0 -. deductions
+    if score < 0.0 {
+      0.0
+    } else {
+      score
+    }
+  }
+}
+
+@genType
+fn groupByRule = (issues: array<accessibilityIssue>): Dict.t<array<accessibilityIssue>> => {
+  fn grouped = Dict.make()
+
+  issues->Array.forEach(issue => {
+    fn existing = Dict.get(grouped, issue.rule)->Option.getOr([])
+    Array.push(existing, issue)->ignore
+    Dict.set(grouped, issue.rule, existing)
+  })
+
+  grouped
+}
+
+@genType
+fn getSummary = (result: accessibilityResult): string => {
+  fn criticalCount = filterByCritical(result.violations)->Array.length
+  fn score = calculateScore(result)
+
+  `Accessibility Score: ${Float.toString(score)}/100 | ` ++
+  `Violations: ${Int.toString(Array.length(result.violations))} ` ++
+  `(${Int.toString(criticalCount)} critical) | ` ++
+  `WCAG Level: ${levelToString(result.wcagLevel)}`
+}
+

@@ -28,13 +28,13 @@ The following files in `.machine_readable/` contain structured project metadata:
 |---------------|----------|-------|
 | **D** | Driver/deployment layer | Adapters, execution, IO boundaries |
 | **V** | Verification layer | Policy, plan verification, schema conformance |
-| **ReScript** | Primary application code | Compiles to JS, type-safe; AmbientOps primary |
+| **AffineScript** | Primary application code | Compiles to JS, type-safe; AmbientOps primary |
 | **Deno** | Runtime & package management | Replaces Node/npm/bun |
 | **Rust** | Agent/verify boxes only | Isolated repos (`*-agent-rs/`, `*-verify-rs/`) |
 | **Elixir** | Observability/event hub only | NEVER source of truth |
 | **Gleam** | Backend services | Runs on BEAM or compiles to JS |
 | **Bash/POSIX Shell** | Scripts, automation | Keep minimal |
-| **JavaScript** | Only where ReScript cannot | MCP protocol glue, Deno APIs |
+| **JavaScript** | Only where AffineScript cannot | MCP protocol glue, Deno APIs |
 | **Nickel** | Configuration language | For complex configs |
 | **Guile Scheme** | State/meta files | STATE.scm, META.scm, ECOSYSTEM.scm |
 | **Julia** | Batch scripts, data processing | Per RSR |
@@ -47,11 +47,11 @@ The following files in `.machine_readable/` contain structured project metadata:
 
 | Banned | Replacement | Reason |
 |--------|-------------|--------|
-| TypeScript | ReScript | Type safety without JS baggage |
+| TypeScript | AffineScript | Type safety without JS baggage |
 | Node.js | Deno | Security-first runtime |
 | npm/yarn/pnpm/bun | Deno | Deno manages deps |
 | Go | Rust | Memory safety without GC |
-| **Python** | ReScript/Rust/D/V | **Completely banned** (SaltStack abandoned) |
+| **Python** | AffineScript/Rust/D/V | **Completely banned** (SaltStack abandoned) |
 | Java/Kotlin | Rust/Tauri | No JVM |
 | Swift | Tauri/Dioxus | No Apple lock-in |
 
@@ -72,7 +72,7 @@ Elixir is allowed **only for observability/event hubs**:
 
 ### Enforcement Rules
 
-1. **No new TypeScript files** - Convert existing TS to ReScript
+1. **No new TypeScript files** - Convert existing TS to AffineScript
 2. **No package.json for runtime deps** - Use deno.json imports
 3. **No node_modules in production** - Deno caches deps automatically
 4. **No Go code** - Use Rust instead
@@ -82,7 +82,7 @@ Elixir is allowed **only for observability/event hubs**:
 ### Package Management
 
 - **Primary**: Guix (guix.scm)
-- **Fallback**: Nix (flake.nix)
+- **Fallback**: Guix (flake.guix)
 - **JS deps**: Deno (deno.json imports)
 
 ### Security Requirements

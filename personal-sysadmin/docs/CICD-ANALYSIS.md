@@ -53,7 +53,7 @@ Typical repo has **14-19 workflows**. Many are redundant or overlapping:
 | Build/CI | rust-ci.yml, zig-ffi.yml, release.yml | Keep - project-specific |
 | Quality | quality.yml | Keep |
 | Fuzzing | cflite_batch.yml, cflite_pr.yml | Keep for security testing |
-| Standards | guix-nix-policy.yml, wellknown-enforcement.yml | Keep |
+| Standards | guix-guix-policy.yml, wellknown-enforcement.yml | Keep |
 | Pages | jekyll*.yml | Migrate to casket-ssg |
 
 ## Recommended Optimizations

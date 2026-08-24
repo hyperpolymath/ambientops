@@ -1,11 +1,16 @@
+// SPDX-License-Identifier: MPL-2.0
+// Ported via Harvard Engine (Semantic pass)
+
+module AccessibilityImpl;
+
 // AccessibilityImpl.res - Pure ReScript accessibility checking
 // Replaces bindings/a11y.ts
 
 @genType
-type wcagLevel = A | AA | AAA
+struct wcagLevel { A | AA | AAA
 
 @genType
-type accessibilityIssue = {
+struct accessibilityIssue { {
   rule: string,
   level: wcagLevel,
   message: string,
@@ -15,7 +20,7 @@ type accessibilityIssue = {
 }
 
 @genType
-type accessibilityResult = {
+struct accessibilityResult { {
   score: float,
   violations: array<accessibilityIssue>,
   warnings: array<accessibilityIssue>,
@@ -25,7 +30,7 @@ type accessibilityResult = {
 }
 
 // Helper to count regex matches
-let countMatches = (html: string, pattern: Js.Re.t): int => {
+fn countMatches = (html: string, pattern: Js.Re.t): int => {
   switch Js.String2.match_(html, pattern) {
   | Some(matches) => Array.length(matches)
   | None => 0
@@ -33,19 +38,19 @@ let countMatches = (html: string, pattern: Js.Re.t): int => {
 }
 
 // Helper to check if pattern exists
-let hasPattern = (html: string, pattern: Js.Re.t): bool => {
+fn hasPattern = (html: string, pattern: Js.Re.t): bool => {
   Js.Re.test_(pattern, html)
 }
 
 @genType
-let checkAccessibility = async (html: string, _url: string): accessibilityResult => {
-  let violations: array<accessibilityIssue> = []
-  let warnings: array<accessibilityIssue> = []
-  let passes = ref(0)
+fn checkAccessibility = async (html: string, _url: string): accessibilityResult => {
+  fn violations: array<accessibilityIssue> = []
+  fn warnings: array<accessibilityIssue> = []
+  fn passes = ref(0)
 
   // Check for alt text on images
-  let imgRe = %re("/<img[^>]*>/gi")
-  let imgMatches = Js.String2.match_(html, imgRe)
+  fn imgRe = %re("/<img[^>]*>/gi")
+  fn imgMatches = Js.String2.match_(html, imgRe)
   switch imgMatches {
   | Some(matches) => {
       matches->Array.forEach(imgTag => {
@@ -67,7 +72,7 @@ let checkAccessibility = async (html: string, _url: string): accessibilityResult
   }
 
   // Check for lang attribute
-  let langRe = %re("/<html[^>]*lang=/i")
+  fn langRe = %re("/<html[^>]*lang=/i")
   if !hasPattern(html, langRe) {
     Array.push(violations, {
       rule: "html-has-lang",
@@ -82,7 +87,7 @@ let checkAccessibility = async (html: string, _url: string): accessibilityResult
   }
 
   // Check for page title
-  let titleRe = %re("/<title[^>]*>/i")
+  fn titleRe = %re("/<title[^>]*>/i")
   if !hasPattern(html, titleRe) {
     Array.push(violations, {
       rule: "document-title",
@@ -97,7 +102,7 @@ let checkAccessibility = async (html: string, _url: string): accessibilityResult
   }
 
   // Check for viewport meta tag
-  let viewportRe = %re("/<meta[^>]*name=[\"']viewport[\"'][^>]*>/i")
+  fn viewportRe = %re("/<meta[^>]*name=[\"']viewport[\"'][^>]*>/i")
   if !hasPattern(html, viewportRe) {
     Array.push(warnings, {
       rule: "meta-viewport",
@@ -112,8 +117,8 @@ let checkAccessibility = async (html: string, _url: string): accessibilityResult
   }
 
   // Check for proper heading hierarchy
-  let h1Re = %re("/<h1[^>]*>/gi")
-  let h1Count = countMatches(html, h1Re)
+  fn h1Re = %re("/<h1[^>]*>/gi")
+  fn h1Count = countMatches(html, h1Re)
   if h1Count === 0 {
     Array.push(violations, {
       rule: "page-has-heading-one",
@@ -137,24 +142,24 @@ let checkAccessibility = async (html: string, _url: string): accessibilityResult
   }
 
   // Check for form labels
-  let inputRe = %re("/<input[^>]*type=[\"'](?!hidden)[^\"']*[\"'][^>]*>/gi")
-  let inputMatches = Js.String2.match_(html, inputRe)
+  fn inputRe = %re("/<input[^>]*struct=[\"'](?!hidden)[^\"']*[\"'][^>]*>/gi")
+  fn inputMatches = Js.String2.match_(html, inputRe)
   switch inputMatches {
   | Some(matches) => {
       matches->Array.forEach(inputTag => {
-        let idRe = %re("/id=[\"']([^\"']+)[\"']/")
-        let idMatch = Js.Re.exec_(idRe, inputTag)
+        fn idRe = %re("/id=[\"']([^\"']+)[\"']/")
+        fn idMatch = Js.Re.exec_(idRe, inputTag)
         switch idMatch {
         | Some(result) => {
-            let captures = Js.Re.captures(result)
+            fn captures = Js.Re.captures(result)
             switch captures->Array.get(1) {
             | Some(capture) => {
-                let id = Js.Nullable.toOption(capture)
+                fn id = Js.Nullable.toOption(capture)
                 switch id {
                 | Some(idVal) => {
-                    let labelFor = `for="${idVal}"`
-                    let hasLabel = String.includes(html, labelFor)
-                    let hasAriaLabel = String.includes(inputTag, "aria-label=")
+                    fn labelFor = `for="${idVal}"`
+                    fn hasLabel = String.includes(html, labelFor)
+                    fn hasAriaLabel = String.includes(inputTag, "aria-label=")
                     if !hasLabel && !hasAriaLabel {
                       Array.push(violations, {
                         rule: "label",
@@ -182,7 +187,7 @@ let checkAccessibility = async (html: string, _url: string): accessibilityResult
   }
 
   // Check for color contrast (simplified)
-  let hasColorStyles = String.includes(html, "color:") || String.includes(html, "background")
+  fn hasColorStyles = String.includes(html, "color:") || String.includes(html, "background")
   if hasColorStyles {
     Array.push(warnings, {
       rule: "color-contrast",
@@ -195,13 +200,13 @@ let checkAccessibility = async (html: string, _url: string): accessibilityResult
   }
 
   // Check for link text
-  let linkRe = %re("/<a[^>]*href=[\"'][^\"']+[\"'][^>]*>([^<]*)<\/a>/gi")
-  let linkMatches = Js.String2.match_(html, linkRe)
+  fn linkRe = %re("/<a[^>]*href=[\"'][^\"']+[\"'][^>]*>([^<]*)<\/a>/gi")
+  fn linkMatches = Js.String2.match_(html, linkRe)
   switch linkMatches {
   | Some(matches) => {
       matches->Array.forEach(linkTag => {
         // Extract text between tags
-        let text = linkTag
+        fn text = linkTag
           ->Js.String2.replaceByRe(%re("/<[^>]+>/g"), "")
           ->String.trim
         if String.length(text) < 2 {
@@ -222,15 +227,15 @@ let checkAccessibility = async (html: string, _url: string): accessibilityResult
   }
 
   // Calculate score
-  let criticalCount = violations->Array.filter(v => v.impact === "critical")->Array.length
-  let seriousCount = violations->Array.filter(v => v.impact === "serious")->Array.length
+  fn criticalCount = violations->Array.filter(v => v.impact === "critical")->Array.length
+  fn seriousCount = violations->Array.filter(v => v.impact === "serious")->Array.length
 
-  let score = Float.fromInt(100) -.
+  fn score = Float.fromInt(100) -.
     Float.fromInt(criticalCount) *. 10.0 -.
     Float.fromInt(seriousCount) *. 5.0 -.
     Float.fromInt(Array.length(warnings)) *. 2.0
 
-  let finalScore = if score < 0.0 { 0.0 } else { score }
+  fn finalScore = if score < 0.0 { 0.0 } else { score }
 
   {
     score: finalScore,
@@ -243,7 +248,7 @@ let checkAccessibility = async (html: string, _url: string): accessibilityResult
 }
 
 @genType
-let levelToString = (level: wcagLevel): string => {
+fn levelToString = (level: wcagLevel): string => {
   switch level {
   | A => "A"
   | AA => "AA"
@@ -252,7 +257,7 @@ let levelToString = (level: wcagLevel): string => {
 }
 
 @genType
-let levelFromString = (str: string): option<wcagLevel> => {
+fn levelFromString = (str: string): option<wcagLevel> => {
   switch String.toUpperCase(str) {
   | "A" => Some(A)
   | "AA" => Some(AA)
@@ -260,3 +265,4 @@ let levelFromString = (str: string): option<wcagLevel> => {
   | _ => None
   }
 }
+

@@ -24,7 +24,7 @@ This repository contains RSR infrastructure only. No application code, design do
 | ✓ | Justfile | ~50 task recipes ready
 | ○ | Project specification | *Awaiting upload*
 | ○ | STATE.scm | Pending spec
-| ○ | guix.scm / flake.nix | Pending spec
+| ○ | guix.scm / flake.guix | Pending spec
 | ○ | .well-known/* | Pending spec
 |===
 
@@ -39,7 +39,7 @@ Once the project specification is uploaded:
 * [ ] Select primary implementation language(s) from allowed stack
 * [ ] Create STATE.scm with phase tracking
 * [ ] Define initial API/interface contracts
-* [ ] Set up package definitions (guix.scm and/or flake.nix)
+* [ ] Set up package definitions (guix.scm and/or flake.guix)
 * [ ] Configure .well-known files (security.txt, ai.txt, humans.txt)
 * [ ] Populate RSR_COMPLIANCE.adoc
 

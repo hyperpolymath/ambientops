@@ -38,7 +38,7 @@ Deliverables:
 
 Deliverables:
 
-* Web-based dashboard (ReScript + Deno)
+* Web-based dashboard (AffineScript + Deno)
 * Real-time system health view
 * Historical trends
 * Change timeline with annotations
@@ -76,7 +76,7 @@ Deliverables:
 | Batch data processing per RSR
 
 | Dashboard UI
-| ReScript + Deno
+| AffineScript + Deno
 | AmbientOps primary stack
 
 | Metrics store

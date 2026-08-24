@@ -53,7 +53,7 @@ This is a monorepo with 20+ components. Coverage is extremely uneven:
 - **monitoring/systems-observatory/** (Julia) — no tests
 - **contracts/** (Deno) — no tests
 
-Total: 163 Rust + 121 Elixir + 73 Zig + 46 Julia + 79 ReScript + 44 V source files.
+Total: 163 Rust + 121 Elixir + 73 Zig + 46 Julia + 79 AffineScript + 44 V source files.
 Test coverage concentrated in Elixir components only.
 
 ### End-to-End (E2E)
@@ -94,7 +94,7 @@ Test coverage concentrated in Elixir components only.
 - [ ] Systemd unit file validation
 
 ## Priority
-- **HIGH** — Massive monorepo (163 Rust + 121 Elixir + 73 Zig + 46 Julia files across 20+ components) with tests concentrated only in the Elixir components. The Rust, Zig, Julia, and ReScript components are essentially untested. Infrastructure tools need especially high reliability.
+- **HIGH** — Massive monorepo (163 Rust + 121 Elixir + 73 Zig + 46 Julia files across 20+ components) with tests concentrated only in the Elixir components. The Rust, Zig, Julia, and AffineScript components are essentially untested. Infrastructure tools need especially high reliability.
 
 ## FAKE-FUZZ ALERT
 

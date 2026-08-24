@@ -122,7 +122,7 @@ unset __NS
 |Directory listing (`ll`, `la`), navigation (`..`, `...`), grep colors
 
 |`path.sh`
-|RSR-compliant PATH for Rust, Deno, Guix, Nix, `~/.local/bin`
+|RSR-compliant PATH for Rust, Deno, Guix, Guix, `~/.local/bin`
 
 |`editor.sh`
 |Auto-detect editor (hx > nvim > vim > vi), less pager config
