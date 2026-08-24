@@ -118,13 +118,13 @@ guix-build:
 guix-shell:
     guix shell -D -f guix.scm
 
-# Build with Nix
-nix-build:
-    nix build
+# Build with Guix
+guix-build:
+    guix build
 
-# Enter Nix shell
-nix-shell:
-    nix develop
+# Enter Guix shell
+guix-shell:
+    guix develop
 
 # === RELEASE ===
 

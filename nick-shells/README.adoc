@@ -20,7 +20,7 @@ toc::[]
 
 * **Modular design** — Pick only the modules you need
 * **Security-first** — Safe defaults, no dangerous practices
-* **RSR-compliant** — PATH setup for Rust, Deno, Guix, Nix
+* **RSR-compliant** — PATH setup for Rust, Deno, Guix, Guix
 * **POSIX-compatible** — Works with Bash, Zsh, and POSIX sh
 * **Type-safe configuration** — Nickel schema for validation
 * **Easy installation** — One-command setup with backup/rollback
@@ -140,7 +140,7 @@ unset __NS
 |Navigation (`..`, `...`), listing (`ll`, `la`), grep colours
 
 |`path.sh`
-|RSR-compliant PATH for Rust, Deno, Guix, Nix, `~/.local/bin`
+|RSR-compliant PATH for Rust, Deno, Guix, Guix, `~/.local/bin`
 
 |`editor.sh`
 |Auto-detect editor (hx > nvim > vim > vi), less pager config

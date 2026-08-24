@@ -65,8 +65,8 @@ updates:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
 
-  # Nix flakes
-  - package-ecosystem: "nix"
+  # Guix flakes
+  - package-ecosystem: "guix"
     directory: "/"
     schedule:
       interval: "daily"

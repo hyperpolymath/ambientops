@@ -21,7 +21,7 @@ This document provides context for AI assistants (Claude, GPT, etc.) working wit
 |Local AI-powered file scanner and renamer using vision models
 
 |Language
-|Rust (primary), Nickel (config), Nix (reproducibility)
+|Rust (primary), Nickel (config), Guix (reproducibility)
 
 |License
 |MPL-2.0
@@ -94,9 +94,9 @@ Output: Renamed files based on AI-generated descriptions
 |Task runner recipes
 |Just
 
-|`flake.nix`
+|`flake.guix`
 |Reproducible builds
-|Nix
+|Guix
 
 |`Containerfile`
 |Container build spec
@@ -146,8 +146,8 @@ just build
 # Release build
 just build-release
 
-# With Nix
-nix build
+# With Guix
+guix build
 ----
 
 === Testing
@@ -180,7 +180,7 @@ just watch-dry
 This project maintains RSR Gold compliance:
 
 === Category 1: Foundational Infrastructure
-* [x] `flake.nix` - Nix reproducibility
+* [x] `flake.guix` - Guix reproducibility
 * [x] `config.ncl` - Nickel configuration
 * [x] `Justfile` - Task runner (20+ recipes)
 * [x] `Containerfile` - Podman (not Docker)

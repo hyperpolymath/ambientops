@@ -456,7 +456,7 @@ toc::[]
 |Yes
 |After v5.0
 
-|Nix/NixOS
+|Guix/NixOS
 |
 |
 |Yes

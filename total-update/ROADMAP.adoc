@@ -7,7 +7,7 @@
 
 *Version:* 0.1.0 +
 *Phase:* Walking Skeleton Complete +
-*Status:* Guix/Nix backends working, safety boundary verified, plugin architecture implemented
+*Status:* Guix/Guix backends working, safety boundary verified, plugin architecture implemented
 
 === Completed
 
@@ -68,7 +68,7 @@
 ** Native recovery point support
 ** Profile management
 
-* [x] Nix backend (Ada + Elixir)
+* [x] Guix backend (Ada + Elixir)
 ** Generation-based install/upgrade/rollback
 ** Native recovery point support
 ** Profile management
@@ -82,7 +82,7 @@
 ** Plugin behaviour/interface
 ** Plugin registry with capability-based selection
 ** Priority-ordered plugin discovery
-** Built-in Guix and Nix plugins
+** Built-in Guix and Guix plugins
 
 * [x] Strategy matrix
 ** Snapshot backend detection (btrfs, ZFS, LVM, native)
@@ -143,7 +143,7 @@
 ==== Priority 0 (Immutable Systems)
 
 * [ ] rpm-ostree (Silverblue, Kinoite, CoreOS)
-* [x] Nix (NixOS and standalone) ✓
+* [x] Guix (NixOS and standalone) ✓
 * [x] Guix (Guix System and standalone) ✓
 
 ==== Priority 1 (Major Distributions)

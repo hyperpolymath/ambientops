@@ -7,7 +7,7 @@ This file contains instructions and context for Claude Code when working on this
 **Repository:** Hyperpolymath/broad-spectrum
 **Project:** Website Auditor
 
-A standalone CLI website auditor that performs comprehensive security, accessibility, performance, and SEO audits. Written entirely in ReScript with Deno as the runtime.
+A standalone CLI website auditor that performs comprehensive security, accessibility, performance, and SEO audits. Written entirely in AffineScript with Deno as the runtime.
 
 **Key Features:**
 - Broken link detection and validation
@@ -19,12 +19,12 @@ A standalone CLI website auditor that performs comprehensive security, accessibi
 ## Technology Stack
 
 **Core Technologies:**
-- **ReScript**: Primary language (100% ReScript, no TypeScript)
+- **AffineScript**: Primary language (100% AffineScript, no TypeScript)
 - **Deno**: Secure runtime (no Node.js runtime deps)
 - **Native URL API**: WHATWG-compliant URL parsing via browser/Deno APIs
 
 **Build Pipeline:**
-- ReScript compiler (`rescript`) → JavaScript modules
+- AffineScript compiler (`affinescript`) → JavaScript modules
 - Deno for runtime execution
 - `just` for task orchestration
 - Nickel (`Mustfile.ncl`) for configuration contracts
@@ -34,12 +34,12 @@ A standalone CLI website auditor that performs comprehensive security, accessibi
 See `.claude/CLAUDE.md` for the complete language policy. Key points:
 
 **ALLOWED:**
-- ReScript (primary application code)
+- AffineScript (primary application code)
 - Nickel (configuration)
 - Bash (minimal scripts)
 
 **BANNED:**
-- TypeScript - Use ReScript
+- TypeScript - Use AffineScript
 - Node.js/npm/bun - Use Deno
 - Makefiles - Use Justfile
 
@@ -47,7 +47,7 @@ See `.claude/CLAUDE.md` for the complete language policy. Key points:
 
 ```
 broad-spectrum/
-├── src/                    # ReScript source files
+├── src/                    # AffineScript source files
 │   ├── Main.res           # CLI entry point
 │   ├── Auditor.res        # Main orchestrator
 │   ├── Config.res         # Shared configuration types
@@ -65,13 +65,13 @@ broad-spectrum/
 │   ├── SeoParserImpl.res # SEO implementation
 │   ├── Report.res        # Report generation (facade)
 │   └── ReportImpl.res    # Report implementation
-├── tests/                 # ReScript test files
+├── tests/                 # AffineScript test files
 ├── lib/                   # Compiled JavaScript output
-├── rescript.json          # ReScript build configuration
+├── affinescript.json          # AffineScript build configuration
 ├── deno.json             # Deno task definitions
 ├── Justfile              # Task runner (replaces Makefile)
 ├── Mustfile.ncl          # Nickel configuration contract
-└── package.json          # Dev deps only (ReScript compiler)
+└── package.json          # Dev deps only (AffineScript compiler)
 ```
 
 ## Common Tasks
@@ -79,12 +79,12 @@ broad-spectrum/
 ### Development Setup
 
 ```bash
-# Install ReScript compiler (dev dependency)
+# Install AffineScript compiler (dev dependency)
 npm install
 
 # Build the project
 just build
-# OR: rescript build
+# OR: affinescript build
 
 # Watch mode
 just watch
@@ -120,8 +120,8 @@ just rsr-status  # Show compliance status
 
 ## Architecture Notes
 
-**Pure ReScript Implementation:**
-All functionality is implemented in ReScript. The `*Impl.res` files contain the actual implementations, while the facade modules (without `Impl`) provide the public API. This allows for:
+**Pure AffineScript Implementation:**
+All functionality is implemented in AffineScript. The `*Impl.res` files contain the actual implementations, while the facade modules (without `Impl`) provide the public API. This allows for:
 - Clean module interfaces
 - Easy testing
 - No TypeScript dependencies
@@ -137,31 +137,31 @@ Contains direct bindings to Deno/Web APIs including:
 **No External Dependencies:**
 The project uses only:
 - Native Web/Deno APIs for URL parsing, HTTP, etc.
-- ReScript standard library
+- AffineScript standard library
 - No npm runtime dependencies
 
-## ReScript Best Practices
+## AffineScript Best Practices
 
-1. **Use @rescript/core Array module:**
-   ```rescript
+1. **Use @affinescript/core Array module:**
+   ```affinescript
    Array.push(arr, item)->ignore
    Array.map(arr, fn)
    ```
 
 2. **Escape reserved keywords:**
-   ```rescript
+   ```affinescript
    type linkStatus = {
      \"external": bool
    }
    ```
 
 3. **Promise handling:**
-   ```rescript
+   ```affinescript
    let result = await someAsyncFn()
    ```
 
 4. **External bindings:**
-   ```rescript
+   ```affinescript
    @scope("Deno") @val external args: array<string> = "args"
    ```
 
@@ -173,11 +173,11 @@ GitHub Actions enforce:
 
 ## Resources
 
-- [ReScript Documentation](https://rescript-lang.org/docs/manual/latest)
+- [AffineScript Documentation](https://affinescript-lang.org/docs/manual/latest)
 - [Deno Documentation](https://deno.land/manual)
 - [just Command Runner](https://github.com/casey/just)
 - [Nickel Configuration](https://nickel-lang.org/)
 
 ---
 
-*This file is updated to reflect the pure ReScript architecture.*
+*This file is updated to reflect the pure AffineScript architecture.*

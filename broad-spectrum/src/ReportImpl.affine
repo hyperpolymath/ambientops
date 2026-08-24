@@ -1,8 +1,13 @@
+// SPDX-License-Identifier: MPL-2.0
+// Ported via Harvard Engine (Semantic pass)
+
+module ReportImpl;
+
 // ReportImpl.res - Pure ReScript report formatting
 // Replaces bindings/report.ts
 
 // HTML character escaping
-let escapeHtml = (text: string): string => {
+fn escapeHtml = (text: string): string => {
   text
     ->String.replaceAll("&", "&amp;")
     ->String.replaceAll("<", "&lt;")
@@ -12,9 +17,9 @@ let escapeHtml = (text: string): string => {
 }
 
 // Format bytes to human readable
-let formatBytes = (bytes: int): string => {
-  let kb = Float.fromInt(bytes) /. 1024.0
-  let mb = kb /. 1024.0
+fn formatBytes = (bytes: int): string => {
+  fn kb = Float.fromInt(bytes) /. 1024.0
+  fn mb = kb /. 1024.0
   if mb >= 1.0 {
     `${Float.toFixed(mb, ~digits=2)}MB`
   } else if kb >= 1.0 {
@@ -25,8 +30,8 @@ let formatBytes = (bytes: int): string => {
 }
 
 // Calculate performance score
-let calculatePerformanceScore = (metrics: HtmlParserImpl.performanceMetrics): float => {
-  let score = ref(100.0)
+fn calculatePerformanceScore = (metrics: HtmlParserImpl.performanceMetrics): float => {
+  fn score = ref(100.0)
   if metrics.loadComplete > 3000.0 {
     score := score.contents -. 20.0
   } else if metrics.loadComplete > 2000.0 {
@@ -39,7 +44,7 @@ let calculatePerformanceScore = (metrics: HtmlParserImpl.performanceMetrics): fl
 }
 
 // Get score CSS class
-let getScoreClass = (score: float): string => {
+fn getScoreClass = (score: float): string => {
   if score >= 90.0 { "score-excellent" }
   else if score >= 70.0 { "score-good" }
   else if score >= 50.0 { "score-fair" }
@@ -47,19 +52,19 @@ let getScoreClass = (score: float): string => {
 }
 
 @genType
-let formatAsJSON = (report: 'a): string => {
+fn formatAsJSON = (report: 'a): string => {
   DenoBindings.stringify(report, Js.Null.empty, 2)
 }
 
 @genType
-let formatAsHTML = async (report: 'a): string => {
+fn formatAsHTML = async (report: 'a): string => {
   // Type assertions for report fields
-  let url: string = %raw(`report.url`)
-  let timestamp: string = %raw(`report.timestamp`)
-  let executionTime: float = %raw(`report.executionTime`)
-  let overallScore: float = %raw(`report.overallScore`)
+  fn url: string = %raw(`report.url`)
+  fn timestamp: string = %raw(`report.timestamp`)
+  fn executionTime: float = %raw(`report.executionTime`)
+  fn overallScore: float = %raw(`report.overallScore`)
 
-  let html = `<!DOCTYPE html>
+  fn html = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -121,13 +126,13 @@ let formatAsHTML = async (report: 'a): string => {
 }
 
 @genType
-let formatAsMarkdown = (report: 'a): string => {
-  let url: string = %raw(`report.url`)
-  let timestamp: string = %raw(`report.timestamp`)
-  let executionTime: float = %raw(`report.executionTime`)
-  let overallScore: float = %raw(`report.overallScore`)
+fn formatAsMarkdown = (report: 'a): string => {
+  fn url: string = %raw(`report.url`)
+  fn timestamp: string = %raw(`report.timestamp`)
+  fn executionTime: float = %raw(`report.executionTime`)
+  fn overallScore: float = %raw(`report.overallScore`)
 
-  let lines: array<string> = []
+  fn lines: array<string> = []
 
   Array.push(lines, "# Website Audit Report\n")->ignore
   Array.push(lines, `**URL:** ${url}`)->ignore
@@ -137,3 +142,4 @@ let formatAsMarkdown = (report: 'a): string => {
 
   Array.join(lines, "\n")
 }
+

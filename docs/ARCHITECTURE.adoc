@@ -106,7 +106,7 @@ See `contracts/WIRING.md` for the full wiring table.
 | Systems / CLI | Rust (nightly, cargo workspace)
 | Emergency intake | V (vlang.io)
 | Observability | Elixir (OTP supervision trees)
-| Application UI | ReScript (compiles to JS)
+| Application UI | AffineScript (compiles to JS)
 | Runtime / Package Mgmt | Deno
 | Configuration | Nickel
 | State / Meta files | Guile Scheme (.scm)
@@ -122,7 +122,7 @@ External tools that integrate via contract types:
 |===
 | Satellite | Category | Integration
 
-| nafa-app | Ward UI | ReScript/Deno mobile journey planner, consumes system-weather
+| nafa-app | Ward UI | AffineScript/Deno mobile journey planner, consumes system-weather
 | panic-attacker | Diagnostics | Software health scanner → verisim
 | verisim / verisim-data | Data Pipeline | Multimodal scan result database
 | hypatia | CI/CD | Neurosymbolic pattern detection → gitbot-fleet

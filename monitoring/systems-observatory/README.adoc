@@ -48,7 +48,7 @@ Juisys implements comprehensive software repository standards:
 |----------|--------|---------|
 | *Documentation* | ✅ Complete | README, LICENSE, CONTRIBUTING, SECURITY, CODE_OF_CONDUCT, MAINTAINERS, CHANGELOG |
 | *.well-known/* | ✅ Complete | security.txt (RFC 9116), ai.txt, humans.txt |
-| *Build System* | ✅ Complete | Justfile (20+ recipes), flake.nix (Nix), CI/CD |
+| *Build System* | ✅ Complete | Justfile (20+ recipes), flake.guix (Guix), CI/CD |
 | *Testing* | ✅ 100% Pass | Unit, integration, privacy, database validation |
 | *Privacy* | ✅ Verified | Zero network calls, ephemeral data, self-audit |
 | *Offline-First* | ✅ Verified | Works air-gapped, no external dependencies |

@@ -16,7 +16,7 @@ Be respectful, inclusive, and professional. We value:
 
 1. **Deno** v1.30 or later
 2. **Node.js** v18 or later
-3. **ReScript** v11.0 or later
+3. **AffineScript** v11.0 or later
 4. **Git** for version control
 
 ### Development Setup
@@ -55,7 +55,7 @@ git checkout -b fix/your-bug-fix
 
 ### 2. Make Changes
 
-**ReScript Files:**
+**AffineScript Files:**
 - Follow functional programming principles
 - Use immutable data structures
 - Prefer `option` over null checks
@@ -220,9 +220,9 @@ Then create a Pull Request on GitHub with:
 
 ## Style Guide
 
-### ReScript Style
+### AffineScript Style
 
-```rescript
+```affinescript
 // Good
 let calculateScore = (violations: array<issue>): float => {
   violations
@@ -290,7 +290,7 @@ Deno.test("audit flow - full website audit", async () => {
 
 ### Code Documentation
 
-```rescript
+```affinescript
 // Public functions should have docstrings
 /// Calculates the overall audit score from individual scanner results.
 ///

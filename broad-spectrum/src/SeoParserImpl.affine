@@ -1,14 +1,19 @@
+// SPDX-License-Identifier: MPL-2.0
+// Ported via Harvard Engine (Semantic pass)
+
+module SeoParserImpl;
+
 // SeoParserImpl.res - Pure ReScript SEO analysis
 // Replaces bindings/seoParser.ts
 
 @genType
-type metaTag = {
+struct metaTag { {
   name: string,
   content: string,
 }
 
 @genType
-type seoData = {
+struct seoData { {
   title: option<string>,
   description: option<string>,
   keywords: option<string>,
@@ -30,11 +35,11 @@ type seoData = {
 }
 
 // Helper to extract single regex match group
-let extractMatch = (html: string, pattern: Js.Re.t): option<string> => {
-  let result = Js.Re.exec_(pattern, html)
+fn extractMatch = (html: string, pattern: Js.Re.t): option<string> => {
+  fn result = Js.Re.exec_(pattern, html)
   switch result {
   | Some(match_) => {
-      let captures = Js.Re.captures(match_)
+      fn captures = Js.Re.captures(match_)
       switch captures->Array.get(1) {
       | Some(capture) => Js.Nullable.toOption(capture)->Option.map(String.trim)
       | None => None
@@ -45,7 +50,7 @@ let extractMatch = (html: string, pattern: Js.Re.t): option<string> => {
 }
 
 // Helper to count regex matches
-let countMatches = (html: string, pattern: Js.Re.t): int => {
+fn countMatches = (html: string, pattern: Js.Re.t): int => {
   switch Js.String2.match_(html, pattern) {
   | Some(matches) => Array.length(matches)
   | None => 0
@@ -53,11 +58,11 @@ let countMatches = (html: string, pattern: Js.Re.t): int => {
 }
 
 @genType
-let analyzeSEO = async (html: string, url: string): seoData => {
-  let metaTags: array<metaTag> = []
-  let ogTags: Dict.t<string> = Dict.make()
-  let twitterTags: Dict.t<string> = Dict.make()
-  let headings: Dict.t<array<string>> = Dict.make()
+fn analyzeSEO = async (html: string, url: string): seoData => {
+  fn metaTags: array<metaTag> = []
+  fn ogTags: Dict.t<string> = Dict.make()
+  fn twitterTags: Dict.t<string> = Dict.make()
+  fn headings: Dict.t<array<string>> = Dict.make()
 
   // Initialize headings
   Dict.set(headings, "h1", [])
@@ -68,41 +73,41 @@ let analyzeSEO = async (html: string, url: string): seoData => {
   Dict.set(headings, "h6", [])
 
   // Extract title
-  let titleRe = %re("/<title[^>]*>([^<]+)<\/title>/i")
-  let title = extractMatch(html, titleRe)
+  fn titleRe = %re("/<title[^>]*>([^<]+)<\/title>/i")
+  fn title = extractMatch(html, titleRe)
 
   // Extract meta description
-  let descRe = %re("/<meta[^>]*name=[\"']description[\"'][^>]*content=[\"']([^\"']+)[\"'][^>]*>/i")
-  let description = extractMatch(html, descRe)
+  fn descRe = %re("/<meta[^>]*name=[\"']description[\"'][^>]*content=[\"']([^\"']+)[\"'][^>]*>/i")
+  fn description = extractMatch(html, descRe)
 
   // Extract keywords
-  let keywordsRe = %re("/<meta[^>]*name=[\"']keywords[\"'][^>]*content=[\"']([^\"']+)[\"'][^>]*>/i")
-  let keywords = extractMatch(html, keywordsRe)
+  fn keywordsRe = %re("/<meta[^>]*name=[\"']keywords[\"'][^>]*content=[\"']([^\"']+)[\"'][^>]*>/i")
+  fn keywords = extractMatch(html, keywordsRe)
 
   // Extract canonical URL
-  let canonicalRe = %re("/<link[^>]*rel=[\"']canonical[\"'][^>]*href=[\"']([^\"']+)[\"'][^>]*>/i")
-  let canonical = extractMatch(html, canonicalRe)
+  fn canonicalRe = %re("/<link[^>]*rel=[\"']canonical[\"'][^>]*href=[\"']([^\"']+)[\"'][^>]*>/i")
+  fn canonical = extractMatch(html, canonicalRe)
 
   // Extract viewport
-  let viewportRe = %re("/<meta[^>]*name=[\"']viewport[\"'][^>]*content=[\"']([^\"']+)[\"'][^>]*>/i")
-  let viewport = extractMatch(html, viewportRe)
+  fn viewportRe = %re("/<meta[^>]*name=[\"']viewport[\"'][^>]*content=[\"']([^\"']+)[\"'][^>]*>/i")
+  fn viewport = extractMatch(html, viewportRe)
 
   // Extract robots
-  let robotsRe = %re("/<meta[^>]*name=[\"']robots[\"'][^>]*content=[\"']([^\"']+)[\"'][^>]*>/i")
-  let robots = extractMatch(html, robotsRe)
+  fn robotsRe = %re("/<meta[^>]*name=[\"']robots[\"'][^>]*content=[\"']([^\"']+)[\"'][^>]*>/i")
+  fn robots = extractMatch(html, robotsRe)
 
   // Extract lang
-  let langRe = %re("/<html[^>]*lang=[\"']([^\"']+)[\"'][^>]*>/i")
-  let lang = extractMatch(html, langRe)
+  fn langRe = %re("/<html[^>]*lang=[\"']([^\"']+)[\"'][^>]*>/i")
+  fn lang = extractMatch(html, langRe)
 
   // Extract headings
   for level in 1 to 6 {
-    let tag = `h${Int.toString(level)}`
-    let re = Js.Re.fromStringWithFlags(`<${tag}[^>]*>([^<]+)</${tag}>`, ~flags="gi")
-    let matches = Js.String2.match_(html, re)
-    let headingTexts: array<string> = switch matches {
+    fn tag = `h${Int.toString(level)}`
+    fn re = Js.Re.fromStringWithFlags(`<${tag}[^>]*>([^<]+)</${tag}>`, ~flags="gi")
+    fn matches = Js.String2.match_(html, re)
+    fn headingTexts: array<string> = switch matches {
     | Some(arr) => arr->Array.filterMap(match_ => {
-        let text = match_
+        fn text = match_
           ->Js.String2.replaceByRe(%re("/<[^>]+>/g"), "")
           ->String.trim
         if text !== "" { Some(text) } else { None }
@@ -113,10 +118,10 @@ let analyzeSEO = async (html: string, url: string): seoData => {
   }
 
   // Count images and alt text
-  let imgRe = %re("/<img[^>]*>/gi")
-  let imgMatches = Js.String2.match_(html, imgRe)
-  let images = ref(0)
-  let imagesWithAlt = ref(0)
+  fn imgRe = %re("/<img[^>]*>/gi")
+  fn imgMatches = Js.String2.match_(html, imgRe)
+  fn images = ref(0)
+  fn imagesWithAlt = ref(0)
   switch imgMatches {
   | Some(matches) => {
       matches->Array.forEach(imgTag => {
@@ -130,14 +135,14 @@ let analyzeSEO = async (html: string, url: string): seoData => {
   }
 
   // Count links
-  let linkRe = %re("/<a[^>]*href=[\"']([^\"']+)[\"'][^>]*>/gi")
-  let linkMatches = Js.String2.match_(html, linkRe)
-  let links = ref(0)
-  let internalLinks = ref(0)
-  let externalLinks = ref(0)
+  fn linkRe = %re("/<a[^>]*href=[\"']([^\"']+)[\"'][^>]*>/gi")
+  fn linkMatches = Js.String2.match_(html, linkRe)
+  fn links = ref(0)
+  fn internalLinks = ref(0)
+  fn externalLinks = ref(0)
 
   // Get hostname from URL
-  let hostname = switch UrlParserImpl.parseUrl(url) {
+  fn hostname = switch UrlParserImpl.parseUrl(url) {
   | Some(parsed) => parsed.hostname
   | None => ""
   }
@@ -147,8 +152,8 @@ let analyzeSEO = async (html: string, url: string): seoData => {
       matches->Array.forEach(linkTag => {
         links := links.contents + 1
         // Extract href
-        let hrefRe = %re("/href=[\"']([^\"']+)[\"']/i")
-        let href = extractMatch(linkTag, hrefRe)
+        fn hrefRe = %re("/href=[\"']([^\"']+)[\"']/i")
+        fn href = extractMatch(linkTag, hrefRe)
         switch href {
         | Some(hrefUrl) => {
             if String.startsWith(hrefUrl, "http") {
@@ -174,21 +179,21 @@ let analyzeSEO = async (html: string, url: string): seoData => {
   }
 
   // Count words in body
-  let bodyRe = %re("/<body[^>]*>([\s\S]*)<\/body>/i")
-  let bodyMatch = extractMatch(html, bodyRe)
-  let bodyText = switch bodyMatch {
+  fn bodyRe = %re("/<body[^>]*>([\s\S]*)<\/body>/i")
+  fn bodyMatch = extractMatch(html, bodyRe)
+  fn bodyText = switch bodyMatch {
   | Some(body) => body
   | None => html
   }
-  let textContent = bodyText
+  fn textContent = bodyText
     ->Js.String2.replaceByRe(%re("/<[^>]+>/g"), " ")
     ->Js.String2.replaceByRe(%re("/\s+/g"), " ")
     ->String.trim
-  let words = textContent->String.split(" ")->Array.filter(word => String.length(word) > 0)
-  let wordCount = Array.length(words)
+  fn words = textContent->String.split(" ")->Array.filter(word => String.length(word) > 0)
+  fn wordCount = Array.length(words)
 
   // Check for structured data
-  let structuredData = String.includes(html, "application/ld+json") ||
+  fn structuredData = String.includes(html, "application/ld+json") ||
     String.includes(html, "schema.org")
 
   {
@@ -212,3 +217,4 @@ let analyzeSEO = async (html: string, url: string): seoData => {
     structuredData,
   }
 }
+

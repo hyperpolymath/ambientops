@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MPL-2.0
-name: ReScript/Deno CI
+name: AffineScript/Deno CI
 on: [push, pull_request]
 
 jobs:
@@ -20,11 +20,11 @@ jobs:
       - name: Deno test
         run: deno test --allow-all --coverage=coverage
       
-      - name: ReScript build
+      - name: AffineScript build
         run: |
-          if [ -f "rescript.json" ] || [ -f "bsconfig.json" ]; then
+          if [ -f "affinescript.json" ] || [ -f "bsconfig.json" ]; then
             npm install
-            npx rescript
+            npx affinescript
           fi
       
       - name: Type check
