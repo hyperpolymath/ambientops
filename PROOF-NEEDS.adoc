@@ -1,0 +1,38 @@
+== Proof Requirements
+
+=== Current state
+
+* `+src/abi/Types.idr+` (194 lines) — System operations types
+* `+src/abi/Layout.idr+` (177 lines) — Memory layout
+* `+src/abi/Foreign.idr+` (217 lines) — FFI declarations
+* No dangerous patterns in ABI layer
+* 109K lines; includes emergency-room, session-sentinel, and system
+management tools
+* Claims: "`panic-safe intake`", safety and trust principles
+
+=== What needs proving
+
+* *Emergency room idempotency*: Prove that emergency stabilization
+operations are idempotent (running twice does not cause harm)
+* *Session sentinel state machine*: Prove the session lifecycle (start
+-> active -> suspended -> terminated) has no invalid transitions or
+resource leaks
+* *Service restart safety*: Prove restart/recovery operations do not
+corrupt persistent state
+* *Privilege escalation prevention*: Prove system operations respect the
+principle of least privilege (no operation escalates beyond its declared
+scope)
+* *Rollback atomicity*: Prove that failed operations roll back
+completely (no partial state)
+
+=== Recommended prover
+
+* *Idris2* — State machines and idempotency properties are natural fits
+for dependent types
+
+=== Priority
+
+* *MEDIUM* — AmbientOps manages system operations where incorrect
+behavior can destabilize the host. The emergency-room and
+session-sentinel components have the highest proof priority within the
+monorepo.

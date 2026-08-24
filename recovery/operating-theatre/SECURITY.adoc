@@ -1,0 +1,28 @@
+== Security Policy
+
+=== Supported Versions
+
+[cols=",",options="header",]
+|===
+|Version |Supported
+|main |:white_check_mark:
+|< main |:x:
+|===
+
+=== Reporting a Vulnerability
+
+Please report security vulnerabilities through GitHub private
+vulnerability reporting:
+
+[arabic]
+. Go to the *Security* tab
+. Click *Report a vulnerability*
+. Fill out the form
+
+We respond within 48 hours.
+
+=== Security Measures
+
+* Dependabot for dependency updates
+* CodeQL for code scanning
+* Secret scanning and push protection

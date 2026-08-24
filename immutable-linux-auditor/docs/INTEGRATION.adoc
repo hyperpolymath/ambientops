@@ -1,0 +1,10 @@
+== Integration Targets
+
+This auditor can be delivered as:
+
+[arabic]
+. KDE Discover plugin (QML + libdiscover)
+. GNOME Software plugin (GTK/Adwaita + gnome-software plugin API)
+. Standalone app (QML or GTK)
+
+Selected: Standalone app (QML/Qt).

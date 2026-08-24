@@ -1,0 +1,62 @@
+== system-freeze-ejector
+
+Off-machine kernel dump for system recovery - preserves state during
+crashes for later analysis and restoration.
+
+=== Overview
+
+Part of the https://github.com/hyperpolymath/ambientops[ambientops]
+platform for system resilience.
+
+When a system becomes unresponsive or is about to crash,
+`+system-freeze-ejector+` captures the current state and ejects it to
+off-machine storage (network, USB) before the system goes down
+completely.
+
+=== Concept
+
+....
+┌─────────────────────────────────────────────────────────────┐
+│                    SYSTEM FREEZE DETECTED                    │
+│                                                              │
+│  ┌──────────┐    ┌──────────────┐    ┌──────────────────┐   │
+│  │ Watchdog │───▶│ State Capture│───▶│ Network/USB Dump │   │
+│  │ Trigger  │    │   - Memory   │    │   - Crash dump   │   │
+│  │          │    │   - Processes│    │   - Session data │   │
+│  │          │    │   - Open files│   │   - Recovery key │   │
+│  └──────────┘    └──────────────┘    └──────────────────┘   │
+│                                                ▼             │
+│                                       ┌──────────────────┐   │
+│                                       │ Remote Recovery  │   │
+│                                       │    Server        │   │
+│                                       └──────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+....
+
+=== Features (Planned)
+
+* *Watchdog integration*: Detect system freezes via hardware/software
+watchdog
+* *Minimal kernel footprint*: Works even when userspace is frozen
+* *Multiple ejection targets*: Network (NFS, SSH), USB, serial
+* *State prioritization*: Capture most critical data first
+* *Recovery integration*: Works with `+system-flare+` for graceful halts
+
+=== Related Projects
+
+[width="100%",cols="26%,38%,36%",options="header",]
+|===
+|Project |Relationship |Description
+|https://github.com/hyperpolymath/ambientops[ambientops] |Parent
+|Umbrella platform
+
+|https://github.com/hyperpolymath/system-flare[system-flare] |Sibling
+|Graceful emergency halt
+
+|https://github.com/hyperpolymath/system-emergency-room[system-emergency-room]
+|Sibling |Triage and stabilization
+|===
+
+=== License
+
+MPL-2.0

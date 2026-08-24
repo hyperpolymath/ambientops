@@ -1,47 +1,48 @@
-// SPDX-License-Identifier: CC-BY-SA-4.0
-= Maintainers
-:toc: preamble
+== Maintainers
 
-This document lists the maintainers of this project and their responsibilities.
+This file lists the maintainers of the Panoptes project.
 
-== Current Maintainers
+=== Current Maintainers
 
-[cols="2,3,2",options="header"]
+==== Project Lead (BDFL)
+
+[cols=",,,",options="header",]
 |===
-| Name | Role | Contact
-
-| Jonathan D.A. Jewell
-| Lead Maintainer
-| https://github.com/hyperpolymath[@hyperpolymath]
+|Name |GitLab |Role |Since
+|Jonathan D. A. Jewell |@hyperpolymath |Project Lead |2025-11
 |===
 
-== Responsibilities
+=== Emeritus Maintainers
 
-Maintainers are responsible for:
+_None yet_
 
-* Reviewing and merging pull requests
-* Triaging issues and feature requests
-* Ensuring code quality and security standards
-* Managing releases and versioning
-* Upholding the project's code of conduct
+=== Becoming a Maintainer
 
-== Becoming a Maintainer
+See GOVERNANCE.adoc for the process of becoming a maintainer.
 
-Contributors who demonstrate:
+==== Requirements
 
-* Consistent, high-quality contributions
-* Understanding of the project's goals and standards
-* Constructive participation in discussions
-* Commitment to the project's long-term health
+[arabic]
+. 6+ months as a trusted contributor
+. Demonstrated understanding of:
+* Rust programming
+* RSR compliance standards
+* Security best practices
+. Nomination by existing maintainer
+. Approval by BDFL
 
-May be invited to become maintainers at the discretion of existing maintainers.
+=== Maintainer Responsibilities
 
-== Decision Making
+* Review and merge pull requests
+* Triage issues
+* Release management
+* Security response
+* Uphold code quality standards
+* Enforce code of conduct
 
-* Routine decisions (bug fixes, minor improvements) can be made by any maintainer
-* Significant changes require discussion and consensus among maintainers
-* Breaking changes or major features should be discussed in issues before implementation
+=== Contact
 
-== Contact
+For private maintainer matters, contact the project lead directly via
+GitLab.
 
-For questions about project governance, open an issue or contact the maintainers listed above.
+For security issues, see SECURITY.md.

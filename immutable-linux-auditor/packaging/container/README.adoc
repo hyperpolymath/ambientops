@@ -1,0 +1,43 @@
+== Build Container (Guix + Guix Fallback + Chainguard)
+
+This directory defines a reproducible build container pipeline:
+
+[arabic]
+. *Guix channels* as the primary build environment.
+. *Guix fallback* when Guix is unavailable.
+. *Chainguard base image* for containerized builds.
+. Optional hooks for *Cerro Torre*, *Vordr*, *Svalinn*, and *Selur*.
+
+=== Build (host)
+
+....
+./packaging/container/build.sh
+....
+
+This will: - Build the app using Guix (or Guix if Guix is missing). -
+Build a Chainguard-based container image tagged
+`+immutable-auditor-build+`. - If available, run: - `+ct pack+` (Cerro
+Torre) to create a `+.ctp+` bundle - `+vordr verify+` to verify the
+image
+
+Set a custom image name:
+
+....
+IMAGE_NAME=immutable-auditor-build-dev ./packaging/container/build.sh
+....
+
+=== Files
+
+* `+Containerfile+` – Chainguard build container base
+* `+guix/channels.scm+` – Guix channels
+* `+guix/manifest.scm+` – Guix build deps
+* `+guix/flake.guix+` – Guix dev shell fallback
+* `+build.sh+` – Orchestrated build pipeline
+* `+scripts/a2mla+` – Wrapper that runs A2ML in attested (`+A2MLa+`)
+mode
+
+=== Notes
+
+* The Chainguard base uses `+apk+` (Wolfi). Adjust package names if
+needed.
+* For runtime containers, use Flatpak or RPM packaging instead.

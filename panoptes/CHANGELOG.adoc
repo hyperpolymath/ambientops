@@ -1,77 +1,77 @@
-<!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
-<!-- SPDX-FileCopyrightText: 2025 Jonathan D. A. Jewell <hyperpolymath> -->
-
-= Changelog
+== Changelog
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+The format is based on https://keepachangelog.com/en/1.1.0/[Keep a
+Changelog], and this project adheres to
+https://semver.org/spec/v2.0.0.html[Semantic Versioning].
 
-== [Unreleased]
+=== https://gitlab.com/hyperpolymath/panoptes/-/compare/v1.0.0...HEAD[Unreleased]
 
-=== Added
-- Initial project structure
+==== Added
 
-== [1.0.0] - 2025-11-27
+* Initial project structure
 
-=== Added
-- Core file watching functionality using `notify` crate
-- Integration with Ollama API for local AI inference
-- Support for Moondream vision model
-- Image analysis for JPG, JPEG, PNG, WebP, GIF, BMP formats
-- Automatic filename generation based on image content
-- Date prefix option for generated filenames
-- Configurable filename length limits
-- Nickel configuration file support
-- CLI options for runtime configuration
-- Dry-run mode for testing
-- Verbose logging option
-- Oil Shell launcher script
-- Guix flake for reproducible builds
-- Podman containerization with Chainguard Wolfi base
-- Comprehensive Justfile with 20+ recipes
-- RSR Gold compliance documentation suite
+=== https://gitlab.com/hyperpolymath/panoptes/-/releases/v1.0.0[1.0.0] - 2025-11-27
 
-=== Security
-- Memory-safe Rust implementation
-- Non-root container execution
-- Input sanitization for filenames
-- Local-only processing (no external API calls)
+==== Added
 
-=== Documentation
-- README.adoc with full usage guide
-- SECURITY.md with vulnerability reporting process
-- CONTRIBUTING.adoc with TPCF guidelines
-- GOVERNANCE.adoc with project governance model
-- CODE_OF_CONDUCT.adoc (Contributor Covenant 2.1)
-- CLAUDE.adoc for AI assistant integration
+* Core file watching functionality using `+notify+` crate
+* Integration with Ollama API for local AI inference
+* Support for Moondream vision model
+* Image analysis for JPG, JPEG, PNG, WebP, GIF, BMP formats
+* Automatic filename generation based on image content
+* Date prefix option for generated filenames
+* Configurable filename length limits
+* Nickel configuration file support
+* CLI options for runtime configuration
+* Dry-run mode for testing
+* Verbose logging option
+* Oil Shell launcher script
+* Guix flake for reproducible builds
+* Podman containerization with Chainguard Wolfi base
+* Comprehensive Justfile with 20+ recipes
+* RSR Gold compliance documentation suite
 
-== [0.1.0] - 2025-11-27
+==== Security
 
-=== Added
-- Initial proof of concept
-- Basic file watching
-- Ollama integration prototype
+* Memory-safe Rust implementation
+* Non-root container execution
+* Input sanitization for filenames
+* Local-only processing (no external API calls)
 
----
+==== Documentation
 
-== Versioning Policy
+* README.adoc with full usage guide
+* SECURITY.md with vulnerability reporting process
+* CONTRIBUTING.adoc with TPCF guidelines
+* GOVERNANCE.adoc with project governance model
+* CODE_OF_CONDUCT.adoc (Contributor Covenant 2.1)
+* CLAUDE.adoc for AI assistant integration
 
-This project uses [Semantic Versioning](https://semver.org/):
+=== https://gitlab.com/hyperpolymath/panoptes/-/releases/v0.1.0[0.1.0] - 2025-11-27
 
-- **MAJOR**: Incompatible API changes
-- **MINOR**: Backwards-compatible functionality additions
-- **PATCH**: Backwards-compatible bug fixes
+==== Added
 
-== Release Process
+* Initial proof of concept
+* Basic file watching
+* Ollama integration prototype
 
-1. Update CHANGELOG.md
-2. Update version in Cargo.toml
-3. Create annotated git tag
-4. Build release artifacts
-5. Publish release notes
+'''''
 
-[Unreleased]: https://gitlab.com/hyperpolymath/panoptes/-/compare/v1.0.0...HEAD
-[1.0.0]: https://gitlab.com/hyperpolymath/panoptes/-/releases/v1.0.0
-[0.1.0]: https://gitlab.com/hyperpolymath/panoptes/-/releases/v0.1.0
+=== Versioning Policy
+
+This project uses https://semver.org/[Semantic Versioning]:
+
+* *MAJOR*: Incompatible API changes
+* *MINOR*: Backwards-compatible functionality additions
+* *PATCH*: Backwards-compatible bug fixes
+
+=== Release Process
+
+[arabic]
+. Update CHANGELOG.md
+. Update version in Cargo.toml
+. Create annotated git tag
+. Build release artifacts
+. Publish release notes

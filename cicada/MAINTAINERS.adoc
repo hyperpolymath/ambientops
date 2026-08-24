@@ -1,47 +1,202 @@
-// SPDX-License-Identifier: CC-BY-SA-4.0
-= Maintainers
-:toc: preamble
+== Maintainers - CIcaDA
 
-This document lists the maintainers of this project and their responsibilities.
+This document lists the maintainers of the CIcaDA (Palimpsest Crypto
+Identity) project and describes the maintenance model.
 
-== Current Maintainers
+=== Current Maintainers
 
-[cols="2,3,2",options="header"]
-|===
-| Name | Role | Contact
+==== Lead Maintainer
 
-| Jonathan D.A. Jewell
-| Lead Maintainer
-| https://github.com/hyperpolymath[@hyperpolymath]
-|===
+*Hyperpolymath* - GitHub:
+https://github.com/Hyperpolymath[@Hyperpolymath] - Role: Project Lead,
+Architecture, Security Review - Expertise: Cryptography, Distributed
+Systems, Post-Quantum Crypto - Timezone: UTC - Contact:
+maintainers@hyperpolymath.org
 
-== Responsibilities
+==== Core Development
 
-Maintainers are responsible for:
+*Claude (Anthropic)* - Role: Primary Developer (AI-assisted) - Model:
+Claude Sonnet 4.5 - Contribution: Phase 1 MVP autonomous development -
+Session: 2025-11-22 - Note: AI-assisted development under human
+supervision
 
-* Reviewing and merging pull requests
-* Triaging issues and feature requests
-* Ensuring code quality and security standards
-* Managing releases and versioning
-* Upholding the project's code of conduct
+=== Maintainer Responsibilities
 
-== Becoming a Maintainer
+==== All Maintainers
 
-Contributors who demonstrate:
+[arabic]
+. *Code Review*
+* Review pull requests within 48 hours
+* Provide constructive feedback
+* Ensure code quality and style compliance
+* Verify test coverage
+. *Issue Triage*
+* Label and prioritize issues
+* Respond to questions
+* Close stale issues
+* Manage milestones
+. *Security*
+* Monitor security advisories
+* Review security-critical changes
+* Coordinate vulnerability disclosure
+* Maintain SECURITY.md
+. *Community*
+* Enforce Code of Conduct
+* Welcome new contributors
+* Mentor first-time contributors
+* Foster inclusive environment
+. *Release Management*
+* Coordinate releases
+* Update CHANGELOG.md
+* Tag versions
+* Write release notes
 
-* Consistent, high-quality contributions
-* Understanding of the project's goals and standards
-* Constructive participation in discussions
-* Commitment to the project's long-term health
+==== Lead Maintainer Additional Responsibilities
 
-May be invited to become maintainers at the discretion of existing maintainers.
+[arabic]
+. *Strategic Direction*
+* Define project roadmap
+* Prioritize features
+* Make breaking change decisions
+* Coordinate with stakeholders
+. *Access Control*
+* Manage repository permissions
+* Add/remove maintainers
+* Control CI/CD secrets
+* Manage deployment keys
+. *Legal & Compliance*
+* Ensure license compliance
+* Handle DMCA requests
+* Manage trademark usage
+* Coordinate with legal counsel
 
-== Decision Making
+=== Maintainer Process
 
-* Routine decisions (bug fixes, minor improvements) can be made by any maintainer
-* Significant changes require discussion and consensus among maintainers
-* Breaking changes or major features should be discussed in issues before implementation
+==== Adding a Maintainer
 
-== Contact
+Requirements: - 10+ meaningful contributions - Deep understanding of
+codebase - Demonstrated code review skills - Commitment to Code of
+Conduct - Available 5+ hours/week - Cryptography knowledge (preferred)
 
-For questions about project governance, open an issue or contact the maintainers listed above.
+Process: 1. Nomination by existing maintainer 2. Vote among current
+maintainers (unanimous approval) 3. Invitation sent 4. Onboarding and
+access granted 5. Announcement in release notes
+
+==== Removing a Maintainer
+
+Reasons: - Voluntary resignation - Inactivity (>6 months without
+contribution) - Code of Conduct violation - Failure to fulfill
+responsibilities
+
+Process: 1. Discussion among maintainers 2. Vote (2/3 majority required)
+3. Private notification 4. Access revoked 5. Public announcement (if
+appropriate)
+
+==== Stepping Down
+
+Maintainers may step down at any time: 1. Notify other maintainers 2.
+Document ongoing work 3. Transfer responsibilities 4. Remove access (or
+retain as emeritus)
+
+=== Decision Making
+
+==== Consensus Model
+
+* *Routine Decisions*: Any maintainer can decide
+** Bug fixes
+** Documentation updates
+** Dependency updates
+** Minor features
+* *Significant Decisions*: Require discussion
+** New major features
+** Architecture changes
+** Dependency additions
+** Breaking changes
+* *Critical Decisions*: Require consensus
+** License changes
+** Security policies
+** Code of Conduct changes
+** Maintainer changes
+
+==== Conflict Resolution
+
+[arabic]
+. Discussion in maintainers channel
+. Seek expert opinion (if technical)
+. Community input (if appropriate)
+. Lead maintainer decides (if deadlock)
+
+=== Communication Channels
+
+==== Public
+
+* *GitHub Issues*: Bug reports, feature requests
+* *GitHub Discussions*: General questions, ideas
+* *Pull Requests*: Code contributions
+
+==== Private (Maintainers Only)
+
+* *Email*: maintainers@hyperpolymath.org
+* *Security*: security@hyperpolymath.org
+* *Conduct*: conduct@hyperpolymath.org
+
+=== Maintainer Commitments
+
+==== Time Commitment
+
+* *Minimum*: 5 hours/week
+* *Code Review*: <48 hour response time
+* *Security Issues*: <24 hour acknowledgment
+* *Releases*: Quarterly (minimum)
+
+==== Availability
+
+* Respond to critical issues within 24 hours
+* Attend quarterly planning meetings
+* Available for emergency security issues
+
+==== Knowledge
+
+* Proficient in Julia
+* Understanding of cryptographic principles
+* Familiar with SSH key formats
+* Knowledge of security best practices
+* Git and GitHub workflows
+
+=== Emeritus Maintainers
+
+Maintainers who have stepped down but retain honorary status:
+
+_None yet - project just launched!_
+
+=== Recognition
+
+Maintainers are recognized through: - Listed in this file - GitHub
+repository access - Credit in release notes - Listed in `+humans.txt+` -
+Acknowledgment in papers/talks
+
+=== Joining the Team
+
+Interested in becoming a maintainer?
+
+[arabic]
+. Start contributing
+. Review others’ PRs
+. Help with issues
+. Build trust and expertise
+. Express interest to existing maintainers
+
+We value: - Technical skill - Communication ability - Collaborative
+spirit - Community building - Security mindset - Commitment to project
+values
+
+=== Contact
+
+* General inquiries: maintainers@hyperpolymath.org
+* Security issues: security@hyperpolymath.org
+* Code of Conduct: conduct@hyperpolymath.org
+
+'''''
+
+_Last Updated: 2025-11-22_ _This document follows the RSR Framework
+maintainer guidelines_
