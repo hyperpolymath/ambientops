@@ -1859,9 +1859,9 @@ checksum = "09edd9e8b54e49e587e4f6295a7d29c3ea94d469cb40ab8ca70b288248a81db2"
 
 [[package]]
 name = "libc"
-version = "0.2.184"
+version = "0.2.189"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "48f5d2a454e16a5ea0f4ced81bd44e4cfc7bd3a507b61887c99fd3538b28e4af"
+checksum = "3eaf3ede3fee6db1a4c2ee091bf8a8b4dccdc6d17f656fb07896ee72867612f2"
 
 [[package]]
 name = "libp2p"
@@ -2616,9 +2616,9 @@ dependencies = [
 
 [[package]]
 name = "ollama-rs"
-version = "0.3.5"
+version = "0.3.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "22839a9841aacb7bcd70a3f73575945b89ffaa7a5532c8a85cf2fee85d919b8c"
+checksum = "fed8739c37da731774bd5b39209bbd9b770f0c1d9a000c4b859c824badac3e8e"
 dependencies = [
  "async-stream",
  "log",
