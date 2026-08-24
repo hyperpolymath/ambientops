@@ -1,7 +1,35 @@
 // SPDX-License-Identifier: MPL-2.0
-// SPDX-FileCopyrightText: 2026 Jonathan D.A. Jewell
-// Ported via Harvard Engine bulk-processor
+// Ported via Harvard Engine (Semantic pass)
 
 module UrlParser;
 
-// TODO: Complete semantic implementation
+// UrlParser.res - URL parsing and validation
+// Re-exports from UrlParserImpl (pure ReScript implementation)
+
+@genType
+struct parsedUrl { UrlParserImpl.parsedUrl
+
+@genType
+struct urlType { UrlParserImpl.urlType
+
+@genType
+fn parse = UrlParserImpl.parse
+
+@genType
+fn isValid = UrlParserImpl.isValid
+
+@genType
+fn normalize = UrlParserImpl.normalize
+
+@genType
+fn getUrlType = UrlParserImpl.getUrlType
+
+@genType
+fn makeAbsolute = UrlParserImpl.makeAbsolute
+
+@genType
+fn isSameDomain = UrlParserImpl.isSameDomain
+
+@genType
+fn extractLinks = UrlParserImpl.extractLinks
+
