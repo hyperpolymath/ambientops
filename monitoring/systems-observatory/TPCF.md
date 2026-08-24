@@ -136,7 +136,7 @@ After 6+ months and 10+ merged PRs, you may be invited to become a maintainer:
 - Minimal dependencies (Julia core + JSON3)
 - All dependencies vetted
 - Dependency updates reviewed carefully
-- Nix flake provides reproducible builds
+- Guix flake provides reproducible builds
 
 **Social Engineering:**
 - Code of Conduct sets behavioral expectations

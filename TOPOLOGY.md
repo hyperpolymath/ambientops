@@ -73,7 +73,7 @@ DATA & CONTRACTS
   composer (Gleam)                  █░░░░░░░░░  10%    Orchestration stubs
 
 SYSTEM TOOLS (ambientops monorepo members)
-  broad-spectrum (ReScript)         ██████░░░░  60%    Link/SEO/accessibility checker
+  broad-spectrum (AffineScript)         ██████░░░░  60%    Link/SEO/accessibility checker
   cicada                            ██░░░░░░░░  20%    Stub
   czech-file-knife                  ██░░░░░░░░  20%    File utilities
   displace                          ██░░░░░░░░  20%    Displacement tool

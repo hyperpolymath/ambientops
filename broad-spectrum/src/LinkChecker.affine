@@ -1,4 +1,9 @@
 // SPDX-License-Identifier: MPL-2.0
+// Ported via Harvard Engine (Semantic pass)
+
+module LinkChecker;
+
+// SPDX-License-Identifier: MPL-2.0
 // SPDX-FileCopyrightText: 2025 Jonathan D.A. Jewell
 
 /**
@@ -19,7 +24,7 @@
 
 // SCHEMA: Detailed status record for a single checked URL.
 @genType
-type linkStatus = {
+struct linkStatus { {
   url: string,
   status: int,
   statusText: string,
@@ -40,7 +45,7 @@ type linkStatus = {
  * 4. RETURN: Return the populated `linkStatus` record.
  */
 @genType
-let checkLink = async (url: string, baseUrl: string, config: Config.t): linkStatus => {
+fn checkLink = async (url: string, baseUrl: string, config: Config.t): linkStatus => {
   // ... [Implementation of the per-link logic]
 }
 
@@ -54,6 +59,7 @@ let checkLink = async (url: string, baseUrl: string, config: Config.t): linkStat
  * 4. SUMMARIZE: Computes aggregate statistics (Broken Count, Avg Latency).
  */
 @genType
-let checkLinks = async (urls: array<string>, baseUrl: string, config: Config.t): linkCheckResult => {
+fn checkLinks = async (urls: array<string>, baseUrl: string, config: Config.t): linkCheckResult => {
   // ... [Batch-based concurrency loop]
 }
+

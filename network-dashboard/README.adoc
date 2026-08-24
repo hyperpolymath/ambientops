@@ -87,7 +87,7 @@ network-dashboard/
 │       │   └── network_live.ex
 │       └── components/
 ├── assets/
-│   └── js/                    # ReScript compiled JS
+│   └── js/                    # AffineScript compiled JS
 ├── grafana/
 │   ├── dashboards/
 │   │   ├── overview.json
@@ -244,7 +244,7 @@ just grafana-import
 | Elixir / Phoenix 1.7+
 
 | Frontend
-| Phoenix LiveView + ReScript
+| Phoenix LiveView + AffineScript
 
 | Real-time
 | Phoenix Channels / WebSocket

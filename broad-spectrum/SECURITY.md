@@ -68,7 +68,7 @@ We request a **90-day embargo** for critical vulnerabilities to allow:
 
 ### Code Security
 
-- **Type Safety**: ReScript provides compile-time type checking
+- **Type Safety**: AffineScript provides compile-time type checking
 - **No Unsafe Code**: No `eval()`, no arbitrary code execution
 - **Dependency Scanning**: Automated vulnerability checks
 - **Input Validation**: All user inputs sanitized
@@ -93,8 +93,8 @@ We minimize dependencies and monitor them for vulnerabilities:
 
 ```
 Dependencies:
-- @rescript/core: Official ReScript standard library
-- rescript: ReScript compiler
+- @affinescript/core: Official AffineScript standard library
+- affinescript: AffineScript compiler
 - gentype: TypeScript FFI generator
 
 Runtime (Deno):

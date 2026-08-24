@@ -46,7 +46,7 @@ The D layer touches real systems and emits real effects. It's where adapters liv
 | Primary implementation
 | Core CLI, plan engine, pack runtime, high-velocity implementation
 
-| **ReScript**
+| **AffineScript**
 | Core driver orchestration
 | When D-to-JS interop is needed
 
@@ -84,7 +84,7 @@ The V layer prevents AmbientOps from becoming "a clever way to do the wrong thin
 | Primary implementation
 | Policy engine, plan verification, schema conformance
 
-| **ReScript**
+| **AffineScript**
 | Orchestration + checks
 | When JS interop is needed
 
@@ -101,24 +101,24 @@ The V layer prevents AmbientOps from becoming "a clever way to do the wrong thin
 
 * `system-emergency-room` (A&E) — V-first (panic-safe intake requires verification)
 
-== AmbientOps Primary (ReScript + Deno)
+== AmbientOps Primary (AffineScript + Deno)
 
-The AmbientOps umbrella and Ward UI are ReScript-first.
+The AmbientOps umbrella and Ward UI are AffineScript-first.
 
 [cols="1,2,2",options="header"]
 |===
 | Component | Language | Notes
 
 | Ward UI (tray/ambient)
-| ReScript + Deno
+| AffineScript + Deno
 | Primary user interface
 
 | Umbrella orchestration
-| ReScript + Deno
+| AffineScript + Deno
 | Ecosystem coordination
 
 | System Weather
-| ReScript
+| AffineScript
 | Ambient payload generation
 |===
 
@@ -150,7 +150,7 @@ Rust is NOT the default language. It is a scalpel for specific use cases.
 
 === Everything Else
 
-Everything else stays ReScript-first (or D/V as appropriate for the layer).
+Everything else stays AffineScript-first (or D/V as appropriate for the layer).
 
 == Elixir: Observability Only
 
@@ -185,7 +185,7 @@ Elixir is allowed ONLY for observability and event hubs. NEVER for policy truth.
 | Banned | Replacement | Reason
 
 | TypeScript
-| ReScript
+| AffineScript
 | Type safety without JS ecosystem baggage
 
 | Node.js
@@ -201,7 +201,7 @@ Elixir is allowed ONLY for observability and event hubs. NEVER for policy truth.
 | Memory safety without GC
 
 | Python
-| ReScript/Rust/D/V
+| AffineScript/Rust/D/V
 | SaltStack abandoned; Python completely banned
 
 | Java/Kotlin
@@ -217,10 +217,10 @@ Elixir is allowed ONLY for observability and event hubs. NEVER for policy truth.
 
 === Bebop (Recommended for JS+Rust)
 
-If wire participants are ReScript/JS + Rust:
+If wire participants are AffineScript/JS + Rust:
 
 * Schemas: `ambientops-protocol/schemas/*.bop`
-* Generated JS: `gen/js/` (consumed by ReScript wrappers)
+* Generated JS: `gen/js/` (consumed by AffineScript wrappers)
 * Generated Rust: `gen/rust/`
 * TypeScript: ONLY as generated artifacts (never hand-written)
 
@@ -270,7 +270,7 @@ Database is NOT truth. It is a cache/index over signed/canonical artifacts.
 
 | ambientops
 | —
-| ReScript
+| AffineScript
 | Umbrella / Ward
 
 | feedback-o-tron

@@ -1,11 +1,16 @@
-// Config.res - Shared configuration types
+// SPDX-License-Identifier: MPL-2.0
+// Ported via Harvard Engine (Semantic pass)
+
+module Config;
+
+// Config.res - Shared configuration structs
 // This module breaks circular dependency between Auditor and LinkChecker
 
 @genType
-type reportFormat = Console | JSON | HTML | Markdown
+struct reportFormat { Console | JSON | HTML | Markdown
 
 @genType
-type t = {
+struct t { {
   maxDepth: int,
   followExternal: bool,
   timeout: int, // milliseconds
@@ -21,7 +26,7 @@ type t = {
 }
 
 @genType
-let default: t = {
+fn default: t = {
   maxDepth: 3,
   followExternal: false,
   timeout: 30000,
@@ -37,7 +42,7 @@ let default: t = {
 }
 
 @genType
-let make = (
+fn make = (
   ~maxDepth=?,
   ~followExternal=?,
   ~timeout=?,
@@ -69,7 +74,7 @@ let make = (
 }
 
 @genType
-let formatToString = (format: reportFormat): string => {
+fn formatToString = (format: reportFormat): string => {
   switch format {
   | Console => "console"
   | JSON => "json"
@@ -79,7 +84,7 @@ let formatToString = (format: reportFormat): string => {
 }
 
 @genType
-let formatFromString = (str: string): option<reportFormat> => {
+fn formatFromString = (str: string): option<reportFormat> => {
   switch String.toLowerCase(str) {
   | "console" => Some(Console)
   | "json" => Some(JSON)
@@ -88,3 +93,4 @@ let formatFromString = (str: string): option<reportFormat> => {
   | _ => None
   }
 }
+

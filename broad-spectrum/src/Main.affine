@@ -1,4 +1,9 @@
 // SPDX-License-Identifier: MPL-2.0
+// Ported via Harvard Engine (Semantic pass)
+
+module Main;
+
+// SPDX-License-Identifier: MPL-2.0
 
 /**
  * Broad-Spectrum Website Auditor — CLI Entry Point (ReScript).
@@ -17,19 +22,19 @@
  * for OS-level tasks (filesystem, process exit).
  */
 
-let version = "1.0.0"
+fn version = "1.0.0"
 
 // HELP SYSTEM: Displays usage instructions and available options.
-let printHelp = () => {
+fn printHelp = () => {
   // ... [Help text implementation]
 }
 
 /**
  * ARGUMENT PARSER: Maps CLI flags to a structured `parsedArgs` record.
- * Handles type conversion for integers (timeouts, depth) and 
+ * Handles struct conversion for integers (timeouts, depth) and 
  * provides sane defaults.
  */
-let parseArgs = (args: array<string>): parsedArgs => {
+fn parseArgs = (args: array<string>): parsedArgs => {
   // ... [Iterative scanning of the process argument list]
 }
 
@@ -43,14 +48,15 @@ let parseArgs = (args: array<string>): parsedArgs => {
  * 4. REPORT: Serialize results to the requested format (Console, JSON, HTML).
  * 5. TERMINATE: Exit with a non-zero code if any critical failures occurred.
  */
-let main = async () => {
-  let args = parseArgs(DenoBindings.args)
+fn main = async () => {
+  fn args = parseArgs(DenoBindings.args)
   // ... [Implementation of the audit workflow]
 }
 
 // EXECUTION: Invokes the main function and catches fatal boot-time errors.
-let _ = main()->Promise.catch(error => {
+fn _ = main()->Promise.catch(error => {
   DenoBindings.consoleError("Fatal error during auditor startup.")
   DenoBindings.exit(1)
   Promise.resolve()
 })
+

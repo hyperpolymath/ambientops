@@ -34,7 +34,7 @@ This invariant is:
 | Priority | Strategy | Backout Speed | Confidence
 
 | 1 (Best)
-| Native PM Recovery (Guix/Nix generations)
+| Native PM Recovery (Guix/Guix generations)
 | Instant (< 1 sec)
 | Proven (SPARK verified)
 
@@ -93,7 +93,7 @@ This invariant is:
 | Instant
 | No
 
-| *Nix*
+| *Guix*
 | ✓ Generations
 | Native
 | Instant
@@ -199,11 +199,11 @@ This invariant is:
 
 | *High*
 | System upgrade, kernel updates
-| Native (Guix/Nix) or Btrfs/ZFS with reboot
+| Native (Guix/Guix) or Btrfs/ZFS with reboot
 
 | *Critical*
 | Bootloader, system files
-| Native only (Guix/Nix), with verification
+| Native only (Guix/Guix), with verification
 |===
 
 == Decision Flowchart
@@ -223,7 +223,7 @@ This invariant is:
                          ┌────────┐   ┌────────────────────┐
                          │Proceed │   │ PM has native      │
                          │ safely │   │ recovery?          │
-                         └────────┘   │ (Guix/Nix/ostree)  │
+                         └────────┘   │ (Guix/Guix/ostree)  │
                                       └────────────────────┘
                                           │ Yes      │ No
                                           ▼          ▼
@@ -291,7 +291,7 @@ end
 
 Plugins are discovered from:
 
-1. Built-in plugins (Guix, Nix, apt, dnf, pacman, etc.)
+1. Built-in plugins (Guix, Guix, apt, dnf, pacman, etc.)
 2. `~/.config/dnfinition/plugins/` (user plugins)
 3. `/usr/share/dnfinition/plugins/` (system plugins)
 4. `/usr/local/share/dnfinition/plugins/` (local plugins)
@@ -304,7 +304,7 @@ The registry selects the best plugin based on required capabilities:
 ----
 # Find plugin with install, upgrade, and native rollback
 {:ok, plugin} = PluginRegistry.best_for([:install, :upgrade, :native_rollback])
-# Returns: Guix or Nix (priority 90)
+# Returns: Guix or Guix (priority 90)
 
 # Find any plugin that can install
 {:ok, plugin} = PluginRegistry.best_for([:install])

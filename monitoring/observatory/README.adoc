@@ -118,7 +118,7 @@ Per AmbientOps language policy:
 
 * **Primary**: Elixir (observability is an allowed Elixir use case)
 * **Data processing**: Julia (batch analytics, forecasting)
-* **Dashboard UI**: ReScript + Deno (if web-based)
+* **Dashboard UI**: AffineScript + Deno (if web-based)
 
 [IMPORTANT]
 ====

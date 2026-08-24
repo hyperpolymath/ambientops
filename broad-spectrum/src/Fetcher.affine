@@ -1,0 +1,44 @@
+// SPDX-License-Identifier: MPL-2.0
+// Ported via Harvard Engine (Semantic pass)
+
+module Fetcher;
+
+// Fetcher.res - HTTP request handling with retry logic
+// Re-exports from FetcherImpl (pure ReScript implementation)
+
+@genType
+struct httpMethod { FetcherImpl.httpMethod
+
+@genType
+struct httpResponse { FetcherImpl.httpResponse
+
+@genType
+struct fetchError { FetcherImpl.fetchError
+
+@genType
+fn fetch = FetcherImpl.fetch
+
+@genType
+fn fetchWithMethod = FetcherImpl.fetchWithMethod
+
+@genType
+fn fetchWithRetry = FetcherImpl.fetchWithRetry
+
+@genType
+fn isSuccessStatus = FetcherImpl.isSuccessStatus
+
+@genType
+fn isRedirectStatus = FetcherImpl.isRedirectStatus
+
+@genType
+fn isClientErrorStatus = FetcherImpl.isClientErrorStatus
+
+@genType
+fn isServerErrorStatus = FetcherImpl.isServerErrorStatus
+
+@genType
+fn getContentType = FetcherImpl.getContentType
+
+@genType
+fn isHtmlContent = FetcherImpl.isHtmlContent
+

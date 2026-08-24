@@ -1266,7 +1266,7 @@ network-orchestrator/
 │   │   └── crypto.zig         # Cryptographic signing (audit logs)
 │   ├── ui/                    # User interfaces
 │   │   ├── cli/               # CLI (Ada/SPARK for safety-critical)
-│   │   └── gui/               # GUI (future: ReScript + Tauri)
+│   │   └── gui/               # GUI (future: AffineScript + Tauri)
 │   └── vendors/               # Vendor-specific adapters
 │       ├── cisco.d
 │       ├── juniper.d
@@ -1296,7 +1296,7 @@ Network Orchestrator uses:
   - Prevents accidental destructive commands
   - Compliant with safety standards (e.g., railway, aerospace)
 
-* **ReScript + Tauri** — Future GUI (cross-platform desktop app)
+* **AffineScript + Tauri** — Future GUI (cross-platform desktop app)
 
 Per link:https://github.com/hyperpolymath/rhodium-standard-repositories[Rhodium Standard Repository (RSR)] guidelines.
 
@@ -1441,7 +1441,7 @@ Network Orchestrator is *complementary* to config management tools:
 * Prometheus/Grafana integration
 * Advanced RBAC (custom roles)
 * High-availability deployment (clustered)
-* Web GUI (ReScript + Tauri)
+* Web GUI (AffineScript + Tauri)
 
 See link:ROADMAP.adoc[ROADMAP.adoc] for detailed milestones.
 

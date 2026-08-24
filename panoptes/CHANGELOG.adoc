@@ -28,7 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Dry-run mode for testing
 - Verbose logging option
 - Oil Shell launcher script
-- Nix flake for reproducible builds
+- Guix flake for reproducible builds
 - Podman containerization with Chainguard Wolfi base
 - Comprehensive Justfile with 20+ recipes
 - RSR Gold compliance documentation suite

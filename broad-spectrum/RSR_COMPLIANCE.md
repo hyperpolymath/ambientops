@@ -108,7 +108,7 @@ This document certifies that the Broad Spectrum Website Auditor project fully co
 - Build scripts
 - Test scripts
 
-✅ **rescript.json** - ReScript configuration
+✅ **affinescript.json** - AffineScript configuration
 - Module system (ES6)
 - In-source compilation
 - GenType integration
@@ -130,7 +130,7 @@ This document certifies that the Broad Spectrum Website Auditor project fully co
 - Health checks
 - RSR verification
 
-✅ **flake.nix** - Nix reproducible builds
+✅ **flake.guix** - Guix reproducible builds
 - Development shell
 - Package definition
 - Multi-platform support
@@ -165,7 +165,7 @@ This document certifies that the Broad Spectrum Website Auditor project fully co
 
 ### Category 6: Type Safety (2/2 - 100%)
 
-✅ **ReScript** - Compile-time type safety
+✅ **AffineScript** - Compile-time type safety
 - 100% type-safe business logic
 - No runtime type errors
 - Exhaustive pattern matching
@@ -192,7 +192,7 @@ This document certifies that the Broad Spectrum Website Auditor project fully co
 
 ✅ **src/ Directory**
 - Clear structure
-- ReScript modules (8)
+- AffineScript modules (8)
 - TypeScript bindings (6)
 - CLI entry point
 
@@ -279,11 +279,11 @@ RSR compliance is verified on every push via GitHub Actions:
 - Documented maintainer structure
 
 ### Quality
-- 100% type-safe core (ReScript)
+- 100% type-safe core (AffineScript)
 - Comprehensive testing
 - Multi-OS CI/CD
 - Automated quality checks
-- Reproducible builds (Nix)
+- Reproducible builds (Guix)
 
 ### Transparency
 - Complete documentation
@@ -293,7 +293,7 @@ RSR compliance is verified on every push via GitHub Actions:
 - Open governance
 
 ### Reproducibility
-- Nix flake for deterministic builds
+- Guix flake for deterministic builds
 - Locked dependencies
 - Version-pinned tools
 - Multi-platform support
@@ -387,7 +387,7 @@ This level of compliance makes Broad Spectrum suitable for:
 ### Additional Badges
 
 ```markdown
-![Type Safe](https://img.shields.io/badge/Type%20Safe-ReScript-blue)
+![Type Safe](https://img.shields.io/badge/Type%20Safe-AffineScript-blue)
 ![License](https://img.shields.io/badge/License-MIT%20%7C%20Palimpsest-green)
 ![TPCF](https://img.shields.io/badge/TPCF-Perimeter%203-brightgreen)
 ![RFC 9116](https://img.shields.io/badge/RFC%209116-Compliant-success)

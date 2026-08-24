@@ -1,4 +1,9 @@
 // SPDX-License-Identifier: MPL-2.0
+// Ported via Harvard Engine (Semantic pass)
+
+module SEO;
+
+// SPDX-License-Identifier: MPL-2.0
 // SPDX-FileCopyrightText: 2025 Jonathan D.A. Jewell
 
 /**
@@ -19,7 +24,7 @@
 
 // SCHEMA: Represents a specific SEO violation or improvement note.
 @genType
-type seoIssue = {
+struct seoIssue { {
   severity: string, // "error", "warning", "info"
   message: string,
   element: option<string>, // The raw HTML snippet involved.
@@ -33,7 +38,7 @@ type seoIssue = {
  * 2. PENALTIES: Deduct for Errors (-10), Warnings (-5), and Info (-2).
  * 3. BONUSES: Reward Structured Data (+5), OG Tags (+3), and Depth (+5).
  */
-let calculateScore = (data: seoData, issues: array<seoIssue>): float => {
+fn calculateScore = (data: seoData, issues: array<seoIssue>): float => {
   // ... [Implementation of the weighted scoring logic]
 }
 
@@ -46,6 +51,7 @@ let calculateScore = (data: seoData, issues: array<seoIssue>): float => {
  * 3. EVALUATE: Compute the final score.
  */
 @genType
-let analyze = async (html: string, url: string): seoResult => {
+fn analyze = async (html: string, url: string): seoResult => {
   // ... [Implementation of the multi-pass rule check]
 }
+

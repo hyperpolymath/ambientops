@@ -380,7 +380,7 @@ cat RSR_COMPLIANCE.md
 1. Add code coverage reporting
 2. Implement Aqua.jl quality checks
 3. Add JET.jl static analysis
-4. Create Nix flake.nix
+4. Create Guix flake.guix
 5. Upgrade to Palimpsest License v0.8
 
 ### Medium Term (v0.3)

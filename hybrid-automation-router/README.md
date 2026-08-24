@@ -164,14 +164,14 @@ nerdctl build -t har:latest -f deploy/Containerfile .
 nerdctl compose -f deploy/compose.yaml up -d
 ```
 
-### Native (guix/nix)
+### Native (guix/guix)
 
 ```bash
 # Guix (preferred)
 guix build -f deploy/guix/har.scm
 
-# Nix (fallback)
-cd deploy/nix && nix build
+# Guix (fallback)
+cd deploy/guix && guix build
 ```
 
 ### Development Shell
@@ -179,7 +179,7 @@ cd deploy/nix && nix build
 ```bash
 ./deploy/run.sh dev
 # Or
-nix develop deploy/nix
+guix develop deploy/guix
 ```
 
 ## Configuration

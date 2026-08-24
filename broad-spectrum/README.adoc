@@ -2,7 +2,7 @@
 
 image:https://img.shields.io/badge/License-MPL--2.0-blue.svg[License: PMPL-1.0,link="https://github.com/hyperpolymath/palimpsest-license"]
 
-A comprehensive CLI website auditor built with ReScript and Deno. Performs automated security, accessibility, performance, and SEO audits on websites.
+A comprehensive CLI website auditor built with AffineScript and Deno. Performs automated security, accessibility, performance, and SEO audits on websites.
 
 == Features
 
@@ -22,7 +22,7 @@ A comprehensive CLI website auditor built with ReScript and Deno. Performs autom
 - Async/await architecture for parallel processing
 - Configurable concurrency limits
 - Automatic retry logic with exponential backoff
-- Type-safe ReScript core with zero runtime errors
+- Type-safe AffineScript core with zero runtime errors
 
 == Installation
 
@@ -33,7 +33,7 @@ A comprehensive CLI website auditor built with ReScript and Deno. Performs autom
 curl -fsSL https://deno.land/install.sh | sh
 ```
 
-2. *Install Node.js & npm* (for building ReScript):
+2. *Install Node.js & npm* (for building AffineScript):
 ```bash
 = Visit https://nodejs.org/ or use nvm
 
@@ -41,9 +41,9 @@ image:https://img.shields.io/badge/License-MPL--2.0-blue.svg[License: PMPL-1.0,l
 nvm install --lts
 ```
 
-3. *Install ReScript* (globally):
+3. *Install AffineScript* (globally):
 ```bash
-npm install -g rescript
+npm install -g affinescript
 ```
 
 === Build from Source
@@ -223,7 +223,7 @@ image:https://img.shields.io/badge/License-MPL--2.0-blue.svg[License: PMPL-1.0,l
 
 === Technology Stack
 
-- *ReScript*: Type-safe functional language compiling to JavaScript (100% of application code)
+- *AffineScript*: Type-safe functional language compiling to JavaScript (100% of application code)
 - *Deno*: Secure JavaScript runtime (no Node.js runtime dependencies)
 - *Native Web APIs*: URL, fetch, AbortController via Deno
 - *just*: Task runner (replaces Makefile)
@@ -233,7 +233,7 @@ image:https://img.shields.io/badge/License-MPL--2.0-blue.svg[License: PMPL-1.0,l
 
 ```
 broad-spectrum/
-├── src/                    # ReScript source files
+├── src/                    # AffineScript source files
 │   ├── Main.res           # CLI entry point
 │   ├── Auditor.res        # Main audit orchestrator
 │   ├── Config.res         # Configuration types
@@ -251,7 +251,7 @@ broad-spectrum/
 │   ├── SeoParserImpl.res # SEO implementation
 │   ├── Report.res        # Report generation (facade)
 │   └── ReportImpl.res    # Report implementation
-├── tests/                 # ReScript test files
+├── tests/                 # AffineScript test files
 ├── lib/                   # Compiled JavaScript output
 ├── Justfile              # Task runner
 ├── Mustfile.ncl          # Nickel configuration contract
@@ -260,7 +260,7 @@ broad-spectrum/
 
 === Key Design Decisions
 
-*Why ReScript?*
+*Why AffineScript?*
 - Compile-time type safety prevents runtime errors
 - Functional patterns eliminate entire classes of bugs
 - Excellent type inference reduces boilerplate
@@ -282,7 +282,7 @@ broad-spectrum/
 === Building
 
 ```bash
-# Install dependencies (ReScript compiler)
+# Install dependencies (AffineScript compiler)
 npm install
 
 # Build the project
@@ -320,7 +320,7 @@ The project follows a modular architecture:
 
 Contributions are welcome! Please follow these guidelines:
 
-1. *Language Policy*: Use ReScript only (no TypeScript)
+1. *Language Policy*: Use AffineScript only (no TypeScript)
 2. *Runtime*: Deno only (no npm/bun runtime deps)
 3. *Build System*: Use Justfile (no Makefile)
 4. *Testing*: Add tests for new features
@@ -337,8 +337,8 @@ See `.claude/CLAUDE.md` for the complete language policy.
 - Install Deno: `curl -fsSL https://deno.land/install.sh | sh`
 - Add to PATH: `export PATH="$HOME/.deno/bin:$PATH"`
 
-*"rescript: command not found"*
-- Install ReScript globally: `npm install -g rescript`
+*"affinescript: command not found"*
+- Install AffineScript globally: `npm install -g affinescript`
 
 *Build errors*
 - Clean and rebuild: `npm run clean && npm install && npm run build`
@@ -354,7 +354,7 @@ Palimpsest-MPL-1.0 License - see LICENSE file for details
 == Credits
 
 Built with:
-- [ReScript](https://rescript-lang.org/) - Type-safe functional language
+- [AffineScript](https://affinescript-lang.org/) - Type-safe functional language
 - [Deno](https://deno.land/) - Secure JavaScript/TypeScript runtime
 - [Native URL API](https://developer.mozilla.org/en-US/docs/Web/API/URL) - WHATWG URL parsing
 
