@@ -1,441 +1,105 @@
-= nano-aider
-
-image:https://img.shields.io/badge/License-MPL_2.0-blue.svg[MPL-2.0-or-later,link="https://opensource.org/licenses/MPL-2.0"]
-
-== License & Philosophy
-
-This project must declare **MPL-2.0-or-later** for platform/tooling compatibility.
-
-Philosophy: **Palimpsest**. The Palimpsest-MPL (PMPL) text is provided in `license/PMPL-1.0.txt`, and the canonical source is the palimpsest-license repository.
-Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
-:toc: macro
-:toc-title: Contents
-:toclevels: 3
-:icons: font
-:source-highlighter: rouge
-:experimental:
-:sectanchors:
-:sectlinks:
-:idprefix:
-:idseparator: -
-:url-github: https://github.com/hyperpolymath/nano-aider
-:url-gitlab: https://gitlab.com/hyperpolymath/nano-aider
-:url-bitbucket: https://bitbucket.org/hyperpolymath/nano-aider
-:url-codeberg: https://codeberg.org/hyperpolymath/nano-aider
-:url-alire: https://alire.ada.dev
-:url-nano: https://www.nano-editor.org
-:url-micro: https://micro-editor.github.io
+== nano-aider
 
 *Ada TUI for nano/micro Editor Configuration*
 
-image:https://img.shields.io/badge/Language-Ada_2022-blue?logo=ada[Ada 2022]
-image:https://img.shields.io/badge/TUI-ncurses-green[ncurses TUI]
-image:https://img.shields.io/badge/SPARK-Ready-purple[SPARK Ready]
-image:https://img.shields.io/badge/RSR-Certified-gold[RSR Certified,link=https://github.com/hyperpolymath/rhodium-standard-repositories]
-image:https://img.shields.io/badge/License-MPL_2.0-blue.svg[MPL-2.0-or-later,link="https://opensource.org/licenses/MPL-2.0"]
+https://ada-lang.io[image:https://img.shields.io/badge/Language-Ada_2022-blue?logo=ada[Ada
+2022]]
+https://invisible-island.net/ncurses/[image:https://img.shields.io/badge/TUI-ncurses-green[ncurses
+TUI]]
+https://www.adacore.com/about-spark[image:https://img.shields.io/badge/SPARK-Ready-purple[SPARK
+Ready]]
+image:https://img.shields.io/badge/License-MPL_2.0-blue.svg[MPL-2.0-or-later,link="`https://opensource.org/licenses/MPL-2.0`"]
 
-[.lead]
-**nano-aider** is a sophisticated Terminal User Interface (TUI) application written in Ada that discovers, documents, and manages the extensive—and often hidden—configuration options available in the {url-nano}[GNU nano] and {url-micro}[micro] text editors.
+____
+Discover and manage the extensive—and often hidden—configuration options
+in nano and micro text editors.
+____
 
-toc::[]
+=== The Problem
 
-== The Problem
+Both `+nano+` and `+micro+` have *hundreds of configuration
+options*—many undocumented, hidden behind compile-time flags, or
+scattered across multiple files. nano-aider exposes them all through an
+interactive TUI.
 
-Both `nano` and `micro` are powerful terminal editors with *hundreds of configuration options*—many of which are:
+=== Quick Start
 
-* *Undocumented* in the standard manpages
-* *Hidden* behind compile-time flags
-* *Scattered* across multiple files and formats
-* *Difficult to discover* without reading source code
-* *Inconsistent* between editor versions
-
-[quote]
-Did you know nano has options like `stateflags`, `minibar`, `zero`, `indicator`, and `jumpyscrolling`? Most users don't.
-
-== The Solution
-
-**nano-aider** provides:
-
-[cols="1,3"]
-|===
-|Feature |Description
-
-|*Option Discovery*
-|Automatically detects all available options for your installed nano/micro version, including hidden ones
-
-|*Interactive TUI*
-|Browse, search, and modify settings through an intuitive curses-based interface
-
-|*Profile Management*
-|Switch between predefined profiles (Developer, Writer, Power User) or create your own
-
-|*Configuration Export*
-|Generate valid `.nanorc` or `settings.json` files with full documentation
-
-|*Version Awareness*
-|Knows which options are available in which editor versions
-
-|*SPARK Verification*
-|Critical sections use SPARK annotations for formal correctness proofs
-|===
-
-== Quick Start
-
-=== Prerequisites
-
-* GNAT (Ada compiler) 12.0 or later
-* {url-alire}[Alire] package manager (recommended)
-* ncurses development libraries
-
-=== Installation
-
-[tabs]
-====
-Alire (Recommended)::
-+
 [source,bash]
 ----
+# Install via Alire (recommended)
 alr get nano_aider
 cd nano_aider*
 alr build
-----
 
-Manual Build::
-+
-[source,bash]
-----
+# Or build from source
 git clone https://github.com/hyperpolymath/nano-aider.git
 cd nano-aider
 gprbuild -P nano_aider.gpr -XNANO_AIDER_BUILD_MODE=release
-----
-
-From Source with Debug::
-+
-[source,bash]
-----
-git clone https://github.com/hyperpolymath/nano-aider.git
-cd nano-aider
-gprbuild -P nano_aider.gpr -XNANO_AIDER_BUILD_MODE=debug
 ./bin/nano-aider
 ----
-====
 
-=== First Run
+==== Prerequisites
 
-[source,bash]
-----
-# Launch interactive TUI
-./bin/nano-aider
+* *GNAT* (Ada compiler) 12.0+
+* *Alire* package manager
+* *ncurses* development libraries
 
-# List all options (including hidden)
-./bin/nano-aider --list
+=== Features
 
-# Load a profile
-./bin/nano-aider --profile developer
+[width="100%",cols="41%,59%",options="header",]
+|===
+|Feature |Description
+|*Option Discovery* |Detects all nano/micro options, including hidden
+ones
 
-# Export configuration
-./bin/nano-aider --export ~/.nanorc
-----
+|*Interactive TUI* |Browse, search, and modify settings with curses
+interface
 
-== TUI Interface
+|*Profile Management* |Switch between Minimal, Developer, Writer, Power
+User profiles
 
-----
+|*Configuration Export* |Generate valid `+.nanorc+` or `+settings.json+`
+files
+
+|*SPARK Verification* |Critical sections formally verified for
+correctness
+|===
+
+=== TUI Preview
+
+....
 +-------------- nano-aider - Editor Configuration TUI ---------------+
 |                                                                     |
 |  Configuration Categories:                                          |
 |                                                                     |
 |    > Display (15 options)                                           |
 |      Editing (12 options)                                           |
-|      Interface (8 options)                                          |
-|      Search & Replace (6 options)                                   |
-|      Files (10 options)                                             |
-|      Backup (5 options)                                             |
-|      Syntax Highlighting (20 options)                               |
-|      Key Bindings (50 options)                                      |
 |      Hidden/Undocumented (25 options)  <-- The secret sauce         |
-|      Micro-Specific (30 options)                                    |
 |                                                                     |
 +---------------------------------------------------------------------+
 | [h]elp | [/]search | [q]uit | [Enter]select | [Esc]back             |
 +---------------------------------------------------------------------+
-----
+....
 
-=== Key Bindings
+=== Documentation
 
-[cols="1,3"]
-|===
-|Key |Action
+* *README.adoc* - Full documentation with examples
+* *ROADMAP.adoc* - Development roadmap (v0.1.0 → v10.0.0)
+* *CONTRIBUTING.md* - Contribution guidelines
+* *docs/architecture.md* - Technical architecture
 
-|kbd:[j] / kbd:[Down]
-|Move cursor down
+=== License
 
-|kbd:[k] / kbd:[Up]
-|Move cursor up
+Dual-licensed under *MIT* OR *MPL-2.0* — choose whichever suits your
+needs.
 
-|kbd:[Enter]
-|Select item / Enter submenu
+=== Acknowledgments
 
-|kbd:[Esc] / kbd:[Backspace]
-|Go back / Exit submenu
-
-|kbd:[/]
-|Start search
-
-|kbd:[h]
-|Toggle hidden options visibility
-
-|kbd:[e]
-|Export current configuration
-
-|kbd:[r]
-|Reload configuration
-
-|kbd:[q]
-|Quit nano-aider
-|===
-
-== Hidden Options Exposed
-
-Here's a sample of the hidden/undocumented nano options that nano-aider helps you discover:
-
-[source]
-----
-Option              Description                                    Since
----------------------------------------------------------------------------
-stateflags          Display editing state flags in title bar       6.0
-minibar             Show compact status bar instead of full one    6.0
-zero                Hide all interface elements except text        7.0
-indicator           Show scroll position indicator                 5.0
-jumpyscrolling      Scroll by half-screen instead of line by line  4.0
-emptyline           Keep an empty line below title bar             5.0
-guidestripe N       Draw vertical stripe at column N               5.0
-bookstyle           Use book-style justification                   6.0
-locking             Use lock files for concurrent edit prevention  4.0
-zap                 Delete selected region without copying         5.0
-----
-
-== Configuration Profiles
-
-nano-aider includes several pre-built profiles:
-
-=== Minimal
-[source,nanorc]
-----
-# Bare essentials - no distractions
-unset linenumbers
-unset constantshow
-unset indicator
-----
-
-=== Developer
-[source,nanorc]
-----
-# Optimized for coding
-set linenumbers
-set autoindent
-set tabstospaces
-set tabsize 4
-set matchbrackets "(<[{)>]}"
-set smarthome
-set indicator
-set stateflags
-----
-
-=== Writer
-[source,nanorc]
-----
-# Optimized for prose
-set softwrap
-set atblanks
-set guidestripe 80
-set speller "aspell -x -c"
-set punct "!.?"
-----
-
-=== Power User
-[source,nanorc]
-----
-# Everything enabled
-set linenumbers
-set constantshow
-set stateflags
-set indicator
-set minibar
-set guidestripe 80
-set jumpyscrolling
-set zap
-set locking
-----
-
-== Architecture
-
-[source]
-----
-nano-aider/
-|-- src/
-|   |-- nano_aider.adb           # Main program
-|   |-- nano_aider.ads           # Root package specification
-|   |-- nano_aider-tui.ads       # TUI interface specification
-|   |-- nano_aider-tui.adb       # TUI implementation
-|   |-- nano_aider-options.ads   # Options discovery spec
-|   |-- nano_aider-options.adb   # Options discovery body
-|   |-- nano_aider-config.ads    # Configuration management spec
-|   |-- nano_aider-config.adb    # Configuration management body
-|   |-- nano_aider-profiles.ads  # Profile management spec
-|   +-- nano_aider-profiles.adb  # Profile management body
-|-- tests/
-|   +-- test_options.adb         # Option discovery tests
-|-- alire.toml                   # Alire package manifest
-|-- nano_aider.gpr               # GNAT project file
-|-- README.adoc                  # This file
-+-- ROADMAP.adoc                 # Development roadmap
-----
-
-=== Design Principles
-
-1. **Ada 2022 Standard** -- Modern Ada features for safety and clarity
-2. **SPARK Annotations** -- Critical sections formally verified
-3. **Minimal Dependencies** -- Only ncursesada required
-4. **Cross-Platform** -- Works on Linux, macOS, BSD, Windows (via MSYS2)
-5. **No Heap Allocation** -- Stack-based where possible for predictability
-
-== Building
-
-=== Build Modes
-
-[cols="1,2,2"]
-|===
-|Mode |Command |Description
-
-|Debug
-|`gprbuild -P nano_aider.gpr -XNANO_AIDER_BUILD_MODE=debug`
-|Full debug symbols, assertions enabled, no optimization
-
-|Release
-|`gprbuild -P nano_aider.gpr -XNANO_AIDER_BUILD_MODE=release`
-|Maximum optimization, no runtime checks
-
-|SPARK
-|`gprbuild -P nano_aider.gpr -XNANO_AIDER_BUILD_MODE=spark`
-|For running GNATprove formal verification
-|===
-
-=== Running Tests
-
-[source,bash]
-----
-# Build and run tests
-gprbuild -P nano_aider.gpr tests/test_options.adb
-./bin/test_options
-----
-
-=== SPARK Verification
-
-[source,bash]
-----
-# Run GNATprove on SPARK-annotated code
-gnatprove -P nano_aider.gpr --level=2
-----
-
-== Supported Platforms
-
-[cols="1,1,2"]
-|===
-|Platform |Status |Notes
-
-|Linux
-|Full Support
-|Primary development platform
-
-|macOS
-|Full Support
-|Requires Homebrew ncurses
-
-|FreeBSD
-|Full Support
-|Native ncurses
-
-|Windows
-|Experimental
-|Requires MSYS2 or WSL
-
-|OpenBSD
-|In Progress
-|Community testing welcome
-|===
-
-== Mirrors
-
-The canonical repository is on GitHub, with automatic mirroring to other platforms:
-
-[cols="1,2"]
-|===
-|Platform |URL
-
-|GitHub (primary)
-|{url-github}
-
-|GitLab
-|{url-gitlab}
-
-|Codeberg
-|{url-codeberg}
-
-|Bitbucket
-|{url-bitbucket}
-|===
-
-== Contributing
-
-Contributions are welcome! Please see link:CONTRIBUTING.md[CONTRIBUTING.md] for guidelines.
-
-=== Development Setup
-
-[source,bash]
-----
-# Clone the repository
-git clone https://github.com/hyperpolymath/nano-aider.git
-cd nano-aider
-
-# Install dependencies via Alire
-alr build
-
-# Run in development mode
-./bin/nano-aider
-----
-
-=== Code Style
-
-* Ada style follows GNAT conventions
-* 80 character line limit
-* 3-space indentation
-* SPARK annotations for new critical code
-
-== License
-
-nano-aider is dual-licensed under:
-
-* **Palimpsest-MPL-1.0 License** -- Permissive, minimal restrictions
-* **MPL-2.0** -- Copyleft, network service protection
-
-Choose whichever license suits your needs. See link:LICENSE.txt[LICENSE.txt] for details.
-
-== Acknowledgments
-
-* The {url-nano}[GNU nano] project for creating an excellent terminal editor
-* The {url-micro}[micro] project for modern terminal editing
-* The Ada community and {url-alire}[Alire] ecosystem
+* https://www.nano-editor.org[GNU nano] and
+https://micro-editor.github.io[micro] projects
+* The Ada community and https://alire.ada.dev[Alire] ecosystem
 * AdaCore for GNAT and SPARK technologies
 
-== See Also
+'''''
 
-* link:ROADMAP.adoc[ROADMAP.adoc] -- Development roadmap to v10.0.0
-* link:docs/architecture.md[Architecture Documentation]
-* link:CHANGELOG.md[Changelog]
-* {url-nano}[GNU nano official site]
-* {url-micro}[micro editor official site]
-
----
-
-[.text-center]
-*Made with Ada by https://github.com/hyperpolymath[Hyper Polymath]*
+_Made with Ada by https://github.com/hyperpolymath[Hyper Polymath]_

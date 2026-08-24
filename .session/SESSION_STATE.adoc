@@ -1,0 +1,26 @@
+== SESSION_STATE
+
+* Goal: Integrate miniKanren-style diagnostics + sophisticated A2ML
+logging into AmbientOps Pulse and deploy safely.
+* Current task: Closed (planned-session-close complete).
+* Last completed action: Implemented, tested, deployed, and pushed Pulse
+integration (`+5a66d9a+`).
+* Next intended action: Re-open at the 48h timer checkpoint
+(`+2026-04-14 23:53:06 BST+`) and run maintenance verification when
+convenient.
+* Repository: /var/mnt/eclipse/repos/ambientops
+* Branch: main
+* HEAD commit: 5a66d9a
+* Files of interest:
+** emergency-room/rust/src/pulse.rs
+** emergency-room/rust/src/main.rs
+** emergency-room/systemd/ambientops-pulse.service
+** emergency-room/MIGRATION.adoc
+** /home/hyper/.local/share/ambientops/pulse/pulse-events.a2ml
+* Known blockers:
+** none
+* Residual risks:
+** siphash integrity marker is not a cryptographic signature
+** heuristic crash-loop inference may occasionally over-warn
+* Recommended next protocol: verify maintenance
+/var/mnt/eclipse/repos/ambientops

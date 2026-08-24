@@ -1,94 +1,215 @@
-= HAR - Hybrid Automation Router
+== HAR - Hybrid Automation Router
 
-image:https://img.shields.io/badge/License-MPL--2.0-blue.svg[License: PMPL-1.0,link="https://github.com/hyperpolymath/palimpsest-license"]
-// SPDX-License-Identifier: CC-BY-SA-4.0
-// SPDX-FileCopyrightText: 2025 Jonathan D.A. Jewell
+https://hex.pm/packages/har[image:https://img.shields.io/hexpm/v/har.svg[Hex.pm]]
+https://hexdocs.pm/har[image:https://img.shields.io/badge/hex-docs-blue.svg[Hex
+Docs]]
+https://github.com/hyperpolymath/hybrid-automation-router/actions[image:https://github.com/hyperpolymath/hybrid-automation-router/actions/workflows/ci.yml/badge.svg[CI]]
+image:https://img.shields.io/badge/License-MPL–2.0-blue.svg[License:
+PMPL-1.0,link="`https://github.com/hyperpolymath/palimpsest-license`"]
 
+*Think BGP for infrastructure automation.* HAR treats configuration
+management like network packet routing - it parses configs from any IaC
+tool (Ansible, Salt, Terraform), extracts semantic operations, and
+routes/transforms them to any target format.
 
+=== Installation
 
-*Think BGP for infrastructure automation.* HAR treats configuration management like network packet routing - it parses configs from any IaC tool (Ansible, Salt, Terraform, bash), extracts semantic operations, and routes/transforms them to any target format.
+Add `+har+` to your list of dependencies in `+mix.exs+`:
 
-[![Elixir](https://img.shields.io/badge/Elixir-1.15+-purple.svg)](https://elixir-lang.org/)
+[source,elixir]
+----
+def deps do
+  [
+    {:har, "~> 1.0.0-rc1"}
+  ]
+end
+----
 
-== Status
+Then run:
 
-🚧 *Early Development (POC Phase)* 🚧
-
-HAR is currently in active development. The architecture is finalized, and we're building the reference implementation. Contributions are welcome!
-
-== Quick Start
-
-```bash
-= Install dependencies
-
+[source,bash]
+----
 mix deps.get
+----
 
-= Compile
+=== Quick Start
 
-mix compile
+==== CLI Usage
 
-= Run tests
+HAR provides three mix tasks for command-line usage:
 
-mix test
+[source,bash]
+----
+# Parse an IaC file to semantic graph (JSON output)
+mix har.parse examples/ansible/webserver.yml --format ansible
 
-= Start interactive shell
+# Transform semantic graph to target format
+mix har.transform graph.json --to terraform
 
-iex -S mix
+# End-to-end conversion
+mix har.convert examples/ansible/webserver.yml --to salt
+mix har.convert examples/terraform/webserver.tf --to ansible
+----
 
-= Try a conversion
+==== Programmatic Usage
 
-iex> {:ok, graph} = HAR.parse(:ansible, File.read!("examples/ansible/webserver.yml"))
-iex> {:ok, salt_sls} = HAR.convert(:ansible, File.read!("examples/ansible/webserver.yml"), to: :salt)
-iex> IO.puts(salt_sls)
-```
+[source,elixir]
+----
+# Parse Ansible playbook to semantic graph
+{:ok, graph} = HAR.DataPlane.Parsers.Ansible.parse(ansible_yaml)
 
-== What is HAR?
+# Route to Salt backend
+{:ok, plan} = HAR.ControlPlane.Router.route(graph, target: :salt)
 
-HAR is an *infrastructure automation router* that provides:
+# Transform to Salt SLS
+{:ok, salt_config} = HAR.DataPlane.Transformers.Salt.transform(graph)
 
-- *Universal Interchange Format:* Convert between any IaC tools (Ansible ↔ Salt ↔ Terraform ↔ ...)
-- *Semantic Understanding:* Understands infrastructure operations (install package, start service) independent of tool syntax
-- *Intelligent Routing:* Routes operations to optimal backends based on target characteristics
-- *IoT/IIoT Scale:* IPv6-based routing for billions of devices (servers → smart homes → industrial robots)
-- *Tool Agnostic:* Write once, deploy anywhere - no vendor lock-in
+# Or use the convenience function
+{:ok, salt_config} = HAR.convert(:ansible, ansible_yaml, to: :salt)
+----
 
-== Core Concepts
+=== Features
 
-=== Semantic Graph (IR)
+==== Universal IaC Translation
 
-HAR's intermediate representation is a directed graph where:
-- *Vertices* = Infrastructure operations (package.install, service.start, file.write)
-- *Edges* = Dependencies (requires, notifies, sequential ordering)
+Convert between any supported IaC tools:
 
-```elixir
-= Example semantic graph
+[cols=",,",options="header",]
+|===
+|Source |Target |Status
+|Ansible |Salt, Terraform |✅
+|Salt |Ansible, Terraform |✅
+|Terraform |Ansible, Salt |✅
+|===
 
-%Graph{
+==== Semantic Understanding
+
+HAR understands infrastructure operations at a semantic level:
+
+* *Package Management*: `+package_install+`, `+package_remove+`,
+`+package_upgrade+`
+* *Service Control*: `+service_start+`, `+service_stop+`,
+`+service_restart+`, `+service_enable+`
+* *File Operations*: `+file_create+`, `+file_template+`, `+file_copy+`,
+`+file_permissions+`
+* *User Management*: `+user_create+`, `+user_delete+`, `+user_modify+`
+* *Network Config*: `+compute_instance_create+`, `+network_create+`,
+`+firewall_rule_create+`
+
+==== Intelligent Routing
+
+Pattern-based routing with health checking and policy enforcement:
+
+[source,elixir]
+----
+# Route with policies
+{:ok, plan} = HAR.ControlPlane.Router.route(graph,
+  target: :salt,
+  policies: [:security, :compliance],
+  allow_fallback: true
+)
+----
+
+==== Control Plane Components
+
+* *Router*: Pattern matching to backends
+* *RoutingTable*: YAML-configurable routing patterns
+* *HealthChecker*: HTTP, TCP, and function-based health checks
+* *PolicyEngine*: Allow/deny/prefer rules with condition matching
+
+=== Architecture
+
+....
+┌─────────────────────────────────────────────────────────────┐
+│                      Control Plane                           │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐         │
+│  │   Router    │  │HealthChecker│  │PolicyEngine │         │
+│  └─────────────┘  └─────────────┘  └─────────────┘         │
+└─────────────────────────────────────────────────────────────┘
+                           │
+┌─────────────────────────────────────────────────────────────┐
+│                       Data Plane                             │
+│  ┌─────────────────┐              ┌─────────────────┐       │
+│  │     Parsers     │              │  Transformers   │       │
+│  │ Ansible │ Salt  │  ──────────► │ Ansible │ Salt  │       │
+│  │ Terraform       │  Semantic    │ Terraform       │       │
+│  └─────────────────┘    Graph     └─────────────────┘       │
+└─────────────────────────────────────────────────────────────┘
+....
+
+==== Semantic Graph IR
+
+HAR uses a directed graph as its intermediate representation:
+
+[source,elixir]
+----
+%HAR.Semantic.Graph{
   vertices: [
-    %Operation{type: :package_install, params: %{package: "nginx"}},
-    %Operation{type: :service_start, params: %{service: "nginx"}}
+    %HAR.Semantic.Operation{
+      id: "op_1",
+      type: :package_install,
+      params: %{name: "nginx"},
+      target: %{os: "debian"}
+    },
+    %HAR.Semantic.Operation{
+      id: "op_2",
+      type: :service_start,
+      params: %{name: "nginx"}
+    }
   ],
   edges: [
-    %Dependency{from: "op1", to: "op2", type: :requires}
+    %HAR.Semantic.Dependency{
+      from: "op_1",
+      to: "op_2",
+      type: :requires
+    }
   ]
 }
-```
+----
 
-=== Transformation Pipeline
+=== Deployment
 
-```
-Ansible YAML → Parser → Semantic Graph → Router → Transformer → Salt SLS
-     ↓                      ↓               ↓          ↓
-   Source IR          Normalized IR    Decision   Target Format
-```
+==== Container (nerdctl/podman/docker)
 
-=== Routing Engine
+[source,bash]
+----
+# Build and run (auto-detects runtime: nerdctl > podman > docker)
+./deploy/run.sh build
+./deploy/run.sh up
 
-Pattern-based routing table matches operations to backends:
+# Or manually
+nerdctl build -t har:latest -f deploy/Containerfile .
+nerdctl compose -f deploy/compose.yaml up -d
+----
 
-```yaml
-= priv/routing_table.yaml
+==== Native (guix/guix)
 
+[source,bash]
+----
+# Guix (preferred)
+guix build -f deploy/guix/har.scm
+
+# Guix (fallback)
+cd deploy/guix && guix build
+----
+
+==== Development Shell
+
+[source,bash]
+----
+./deploy/run.sh dev
+# Or
+guix develop deploy/guix
+----
+
+=== Configuration
+
+==== Routing Table
+
+Configure routing patterns in `+priv/routing_table.yaml+`:
+
+[source,yaml]
+----
 routes:
   - pattern:
       operation: package_install
@@ -97,334 +218,97 @@ routes:
     backends:
       - name: apt
         priority: 100
-```
+      - name: ansible.apt
+        priority: 50
 
-== Examples
+  - pattern:
+      operation: service_start
+    backends:
+      - name: systemd
+        priority: 100
+----
 
-=== Convert Ansible to Salt
+==== Policies
 
-*Input (Ansible):*
-```yaml
-- name: Install nginx
-  apt:
-    name: nginx
-    state: present
+Add custom policies to the PolicyEngine:
 
-- name: Start nginx
-  service:
-    name: nginx
-    state: started
-```
+[source,elixir]
+----
+HAR.ControlPlane.PolicyEngine.add_policy(%{
+  name: "production_only_terraform",
+  type: :deny,
+  priority: 100,
+  condition: %{environment: :production, backend_type: :terraform},
+  action: %{reason: "Terraform not allowed in production"}
+})
+----
 
-*Output (Salt):*
-```yaml
-install_nginx:
-  pkg.installed:
-    - name: nginx
+=== Supported Formats
 
-start_nginx:
-  service.running:
-    - name: nginx
-    - enable: True
-```
+==== Parsers
 
-*Code:*
-```elixir
-{:ok, salt_config} = HAR.convert(:ansible, ansible_playbook, to: :salt)
-```
+[cols=",,",options="header",]
+|===
+|Format |File Types |Features
+|Ansible |`+.yml+`, `+.yaml+` |Playbooks, roles, tasks
+|Salt |`+.sls+` |States, pillars
+|Terraform |`+.tf+`, `+.tf.json+` |HCL and JSON plan output
+|===
 
-=== Parse and Route
+==== Transformers
 
-```elixir
-= Parse Ansible playbook
+[cols=",,",options="header",]
+|===
+|Format |Output |Features
+|Ansible |YAML |Playbooks with handlers
+|Salt |YAML |States with requisites
+|Terraform |HCL/JSON |AWS, GCP, Azure providers
+|===
 
-{:ok, graph} = HAR.parse(:ansible, playbook_yaml)
+=== Testing
 
-= Route to Salt backend
-
-{:ok, routing_plan} = HAR.route(graph, target: :salt)
-
-= Transform to Salt SLS
-
-{:ok, salt_sls} = HAR.transform(routing_plan)
-```
-
-== Architecture
-
-HAR uses Elixir/OTP for fault tolerance and distributed routing:
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    HAR Cluster (Mesh)                        │
-│  ┌──────────┐      ┌──────────┐      ┌──────────┐          │
-│  │ HAR Node │◄────►│ HAR Node │◄────►│ HAR Node │          │
-│  │    1     │      │    2     │      │    3     │          │
-│  └──────────┘      └──────────┘      └──────────┘          │
-└─────────────────────────────────────────────────────────────┘
-         ↓                  ↓                  ↓
-    [Backends: Ansible, Salt, Terraform, IoT agents, ...]
-```
-
-*Key Components:*
-- *Control Plane:* Routing decisions, policy enforcement
-- *Data Plane:* Parsing, transformation execution
-- *IPFS Integration:* Content-addressed config storage
-- *OTP Distribution:* Fault-tolerant clustering
-
-See [docs/](./docs/) for detailed architecture documentation.
-
-== Supported Formats
-
-=== Currently Implemented
-
-| Format | Parse | Transform | Status |
-|--------|-------|-----------|--------|
-| Ansible | ✅ | ✅ | Alpha |
-| Salt | ✅ | ✅ | Alpha |
-| Terraform | 🚧 | 🚧 | In Progress |
-
-=== Planned
-
-- Puppet
-- Chef
-- CFEngine
-- Bash scripts
-- Kubernetes manifests
-- Docker Compose
-- Pulumi
-- Cloud-specific (CloudFormation, ARM templates)
-
-== IoT/IIoT Support
-
-HAR scales to billions of devices using IPv6 subnets for classification:
-
-```
-2001:db8:1::/48 - Servers (traditional IaC)
-2001:db8:2::/48 - IoT devices (smart homes, wearables)
-2001:db8:3::/48 - IIoT devices (factories, industrial robots)
-```
-
-*Security Tiers:*
-- Dev: Self-signed certs
-- IoT: Device certificates + TLS
-- Industrial: Mutual TLS + VPN
-- Critical Infrastructure: HSM-backed certs + dual approval
-
-See [docs/IOT_IIOT_ARCHITECTURE.md](./docs/IOT_IIOT_ARCHITECTURE.md) for details.
-
-== Development
-
-=== Prerequisites
-
-- Elixir 1.15+
-- Erlang/OTP 26+
-- (Optional) IPFS for content addressing
-- (Optional) Podman for deployment
-
-=== Setup
-
-```bash
-= Clone repository
-
-git clone https://github.com/yourusername/hybrid-automation-router
-cd hybrid-automation-router
-
-= Install dependencies
-
-mix deps.get
-
-= Run tests
-
+[source,bash]
+----
+# Run all tests
 mix test
 
-= Run with type checking
+# Run with coverage
+mix coveralls
 
+# Type checking
 mix dialyzer
 
-= Run linter
-
+# Linting
 mix credo
-```
-
-=== Project Structure
-
-```
-hybrid-automation-router/
-├── lib/
-│   ├── har/
-│   │   ├── control_plane/   # Routing engine, policies
-│   │   ├── data_plane/      # Parsers, transformers
-│   │   └── semantic/        # Graph models
-│   └── har.ex               # Main API
-├── test/                    # Test suites
-├── config/                  # Configuration
-├── docs/                    # Architecture documentation
-├── priv/                    # Static assets (routing table)
-└── examples/                # Example configurations
-```
-
-== Roadmap
-
-=== Phase 1: POC (Current - Q1-Q2 2024)
-- [x] Architecture documentation
-- [x] Semantic graph models
-- [x] Ansible/Salt parsers
-- [x] Basic routing engine
-- [x] Ansible/Salt transformers
-- [ ] CLI interface
-- [ ] IPFS integration
-- [ ] Production deployment example
-
-=== Phase 2: Community (Q3 2024 - Q2 2025)
-- [ ] Plugin architecture
-- [ ] All major tool support (Terraform, Puppet, Chef)
-- [ ] Web dashboard
-- [ ] Performance optimization
-- [ ] Production case studies
-
-=== Phase 3: Standardization (Q3 2025 - 2026)
-- [ ] IETF RFC draft
-- [ ] HAR Foundation
-- [ ] Compliance certification
-- [ ] Multi-vendor implementations
-
-See [docs/STANDARDIZATION_STRATEGY.md](./docs/STANDARDIZATION_STRATEGY.md) for details.
-
-== Documentation
-
-- [FINAL_ARCHITECTURE.md](./docs/FINAL_ARCHITECTURE.md) - Core architecture decisions
-- [CONTROL_PLANE_ARCHITECTURE.md](./docs/CONTROL_PLANE_ARCHITECTURE.md) - Routing engine design
-- [DATA_PLANE_ARCHITECTURE.md](./docs/DATA_PLANE_ARCHITECTURE.md) - Parser/transformer details
-- [HAR_NETWORK_ARCHITECTURE.md](./docs/HAR_NETWORK_ARCHITECTURE.md) - Distributed routing
-- [IOT_IIOT_ARCHITECTURE.md](./docs/IOT_IIOT_ARCHITECTURE.md) - IoT/IIoT support
-- [HAR_SECURITY.md](./docs/HAR_SECURITY.md) - Multi-tier security model
-- [STANDARDIZATION_STRATEGY.md](./docs/STANDARDIZATION_STRATEGY.md) - Path to IETF RFC
-- [SELF_HOSTED_DEPLOYMENT.md](./docs/SELF_HOSTED_DEPLOYMENT.md) - Production deployment
-
-== Contributing
-
-Contributions are welcome! Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
-
-*Ways to contribute:*
-- Add support for new IaC tools (parsers/transformers)
-- Improve routing algorithms
-- Write tests
-- Improve documentation
-- Report bugs
-- Share use cases
-
-== Community
-
-- *GitHub Discussions:* [Ask questions, share ideas](https://github.com/yourusername/hybrid-automation-router/discussions)
-- *Issues:* [Bug reports, feature requests](https://github.com/yourusername/hybrid-automation-router/issues)
-- *Discord:* Coming soon
-- *Twitter:* Coming soon
-
-== RSR Compliance
-
-HAR follows the [Rhodium Standard Repository](https://github.com/yourusername/rhodium-standards) framework for high-quality, reproducible software:
-
-=== Compliance Checklist
-
-*Documentation (7/7)*
-- ✅ README.md - Project overview and quickstart
-- ✅ LICENSE - Palimpsest-MPL-1.0 License (maximum accessibility)
-- ✅ SECURITY.md - Security policy and vulnerability reporting
-- ✅ CONTRIBUTING.md - Contribution guidelines
-- ✅ CODE_OF_CONDUCT.md - Community standards
-- ✅ MAINTAINERS.md - Project maintainer information
-- ✅ CHANGELOG.md - Version history and changes
-
-*.well-known/ Directory (3/3)*
-- ✅ security.txt - RFC 9116 security contact info
-- ✅ ai.txt - AI training policies
-- ✅ humans.txt - Attribution and credits
-
-*Build System (2/2)*
-- ✅ Justfile - Build automation (30+ recipes)
-- ✅ mix.exs - Elixir package manager
-
-*Testing (2/3)*
-- ✅ Test suite exists (ExUnit)
-- ✅ Tests pass (semantic models, parsers)
-- ⏳ Test coverage >80% (in progress)
-
-*Type Safety & Memory Safety*
-- ✅ Elixir compile-time type guarantees
-- ✅ @spec type annotations throughout
-- ✅ Dialyzer static analysis support
-- ✅ Pattern matching enforces correctness
-- ✅ Immutable data structures
-- ✅ BEAM VM memory safety
-
-*Offline-First*
-- ✅ Core functionality works without network
-- ✅ IPFS optional (offline mode default)
-- ✅ No mandatory cloud dependencies
-- ✅ Works air-gapped
-
-*Architecture Documentation (8/8)*
-- ✅ FINAL_ARCHITECTURE.md - Core tech decisions
-- ✅ CONTROL_PLANE_ARCHITECTURE.md - Routing engine
-- ✅ DATA_PLANE_ARCHITECTURE.md - Parsers/transformers
-- ✅ HAR_NETWORK_ARCHITECTURE.md - Distributed routing
-- ✅ IOT_IIOT_ARCHITECTURE.md - IPv6/MAC device support
-- ✅ HAR_SECURITY.md - Multi-tier security
-- ✅ STANDARDIZATION_STRATEGY.md - Path to IETF RFC
-- ✅ SELF_HOSTED_DEPLOYMENT.md - Production deployment
-
-*CI/CD (1/1)*
-- ✅ .gitlab-ci.yml - Automated testing and deployment
-
-*TPCF Perimeter*
-- ✅ Perimeter 3 (Community Sandbox) - Fully open contribution
-
-*RSR Level: Bronze (Offline-First, Type-Safe)*
-
-Run `just rsr-check` to verify compliance:
-
-```bash
-just rsr-check
-```
-
-== License
-
-Palimpsest-MPL-1.0 License - See [LICENSE](./LICENSE) for details.
-
-*Philosophy:* Maximum accessibility, prevent vendor lock-in.
-
-== Acknowledgments
-
-- *Inspired by:* BGP (network routing), Babel (JavaScript transpilation)
-- *Built with:* Elixir/OTP, IPFS, libgraph
-- *Thanks to:* The open-source IaC community (Ansible, Salt, Terraform, Puppet, Chef teams)
-
-== Citation
-
-If you use HAR in research, please cite:
-
-```bibtex
-@software{har2024,
-  title = {HAR: Hybrid Automation Router},
-  author = {HAR Contributors},
-  year = {2024},
-  url = {https://github.com/yourusername/hybrid-automation-router}
-}
-```
-
----
-
-*Status:* Early development | *License:* MIT | *Language:* Elixir
-
-*Star this repo if you believe infrastructure automation should be tool-agnostic!* ⭐
-
-== OPSM Link
-
-[source]
 ----
-OPSM Core
-  |
-  v
-hybrid-automation-router (automation routing for OPSM operations)
 
-----
+=== Documentation
+
+* link:docs/FINAL_ARCHITECTURE.md[Architecture Overview]
+* link:docs/CONTROL_PLANE_ARCHITECTURE.md[Control Plane Design]
+* link:docs/DATA_PLANE_ARCHITECTURE.md[Data Plane Design]
+* link:docs/HAR_SECURITY.md[Security Model]
+* link:docs/IOT_IIOT_ARCHITECTURE.md[IoT/IIoT Integration]
+* link:docs/SELF_HOSTED_DEPLOYMENT.md[Deployment Guide]
+
+=== Roadmap
+
+* [x] *1.0.0-rc1*: Core parsers/transformers, routing engine, CLI
+* [ ] *1.0.0*: Documentation, Hex.pm release, benchmarks
+* [ ] *1.1.0*: Distributed routing (libcluster/horde)
+* [ ] *1.2.0*: IPFS integration
+* [ ] *2.0.0*: Web dashboard, Phoenix LiveView
+
+=== Contributing
+
+See CONTRIBUTING.adoc for guidelines.
+
+=== License
+
+MPL-2.0 - See LICENSE for details.
+
+=== Links
+
+* https://github.com/hyperpolymath/hybrid-automation-router[GitHub]
+* https://hex.pm/packages/har[Hex.pm]
+* https://hexdocs.pm/har[Documentation]

@@ -1,0 +1,15 @@
+== project-cb
+
+Project clipboard/scratchpad for collecting and organizing ideas,
+comments, and text snippets.
+
+=== Features
+
+* Comment bank management (Scheme and Djot formats)
+* Text analysis and quality assessment
+* AceText import capabilities
+* Integration with tma-mark2 for monitoring
+
+=== License
+
+PMPL-1.0 (Palimpsest-MPL) - See LICENSE

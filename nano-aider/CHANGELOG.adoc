@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: CC-BY-SA-4.0
-= Changelog
+== Changelog
 
-== [Unreleased]
-- Initial scaffold with dual license, CI/CD, contributor rituals
+=== [Unreleased]
+
+* Initial scaffold with dual license, CI/CD, contributor rituals
