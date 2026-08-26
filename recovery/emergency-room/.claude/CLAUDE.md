@@ -29,7 +29,7 @@ The following files in `.machine_readable/` contain structured project metadata:
 | **D** | Driver/deployment layer | Adapters, execution, IO boundaries |
 | **V** | Verification layer | Policy, plan verification, schema conformance |
 | **AffineScript** | Primary application code | Compiles to JS, type-safe; AmbientOps primary |
-| **Bun** | JS/TS runtime & package management (tier 1) | Default for all new work. Executes `.ts` directly, no build step. Uses an npm-compatible `package.json` plus `bun.lock` — both are expected, not anti-patterns. |
+| **Bun** | JS runtime & package management (tier 1) | Default for all new work. Runs compiled ESM/JS directly — no bundler step. Uses an npm-compatible `package.json` plus `bun.lock` — both are expected, not anti-patterns. |
 | **Rust** | Agent/verify boxes only | Isolated repos (`*-agent-rs/`, `*-verify-rs/`) |
 | **Elixir** | Observability/event hub only | NEVER source of truth |
 | **Gleam** | Backend services | Runs on BEAM or compiles to JS |
@@ -48,6 +48,7 @@ The following files in `.machine_readable/` contain structured project metadata:
 | Banned | Replacement | Reason |
 |--------|-------------|--------|
 | TypeScript | AffineScript | Type safety without JS baggage |
+| Deno | Bun | Being removed per the 2026-08-26 ruling; migrate, or document why not |
 | Node.js | Bun | Node-compatible; run the code, drop the runtime |
 | npm/yarn/pnpm | Bun | Bun manages deps |
 | Go | Rust | Memory safety without GC |
@@ -83,7 +84,7 @@ Elixir is allowed **only for observability/event hubs**:
 
 - **Primary**: Guix (guix.scm)
 - **Fallback**: Guix (flake.guix)
-- **JS deps**: Bun (`package.json` + `bun.lock`); `bunx <tool>` for one-off tooling
+- **JS deps**: Bun (`package.json` + `bun.lock`). Declare tooling as a devDependency and run `bunx --no-install --bun <tool>` — a bare `bunx <tool>` can fetch an unpinned package and may start Node via its shebang.
 
 ### Security Requirements
 
