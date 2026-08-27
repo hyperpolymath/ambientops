@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # SPDX-License-Identifier: MPL-2.0 OR MPL-2.0
 # SPDX-FileCopyrightText: 2025 Jonathan D.A. Jewell <hyperpolymath>
 #
