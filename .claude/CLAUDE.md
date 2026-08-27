@@ -102,6 +102,7 @@ cargo build -p ambientops-clinician --all-features     # Everything (slow)
 | Banned | Replacement | Reason |
 |--------|-------------|--------|
 | TypeScript | AffineScript | Type safety without JS baggage |
+| ReScript | AffineScript | Type safety without JS baggage |
 | Deno | Bun | Being removed per the 2026-08-26 ruling; migrate, or document why not |
 | Node.js | Bun | Node-compatible; run the code, drop the runtime |
 | npm/yarn/pnpm | Bun | Bun manages deps |
@@ -129,7 +130,7 @@ Elixir is allowed **only for observability/event hubs**:
 
 1. **No new TypeScript files** - Convert existing TS to AffineScript
 2. **Use `package.json` + `bun.lock` for JS runtime deps** - Bun is npm-compatible; a manifest is REQUIRED
-3. **`bun install --production` for production deps** - resolved from `package.json`, pinned via `bun.lock`
+3. **`bun install --production --frozen-lockfile` for production deps** - resolved from `package.json` and pinned via `bun.lock`; `--frozen-lockfile` makes a lockfile mismatch a build failure rather than a silent re-resolve
 4. **No Go code** - Use Rust instead
 5. **No Python anywhere** - Completely banned
 6. **No Kotlin/Swift for mobile** - Use Tauri 2.0+ or Dioxus
