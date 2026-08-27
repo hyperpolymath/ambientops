@@ -29,7 +29,7 @@ The following files in `.machine_readable/` contain structured project metadata:
 | **D**                | Driver/deployment layer        | Adapters, execution, IO boundaries             |
 | **V**                | Verification layer             | Policy, plan verification, schema conformance  |
 | **AffineScript**         | Primary application code       | Compiles to JS, type-safe; AmbientOps primary  |
-| **Deno**             | Runtime & package management   | Replaces Node/npm/bun                          |
+| **Bun**              | JS runtime & package management (tier 1)       | Runs compiled ESM/JS; package.json + bun.lock  |
 | **Rust**             | Agent/verify boxes only        | Isolated repos (`*-agent-rs/`, `*-verify-rs/`) |
 | **Elixir**           | Observability/event hub only   | NEVER source of truth                          |
 | **Gleam**            | Backend services               | Runs on BEAM or compiles to JS                 |
@@ -48,8 +48,9 @@ The following files in `.machine_readable/` contain structured project metadata:
 | Banned            | Replacement       | Reason                                      |
 | ----------------- | ----------------- | ------------------------------------------- |
 | TypeScript        | AffineScript          | Type safety without JS baggage              |
-| Node.js           | Deno              | Security-first runtime                      |
-| npm/yarn/pnpm/bun | Deno              | Deno manages deps                           |
+| Deno              | Bun               | Being removed per the 2026-08-26 ruling     |
+| Node.js           | Bun               | Node-compatible; run the code, drop runtime |
+| npm/yarn/pnpm     | Bun               | Bun manages deps                            |
 | Go                | Rust              | Memory safety without GC                    |
 | **Python**        | AffineScript/Rust/D/V | **Completely banned** (SaltStack abandoned) |
 | Java/Kotlin       | Rust/Tauri        | No JVM                                      |
@@ -75,8 +76,8 @@ Elixir is allowed **only for observability/event hubs**:
 ### Enforcement Rules
 
 1. **No new TypeScript files** - Convert existing TS to AffineScript
-2. **No package.json for runtime deps** - Use deno.json imports
-3. **No node_modules in production** - Deno caches deps automatically
+2. **Use `package.json` + `bun.lock` for JS runtime deps** - Bun is npm-compatible; a manifest is REQUIRED
+3. **`bun install --production` for production deps** - resolved from `package.json`, pinned via `bun.lock`
 4. **No Go code** - Use Rust instead
 5. **No Python anywhere** - Completely banned
 6. **No Kotlin/Swift for mobile** - Use Tauri 2.0+ or Dioxus
@@ -85,7 +86,7 @@ Elixir is allowed **only for observability/event hubs**:
 
 - **Primary**: Guix (guix.scm)
 - **Fallback**: Guix (flake.guix)
-- **JS deps**: Deno (deno.json imports)
+- **JS deps**: Bun (`package.json` + `bun.lock`). Declare tooling as a devDependency and run `bunx --no-install --bun <tool>` — a bare `bunx <tool>` can fetch an unpinned package and may start Node via its shebang.
 
 ### Security Requirements
 
