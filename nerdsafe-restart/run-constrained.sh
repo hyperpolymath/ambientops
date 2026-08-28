@@ -159,8 +159,6 @@ NERDCTL_ARGS=(
     --volume="${HOME}/.config:${HOME}/.config:ro"
     --volume="${HOME}/.local:${HOME}/.local:ro"
 
-    # Mount asdf if present
-    ${HOME}/.asdf && --volume="${HOME}/.asdf:${HOME}/.asdf:ro"
 
     # Environment
     --env="HOME=${HOME}"
@@ -174,6 +172,9 @@ NERDCTL_ARGS=(
     # Image
     "$IMAGE_NAME"
 )
+
+# Mount asdf only if present (cannot be expressed inside the array literal above)
+[ -d "${HOME}/.asdf" ] && NERDCTL_ARGS+=( --volume="${HOME}/.asdf:${HOME}/.asdf:ro" )
 
 # Add asdf mount if directory exists
 if [[ -d "${HOME}/.asdf" ]]; then
