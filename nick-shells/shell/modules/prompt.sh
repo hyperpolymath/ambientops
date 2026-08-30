@@ -27,7 +27,7 @@ case $- in
         if [ -n "${BASH_VERSION:-}" ]; then
             PROMPT_COMMAND='PS1="$(__ns_prompt)"'
         elif [ -n "${ZSH_VERSION:-}" ]; then
-            precmd() { PS1="$(__ns_prompt)" }
+            precmd() { PS1="$(__ns_prompt)"; }
         else
             PS1='$ '
         fi
