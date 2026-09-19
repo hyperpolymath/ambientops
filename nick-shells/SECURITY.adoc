@@ -390,7 +390,7 @@ When using nick-shells, we recommend:
 * https://github.com/hyperpolymath/nick-shells/security/advisories[Security
 Advisories]
 * link:CHANGELOG.md[Changelog]
-* link:CONTRIBUTING.md[Contributing Guidelines]
+* link:../.github/CONTRIBUTING.md[Contributing Guidelines]
 * https://www.shellcheck.net/[ShellCheck] - Shell script static analysis
 
 '''''
