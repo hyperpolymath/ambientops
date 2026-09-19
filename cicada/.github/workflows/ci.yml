@@ -28,22 +28,22 @@ jobs:
         with:
           submodules: recursive
 
-      - uses: julia-actions/setup-julia@v2
+      - uses: julia-actions/setup-julia@4c0cb0fce8556fdb04a90347310e5db8b1f98fb9  # v2
         with:
           version: ${{ matrix.version }}
 
-      - uses: julia-actions/cache@v2
+      - uses: julia-actions/cache@d10a6fd8f31b12404a54613ebad242900567f2b9  # v2
 
-      - uses: julia-actions/julia-buildpkg@v1
+      - uses: julia-actions/julia-buildpkg@e3eb439fad4f9aba7da2667e7510e4a46ebc46e1  # v1
 
       - name: Run tests
         run: |
           julia --project=. -e 'using Pkg; Pkg.test()'
 
-      - uses: julia-actions/julia-processcoverage@v1
+      - uses: julia-actions/julia-processcoverage@03114f09f119417c3242a9fb6e0b722676aedf38  # v1
         if: matrix.os == 'ubuntu-latest' && matrix.version == '1.9'
 
-      - uses: codecov/codecov-action@v5
+      - uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac  # v5
         if: matrix.os == 'ubuntu-latest' && matrix.version == '1.9'
         with:
           file: lcov.info
@@ -55,7 +55,7 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
-      - uses: julia-actions/setup-julia@v2
+      - uses: julia-actions/setup-julia@4c0cb0fce8556fdb04a90347310e5db8b1f98fb9  # v2
         with:
           version: '1.9'
 
@@ -79,7 +79,7 @@ jobs:
           ! grep -r "token\s*=" src/ test/ | grep -v "github_token" | grep -v "# GitHub"
 
       - name: Dependency audit
-        uses: julia-actions/setup-julia@v2
+        uses: julia-actions/setup-julia@4c0cb0fce8556fdb04a90347310e5db8b1f98fb9  # v2
         with:
           version: '1.9'
 
