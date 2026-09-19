@@ -164,7 +164,7 @@ just start-engine
 
 * README.adoc - Usage documentation
 * SECURITY.md - Security considerations
-* CONTRIBUTING.adoc - Development guidelines
+* ../.github/CONTRIBUTING.md - Development guidelines
 
 '''''
 

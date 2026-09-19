@@ -107,8 +107,8 @@ while read repo; do
     # Add SECURITY.md if missing
     add_if_missing "$repo" "SECURITY.md" "$SECURITY_CONTENT" "Add security policy"
     
-    # Add CONTRIBUTING.adoc if missing
-    add_if_missing "$repo" "CONTRIBUTING.adoc" "$CONTRIBUTING_CONTENT" "Add contributing guide"
+    # Add ../../../.github/CONTRIBUTING.md if missing
+    add_if_missing "$repo" "../../../.github/CONTRIBUTING.md" "$CONTRIBUTING_CONTENT" "Add contributing guide"
     
     # Add CODE_OF_CONDUCT.md if missing
     add_if_missing "$repo" "CODE_OF_CONDUCT.md" "$CODE_OF_CONDUCT" "Add code of conduct"

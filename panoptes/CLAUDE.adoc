@@ -191,7 +191,7 @@ This project maintains RSR Gold compliance:
 * [x] `LICENSE.txt` (SPDX: MPL-2.0)
 * [x] `SECURITY.md`
 * [x] `CODE_OF_CONDUCT.adoc`
-* [x] `CONTRIBUTING.adoc`
+* [x] `../.github/CONTRIBUTING.md`
 * [x] `FUNDING.yml`
 * [x] `GOVERNANCE.adoc`
 * [x] `MAINTAINERS.md`

@@ -25,7 +25,7 @@ cd $repo
 
 == Contributing
 
-See link:CONTRIBUTING.adoc[Contributing Guide]
+See link:../../../.github/CONTRIBUTING.md[Contributing Guide]
 
 == License
 

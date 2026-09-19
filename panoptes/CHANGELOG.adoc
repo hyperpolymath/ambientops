@@ -44,7 +44,7 @@ https://semver.org/spec/v2.0.0.html[Semantic Versioning].
 
 * README.adoc with full usage guide
 * SECURITY.md with vulnerability reporting process
-* CONTRIBUTING.adoc with TPCF guidelines
+* ../.github/CONTRIBUTING.md with TPCF guidelines
 * GOVERNANCE.adoc with project governance model
 * CODE_OF_CONDUCT.adoc (Contributor Covenant 2.1)
 * CLAUDE.adoc for AI assistant integration
