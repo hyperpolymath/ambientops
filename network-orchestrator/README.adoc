@@ -1447,7 +1447,7 @@ See link:ROADMAP.adoc[ROADMAP.adoc] for detailed milestones.
 
 == Contributing
 
-We welcome contributions! See link:CONTRIBUTING.adoc[CONTRIBUTING.adoc].
+We welcome contributions! See link:../.github/CONTRIBUTING.md[../.github/CONTRIBUTING.md].
 
 Priority areas for v0.2:
 

@@ -403,7 +403,7 @@ When a new repo is created, git-hud automatically:
 └── diagnostic.yml          # Latest scan results
 │
 SECURITY.md                 # Security policy
-CONTRIBUTING.adoc           # Contribution guide
+../../.github/CONTRIBUTING.md           # Contribution guide
 CODE_OF_CONDUCT.md          # Community standards
 justfile                    # Task runner
 Mustfile                    # Mandatory checks

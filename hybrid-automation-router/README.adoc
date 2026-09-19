@@ -301,7 +301,7 @@ mix credo
 
 === Contributing
 
-See CONTRIBUTING.adoc for guidelines.
+See ../.github/CONTRIBUTING.md for guidelines.
 
 === License
 

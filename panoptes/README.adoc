@@ -248,7 +248,7 @@ podman exec panoptes-llm ollama list
 
 == Contributing
 
-See link:CONTRIBUTING.adoc[CONTRIBUTING.adoc] for guidelines.
+See link:../.github/CONTRIBUTING.md[../.github/CONTRIBUTING.md] for guidelines.
 
 == License
 
