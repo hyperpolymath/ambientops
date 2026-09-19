@@ -347,7 +347,7 @@ See [ETHICS.md](ETHICS.md) for detailed breakdown.
 | *[tools/README.md](tools/README.md)* | Detailed tool documentation |
 | *[ETHICS.md](ETHICS.md)* | GDPR principles and privacy |
 | *[PROJECT_SUMMARY.md](PROJECT_SUMMARY.md)* | Technical architecture |
-| *[CONTRIBUTING.md](CONTRIBUTING.md)* | Development guide |
+| *[CONTRIBUTING.md](../../.github/CONTRIBUTING.md)* | Development guide |
 | *[CLAUDE.md](CLAUDE.md)* | AI assistant context |
 
 ---
@@ -589,7 +589,7 @@ jusys/
 
 == 🤝 Contributing
 
-We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
+We welcome contributions! See [CONTRIBUTING.md](../../.github/CONTRIBUTING.md) for:
 
 - Code style guidelines
 - Testing requirements

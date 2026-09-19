@@ -480,7 +480,7 @@ Planned tool additions:
 
 === Contributing
 
-See link:../CONTRIBUTING.md[CONTRIBUTING.md] for development guidelines.
+See link:../../../.github/CONTRIBUTING.md[CONTRIBUTING.md] for development guidelines.
 
 *Tool Development Checklist:* - [ ] Follows privacy-first principles - [
 ] Includes usage documentation - [ ] Provides example output - [ ]

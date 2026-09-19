@@ -131,7 +131,7 @@ This is the central documentation hub for *CIcaDA* (Palimpsest Crypto Identity),
 |===
 | Document | Description | Location
 
-| link:../CONTRIBUTING.md[Contributing Guide]
+| link:../../.github/CONTRIBUTING.md[Contributing Guide]
 | How to contribute: code style, PR process, testing requirements
 | `CONTRIBUTING.md`
 

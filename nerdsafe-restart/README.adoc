@@ -251,4 +251,4 @@ MPL-2.0
 
 == Contributing
 
-See link:CONTRIBUTING.md[CONTRIBUTING.md]
+See link:../.github/CONTRIBUTING.md[CONTRIBUTING.md]

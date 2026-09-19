@@ -380,7 +380,7 @@ Suggestions welcome via:
 * Pull requests
 * Email: jonathan@hyperpolymath.io
 
-See link:CONTRIBUTING.md[CONTRIBUTING.md] for guidelines.
+See link:../.github/CONTRIBUTING.md[CONTRIBUTING.md] for guidelines.
 
 ---
 

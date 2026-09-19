@@ -76,4 +76,4 @@ _To be determined based on project specification._
 
 This roadmap will be updated once the project specification is available. Check back or watch this repository for updates.
 
-See link:CONTRIBUTING.md[CONTRIBUTING.md] for contribution guidelines.
+See link:../.github/CONTRIBUTING.md[CONTRIBUTING.md] for contribution guidelines.
