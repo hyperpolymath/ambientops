@@ -37,7 +37,7 @@ jobs:
         run: brew install ncurses
 
       - name: Install Alire
-        uses: alire-project/setup-alire@v5
+        uses: alire-project/setup-alire@8398015c233537c928d12293d46c0dcecb54434c  # v5
         with:
           version: ${{ env.ALIRE_VERSION }}
 
@@ -54,7 +54,7 @@ jobs:
           ./ci-scripts/test.sh
 
       - name: Upload binary artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f  # v6
         with:
           name: nano-aider-${{ matrix.os }}
           path: bin/nano-aider
@@ -74,7 +74,7 @@ jobs:
           sudo apt-get install -y gnat gnatprove libncurses-dev
 
       - name: Install Alire
-        uses: alire-project/setup-alire@v5
+        uses: alire-project/setup-alire@8398015c233537c928d12293d46c0dcecb54434c  # v5
         with:
           version: ${{ env.ALIRE_VERSION }}
 
@@ -96,7 +96,7 @@ jobs:
           sudo apt-get install -y gnat libncurses-dev
 
       - name: Install Alire
-        uses: alire-project/setup-alire@v5
+        uses: alire-project/setup-alire@8398015c233537c928d12293d46c0dcecb54434c  # v5
         with:
           version: ${{ env.ALIRE_VERSION }}
 
