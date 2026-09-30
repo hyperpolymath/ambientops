@@ -12,6 +12,8 @@ echo "Starting configuration of all repos at $(date)" | tee "$LOG_FILE"
 # and attempt to enable vulnerability alerts and automated security fixes via gh.
 # Arguments: $1 is the repository name within OWNER (without the owner prefix).
 # Uses globals OWNER and LOG_FILE; prints progress and appends it to LOG_FILE.
+# API failures do not stop subsequent requests. The return status is that of the
+# final tee command, so a successful return does not confirm configuration.
 configure_repo() {
     local repo=$1
     echo "Configuring: $repo" | tee -a "$LOG_FILE"
