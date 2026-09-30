@@ -3,10 +3,10 @@
 
 OWNER="hyperpolymath"
 LOG_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/personal-sysadmin/repo-config.log"
-mkdir -p "$(dirname "$LOG_FILE")"
-chmod 0700 "$(dirname "$LOG_FILE")"
+mkdir -p "$(dirname "$LOG_FILE")" || exit 1
+chmod 0700 "$(dirname "$LOG_FILE")" || exit 1
 
-echo "Starting configuration of all repos at $(date)" | tee "$LOG_FILE"
+echo "Starting configuration of all repos at $(date)" | tee "$LOG_FILE" || exit 1
 
 # Apply standard settings, star the repository, configure main branch protection,
 # and attempt to enable vulnerability alerts and automated security fixes via gh.
