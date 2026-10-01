@@ -2,13 +2,19 @@
 # Configure all hyperpolymath repos with standard settings
 
 OWNER="hyperpolymath"
-LOG_FILE="/tmp/repo-config.log"
+LOG_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/personal-sysadmin/repo-config.log"
+mkdir -p "$(dirname "$LOG_FILE")" || exit 1
+chmod 0700 "$(dirname "$LOG_FILE")" || exit 1
 
-echo "Starting configuration of all repos at $(date)" | tee $LOG_FILE
+echo "Starting configuration of all repos at $(date)" | tee "$LOG_FILE" || exit 1
 
+# Apply standard settings, star the repository, configure main branch protection,
+# and attempt to enable vulnerability alerts and automated security fixes via gh.
+# Arguments: $1 is the repository name within OWNER (without the owner prefix).
+# Uses globals OWNER and LOG_FILE; prints progress and appends it to LOG_FILE.
 configure_repo() {
     local repo=$1
-    echo "Configuring: $repo" | tee -a $LOG_FILE
+    echo "Configuring: $repo" | tee -a "$LOG_FILE"
 
     # 1. Update repository settings
     gh api "repos/$OWNER/$repo" -X PATCH \
@@ -54,7 +60,7 @@ PROTECTION
     gh api "repos/$OWNER/$repo/vulnerability-alerts" -X PUT --silent 2>/dev/null
     gh api "repos/$OWNER/$repo/automated-security-fixes" -X PUT --silent 2>/dev/null
 
-    echo "  Done: $repo" | tee -a $LOG_FILE
+    echo "  Done: $repo" | tee -a "$LOG_FILE"
 }
 
 # Get all repos
@@ -71,5 +77,5 @@ while read repo; do
 done < /tmp/repos-to-configure.txt
 
 echo ""
-echo "=== Configuration complete at $(date) ===" | tee -a $LOG_FILE
-echo "Configured $count repos" | tee -a $LOG_FILE
+echo "=== Configuration complete at $(date) ===" | tee -a "$LOG_FILE"
+echo "Configured $count repos" | tee -a "$LOG_FILE"
