@@ -28,12 +28,13 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 
 # AI/SLM Integration (also used for VeriSimDB HTTP calls)
-reqwest = { version = "0.13", features = ["json"] }
+reqwest = { version = "0.13", features = ["json", "query"] }
 ollama-rs = "0.3"             # Local LLM via Ollama
 
 # P2P Communication
 # Updated from 0.54 to 0.56 to fix RUSTSEC-2025-0009 (ring 0.16.20 via rcgen)
-libp2p = { version = "0.56", features = ["tokio", "mdns", "gossipsub", "kad"] }
+# Updated from 0.56 to 0.57 to move hickory-proto off 0.25.2 (GHSA-q2qq-hmj6-3wpp, GHSA-3v94-mw7p-v465)
+libp2p = { version = "0.57", features = ["tokio", "mdns", "gossipsub", "kad"] }
 
 # Anomaly detection (integrates with ESN/LSM)
 ndarray = "0.17"
