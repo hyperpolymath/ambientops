@@ -71,7 +71,6 @@ DATA & CONTRACTS
 SYSTEM TOOLS (ambientops monorepo members)
   broad-spectrum (AffineScript)         ██████░░░░  60%    Link/SEO/accessibility checker
   cicada                            ██░░░░░░░░  20%    Stub
-  czech-file-knife                  ██░░░░░░░░  20%    File utilities
   displace                          ██░░░░░░░░  20%    Displacement tool
   emergency-button                  ██░░░░░░░░  20%    Emergency stop
   hybrid-automation-router          ██░░░░░░░░  20%    HAR integration

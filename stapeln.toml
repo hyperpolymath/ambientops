@@ -122,33 +122,6 @@ user = "nonroot"
 labels = { "org.opencontainers.image.title" = "Hardware Crash Team", "org.opencontainers.image.description" = "Hardware diagnostic and remediation for zombie devices, driver conflicts, PCI bus issues", "org.opencontainers.image.source" = "https://github.com/hyperpolymath/ambientops", "org.opencontainers.image.licenses" = "MPL-2.0" }
 
 # ══════════════════════════════════════════════════════════════════
-# Service: czech-file-knife (Rust workspace — universal file tool)
-# Binary: cfk
-# Deps: own workspace (cfk-core, cfk-providers, cfk-cli, etc.)
-# ══════════════════════════════════════════════════════════════════
-
-[layers.cfk-build]
-description = "Build czech-file-knife cfk-cli binary"
-extends = "rust-toolchain"
-packages = ["fuse3-dev"]
-commands = [
-    "mkdir -p /build",
-    "cp -r czech-file-knife/ /build/cfk/",
-    "cd /build/cfk && cargo build --release -p cfk-cli --locked",
-]
-
-[layers.cfk-runtime]
-description = "Czech File Knife minimal runtime"
-extends = "wolfi-base"
-packages = ["fuse3", "fuse3-libs", "ca-certificates"]
-copy-from = [
-    { layer = "cfk-build", src = "/build/cfk/target/release/cfk", dst = "/usr/local/bin/cfk" },
-]
-entrypoint = ["/usr/local/bin/cfk"]
-user = "cfk"
-labels = { "org.opencontainers.image.title" = "Czech File Knife", "org.opencontainers.image.description" = "Universal file management tool with cloud providers, VFS, and search", "org.opencontainers.image.source" = "https://github.com/hyperpolymath/czech-file-knife", "org.opencontainers.image.licenses" = "MPL-2.0" }
-
-# ══════════════════════════════════════════════════════════════════
 # Service: panoptes (Rust — AI file scanner/renamer)
 # Binary: panoptes
 # Deps: Nickel config, /watch volume
@@ -461,7 +434,6 @@ description = "All services with debug logging"
 layers = [
     "clinician-build",
     "hct-build",
-    "cfk-build",
     "panoptes-build",
     "displace-build",
     "observatory-build",
@@ -476,7 +448,6 @@ description = "All runtime-optimised service layers"
 layers = [
     "clinician-runtime",
     "hct-runtime",
-    "cfk-runtime",
     "panoptes-runtime",
     "displace-runtime",
     "observatory-runtime",
@@ -493,7 +464,6 @@ description = "Build layers for CI/CD test matrix"
 layers = [
     "clinician-build",
     "hct-build",
-    "cfk-build",
     "panoptes-build",
     "displace-build",
     "observatory-build",
@@ -512,9 +482,8 @@ layers = [
 env = { LOG_LEVEL = "info", RUST_LOG = "info" }
 
 [targets.file-tools]
-description = "File management: czech-file-knife + panoptes + displace"
+description = "File management: panoptes + displace (czech-file-knife builds its own image: hyperpolymath/czech-file-knife)"
 layers = [
-    "cfk-runtime",
     "panoptes-runtime",
     "displace-runtime",
 ]

@@ -201,12 +201,6 @@
     "severity": "critical",
     "rule_module": "banned_language",
     "type": "rescript_file_present",
-    "file": "czech-file-knife/examples/SafeDOMExample.res"
-  },
-  {
-    "severity": "critical",
-    "rule_module": "banned_language",
-    "type": "rescript_file_present",
     "file": "emergency-button/examples/SafeDOMExample.res"
   },
   {
@@ -333,90 +327,6 @@
     "severity": "critical",
     "rule_module": "code_safety",
     "type": "unwrap_dangerous_default",
-    "file": "czech-file-knife/cfk-cache/src/metadata_cache.rs"
-  },
-  {
-    "severity": "critical",
-    "rule_module": "code_safety",
-    "type": "unwrap_dangerous_default",
-    "file": "czech-file-knife/cfk-integrations/src/agrep.rs"
-  },
-  {
-    "severity": "critical",
-    "rule_module": "code_safety",
-    "type": "unwrap_dangerous_default",
-    "file": "czech-file-knife/cfk-ios/src/ffi.rs"
-  },
-  {
-    "severity": "critical",
-    "rule_module": "code_safety",
-    "type": "unwrap_dangerous_default",
-    "file": "czech-file-knife/cfk-ios/src/provider.rs"
-  },
-  {
-    "severity": "critical",
-    "rule_module": "code_safety",
-    "type": "unwrap_dangerous_default",
-    "file": "czech-file-knife/cfk-providers/src/afs.rs"
-  },
-  {
-    "severity": "critical",
-    "rule_module": "code_safety",
-    "type": "unwrap_dangerous_default",
-    "file": "czech-file-knife/cfk-providers/src/box_com.rs"
-  },
-  {
-    "severity": "critical",
-    "rule_module": "code_safety",
-    "type": "unwrap_dangerous_default",
-    "file": "czech-file-knife/cfk-providers/src/dropbox.rs"
-  },
-  {
-    "severity": "critical",
-    "rule_module": "code_safety",
-    "type": "unwrap_dangerous_default",
-    "file": "czech-file-knife/cfk-providers/src/gdrive.rs"
-  },
-  {
-    "severity": "critical",
-    "rule_module": "code_safety",
-    "type": "unwrap_dangerous_default",
-    "file": "czech-file-knife/cfk-providers/src/ipfs.rs"
-  },
-  {
-    "severity": "critical",
-    "rule_module": "code_safety",
-    "type": "unwrap_dangerous_default",
-    "file": "czech-file-knife/cfk-providers/src/onedrive.rs"
-  },
-  {
-    "severity": "critical",
-    "rule_module": "code_safety",
-    "type": "unwrap_dangerous_default",
-    "file": "czech-file-knife/cfk-providers/src/protocols.rs"
-  },
-  {
-    "severity": "critical",
-    "rule_module": "code_safety",
-    "type": "unwrap_dangerous_default",
-    "file": "czech-file-knife/cfk-providers/src/s3.rs"
-  },
-  {
-    "severity": "critical",
-    "rule_module": "code_safety",
-    "type": "unwrap_dangerous_default",
-    "file": "czech-file-knife/cfk-providers/src/webdav.rs"
-  },
-  {
-    "severity": "critical",
-    "rule_module": "code_safety",
-    "type": "unwrap_dangerous_default",
-    "file": "czech-file-knife/cfk-search/src/lib.rs"
-  },
-  {
-    "severity": "critical",
-    "rule_module": "code_safety",
-    "type": "unwrap_dangerous_default",
     "file": "emergency-button/rust/src/capture.rs"
   },
   {
@@ -483,12 +393,6 @@
     "severity": "critical",
     "rule_module": "security_errors",
     "type": "secret_detected",
-    "file": "czech-file-knife/docs/DISTRIBUTED_FILESYSTEMS.md"
-  },
-  {
-    "severity": "critical",
-    "rule_module": "security_errors",
-    "type": "secret_detected",
     "file": "emergency-room/src/zig/capture_test.zig"
   },
   {
@@ -549,25 +453,7 @@
     "severity": "high",
     "rule_module": "code_safety",
     "type": "from_raw",
-    "file": "czech-file-knife/cfk-ios/src/error.rs"
-  },
-  {
-    "severity": "high",
-    "rule_module": "code_safety",
-    "type": "from_raw",
-    "file": "czech-file-knife/cfk-ios/src/ffi.rs"
-  },
-  {
-    "severity": "high",
-    "rule_module": "code_safety",
-    "type": "from_raw",
     "file": "port-endoscope/src/process.rs"
-  },
-  {
-    "severity": "high",
-    "rule_module": "code_safety",
-    "type": "mem_forget",
-    "file": "czech-file-knife/cfk-ios/src/ffi.rs"
   },
   {
     "severity": "high",
@@ -754,114 +640,6 @@
     "rule_module": "code_safety",
     "type": "unwrap_without_check",
     "file": "contracts-rust/tests/contract_tests.rs"
-  },
-  {
-    "severity": "high",
-    "rule_module": "code_safety",
-    "type": "unwrap_without_check",
-    "file": "czech-file-knife/cfk-cache/src/blob_store.rs"
-  },
-  {
-    "severity": "high",
-    "rule_module": "code_safety",
-    "type": "unwrap_without_check",
-    "file": "czech-file-knife/cfk-cache/src/metadata_cache.rs"
-  },
-  {
-    "severity": "high",
-    "rule_module": "code_safety",
-    "type": "unwrap_without_check",
-    "file": "czech-file-knife/cfk-core/src/path.rs"
-  },
-  {
-    "severity": "high",
-    "rule_module": "code_safety",
-    "type": "unwrap_without_check",
-    "file": "czech-file-knife/cfk-integrations/src/agrep.rs"
-  },
-  {
-    "severity": "high",
-    "rule_module": "code_safety",
-    "type": "unwrap_without_check",
-    "file": "czech-file-knife/cfk-integrations/src/aria2.rs"
-  },
-  {
-    "severity": "high",
-    "rule_module": "code_safety",
-    "type": "unwrap_without_check",
-    "file": "czech-file-knife/cfk-integrations/src/pandoc.rs"
-  },
-  {
-    "severity": "high",
-    "rule_module": "code_safety",
-    "type": "unwrap_without_check",
-    "file": "czech-file-knife/cfk-providers/src/afs.rs"
-  },
-  {
-    "severity": "high",
-    "rule_module": "code_safety",
-    "type": "unwrap_without_check",
-    "file": "czech-file-knife/cfk-providers/src/box_com.rs"
-  },
-  {
-    "severity": "high",
-    "rule_module": "code_safety",
-    "type": "unwrap_without_check",
-    "file": "czech-file-knife/cfk-providers/src/dropbox.rs"
-  },
-  {
-    "severity": "high",
-    "rule_module": "code_safety",
-    "type": "unwrap_without_check",
-    "file": "czech-file-knife/cfk-providers/src/gdrive.rs"
-  },
-  {
-    "severity": "high",
-    "rule_module": "code_safety",
-    "type": "unwrap_without_check",
-    "file": "czech-file-knife/cfk-providers/src/local.rs"
-  },
-  {
-    "severity": "high",
-    "rule_module": "code_safety",
-    "type": "unwrap_without_check",
-    "file": "czech-file-knife/cfk-providers/src/nfs.rs"
-  },
-  {
-    "severity": "high",
-    "rule_module": "code_safety",
-    "type": "unwrap_without_check",
-    "file": "czech-file-knife/cfk-providers/src/onedrive.rs"
-  },
-  {
-    "severity": "high",
-    "rule_module": "code_safety",
-    "type": "unwrap_without_check",
-    "file": "czech-file-knife/cfk-providers/src/syncthing.rs"
-  },
-  {
-    "severity": "high",
-    "rule_module": "code_safety",
-    "type": "unwrap_without_check",
-    "file": "czech-file-knife/cfk-providers/src/transport.rs"
-  },
-  {
-    "severity": "high",
-    "rule_module": "code_safety",
-    "type": "unwrap_without_check",
-    "file": "czech-file-knife/cfk-providers/src/webdav.rs"
-  },
-  {
-    "severity": "high",
-    "rule_module": "code_safety",
-    "type": "unwrap_without_check",
-    "file": "czech-file-knife/cfk-search/src/lib.rs"
-  },
-  {
-    "severity": "high",
-    "rule_module": "code_safety",
-    "type": "unwrap_without_check",
-    "file": "czech-file-knife/cfk-vfs/src/lib.rs"
   },
   {
     "severity": "high",
@@ -1126,114 +904,6 @@
     "rule_module": "unsafe_panic",
     "type": "unwrap_without_check",
     "file": "contracts-rust/tests/contract_tests.rs"
-  },
-  {
-    "severity": "high",
-    "rule_module": "unsafe_panic",
-    "type": "unwrap_without_check",
-    "file": "czech-file-knife/cfk-cache/src/blob_store.rs"
-  },
-  {
-    "severity": "high",
-    "rule_module": "unsafe_panic",
-    "type": "unwrap_without_check",
-    "file": "czech-file-knife/cfk-cache/src/metadata_cache.rs"
-  },
-  {
-    "severity": "high",
-    "rule_module": "unsafe_panic",
-    "type": "unwrap_without_check",
-    "file": "czech-file-knife/cfk-core/src/path.rs"
-  },
-  {
-    "severity": "high",
-    "rule_module": "unsafe_panic",
-    "type": "unwrap_without_check",
-    "file": "czech-file-knife/cfk-integrations/src/agrep.rs"
-  },
-  {
-    "severity": "high",
-    "rule_module": "unsafe_panic",
-    "type": "unwrap_without_check",
-    "file": "czech-file-knife/cfk-integrations/src/aria2.rs"
-  },
-  {
-    "severity": "high",
-    "rule_module": "unsafe_panic",
-    "type": "unwrap_without_check",
-    "file": "czech-file-knife/cfk-integrations/src/pandoc.rs"
-  },
-  {
-    "severity": "high",
-    "rule_module": "unsafe_panic",
-    "type": "unwrap_without_check",
-    "file": "czech-file-knife/cfk-providers/src/afs.rs"
-  },
-  {
-    "severity": "high",
-    "rule_module": "unsafe_panic",
-    "type": "unwrap_without_check",
-    "file": "czech-file-knife/cfk-providers/src/box_com.rs"
-  },
-  {
-    "severity": "high",
-    "rule_module": "unsafe_panic",
-    "type": "unwrap_without_check",
-    "file": "czech-file-knife/cfk-providers/src/dropbox.rs"
-  },
-  {
-    "severity": "high",
-    "rule_module": "unsafe_panic",
-    "type": "unwrap_without_check",
-    "file": "czech-file-knife/cfk-providers/src/gdrive.rs"
-  },
-  {
-    "severity": "high",
-    "rule_module": "unsafe_panic",
-    "type": "unwrap_without_check",
-    "file": "czech-file-knife/cfk-providers/src/local.rs"
-  },
-  {
-    "severity": "high",
-    "rule_module": "unsafe_panic",
-    "type": "unwrap_without_check",
-    "file": "czech-file-knife/cfk-providers/src/nfs.rs"
-  },
-  {
-    "severity": "high",
-    "rule_module": "unsafe_panic",
-    "type": "unwrap_without_check",
-    "file": "czech-file-knife/cfk-providers/src/onedrive.rs"
-  },
-  {
-    "severity": "high",
-    "rule_module": "unsafe_panic",
-    "type": "unwrap_without_check",
-    "file": "czech-file-knife/cfk-providers/src/syncthing.rs"
-  },
-  {
-    "severity": "high",
-    "rule_module": "unsafe_panic",
-    "type": "unwrap_without_check",
-    "file": "czech-file-knife/cfk-providers/src/transport.rs"
-  },
-  {
-    "severity": "high",
-    "rule_module": "unsafe_panic",
-    "type": "unwrap_without_check",
-    "file": "czech-file-knife/cfk-providers/src/webdav.rs"
-  },
-  {
-    "severity": "high",
-    "rule_module": "unsafe_panic",
-    "type": "unwrap_without_check",
-    "file": "czech-file-knife/cfk-search/src/lib.rs"
-  },
-  {
-    "severity": "high",
-    "rule_module": "unsafe_panic",
-    "type": "unwrap_without_check",
-    "file": "czech-file-knife/cfk-vfs/src/lib.rs"
   },
   {
     "severity": "high",

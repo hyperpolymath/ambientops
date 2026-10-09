@@ -27,7 +27,6 @@ ambientops/                      Hybrid monorepo
 ├── displace/             (Rust)            Displacement tool
 ├── personal-sysadmin/    (Rust)            Personal sysadmin toolkit
 ├── panoptes/             (Rust)            Monitoring
-├── czech-file-knife/     (Rust)            File manipulation tool
 ├── volumod/              (V)               Volume modifier
 ├── emergency-button/     (V)               Emergency button
 ├── network-dashboard/    (Elixir)          Network monitoring
@@ -80,9 +79,8 @@ just sync-metadata    # A2ML -> SCM shadow sync
 
 Root `+Cargo.toml+` defines the workspace. Members include: clinician,
 hardware-crash-team, contracts-rust, displace, personal-sysadmin,
-panoptes, czech-file-knife (and sub-crates: cfk-core, cfk-cli,
-cfk-search, cfk-vfs, cfk-providers, cfk-integrations, cfk-ios,
-cfk-cache).
+panoptes. czech-file-knife (the cfk-* crates) moved out on 2026-10-09
+to its own repo, https://github.com/hyperpolymath/czech-file-knife.
 
 ==== Elixir Components
 
