@@ -38,7 +38,6 @@ This is a monorepo with 20+ components. Coverage is extremely uneven:
 * *clinician/* (Rust) — Cargo.toml exists, 0 test files
 * *hardware-crash-team/* (Rust) — Cargo.toml exists, 0 test files
 * *contracts-rust/* (Rust) — Cargo.toml exists, 0 test files
-* *czech-file-knife/* (Rust) — bench file exists but 0 test files
 * *displace/* — no tests
 * *emergency-button/* — no tests
 * *emergency-room/* — no tests

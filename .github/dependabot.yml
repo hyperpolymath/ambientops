@@ -19,7 +19,6 @@ updates:
   - package-ecosystem: "cargo"
     directories:
       - "/"
-      - "/czech-file-knife"
       - "/panoptes"
       - "/personal-sysadmin"
       - "/displace"
