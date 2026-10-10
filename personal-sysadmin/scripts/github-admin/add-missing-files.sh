@@ -1,7 +1,13 @@
 #!/bin/bash
 # Add missing dependabot.yml, codeql.yml, issue templates, and FUNDING.yml
 
+set -euo pipefail
+
 OWNER="hyperpolymath"
+
+# XDG-compliant shared state directory (CWE-377 fix)
+GITHUB_ADMIN_STATE="${XDG_STATE_HOME:-$HOME/.local/state}/personal-sysadmin/github-admin"
+REPOS_CACHE="$GITHUB_ADMIN_STATE/repos-to-configure.txt"
 
 # Standard dependabot.yml content
 DEPENDABOT_CONTENT='# SPDX-License-Identifier: MPL-2.0
@@ -68,11 +74,15 @@ add_file_if_missing() {
     # Check if file exists
     if ! gh api "repos/$OWNER/$repo/contents/$path" --silent 2>/dev/null; then
         echo "  Adding $path to $repo"
-        echo "$content" | base64 > /tmp/file_content.b64
+        local tmpfile
+        tmpfile=$(mktemp)
+        trap 'rm -f "$tmpfile"' RETURN
+        echo "$content" | base64 > "$tmpfile"
         gh api "repos/$OWNER/$repo/contents/$path" -X PUT \
             -f message="$msg" \
-            -f content="$(cat /tmp/file_content.b64)" \
+            -f content="$(cat "$tmpfile")" \
             --silent 2>/dev/null
+        rm -f "$tmpfile"
     fi
 }
 
@@ -90,6 +100,6 @@ while read repo; do
     # Add codeql.yml if missing
     add_file_if_missing "$repo" ".github/workflows/codeql.yml" "$CODEQL_CONTENT" "Add CodeQL security scanning"
 
-done < /tmp/repos-to-configure.txt
+done < "$REPOS_CACHE"
 
 echo "Done adding missing files"

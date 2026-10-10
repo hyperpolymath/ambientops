@@ -1,7 +1,13 @@
 #!/bin/bash
 # Add descriptions to repos that don't have one
 
+set -euo pipefail
+
 OWNER="hyperpolymath"
+
+# XDG-compliant shared state directory (CWE-377 fix)
+GITHUB_ADMIN_STATE="${XDG_STATE_HOME:-$HOME/.local/state}/personal-sysadmin/github-admin"
+REPOS_CACHE="$GITHUB_ADMIN_STATE/repos-to-configure.txt"
 
 generate_description() {
     local repo=$1
@@ -12,7 +18,7 @@ generate_description() {
 
 echo "Checking repos for missing descriptions..."
 count=0
-total=$(wc -l < /tmp/repos-to-configure.txt)
+total=$(wc -l < "$REPOS_CACHE")
 
 while read repo; do
     ((count++))
@@ -22,6 +28,6 @@ while read repo; do
         echo "[$count/$total] $repo - Adding description: $new_desc"
         gh api "repos/$OWNER/$repo" -X PATCH -f description="$new_desc" --silent 2>/dev/null
     fi
-done < /tmp/repos-to-configure.txt
+done < "$REPOS_CACHE"
 
 echo "=== Descriptions complete ==="

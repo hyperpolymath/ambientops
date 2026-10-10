@@ -1,7 +1,13 @@
 #!/bin/bash
 # Add SCM files to all repos
 
+set -euo pipefail
+
 OWNER="hyperpolymath"
+
+# XDG-compliant shared state directory (CWE-377 fix)
+GITHUB_ADMIN_STATE="${XDG_STATE_HOME:-$HOME/.local/state}/personal-sysadmin/github-admin"
+REPOS_CACHE="$GITHUB_ADMIN_STATE/repos-to-configure.txt"
 
 create_meta() {
     local repo=$1
@@ -55,8 +61,8 @@ create_state() {
   \`((metadata
       ((version . "1.0.0")
        (schema-version . "1")
-       (created . "$(date -Iseconds)")
-       (updated . "$(date -Iseconds)")
+       (created . "\$(date -Iseconds)")
+       (updated . "\$(date -Iseconds)")
        (project . "$name")
        (repo . "$repo")))
     (current-position
@@ -139,17 +145,21 @@ add_if_missing() {
 
     if ! gh api "repos/$OWNER/$repo/contents/$path" --silent 2>/dev/null; then
         echo "  Adding $path"
-        echo "$content" | base64 | tr -d '\n' > /tmp/content.b64
+        local tmpfile
+        tmpfile=$(mktemp)
+        trap 'rm -f "$tmpfile"' RETURN
+        echo "$content" | base64 | tr -d '\n' > "$tmpfile"
         gh api "repos/$OWNER/$repo/contents/$path" -X PUT \
             -f message="$msg" \
-            -f content="$(cat /tmp/content.b64)" \
+            -f content="$(cat "$tmpfile")" \
             --silent 2>/dev/null && echo "    ✓" || echo "    ✗"
+        rm -f "$tmpfile"
     fi
 }
 
 echo "Adding SCM files..."
 count=0
-total=$(wc -l < /tmp/repos-to-configure.txt)
+total=$(wc -l < "$REPOS_CACHE")
 
 while read repo; do
     ((count++))
@@ -163,6 +173,6 @@ while read repo; do
     add_if_missing "$repo" "AGENTIC.scm" "$(create_agentic)" "Add AGENTIC.scm"
     add_if_missing "$repo" "NEUROSYM.scm" "$(create_neurosym)" "Add NEUROSYM.scm"
     
-done < /tmp/repos-to-configure.txt
+done < "$REPOS_CACHE"
 
 echo "=== SCM files complete ==="

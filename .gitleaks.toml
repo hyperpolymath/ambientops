@@ -1,0 +1,33 @@
+# SPDX-License-Identifier: MPL-2.0
+# .gitleaks.toml — ambientops repo-local gitleaks config.
+# Extends the estate baseline staged by the reusable workflow at
+# .gitleaks-estate.toml (written by secret-scanner-reusable.yml).
+#
+# See: hyperpolymath/standards/config/gitleaks/estate-baseline.toml
+# See: .github/workflows/secret-scanner.yml
+
+[extend]
+path = ".gitleaks-estate.toml"
+
+[allowlist]
+description = "ambientops: machine-readable metadata and session-state false positives"
+
+paths = [
+  # .machine_readable/ — A2ML/TOML metadata files contain high-entropy
+  # identifiers (commit SHAs, version strings, hex-encoded keys) that
+  # are NOT credentials. These are machine-generated state checkpoints
+  # (STATE.a2ml, META.a2ml, ECOSYSTEM.a2ml, AGENTIC.a2ml, PLAYBOOK.a2ml,
+  # NEUROSYM.a2ml, INTENT.contractile, MUST.contractile, TRUST.contractile,
+  # ADJUST.contractile, CLADE.a2ml, contractiles/, integrations/, anchors/,
+  # agent_instructions/). None of these files hold real secrets.
+  '''(^|/)\.machine_readable/''',
+
+  # .session/ — session state files (SESSION_STATE.adoc, NEXT_STEPS.adoc,
+  # SESSION_SUMMARY.adoc, LAST-CANONICAL-COMMAND.adoc) contain commit SHAs
+  # and path references, not credentials.
+  '''(^|/)\.session/''',
+
+  # .hypatia/ — neurosymbolic scan cache and activity logs. Contains
+  # hash digests and timestamps, not credentials.
+  '''(^|/)\.hypatia/''',
+]
