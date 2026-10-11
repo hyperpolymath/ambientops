@@ -1,7 +1,13 @@
 #!/bin/bash
 # Advanced security and Actions configuration for all repos
 
+set -euo pipefail
+
 OWNER="hyperpolymath"
+
+# XDG-compliant shared state directory (CWE-377 fix)
+GITHUB_ADMIN_STATE="${XDG_STATE_HOME:-$HOME/.local/state}/personal-sysadmin/github-admin"
+REPOS_CACHE="$GITHUB_ADMIN_STATE/repos-to-configure.txt"
 
 configure_advanced() {
     local repo=$1
@@ -47,13 +53,13 @@ configure_advanced() {
 echo "Configuring advanced security for all repos..."
 
 count=0
-total=$(wc -l < /tmp/repos-to-configure.txt)
+total=$(wc -l < "$REPOS_CACHE")
 
 while read repo; do
     ((count++))
     echo "[$count/$total] $repo"
     configure_advanced "$repo"
-done < /tmp/repos-to-configure.txt
+done < "$REPOS_CACHE"
 
 echo ""
 echo "=== Advanced configuration complete ==="

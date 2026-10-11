@@ -1,10 +1,17 @@
 #!/bin/bash
 # Configure all hyperpolymath repos with standard settings
 
+set -euo pipefail
+
 OWNER="hyperpolymath"
-LOG_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/personal-sysadmin/repo-config.log"
-mkdir -p "$(dirname "$LOG_FILE")" || exit 1
-chmod 0700 "$(dirname "$LOG_FILE")" || exit 1
+
+# XDG-compliant shared state directory for cross-script cache (CWE-377 fix)
+GITHUB_ADMIN_STATE="${XDG_STATE_HOME:-$HOME/.local/state}/personal-sysadmin/github-admin"
+mkdir -p "$GITHUB_ADMIN_STATE" || exit 1
+chmod 0700 "$GITHUB_ADMIN_STATE" || exit 1
+
+LOG_FILE="$GITHUB_ADMIN_STATE/repo-config.log"
+REPOS_CACHE="$GITHUB_ADMIN_STATE/repos-to-configure.txt"
 
 echo "Starting configuration of all repos at $(date)" | tee "$LOG_FILE" || exit 1
 
@@ -65,8 +72,8 @@ PROTECTION
 
 # Get all repos
 echo "Fetching repo list..."
-gh repo list $OWNER --limit 400 --json name --jq '.[].name' > /tmp/repos-to-configure.txt
-total=$(wc -l < /tmp/repos-to-configure.txt)
+gh repo list $OWNER --limit 400 --json name --jq '.[].name' > "$REPOS_CACHE"
+total=$(wc -l < "$REPOS_CACHE")
 echo "Found $total repos to configure"
 
 count=0
@@ -74,7 +81,7 @@ while read repo; do
     ((count++))
     echo "[$count/$total] $repo"
     configure_repo "$repo"
-done < /tmp/repos-to-configure.txt
+done < "$REPOS_CACHE"
 
 echo ""
 echo "=== Configuration complete at $(date) ===" | tee -a "$LOG_FILE"
