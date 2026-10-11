@@ -1,7 +1,13 @@
 #!/bin/bash
 # Add license badges to README.adoc files
 
+set -euo pipefail
+
 OWNER="hyperpolymath"
+
+# XDG-compliant shared state directory (CWE-377 fix)
+GITHUB_ADMIN_STATE="${XDG_STATE_HOME:-$HOME/.local/state}/personal-sysadmin/github-admin"
+REPOS_CACHE="$GITHUB_ADMIN_STATE/repos-to-configure.txt"
 
 # Badge format for AsciiDoc
 AGPL_BADGE='image:https://img.shields.io/badge/license-AGPL--3.0-blue.svg[AGPL-3.0,link="https://www.gnu.org/licenses/agpl-3.0"]'
@@ -40,24 +46,28 @@ add_badges() {
     # Update file
     sha=$(gh api "repos/$OWNER/$repo/contents/README.adoc" --jq '.sha' 2>/dev/null)
     if [ -n "$sha" ]; then
-        echo "$new_content" | base64 | tr -d '\n' > /tmp/readme.b64
+        local tmpfile
+        tmpfile=$(mktemp)
+        trap 'rm -f "$tmpfile"' RETURN
+        echo "$new_content" | base64 | tr -d '\n' > "$tmpfile"
         gh api "repos/$OWNER/$repo/contents/README.adoc" -X PUT \
             -f message="Add license badges to README" \
-            -f content="$(cat /tmp/readme.b64)" \
+            -f content="$(cat "$tmpfile")" \
             -f sha="$sha" \
             --silent 2>/dev/null && echo "  ✓ Added badges" || echo "  ✗ Failed"
+        rm -f "$tmpfile"
     fi
 }
 
 echo "Adding license badges to README.adoc..."
 count=0
-total=$(wc -l < /tmp/repos-to-configure.txt)
+total=$(wc -l < "$REPOS_CACHE")
 
 while read repo; do
     ((count++))
     pct=$((count * 100 / total))
     echo "[$count/$total] ($pct%) $repo"
     add_badges "$repo"
-done < /tmp/repos-to-configure.txt
+done < "$REPOS_CACHE"
 
 echo "=== License badges complete ==="

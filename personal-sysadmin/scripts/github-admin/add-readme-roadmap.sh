@@ -1,7 +1,13 @@
 #!/bin/bash
 # Add README.adoc and ROADMAP.adoc to repos missing them
 
+set -euo pipefail
+
 OWNER="hyperpolymath"
+
+# XDG-compliant shared state directory (CWE-377 fix)
+GITHUB_ADMIN_STATE="${XDG_STATE_HOME:-$HOME/.local/state}/personal-sysadmin/github-admin"
+REPOS_CACHE="$GITHUB_ADMIN_STATE/repos-to-configure.txt"
 
 create_readme() {
     local repo=$1
@@ -18,10 +24,10 @@ $name is part of the hyperpolymath ecosystem.
 
 == Getting Started
 
-\`\`\`bash
+\\\`\\\`\\\`bash
 git clone https://github.com/hyperpolymath/$repo.git
 cd $repo
-\`\`\`
+\\\`\\\`\\\`
 
 == Contributing
 
@@ -70,17 +76,21 @@ add_if_missing() {
 
     if ! gh api "repos/$OWNER/$repo/contents/$path" --silent 2>/dev/null; then
         echo "  Adding $path to $repo"
-        echo "$content" | base64 | tr -d '\n' > /tmp/content.b64
+        local tmpfile
+        tmpfile=$(mktemp)
+        trap 'rm -f "$tmpfile"' RETURN
+        echo "$content" | base64 | tr -d '\n' > "$tmpfile"
         gh api "repos/$OWNER/$repo/contents/$path" -X PUT \
             -f message="$msg" \
-            -f content="$(cat /tmp/content.b64)" \
+            -f content="$(cat "$tmpfile")" \
             --silent 2>/dev/null
+        rm -f "$tmpfile"
     fi
 }
 
 echo "Adding README.adoc and ROADMAP.adoc..."
 count=0
-total=$(wc -l < /tmp/repos-to-configure.txt)
+total=$(wc -l < "$REPOS_CACHE")
 
 while read repo; do
     ((count++))
@@ -115,6 +125,6 @@ while read repo; do
         add_if_missing "$repo" "ROADMAP.adoc" "$roadmap_content" "Add ROADMAP"
     fi
     
-done < /tmp/repos-to-configure.txt
+done < "$REPOS_CACHE"
 
 echo "=== README/ROADMAP complete ==="
