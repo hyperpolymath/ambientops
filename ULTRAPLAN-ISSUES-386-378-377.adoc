@@ -1,0 +1,437 @@
+= Ultraplan: Resolving Issues #386, #378, #377
+:toc:
+:toclevels: 3
+:icons: font
+:sectnums:
+
+// SPDX-License-Identifier: MPL-2.0
+
+Generated: 2026-10-10
+
+== Situation Assessment
+
+=== Open Issues (3)
+
+[cols="5%,15%,15%,65%",options="header"]
+|===
+| # | Title | Labels | Summary
+
+|386
+|scan / gitleaks fails on main (181076c), inherited by every PR
+|bug, security
+|The estate reusable secret scanner (gitleaks 8.18.4, pinned binary) fails at the "Gitleaks secret scan (gating)" step. No `.gitleaks.toml` exists in this repo, so the scanner runs with the estate baseline only. Findings are repo-specific patterns in A2ML/machine-readable files that trip `generic-api-key`. Every PR inherits this red check.
+
+|378
+|main HEAD (8f75e31) is red: rust-ci, 4× mirror jobs, Hypatia, Codeac
+|_none_
+|Seven failing checks on main: (1) `rust-ci / Cargo fmt` fails — `cargo check` passes but formatting is wrong, blocking clippy and all downstream steps. (2) Four mirror jobs fail (bitbucket, disroot, gitea, sourcehut). (3) Hypatia was failing but appears green on latest runs. (4) Codeac returns error state.
+
+|377
+|personal-sysadmin/scripts/github-admin: /tmp/repos-to-configure.txt is a CWE-377
+|_none_
+|Ten scripts share a predictable-path file at `/tmp/repos-to-configure.txt` (configure-all-repos.sh produces, 9 consumers read). Additional `/tmp/` scratch files across the suite. A local attacker can symlink/race the predictable path.
+|===
+
+=== Binding Standards & Constraints
+
+==== RSR Template (https://github.com/hyperpolymath/RSR-template-repo)
+
+* **Required files**: .editorconfig, .gitignore, justfile, README.adoc, LICENSE.txt (MPL-2.0), RSR_COMPLIANCE.adoc, .well-known/{security,ai,humans}.txt, guix.scm
+* **Language tiers**: Tier 1 Gold (Rust, Elixir, Zig, Ada, Haskell, AffineScript), Tier 2 Silver (Nickel, Racket, Guile Scheme, Guix)
+* **Prohibited**: Python (completely banned), TypeScript/JavaScript (use AffineScript), CUE (use Guile/Nickel), Dockerfile (use Containerfile)
+* **RSR 2026 standard** referenced in META.a2ml
+
+==== CLAUDE.md Language Policy (Binding)
+
+* Rust is a **scalpel** — only in agent/verify components (`*-agent-rs/`, `*-verify-rs/`, isolated components)
+* Elixir **only** for observability/event hubs — NEVER policy engine or config truth
+* **Banned**: Python, Go, TypeScript, ReScript, Deno, Node.js, npm/yarn/pnpm, Java/Kotlin, Swift
+* **Primary JS runtime**: Bun (`package.json` + `bun.lock`)
+* **Primary application language**: AffineScript
+* All actions must be SHA-pinned
+* SPDX license headers on all files
+* No MD5/SHA1 for security
+
+==== Hospital Model (HOSPITAL_MODEL.adox)
+
+* Ward **never** applies changes
+* Emergency Room defaults to non-destructive actions
+* Operating Room requires explicit approval to apply
+* Every apply produces a receipt
+* Undo is first-class
+* No fearware copy; evidence beats theatrics
+
+==== 0-AI-MANIFEST.a2ml Invariants
+
+* State files in `.machine_readable/` ONLY — never in root
+* MPL-2.0 throughout
+* Containerfile not Dockerfile, Podman not Docker
+* Data flow: ER → Evidence Envelope → Procedure Plan → Receipt → Weather
+* No Python anywhere
+
+==== Estate Reusable Workflow Requirements
+
+* Secret Scanner: Calls `hyperpolymath/standards/.github/workflows/secret-scanner-reusable.yml@74d2f66`. Requires `secrets: inherit`. Repository can add `.gitleaks.toml` with `[extend] path = ".gitleaks-estate.toml"` plus repo-specific allowlist entries.
+* Rust CI: Calls `hyperpolymath/standards/.github/workflows/rust-ci-reusable.yml@7c9db0e5`. Runs `cargo check`, `cargo fmt --check`, `cargo clippy`, `cargo test`, `cargo audit` (opt-in), `cargo-llvm-cov` (opt-in).
+* Mirror: Calls `hyperpolymath/standards/.github/workflows/mirror-reusable.yml@da2c748`. Each forge gated on `vars.<FORGE>_MIRROR_ENABLED == 'true'` + corresponding SSH key secret.
+* Hypatia: Calls `hyperpolymath/standards/.github/workflows/hypatia-scan-reusable.yml@092dedad`. With `secrets: inherit`.
+
+== Root Cause Analysis
+
+=== Issue #386 — gitleaks failure
+
+**Evidence chain**:
+
+1. `secret-scanner.yml` pins `@74d2f66f` — calls the estate reusable
+2. The reusable installs gitleaks 8.18.4 (checksum-verified), fetches the estate baseline, stages it as `.gitleaks-estate.toml`
+3. No `.gitleaks.toml` exists in this repo → scanner uses `.gitleaks-estate.toml` directly
+4. The estate baseline allowlists: lockfiles, vendored yarn, `.gitleaks-estate.toml` itself, published test vectors (RFC 8032), hex fingerprints, CamelCase type names, doc filenames, ellipsis-terminated placeholders, repeated-character masks, monotonic hex walks, snake_case test fixtures
+5. **What is NOT allowlisted**: the A2ML/TOML metadata in `.machine_readable/`, STATE.a2ml, ECOSYSTEM.a2ml, META.a2ml, AGENTIC.a2ml, PLAYBOOK.a2ml, NEUROSYM.a2ml — these contain key-value pairs with high-entropy values (SHA hashes, UUIDs, hex strings, version identifiers) that trip `generic-api-key`
+6. The scan step runs `gitleaks detect --source . --no-git --redact --no-banner --verbose --config <CONFIG> --exit-code 1`
+7. The git-history pass also runs, catching any committed-then-deleted secrets
+
+**Root cause**: Repo-specific false positives in machine-readable metadata files. The repo needs a `.gitleaks.toml` that extends the estate baseline and adds path-based or value-based allowlist entries for its A2ML files.
+
+=== Issue #378 — multi-failure CI
+
+**Sub-failure 1: rust-ci / Cargo fmt**
+
+* `cargo check` succeeds → code compiles
+* `cargo fmt --check` fails → formatting violations in Rust source
+* `cargo clippy` skipped (depends on fmt passing)
+* `cargo test` skipped (depends on the above)
+* This is a **formatting debt** issue — likely accumulated from multiple contributors or AI-generated code that wasn't auto-formatted
+
+**Sub-failure 2: 4× mirror jobs**
+
+* The mirror reusable gates each forge on `vars.<FORGE>_MIRROR_ENABLED == 'true'`
+* gitlab, codeberg, and radicle pass → their vars are correctly set to `false` (skipped) or their SSH keys work
+* bitbucket, disroot, gitea, sourcehut fail → likely their vars are `true` but the corresponding SSH key secrets are missing/invalid/expired
+* This is a **repo configuration** issue (GitHub Actions variables + secrets), not a code issue
+* **Cannot be fixed in source code** — requires repo admin to either fix the SSH keys or set the mirror vars to `'false'`
+
+**Sub-failure 3: Hypatia**
+
+* Latest check runs show `hypatia / Hypatia Neurosymbolic Analysis` → `success`
+* This appears to have been **self-healed** or was a transient failure
+* The issue title references HEAD `8f75e31` — the repo has moved on
+
+**Sub-failure 4: Codeac**
+
+* "Codeac was not able to perform analysis" — external SaaS integration
+* This is not fixable in source code; Codeac's analysis engine couldn't process the repo
+* **Action**: Either fix Codeac config (if any exists) or remove it from required checks via repo settings
+
+=== Issue #377 — CWE-377 in personal-sysadmin scripts
+
+**Evidence chain**:
+
+1. `configure-all-repos.sh` (producer) writes `/tmp/repos-to-configure.txt` — a list of all hyperpolymath repos
+2. 9 consumer scripts read from `/tmp/repos-to-configure.txt`:
+   - `add-community-health.sh`
+   - `add-descriptions.sh`
+   - `add-justfile-mustfile.sh`
+   - `add-language-blockers.sh`
+   - `add-license-badges.sh`
+   - `add-missing-files.sh`
+   - `add-readme-roadmap.sh`
+   - `add-scm-files.sh`
+   - `advanced-security-config.sh`
+3. Additionally, scratch files use `/tmp/`:
+   - `/tmp/community-health.log` (add-community-health.sh)
+   - `/tmp/content.b64` (add-community-health.sh, add-justfile-mustfile.sh, add-readme-roadmap.sh, add-scm-files.sh)
+   - `/tmp/readme.b64` (add-license-badges.sh, setup-palimpsest.sh)
+   - `/tmp/license.b64` (setup-palimpsest.sh)
+   - `/tmp/file_content.b64` (add-missing-files.sh)
+   - `/tmp/language-blocker.yml` (add-language-blockers.sh — reads a file the script doesn't create)
+
+**Note**: `configure-all-repos.sh` was already partially fixed (PR fix/launcher-xdg-state moved `LOG_FILE` to XDG_STATE_HOME). The `/tmp/repos-to-configure.txt` shared cache was explicitly left as out-of-scope for that PR per the issue description.
+
+**Root cause**: CWE-377 (Insecure Temporary File). Predictable `/tmp/` paths allow symlink attacks and race conditions. The shared-cache file is particularly dangerous because it's read by 9 scripts that act on its content (creating/modifying GitHub repos).
+
+== Execution Plan
+
+=== Wave 1: Unblock main — gitleaks (Issue #386)
+
+**Priority**: P0 (security gate, blocks every PR)
+
+==== Step 1.1: Create repo-local `.gitleaks.toml`
+
+Create `.gitleaks.toml` at the repository root with the following design:
+
+1. **Inherit the estate baseline** via `[extend] path = ".gitleaks-estate.toml"` — this is the pattern the reusable expects
+2. **Allowlist the A2ML/metadata directory** by path for `generic-api-key` false positives — the `.machine_readable/` directory contains TOML and A2ML files with high-entropy keys that are NOT credentials (SHA commit refs, version strings, hex-encoded metadata)
+3. **Add value-based regexes** for repo-specific false positive patterns (e.g., hex commit SHAs in STATE files, A2ML key names with CamelCase)
+
+```toml
+# SPDX-License-Identifier: MPL-2.0
+# .gitleaks.toml — ambientops repo-local gitleaks config.
+# Extends the estate baseline staged by the reusable workflow.
+
+[extend]
+path = ".gitleaks-estate.toml"
+
+[allowlist]
+description = "ambientops: machine-readable metadata false positives"
+paths = [
+  # A2ML/TOML metadata files contain high-entropy identifiers
+  # (commit SHAs, version strings, hex-encoded keys) that are NOT credentials.
+  '''(^|/)\.machine_readable/''',
+  # Session state files
+  '''(^|/)\.session/''',
+  # Hypatia baseline metadata
+  '''(^|/)\.hypatia/''',
+]
+```
+
+**Rationale for path-based allowlist**: The `.machine_readable/` directory is a controlled, generated metadata store. All files in it are machine-generated state checkpoints (STATE.a2ml, META.a2ml, ECOSYSTEM.a2ml, etc.) that contain no real credentials. This is narrow enough to not blind the scanner elsewhere.
+
+**Validation**: After creating, verify with `gitleaks detect --source . --no-git --config .gitleaks.toml --verbose --exit-code 1` (if gitleaks is available).
+
+==== Step 1.2: Run gitleaks git-history pass
+
+The git-history pass scans all committed content. If historical commits contain real secrets (not just metadata), those need to be either:
+- **Rotated** (if real) — the secret is already exposed in git history
+- **Allowlisted by value** (if false positive) — add a `regexes` entry
+
+This step requires running the actual gitleaks binary against the full history. Since we don't have gitleaks in this sandbox, the fix should be pushed and the CI run observed.
+
+==== Deliverable
+
+* File: `.gitleaks.toml` at repo root
+* Validation: `scan / gitleaks` check passes on main
+
+=== Wave 2: Unblock main — Rust formatting (Issue #378, rust-ci)
+
+**Priority**: P0 (formatting gate, blocks clippy, test, and audit)
+
+==== Step 2.1: Install Rust toolchain
+
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+source "$HOME/.cargo/env"
+```
+
+==== Step 2.2: Run `cargo fmt` across the workspace
+
+```bash
+cd /home/user/ambientops
+cargo fmt --workspace
+```
+
+This auto-fixes all formatting violations.
+
+==== Step 2.3: Verify
+
+```bash
+cargo fmt --workspace --check   # Should exit 0
+cargo check --workspace         # Should still compile
+```
+
+==== Deliverable
+
+* All `.rs` files in the workspace formatted to `rustfmt` defaults
+* `rust-ci / Cargo check + clippy + fmt` passes
+
+=== Wave 3: Mirror & Codeac triage (Issue #378, non-Rust)
+
+**Priority**: P1 (diagnosis required, may need repo admin action)
+
+==== Step 3.1: Diagnose mirror failures
+
+The 4 failing mirrors (bitbucket, disroot, gitea, sourcehut) are gated on repository variables + SSH key secrets.
+
+**Possible causes**:
+1. `vars.BITBUCKET_MIRROR_ENABLED` etc. are `'true'` but the SSH key secrets are missing or expired
+2. The target forge repos don't exist or have been renamed
+3. SSH host key verification fails (new forge host keys)
+
+**Action**: Check repo variables and secrets. If SSH keys are not available:
+- Set `vars.BITBUCKET_MIRROR_ENABLED`, `vars.DISROOT_MIRROR_ENABLED`, `vars.GITEA_MIRROR_ENABLED`, `vars.SOURCEHUT_MIRROR_ENABLED` to `'false'`
+- This makes the mirror jobs skip (they are `continue-on-error: true` anyway per the reusable, but with `if:` gating they won't even start)
+
+**This cannot be fixed in source code** — it requires `gh variable set` or repo settings.
+
+==== Step 3.2: Handle Codeac
+
+Codeac is an external SaaS that "was not able to perform analysis". Options:
+1. Investigate if there's a `.codeac.yml` or similar config that needs updating
+2. If Codeac can't handle this monorepo structure, remove it from the required checks: `gh api repos/hyperpolymath/ambientops/branches/main/protection` to update required status checks
+3. **This likely requires repo admin privileges** to modify branch protection rules
+
+==== Deliverable
+
+* Mirror jobs: either passing or skipped (vars set to false)
+* Codeac: either working or removed from required checks
+* `gh api repos/hyperpolymath/ambientops/commits/main/status --jq '.state'` reads `success`
+
+=== Wave 4: CWE-377 remediation (Issue #377)
+
+**Priority**: P1 (security hardening, not blocking CI)
+
+==== Step 4.1: Define the shared state directory
+
+Use `${XDG_STATE_HOME:-$HOME/.local/state}/personal-sysadmin/github-admin/` as the shared state directory. This follows the XDG Base Directory Specification and is:
+- User-private by default (`~/.local/state/`)
+- Not world-writable
+- Consistent with the existing fix in `configure-all-repos.sh` (which already uses `${XDG_STATE_HOME:-$HOME/.local/state}/personal-sysadmin/repo-config.log`)
+
+==== Step 4.2: Create a shared helper function
+
+Add a state-directory initialization block at the top of each script (or source a shared snippet):
+
+```bash
+# XDG-compliant shared state directory for cross-script cache
+GITHUB_ADMIN_STATE="${XDG_STATE_HOME:-$HOME/.local/state}/personal-sysadmin/github-admin"
+mkdir -p "$GITHUB_ADMIN_STATE" || exit 1
+chmod 0700 "$GITHUB_ADMIN_STATE" || exit 1
+REPOS_CACHE="$GITHUB_ADMIN_STATE/repos-to-configure.txt"
+```
+
+==== Step 4.3: Fix `configure-all-repos.sh` (producer)
+
+Replace:
+```bash
+gh repo list $OWNER --limit 400 --json name --jq '.[].name' > /tmp/repos-to-configure.txt
+total=$(wc -l < /tmp/repos-to-configure.txt)
+...
+done < /tmp/repos-to-configure.txt
+```
+
+With:
+```bash
+gh repo list $OWNER --limit 400 --json name --jq '.[].name' > "$REPOS_CACHE"
+total=$(wc -l < "$REPOS_CACHE")
+...
+done < "$REPOS_CACHE"
+```
+
+==== Step 4.4: Fix all 9 consumer scripts
+
+For each consumer, replace `/tmp/repos-to-configure.txt` with `$REPOS_CACHE` and add the state-directory initialization block.
+
+==== Step 4.5: Fix scratch files
+
+For `/tmp/content.b64`, `/tmp/readme.b64`, `/tmp/license.b64`, `/tmp/file_content.b64`:
+```bash
+# Replace fixed /tmp path with mktemp
+tmpfile=$(mktemp)
+trap 'rm -f "$tmpfile"' EXIT
+echo "$content" | base64 | tr -d '\n' > "$tmpfile"
+# ... use "$tmpfile" ...
+```
+
+For `/tmp/community-health.log`:
+```bash
+LOG="${XDG_STATE_HOME:-$HOME/.local/state}/personal-sysadmin/github-admin/community-health.log"
+mkdir -p "$(dirname "$LOG")"
+```
+
+For `/tmp/language-blocker.yml` (read-only reference):
+- Move the file alongside the script or reference it by a proper path
+- If it's a template, embed it in the script or reference `${SCRIPT_DIR}/language-blocker.yml`
+
+==== Step 4.6: Validate
+
+```bash
+# Syntax check all 10 files
+for f in personal-sysadmin/scripts/github-admin/*.sh; do bash -n "$f"; done
+
+# Verify no /tmp/ references remain
+grep -nE '["'"'"'/]tmp/' personal-sysadmin/scripts/github-admin/*.sh
+# Expected: 0 hits
+```
+
+==== Deliverable
+
+* 10 scripts in `personal-sysadmin/scripts/github-admin/` free of `/tmp/` paths
+* Shared cache at `${XDG_STATE_HOME:-$HOME/.local/state}/personal-sysadmin/github-admin/repos-to-configure.txt`
+* Scratch files use `mktemp` with cleanup traps
+* `bash -n` + `shellcheck` clean on all 10 files
+
+== Execution Order & Dependencies
+
+....
+                    ┌──────────────────────────────────────────┐
+                    │  Wave 1: .gitleaks.toml  (Issue #386)    │
+                    │  P0 — security gate                      │
+                    └──────────────────┬───────────────────────┘
+                                       │
+                                       ▼
+                    ┌──────────────────────────────────────────┐
+                    │  Wave 2: cargo fmt  (Issue #378, rust)   │
+                    │  P0 — format gate → clippy → test → audit│
+                    └──────────────────┬───────────────────────┘
+                                       │
+                              ┌────────┴────────┐
+                              ▼                 ▼
+                    ┌─────────────────┐  ┌──────────────────────┐
+                    │  Wave 3: Triage  │  │  Wave 4: CWE-377    │
+                    │  mirrors+Codeac  │  │  (Issue #377)        │
+                    │  P1 — admin      │  │  P1 — security      │
+                    │  action needed   │  │  hardening           │
+                    └─────────────────┘  └──────────────────────┘
+....
+
+**Waves 1 + 2** can be done in parallel (different files, no conflict).
+**Wave 3** requires repo admin actions (variables, secrets, branch protection) — may not be achievable from code changes alone.
+**Wave 4** is independent of CI and can proceed in parallel with all others.
+
+== Acceptance Criteria Verification
+
+=== Issue #386
+
+- [ ] `.gitleaks.toml` exists at repo root with `[extend] path = ".gitleaks-estate.toml"`
+- [ ] `scan / gitleaks` passes on main (all three passes: working tree, git history, AsciiDoc mirror)
+- [ ] No real secrets in the repository (if gitleaks finds real findings, rotate/remove them)
+
+=== Issue #378
+
+- [ ] `cargo fmt --workspace --check` exits 0
+- [ ] `rust-ci / Cargo check + clippy + fmt` passes on main
+- [ ] Mirror jobs: either pass or are skipped (vars set to false for missing SSH keys)
+- [ ] Codeac: either completes or is removed from required checks
+- [ ] `gh api repos/hyperpolymath/ambientops/commits/main/status --jq '.state'` reads `success`
+
+=== Issue #377
+
+- [ ] All 10 scripts use `${XDG_STATE_HOME:-$HOME/.local/state}/personal-sysadmin/github-admin/` for shared state
+- [ ] All scratch files use `mktemp` with cleanup traps
+- [ ] `bash -n` clean on all 10 touched files
+- [ ] `shellcheck` clean on all 10 touched files
+- [ ] `grep -nE '["'"'"'/]tmp/'` across all 10 files reads 0 hits
+
+== Risk Assessment
+
+[cols="15%,15%,70%",options="header"]
+|===
+| Risk | Likelihood | Mitigation
+
+| gitleaks finds REAL secrets in git history
+| Low
+| The repo's git history is primarily code and metadata, not operational data. If found, rotate immediately and add to the allowlist only after rotation.
+
+| cargo fmt changes break compilation
+| Very Low
+| `rustfmt` only changes whitespace. Run `cargo check` after fmt to verify.
+
+| Mirror SSH keys are organization secrets we can't access
+| High
+| Escalate to repo owner (@hyperpolymath). Document in issue that vars need to be set to false.
+
+| CWE-377 fix breaks existing workflows
+| Low
+| The scripts are administrative (not CI). Run them manually after the fix to verify they still work.
+
+| XDG_STATE_HOME doesn't exist on the target system
+| Very Low
+| The fallback `$HOME/.local/state` is the XDG default and exists on all Linux systems. `mkdir -p` creates it if missing.
+|===
+
+== Notes for AI Visitors
+
+. **This is a monorepo.** All work stays in ambientops. Never create standalone repos.
+. **Language assignments are deliberate.** Rust only in clinician + hardware-crash-team. Elixir only in observatory + records. V only in emergency-room.
+. **The hospital model safety rules are non-negotiable.** Ward never mutates. ER defaults non-destructive. OR requires consent. Every apply produces a receipt.
+. **RSR compliance is binding.** The RSR template repo defines the standard. Follow it.
+. **Estate-wide reusable workflows are the authority.** Don't copy workflows — call the shared ones from `hyperpolymath/standards`.
