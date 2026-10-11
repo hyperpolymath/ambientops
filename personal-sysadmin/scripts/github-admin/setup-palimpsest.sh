@@ -1,6 +1,8 @@
 #!/bin/bash
 # Set up palimpsest-licence as sole license for hyperpolymath/hyperpolymath
 
+set -euo pipefail
+
 OWNER="hyperpolymath"
 REPO="hyperpolymath"
 
@@ -30,20 +32,22 @@ This repository is licensed under the Palimpsest Licence.
 '
 fi
 
-# 3. Update or create LICENSE file
+# 3. Update or create LICENSE file (CWE-377 fix: use mktemp)
 echo "Updating LICENSE file..."
-echo "$license_content" | base64 | tr -d '\n' > /tmp/license.b64
+tmpfile=$(mktemp)
+trap 'rm -f "$tmpfile"' EXIT
+echo "$license_content" | base64 | tr -d '\n' > "$tmpfile"
 
 if [ "$update" = "true" ]; then
     gh api "repos/$OWNER/$REPO/contents/LICENSE" -X PUT \
         -f message="Set Palimpsest licence as sole license" \
-        -f content="$(cat /tmp/license.b64)" \
+        -f content="$(cat "$tmpfile")" \
         -f sha="$sha" \
         --silent && echo "✓ LICENSE updated" || echo "✗ Failed to update LICENSE"
 else
     gh api "repos/$OWNER/$REPO/contents/LICENSE" -X PUT \
         -f message="Add Palimpsest licence" \
-        -f content="$(cat /tmp/license.b64)" \
+        -f content="$(cat "$tmpfile")" \
         --silent && echo "✓ LICENSE created" || echo "✗ Failed to create LICENSE"
 fi
 
@@ -62,12 +66,15 @@ if [ -n "$readme" ]; then
 \
 '"$PALIMPSEST_BADGE"'
 ')
-        echo "$new_readme" | base64 | tr -d '\n' > /tmp/readme.b64
+        readme_tmpfile=$(mktemp)
+        trap 'rm -f "$readme_tmpfile"' RETURN
+        echo "$new_readme" | base64 | tr -d '\n' > "$readme_tmpfile"
         gh api "repos/$OWNER/$REPO/contents/README.adoc" -X PUT \
             -f message="Add Palimpsest licence badge" \
-            -f content="$(cat /tmp/readme.b64)" \
+            -f content="$(cat "$readme_tmpfile")" \
             -f sha="$readme_sha" \
             --silent && echo "✓ README updated" || echo "✗ Failed to update README"
+        rm -f "$readme_tmpfile"
     else
         echo "Palimpsest badge already in README"
     fi

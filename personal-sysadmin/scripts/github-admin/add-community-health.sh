@@ -1,8 +1,17 @@
 #!/bin/bash
 # Add community health files to all repos
 
+set -euo pipefail
+
 OWNER="hyperpolymath"
-LOG="/tmp/community-health.log"
+
+# XDG-compliant shared state directory (CWE-377 fix)
+GITHUB_ADMIN_STATE="${XDG_STATE_HOME:-$HOME/.local/state}/personal-sysadmin/github-admin"
+mkdir -p "$GITHUB_ADMIN_STATE" || exit 1
+chmod 0700 "$GITHUB_ADMIN_STATE" || exit 1
+
+LOG="$GITHUB_ADMIN_STATE/community-health.log"
+REPOS_CACHE="$GITHUB_ADMIN_STATE/repos-to-configure.txt"
 
 SECURITY_CONTENT='<!-- SPDX-License-Identifier: MPL-2.0 -->
 # Security Policy
@@ -87,33 +96,37 @@ add_if_missing() {
 
     if ! gh api "repos/$OWNER/$repo/contents/$path" --silent 2>/dev/null; then
         echo "  Adding $path"
-        echo "$content" | base64 | tr -d '\n' > /tmp/content.b64
+        local tmpfile
+        tmpfile=$(mktemp)
+        trap 'rm -f "$tmpfile"' RETURN
+        echo "$content" | base64 | tr -d '\n' > "$tmpfile"
         gh api "repos/$OWNER/$repo/contents/$path" -X PUT \
             -f message="$msg" \
-            -f content="$(cat /tmp/content.b64)" \
+            -f content="$(cat "$tmpfile")" \
             --silent 2>/dev/null && echo "    ✓" || echo "    ✗ (may already exist)"
+        rm -f "$tmpfile"
     fi
 }
 
-echo "Adding community health files..." | tee $LOG
-total=$(wc -l < /tmp/repos-to-configure.txt)
+echo "Adding community health files..." | tee "$LOG"
+total=$(wc -l < "$REPOS_CACHE")
 count=0
 
 while read repo; do
     ((count++))
     pct=$((count * 100 / total))
-    echo "[$count/$total] ($pct%) $repo" | tee -a $LOG
+    echo "[$count/$total] ($pct%) $repo" | tee -a "$LOG"
     
     # Add SECURITY.md if missing
     add_if_missing "$repo" "SECURITY.md" "$SECURITY_CONTENT" "Add security policy"
     
-    # Add ../../../.github/CONTRIBUTING.md if missing
+    # Add CONTRIBUTING.md if missing
     add_if_missing "$repo" "../../../.github/CONTRIBUTING.md" "$CONTRIBUTING_CONTENT" "Add contributing guide"
     
     # Add CODE_OF_CONDUCT.md if missing
     add_if_missing "$repo" "CODE_OF_CONDUCT.md" "$CODE_OF_CONDUCT" "Add code of conduct"
     
-done < /tmp/repos-to-configure.txt
+done < "$REPOS_CACHE"
 
 echo ""
-echo "=== Community health files complete ===" | tee -a $LOG
+echo "=== Community health files complete ===" | tee -a "$LOG"
