@@ -57,7 +57,7 @@ image = "0.25"
 
 # PDF processing
 pdf-extract = "0.10"
-lopdf = "0.32"
+lopdf = "0.38"
 
 # Audio metadata
 id3 = "1.17"
