@@ -24,7 +24,6 @@
 
 **Why NOT Haskell:** Too complex, slower development velocity
 **Optional Components:**
-- Logtalk: Pattern-based routing rules
 - Julia: ML-based routing optimization
 - IPFS: Content-addressed config storage
 

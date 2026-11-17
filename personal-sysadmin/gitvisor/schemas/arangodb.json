@@ -27,13 +27,13 @@
       "type": "document",
       "schema": {
         "type": "object",
-        "required": ["_key", "name", "type", "logtalk"],
+        "required": ["_key", "name", "type", "body"],
         "properties": {
           "_key": { "type": "string", "pattern": "^r[0-9]+$" },
           "name": { "type": "string" },
           "type": { "enum": ["preventive", "curative", "diagnostic"] },
           "priority": { "enum": ["critical", "high", "medium", "low"] },
-          "logtalk": { "type": "string" },
+          "body": { "type": "string" },
           "origin": { "enum": ["manual", "neural_distillation", "imported"] },
           "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
           "applied_count": { "type": "integer", "minimum": 0 },
