@@ -25,13 +25,13 @@ inference overhead
 │  │                         ▼                                 │   │
 │  │  ┌─────────────────────────────────────────────────────┐ │   │
 │  │  │              RULE DISTILLATION                       │ │   │
-│  │  │  Neural insights → Logtalk predicates → Fast rules   │ │   │
+│  │  │  Neural insights → symbolic predicates → Fast rules  │ │   │
 │  │  └─────────────────────────────────────────────────────┘ │   │
 │  └──────────────────────────────────────────────────────────┘   │
 │                              │                                   │
 │                              ▼                                   │
 │  ┌──────────────────────────────────────────────────────────┐   │
-│  │              SYMBOLIC LAYER (Logtalk + Prolog)            │   │
+│  │              SYMBOLIC LAYER (rule engine)                │   │
 │  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────────┐   │   │
 │  │  │ Declarative │  │ Imperative  │  │ Inference       │   │   │
 │  │  │ Rules       │  │ Procedures  │  │ Engine          │   │   │
@@ -68,16 +68,14 @@ inference overhead
 └─────────────────────────────────────────────────────────────────┘
 ....
 
-=== Logtalk Rule System
+=== Rule System
 
 ==== Rule Categories
 
-[source,logtalk]
+[source,text]
 ----
-:- object(cicd_rules).
 
     % DECLARATIVE RULES (what should be true)
-    :- public(repo_must_have/2).
     repo_must_have(Repo, 'dependabot.yml') :-
         repo_uses_dependencies(Repo).
     repo_must_have(Repo, 'codeql.yml') :-
@@ -86,14 +84,12 @@ inference overhead
         repo_is_public(Repo).
 
     % IMPERATIVE PROCEDURES (how to fix)
-    :- public(fix_missing_file/3).
     fix_missing_file(Repo, File, Template) :-
         \+ repo_has_file(Repo, File),
         get_template(File, Template),
         inject_file(Repo, File, Template).
 
     % PREVENTIVE RULES (stop before it happens)
-    :- public(block_commit_if/2).
     block_commit_if(Commit, 'typescript_detected') :-
         commit_adds_file(Commit, File),
         file_extension(File, '.ts').
@@ -101,7 +97,6 @@ inference overhead
         commit_content_matches(Commit, secret_pattern(_)).
 
     % CURATIVE RULES (fix after detection)
-    :- public(auto_fix/2).
     auto_fix(Repo, unpinned_actions) :-
         find_unpinned_actions(Repo, Actions),
         pin_actions_to_sha(Repo, Actions).
@@ -109,17 +104,14 @@ inference overhead
         find_workflows_without_permissions(Repo, Workflows),
         add_permissions(Repo, Workflows, 'read-all').
 
-:- end_object.
 ----
 
 ==== Pattern Learning → Rule Generation
 
-[source,logtalk]
+[source,text]
 ----
-:- object(rule_distiller).
 
     % Learn from failure patterns
-    :- public(distill_rule/2).
     distill_rule(Pattern, Rule) :-
         % Neural layer detected pattern
         neural_pattern(Pattern, Confidence),
@@ -137,7 +129,6 @@ inference overhead
         (repo_needs_fuzzing(R) :- repo_language(R, rust), \+ repo_has_fuzzing(R))
     ).
 
-:- end_object.
 ----
 
 === ArangoDB Schema
@@ -165,7 +156,7 @@ inference overhead
   "name": "require_dependabot",
   "type": "preventive",
   "priority": "high",
-  "logtalk": "repo_must_have(R, 'dependabot.yml') :- repo_uses_dependencies(R).",
+  "body": "repo_must_have(R, 'dependabot.yml') :- repo_uses_dependencies(R).",
   "origin": "neural_distillation",
   "confidence": 0.97,
   "applied_count": 15420,
@@ -215,7 +206,7 @@ inference overhead
 rules:
   key_pattern: "rule:{rule_id}"
   ttl: 3600  # 1 hour
-  data: compiled_logtalk_bytecode
+  data: compiled_rule_bytecode
 
 # Repo state cache
 repos:
@@ -356,11 +347,9 @@ learnings:
 
 When a new repo is created, git-hud automatically:
 
-[source,logtalk]
+[source,text]
 ----
-:- object(repo_bootstrap).
 
-    :- public(initialize/1).
     initialize(Repo) :-
         % Detect repo characteristics
         detect_languages(Repo, Languages),
@@ -381,7 +370,6 @@ When a new repo is created, git-hud automatically:
         run_diagnostic(Repo, Report),
         store_baseline(Repo, Report).
 
-:- end_object.
 ----
 
 ==== Files Injected on New Repo
@@ -437,8 +425,8 @@ spec:
             - name: DRAGONFLY_URL
               value: "redis://dragonfly:6379"
 
-        - name: logtalk-engine
-          image: hyperpolymath/git-hud-logtalk:latest
+        - name: rule-engine
+          image: hyperpolymath/git-hud-rule-engine:latest
           resources:
             requests:
               memory: "512Mi"
@@ -491,7 +479,7 @@ POST /api/v1/hooks/bitbucket
 
 * [ ] ArangoDB schema setup
 * [ ] Dragonfly caching layer
-* [ ] Basic Logtalk rule engine
+* [ ] Basic rule engine
 * [ ] GitHub adapter
 
 ==== Phase 2: Intelligence

@@ -108,9 +108,6 @@ inherit their limitations/opinions in output
 
 ==== Optional Components
 
-*Logtalk (Pattern Rules):* - Logic programming for complex routing rules
-- Declarative policy specifications - Integration via OS process calls
-
 *Julia (ML Optimization):* - Learn optimal backend selection from
 metrics - Predict execution time/resource usage - Clustering similar
 operations
