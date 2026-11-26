@@ -105,3 +105,6 @@ package-lock.json
 bun.lockb
 yarn.lock
 .npmrc
+.zig-cache/
+zig-cache/
+zig-out/
