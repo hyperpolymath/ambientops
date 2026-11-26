@@ -106,3 +106,6 @@ bun.lockb
 yarn.lock
 pnpm-lock.yaml
 .npmrc
+.zig-cache/
+zig-cache/
+zig-out/
