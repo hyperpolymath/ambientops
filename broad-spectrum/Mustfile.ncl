@@ -11,12 +11,13 @@ let Contract = {
   # Language policy - strictly enforced
   languages = {
     allowed = [
+      "affinescript", # Primary application language
       "rescript",   # Primary application language
       "nickel",     # Configuration language
       "bash",       # Build scripts only
     ],
     banned = [
-      "typescript", # Use ReScript instead
+      "typescript", # Use AffineScript instead
       "javascript", # Only generated from ReScript
       "go",         # Use Rust if systems code needed
       "python",     # Except SaltStack
