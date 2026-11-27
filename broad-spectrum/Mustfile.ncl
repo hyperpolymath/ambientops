@@ -11,6 +11,7 @@ let Contract = {
   # Language policy - strictly enforced
   languages = {
     allowed = [
+      "affinescript", # Primary application language
       "rescript",   # Primary application language
       "nickel",     # Configuration language
       "bash",       # Build scripts only
